@@ -1,0 +1,31 @@
+# Jaypore Labs - AI-First Development Agency
+
+## About
+Jaypore Labs is an AI-first development agency with 8+ years of experience helping SaaS founders and businesses build exceptional software products. We specialize in full-stack development, desktop applications, AI integration, and healthcare technology.
+
+## Founder
+Yash Shah - Full-Stack Developer with experience working with global brands like Logitech and Mercedes Benz.
+
+## Services
+- Full-Stack Development: End-to-end web applications using React, Next.js, Node.js
+- Desktop Applications: Cross-platform Electron applications
+- AI Integration: LLM-powered features, AI scribes, voice interfaces
+- SaaS Development: MVP to scale, multi-tenant architecture
+- Healthcare Technology: HIPAA-compliant medical software
+- Technical Consulting: Architecture review, code audits
+
+## Notable Projects
+- Nudge AI (getnudgeai.com): AI Scribe for medical practitioners
+- Curastream AI (curastreamai.com): Voice-controlled medical assistant
+- Lucy (medlucy.com): Healthcare software serving 100+ doctors in Luxembourg
+- SmartHabits (smarthabits.logitech.com): Wellness app built for Logitech
+- Sonnet AI (sonnetai.com): AI meeting assistant
+
+## Contact
+Email: hello@jayporelabs.com
+Website: https://jayporelabs.com
+GitHub: https://github.com/theguidingstar
+Upwork: https://www.upwork.com/freelancers/theguidingstar
+
+## Technologies
+React, Next.js, TypeScript, Node.js, Electron, Python, PostgreSQL, MongoDB, AWS, Docker, OpenAI, TailwindCSS
