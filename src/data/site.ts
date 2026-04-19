@@ -77,10 +77,10 @@ export const services = [
   },
   {
     id: "full-stack",
-    title: "AI-Enabled Web Apps",
-    shortDescription: "Custom web apps with AI inside from day one",
+    title: "Web Applications",
+    shortDescription: "Custom web apps built as coherent products",
     description:
-      "Complete web applications — frontend, backend, AI layer — built as a single coherent product. React, Next.js, Node, Postgres, whatever the job needs. No glue-code spaghetti.",
+      "Complete web applications — frontend, backend, and an AI layer when it earns its keep — shipped as a single coherent product. React, Next.js, Node, Postgres, whatever the job needs. No glue-code spaghetti.",
     icon: "Code",
     features: [
       "Next.js App Router, React Server Components",
@@ -91,10 +91,10 @@ export const services = [
   },
   {
     id: "desktop-apps",
-    title: "AI-Enabled Desktop Apps",
-    shortDescription: "Native-feel Electron apps with AI inside",
+    title: "Desktop Applications",
+    shortDescription: "Native-feel Electron apps that run offline",
     description:
-      "For when the web isn't the right surface. Electron apps that feel native, run offline, and ship AI features behind a fast, polished UI. macOS, Windows, Linux.",
+      "For when the web isn't the right surface. Electron apps that feel native, run offline, and ship smart features behind a fast, polished UI. macOS, Windows, Linux.",
     icon: "Monitor",
     features: [
       "Offline-first architecture",
@@ -105,24 +105,24 @@ export const services = [
   },
   {
     id: "saas-development",
-    title: "AI-Enabled SaaS",
-    shortDescription: "From MVP to production, AI inside",
+    title: "SaaS, from MVP to Scale",
+    shortDescription: "Full-lifecycle SaaS, built to last",
     description:
-      "Full-lifecycle SaaS with AI built into the core loop — not bolted on. Multi-tenant, billing, analytics, evals. We help you go from zero to paying users without the usual debt.",
+      "Full-lifecycle SaaS with the AI layer built into the core loop when it matters — not bolted on. Multi-tenant, billing, analytics, evals. We help you go from zero to paying users without the usual debt.",
     icon: "Rocket",
     features: [
       "MVP to production in 8–16 weeks",
       "Multi-tenant architecture",
       "Stripe billing, usage metering",
-      "LLM evals + monitoring baked in",
+      "Evals + monitoring baked in",
     ],
   },
   {
     id: "healthcare-tech",
-    title: "AI for Healthcare",
-    shortDescription: "HIPAA-ready AI software for clinics + devices",
+    title: "Healthcare Software",
+    shortDescription: "HIPAA-ready clinical software you can audit",
     description:
-      "Depth we've earned. AI scribes, clinic OS, EHR add-ons, AI-assisted medical imaging — built to withstand audits, privacy reviews, and actual practitioners using them all day.",
+      "Depth we've earned. Scribes, clinic OS, EHR add-ons, AI-assisted medical imaging — built to withstand audits, privacy reviews, and actual practitioners using them all day.",
     icon: "Heart",
     features: [
       "HIPAA-compliant architectures",
@@ -133,8 +133,8 @@ export const services = [
   },
   {
     id: "consulting",
-    title: "AI Readiness + Strategy",
-    shortDescription: "Find out if AI is the right bet — honestly",
+    title: "Strategy + Readiness",
+    shortDescription: "Honest advice on whether AI is the right bet",
     description:
       "Not every product needs AI. Before you commit a quarter, we audit your product, data, and workflows — then tell you where AI will move the needle, and where it won't.",
     icon: "Lightbulb",

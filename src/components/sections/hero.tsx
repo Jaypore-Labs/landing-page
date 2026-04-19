@@ -14,14 +14,14 @@ import {
 import { heroSpecimens } from "@/data/site";
 
 const rotatingWords = [
-  "AI-enabled SaaS",
+  "SaaS platforms",
   "AI scribes",
-  "AI copilots",
+  "copilots inside apps",
   "RAG pipelines",
-  "voice AI tools",
-  "AI agents",
+  "voice interfaces",
   "MCP servers",
-  "desktop apps with AI",
+  "desktop apps",
+  "internal tools",
 ];
 
 const SPEC_ACCENTS = ["#FF4D1F", "#FFD166", "#8BE9FD", "#B5E48C", "#C77DFF"];

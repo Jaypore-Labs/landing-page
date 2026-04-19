@@ -148,3 +148,6 @@ vite.config.ts.timestamp-*
 # Unused local assets (not rendered; see feedback_no_images memory)
 /public/yash.png
 /public/portfolio/
+
+# Cached Google Fonts downloaded by scripts/gen-post.mjs
+scripts/.fonts/

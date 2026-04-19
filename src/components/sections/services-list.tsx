@@ -32,9 +32,9 @@ export function ServicesList() {
 
           <div className="col-span-12 md:col-span-6 md:col-start-7 flex md:items-end">
             <p className="text-paper-dim text-base md:text-lg leading-relaxed max-w-md">
-              Six ways to bring AI into your business. Whether you&apos;re
-              starting fresh or retrofitting an existing product, we pick the
-              shape that fits — not the one that pads the invoice.
+              Six shapes of work. Whether you&apos;re starting fresh or
+              retrofitting an existing product, we pick the one that fits —
+              not the one that pads the invoice.
             </p>
           </div>
         </div>
