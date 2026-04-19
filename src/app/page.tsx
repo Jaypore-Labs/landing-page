@@ -36,8 +36,8 @@ export default function HomePage() {
       <TestimonialQuote />
       <Marquee
         words={[
-          "Booking AI projects — Q2 2026",
           "Bringing AI to your business",
+          "Industry-first, then AI-first",
           "Hello from India",
         ]}
         size="lg"

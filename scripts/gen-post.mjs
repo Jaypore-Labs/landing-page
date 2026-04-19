@@ -51,6 +51,7 @@ const SIZES = {
   avatar: { width: 1080, height: 1080, label: "Profile avatar" },
   banner: { width: 1584, height: 396, label: "LinkedIn cover banner" },
   "banner-company": { width: 1128, height: 191, label: "LinkedIn company banner (exact)" },
+  "x-header": { width: 1500, height: 500, label: "X / Twitter header" },
 };
 
 // ---------------------------------------------------------------------------
@@ -1168,7 +1169,9 @@ async function main() {
 
   const fields = {
     title: values.title,
-    subtitle: values.subtitle || "",
+    // Leave undefined through so template defaults fire. Users can still
+    // explicitly hide the wordmark with --subtitle "" (empty string).
+    subtitle: values.subtitle,
     kicker: values.kicker,
     stat: values.stat,
     label: values.label,

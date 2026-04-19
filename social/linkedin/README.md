@@ -17,8 +17,8 @@ All assets are rendered at 2× or 3× their logical size so they stay razor-shar
 | `cover-banner.png` | 1584×396 | **3168×792** | Company Page cover (primary). Works for both company and personal profile. |
 | `cover-banner-company.png` | 1128×191 | **3384×573** | Optional — LinkedIn's exact company banner spec, rendered at 3× for sharpness. |
 | `featured-1-positioning.png` | 1600×900 | **3200×1800** | Featured section slot 1 — positioning statement. |
-| `featured-2-lucy.png` | 1600×900 | **3200×1800** | Featured section slot 2 — Luxembourg clinic case study. |
-| `featured-3-nudge.png` | 1600×900 | **3200×1800** | Featured section slot 3 — Nudge AI outcome. |
+| `featured-2-engagement.png` | 1600×900 | **3200×1800** | Featured section slot 2 — three engagement models. |
+| `featured-3-nudge.png` | 1600×900 | **3200×1800** | Featured section slot 3 — AI scribe outcome. |
 
 ---
 
@@ -45,7 +45,7 @@ If you want your personal profile to match:
 
 ### Tagline (120 chars max)
 
-> **AI-enabled software, built for real businesses. Friendly product studio. Shipping since 2017.**
+> **AI-enabled software, built for real businesses. A friendly product studio. Shipping since 2017.**
 
 ### About / Description (LinkedIn Company Page)
 
@@ -57,9 +57,8 @@ We don't sell AI as a category. We build the software around it — real
 products, with AI embedded where it earns its keep. Scribes. Copilots.
 Voice interfaces. Full-stack SaaS. Desktop apps. Internal tools.
 
-Since 2017 we've shipped for Logitech, Mercedes Benz, Luxembourg clinics
-serving 100+ doctors, the University of Arizona, the London School of
-Medical Science, and founders across three continents.
+Since 2017 we've shipped for founders, global consumer brands, clinics
+in Europe, and academic research teams across three continents.
 
 How we work:
 · Industry-first, then AI-first. We learn your business before we touch
@@ -77,7 +76,6 @@ Three ways to work with us:
   across multiple surfaces.
 · Augment — we plug in beside your engineers as senior AI specialists.
 
-Booking Q2 2026.
 Based in India. Remote-worldwide. Async-first with IST-friendly live
 hours for working sessions.
 
@@ -96,7 +94,7 @@ OpenAI, Anthropic, product strategy, technical consulting
 
 ### Personal headline (Yash's profile)
 
-> **Founder, Jaypore Labs · We build AI-enabled software and help businesses put AI to work · 8+ yrs · ex-Logitech, Mercedes**
+> **Founder, Jaypore Labs · We build AI-enabled software and help businesses put AI to work · 8+ yrs shipping**
 
 ### Personal About (Yash's profile, long form)
 
@@ -104,10 +102,10 @@ OpenAI, Anthropic, product strategy, technical consulting
 I run Jaypore Labs — a friendly product studio that builds AI-enabled
 software for real businesses.
 
-Eight years leading engineering for healthcare and consumer tech, including
-enterprise work with Logitech and Mercedes Benz. Led a team of five to
-ship Lucy, a clinic platform now serving 100+ doctors across Luxembourg.
-Today, four engineers deep, industry-first, AI-first, friendly about it.
+Eight years leading engineering for healthcare, consumer, and enterprise
+tech. Led a team of five to ship a production clinic operating system
+used daily by doctors across Europe. Today, four engineers deep,
+industry-first, AI-first, friendly about it.
 
 If you want a polished deck and a 12-month roadmap, I'm the wrong
 engineer. If you want working AI in front of real users by next
@@ -135,28 +133,27 @@ Pair each image with a ~150-word post. Rough drafts you can edit:
 >
 > #AIDevelopment #AIProducts #ProductStudio
 
-### Post 2 — with `featured-2-lucy.png`
+### Post 2 — with `featured-2-engagement.png`
 
-> Case study: Lucy — clinic OS, Luxembourg.
+> Three shapes of work.
 >
-> Led a team of five from zero to a production clinic operating system now serving 100+ doctors across Luxembourg. Full stack, HIPAA-ready, voice-first clinical workflows, AI-assisted documentation.
+> 1. Project — fixed-scope delivery. Best for MVPs, discrete AI features, or retrofitting an existing product. You know what you want; we scope it and ship it.
 >
-> What we learned shipping it:
-> → Start with one specialty, not all of them.
-> → Ship to one doctor before ten.
-> → Measure minutes saved, not tokens consumed.
+> 2. Retainer — a monthly slice of the studio. Best for teams putting AI to work across several surfaces over a quarter or two. Continuous delivery, no context-reset overhead.
 >
-> The reason AI adoption stalls in regulated industries isn't the tech. It's rolling it out without collapsing the workflow that already works. We write about that a lot at jayporelabs.com.
+> 3. Augment — we plug in beside your engineers as senior AI specialists. Best when you already have a team but lack AI depth. We ramp fast, transfer knowledge, leave you stronger.
 >
-> #HealthcareAI #ClinicalSoftware #AIAdoption
+> We'll recommend one honestly. Sometimes that means a different studio. Email is the fastest path: hello@jayporelabs.com.
+>
+> #AIEngineering #AIEnablement #Engagement
 
 ### Post 3 — with `featured-3-nudge.png`
 
-> Three hours, saved per doctor, daily.
+> Three hours saved per doctor, every day.
 >
-> That's what Nudge AI — an AI scribe we built — delivers across psychiatry, pediatrics, and family medicine. It listens, structures the note, maps to codes, and hands it back to the doctor before they leave the room.
+> That's a typical outcome for a well-built AI scribe — listening, structuring the note, mapping to codes, handing it back before the clinician leaves the room.
 >
-> The hard part wasn't the LLM. It was the plumbing — privacy, EHR integration, specialty-specific templates, the eval harness that catches drift. That's where we spend our time: AI where it earns its keep, boring software everywhere else.
+> The hard part is never the LLM. It's the plumbing — privacy, EHR integration, specialty-specific templates, the eval harness that catches drift month-over-month. That's where we spend our time: AI where it earns its keep, boring software everywhere else.
 >
 > If you're building a scribe (or thinking about one), our DMs are open.
 >
@@ -211,13 +208,12 @@ npm run gen:post -- --template quote --size landscape \
   --kicker "Positioning" \
   --out social/linkedin/featured-1-positioning.png
 
-# featured — case study
-npm run gen:post -- --template case-study --size landscape \
-  --client "Luxembourg clinic" --stat "100+" \
-  --label "doctors using Lucy in production." \
-  --subtitle "Led a team of five from zero to clinic OS. Full stack. Shipped in Europe." \
-  --kicker "Case study" \
-  --out social/linkedin/featured-2-lucy.png
+# featured — engagement models
+npm run gen:post -- --template list --size landscape \
+  --title "Three shapes\nof engagement." \
+  --items "Project · fixed-scope delivery|Retainer · monthly slice of the studio|Augment · plug in beside your team" \
+  --kicker "How to work with us" \
+  --out social/linkedin/featured-2-engagement.png
 
 # featured — field note
 npm run gen:post -- --template stat --size landscape \

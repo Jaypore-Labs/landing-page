@@ -60,10 +60,10 @@ export function Footer() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
               </span>
-              Available · Q2
+              Online · {siteConfig.location}
             </span>
             <span className="text-paper/30">/</span>
-            <span className="text-paper">{siteConfig.location} · {time}</span>
+            <span className="text-paper">{time}</span>
           </div>
         </div>
 

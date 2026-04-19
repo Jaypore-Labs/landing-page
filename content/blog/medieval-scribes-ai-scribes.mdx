@@ -1,0 +1,57 @@
+---
+title: "What medieval scribes teach us about AI scribes"
+description: "Monks in a 13th-century scriptorium were not copiers. They were first-pass editors. Your AI scribe should be too — and the best ones already are."
+date: "2026-04-20"
+author: "Yash Shah"
+category: "Healthcare"
+tags: ["AI Scribes", "Healthcare AI", "LLM", "Product Design", "Field Notes"]
+---
+
+Medieval scribes spent their days copying texts. AI scribes spend their days doing something scribes never did — interpreting them. That distinction matters, and most people building medical AI get it wrong in exactly the same way.
+
+Here's what a Benedictine scriptorium in the year 1230 can tell you about the scribe we shipped to a psychiatrist last month.
+
+## The easy assumption (and why it's wrong)
+
+The word *scribe* invites a lazy picture: a quiet person in robes, hand cramped around a quill, copying someone else's words verbatim. Modern AI scribes get pitched the same way — "speech goes in, note comes out, done." Speech-to-text dressed up in a lab coat.
+
+That picture is wrong in both eras.
+
+A medieval scribe was not a photocopier. They were a first-pass editor, a verification layer, a craftsman whose hand shaped every sentence. The manuscripts we inherited from the scriptoria of Reims and Wearmouth-Jarrow are filled with marginal corrections, scribal abbreviations expanded, textual variants compared, and the occasional wry note — *"Now I've written the whole thing, for Christ's sake give me a drink."* They knew what they were copying. They noticed when the exemplar was wrong.
+
+Strip that judgment out and you don't have a scribe. You have a machine that fogs glass.
+
+## What they actually shared
+
+Look at a scriptorium operating at steady state and you see four structural features that matter just as much in modern clinical AI:
+
+**Scribes were first-pass editors, not copiers.** The scribe normalised spellings, expanded abbreviations, corrected obvious exemplar errors, and silently imposed house style. They were not *creating* the text, but they were not *passing it through* either. In a modern clinical scribe, the transcript step is maybe 5% of the work. The other 95% is mapping what was said into a structured note the clinician's specialty actually expects. Psychiatry notes don't look like pediatrics notes. Abbreviations get expanded. Medications get reconciled against the chart. That's scribal work, not stenography.
+
+**Verification loops were non-negotiable.** A scriptorium used a *corrector* — a second pair of eyes who cross-checked the finished copy against the exemplar and signed off. Without that loop, errors compounded across generations of manuscripts. In an LLM scribe, the corrector is an eval harness: a test suite that runs on every prompt change, catching drift before it reaches a doctor. Skip the evals and your scribe silently gets worse over months. Nobody sees it until a bad note lands in a chart.
+
+**The tools shaped the output.** Vellum versus parchment, oak-gall ink versus lamp-black, reed pen versus quill — each changed what could be written and how. The scribe's output was not separable from the materials. In modern clinical AI, the equivalent choices are: which LLM, which ASR, which retrieval system, what guardrails, what context you allow. Swap the model and the note changes flavor. That's not a bug. It's physics. Pick the tools deliberately.
+
+**Scribes and scholars are different roles.** A scriptorium didn't expect its scribes to be theologians. There were monks for that, in separate rooms, on a different schedule. When product teams ask an AI scribe to also *diagnose*, they're asking a scribe to be a scholar. That's how you get AI "hallucinating" a condition that wasn't discussed. The scribe writes down what happened. The scholar — the doctor — decides what it means. Good systems preserve that division.
+
+## What this looks like in code
+
+When we build a clinical scribe, the architecture mirrors the scriptorium layout:
+
+1. **The scribe** — a specialty-tuned prompt that shapes transcripts into notes the clinician's EHR expects. It never diagnoses. It never adds facts.
+2. **The corrector** — an eval harness that runs on every deploy, catching drift in tone, format, and factual grounding. It blocks releases that regress.
+3. **The colophon** — every generated note carries a footer stating what model produced it, what guardrails ran, what retrieval context was used. If a doctor questions a line, we can retrace it.
+4. **The scholar** — the doctor, who has the final say, always. The scribe drafts; the doctor signs.
+
+That's it. Four roles, nine centuries apart, describing the same operating model.
+
+## Why this matters now
+
+Every month we meet a healthcare team that has bought or built an AI scribe and is disappointed with it. Almost always, the failure mode is the same: they treated the scribe as a transcription layer instead of an editorial one. They skipped the corrector. They let the scribe drift into the scholar's chair.
+
+The fix isn't a bigger model. It's older than the printing press.
+
+If you're building a scribe — for medicine, legal, voice notes, meetings — borrow the scriptorium's shape. You'll ship better software. And your doctors will get their evening back.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're introducing a scribe (or any AI layer) into real clinical workflows, we'd love to hear about it. [Get in touch.](/contact)*

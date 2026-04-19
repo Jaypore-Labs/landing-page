@@ -255,7 +255,7 @@ export default function ServicesPage() {
       </section>
 
       <Marquee
-        words={["Booking AI projects — Q2 2026", "Scribes · Copilots · Voice · RAG"]}
+        words={["Scribes · Copilots · Voice · RAG · MCP", "Industry-first engineering"]}
         size="lg"
         speed="slow"
       />
