@@ -131,6 +131,7 @@ npm run gen:post -- --template banner --size banner \
 ## Optional flags (all templates)
 
 - `--accent "#RRGGBB"` — override accent color per image. Defaults to brand orange `#FF4D1F`. Good alternates that feel on-brand: `#FFD166` (amber), `#8BE9FD` (cyan), `#B5E48C` (lime), `#C77DFF` (violet).
+- `--scale N` — render multiplier for retina quality. Default **2** (e.g., 1080² → 2160² PNG). Bump to **3** for very small source sizes like `banner-company` (1128×191) so LinkedIn's own scaling stays sharp. Clamped to `[1, 4]`. SVG composition is vector so scaling up is lossless.
 - `--out <path>` — always under `social/out/` unless the user wants elsewhere. Name files with kebab-case and a suffix for size: `booking-q2-2026-portrait.png`.
 
 ## After rendering

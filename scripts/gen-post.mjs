@@ -1115,7 +1115,7 @@ Newlines in title/subtitle: use \\n (literal backslash-n).
 `;
 }
 
-async function render({ template, size, fields, out }) {
+async function render({ template, size, fields, out, scale }) {
   const build = TEMPLATES[template];
   if (!build) throw new Error(`Unknown template: ${template}`);
   const s = SIZES[size];
@@ -1125,15 +1125,19 @@ async function render({ template, size, fields, out }) {
   const tree = build({ ...fields, accent, size: s });
   const fonts = await loadFonts();
   const svg = await satori(tree, { width: s.width, height: s.height, fonts });
+  // Rasterize at N× the logical canvas. SVG is vector, so the composition
+  // is identical — just every pixel sharper. LinkedIn, Instagram, etc. all
+  // downscale cleanly and get retina displays crisp.
+  const outWidth = Math.round(s.width * scale);
   const png = new Resvg(svg, {
-    fitTo: { mode: "width", value: s.width },
+    fitTo: { mode: "width", value: outWidth },
     font: { loadSystemFonts: false },
   })
     .render()
     .asPng();
   await mkdir(path.dirname(out), { recursive: true });
   await writeFile(out, png);
-  return { bytes: png.length };
+  return { bytes: png.length, outWidth, outHeight: Math.round(s.height * scale) };
 }
 
 async function main() {
@@ -1150,6 +1154,7 @@ async function main() {
       items: { type: "string" },
       accent: { type: "string" },
       bg: { type: "string" },
+      scale: { type: "string" },
       out: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
@@ -1173,16 +1178,18 @@ async function main() {
     bg: values.bg,
   };
 
-  const { bytes } = await render({
+  const scale = Math.max(1, Math.min(4, Number(values.scale) || 2));
+  const { bytes, outWidth, outHeight } = await render({
     template: values.template,
     size: values.size,
     fields,
     out: values.out,
+    scale,
   });
   const kb = (bytes / 1024).toFixed(1);
   const s = SIZES[values.size];
   process.stdout.write(
-    `✓ ${values.template}/${values.size} (${s.width}×${s.height}, ${kb} KB) → ${values.out}\n`
+    `✓ ${values.template}/${values.size} @${scale}x (logical ${s.width}×${s.height}, render ${outWidth}×${outHeight}, ${kb} KB) → ${values.out}\n`
   );
 }
 

@@ -8,15 +8,17 @@ Every image was rendered by `scripts/gen-post.mjs` and matches the site's visual
 
 ## 1. Assets in this folder
 
-| File | Size | Where it goes |
-| --- | --- | --- |
-| `avatar-dark.png` | 1080×1080 | Company Page logo (primary). LinkedIn crops to circle. |
-| `avatar-accent.png` | 1080×1080 | Alternate profile avatar — use as a variant, or in sticker / badge contexts. |
-| `cover-banner.png` | 1584×396 | Company Page cover (primary). Works for both company and personal profile. |
-| `cover-banner-company.png` | 1128×191 | Optional — LinkedIn's exact company banner spec if you want pixel-perfect control. |
-| `featured-1-positioning.png` | 1600×900 | Featured section slot 1 — positioning statement. |
-| `featured-2-lucy.png` | 1600×900 | Featured section slot 2 — Luxembourg clinic case study. |
-| `featured-3-nudge.png` | 1600×900 | Featured section slot 3 — Nudge AI outcome. |
+All assets are rendered at 2× or 3× their logical size so they stay razor-sharp on retina displays after LinkedIn scales them. Upload as-is.
+
+| File | Logical size | Rendered PNG | Where it goes |
+| --- | --- | --- | --- |
+| `avatar-dark.png` | 1080×1080 | **2160×2160** | Company Page logo (primary). LinkedIn crops to circle. |
+| `avatar-accent.png` | 1080×1080 | **2160×2160** | Alternate profile avatar — use as a variant, or in sticker / badge contexts. |
+| `cover-banner.png` | 1584×396 | **3168×792** | Company Page cover (primary). Works for both company and personal profile. |
+| `cover-banner-company.png` | 1128×191 | **3384×573** | Optional — LinkedIn's exact company banner spec, rendered at 3× for sharpness. |
+| `featured-1-positioning.png` | 1600×900 | **3200×1800** | Featured section slot 1 — positioning statement. |
+| `featured-2-lucy.png` | 1600×900 | **3200×1800** | Featured section slot 2 — Luxembourg clinic case study. |
+| `featured-3-nudge.png` | 1600×900 | **3200×1800** | Featured section slot 3 — Nudge AI outcome. |
 
 ---
 
@@ -195,6 +197,12 @@ npm run gen:post -- --template banner --size banner \
   --subtitle "Friendly product studio. We help teams put AI to work." \
   --kicker "Est. 2017 · Remote-worldwide" \
   --out social/linkedin/cover-banner.png
+
+# cover banner (1128×191 exact — requires --scale 3 for sharpness)
+npm run gen:post -- --template banner --size banner-company \
+  --title "AI-enabled software for real businesses." \
+  --kicker "Est. 2017" --scale 3 \
+  --out social/linkedin/cover-banner-company.png
 
 # featured — positioning
 npm run gen:post -- --template quote --size landscape \
