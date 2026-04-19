@@ -97,7 +97,7 @@ Or post sequentially over 9 days (recommended pace for a new account) at 10am IS
 
 ---
 
-> **03-nudge-stat.png** — 3 hours, saved daily
+> **03-scribe-stat.png** — 3 hours, saved daily
 >
 > Three hours, per doctor, every day.
 >
@@ -216,7 +216,7 @@ Highlights are the pinned reels above the feed. They let visitors jump to catego
 
 | Week | Mon | Wed | Fri |
 | --- | --- | --- | --- |
-| 1 | `01-welcome` | `03-nudge-stat` | `05-playbook` (carousel) |
+| 1 | `01-welcome` | `03-scribe-stat` | `05-playbook` (carousel) |
 | 2 | `02-manifesto` | `04-capabilities` | `06-no-buzzword` |
 | 3 | `07-ship-weekly` | `08-first-reply` | `09-industry-first` |
 | 4 | Daily-article carousel #1 | carousel #2 | Field-note single post |

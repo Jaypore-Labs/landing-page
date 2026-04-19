@@ -18,7 +18,7 @@ All assets are rendered at 2× or 3× their logical size so they stay razor-shar
 | `cover-banner-company.png` | 1128×191 | **3384×573** | Optional — LinkedIn's exact company banner spec, rendered at 3× for sharpness. |
 | `featured-1-positioning.png` | 1600×900 | **3200×1800** | Featured section slot 1 — positioning statement. |
 | `featured-2-engagement.png` | 1600×900 | **3200×1800** | Featured section slot 2 — three engagement models. |
-| `featured-3-nudge.png` | 1600×900 | **3200×1800** | Featured section slot 3 — AI scribe outcome. |
+| `featured-3-scribe.png` | 1600×900 | **3200×1800** | Featured section slot 3 — AI scribe outcome. |
 
 ---
 
@@ -147,7 +147,7 @@ Pair each image with a ~150-word post. Rough drafts you can edit:
 >
 > #AIEngineering #AIEnablement #Engagement
 
-### Post 3 — with `featured-3-nudge.png`
+### Post 3 — with `featured-3-scribe.png`
 
 > Three hours saved per doctor, every day.
 >
@@ -218,9 +218,9 @@ npm run gen:post -- --template list --size landscape \
 # featured — field note
 npm run gen:post -- --template stat --size landscape \
   --stat "3 hrs" --label "saved per doctor, daily." \
-  --subtitle "Nudge AI · scribes deployed across psychiatry, pediatrics, family medicine." \
-  --kicker "Field note · Nudge AI" \
-  --out social/linkedin/featured-3-nudge.png
+  --subtitle "A typical outcome for a well-built scribe. The plumbing matters more than the model." \
+  --kicker "Field note" \
+  --out social/linkedin/featured-3-scribe.png
 ```
 
 Want a new angle? See [`.claude/skills/post-image.md`](../../.claude/skills/post-image.md) for every template/size.
