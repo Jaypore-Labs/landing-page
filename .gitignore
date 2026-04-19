@@ -151,3 +151,7 @@ vite.config.ts.timestamp-*
 
 # Cached Google Fonts downloaded by scripts/gen-post.mjs
 scripts/.fonts/
+
+# Force-include social post samples (override earlier `out` rule)
+!social/out/
+!social/out/**
