@@ -1,6 +1,6 @@
 ---
 name: post-image
-description: Generate on-brand Jaypore Labs social post images (Instagram, LinkedIn, X) that match the website's visual system exactly. Use when the user asks for a post, announcement graphic, carousel slide, case-study card, stat callout, or share image. Five templates (quote, stat, announcement, list, case-study) across four sizes (square, portrait, story, landscape).
+description: Generate on-brand Jaypore Labs social assets (Instagram, LinkedIn, X, Facebook) that match the website's visual system exactly. Use when the user asks for a post, announcement graphic, carousel slide, case-study card, stat callout, share image, profile avatar, or cover banner. Seven templates (quote, stat, announcement, list, case-study, logo, banner) across seven sizes (square, portrait, story, landscape, avatar, banner, banner-company).
 ---
 
 # post-image
@@ -29,6 +29,9 @@ If any are genuinely ambiguous, ask. Otherwise, pick the best fit and note your 
 | `portrait` | 1080×1350 | Instagram portrait (4:5) |
 | `story` | 1080×1920 | Instagram/Facebook Story, Reels cover |
 | `landscape` | 1600×900 | LinkedIn, X, Facebook share card |
+| `avatar` | 1080×1080 | Profile picture (all platforms crop to circle) |
+| `banner` | 1584×396 | LinkedIn cover banner (profile + company), uploads well even to 1128×191 slot |
+| `banner-company` | 1128×191 | LinkedIn company page cover at exact spec |
 
 ## Templates (flags · use case · example)
 
@@ -93,6 +96,36 @@ npm run gen:post -- --template case-study --size landscape \
   --subtitle "Led a team of five from zero to clinic OS. Full stack. Shipped in Europe." \
   --kicker "Case study" \
   --out social/out/case-lucy-landscape.png
+```
+
+### `logo` (profile avatar / brand mark)
+Flags: `--title` (the monogram, default `JL`) · `--subtitle` (wordmark under, default `Jaypore Labs`) · `--bg` (`ink` default or `accent` for a stamped orange variant)
+Use for: profile pictures on LinkedIn/IG/X, share thumbnails, brand stamps.
+Pair with `--size avatar` for a square platform avatar.
+
+```bash
+# Dark variant (default) — fits every feed
+npm run gen:post -- --template logo --size avatar \
+  --title "JL" --subtitle "Jaypore Labs" \
+  --out social/linkedin/avatar-dark.png
+
+# Accent stamp — use as an alternate profile or sticker
+npm run gen:post -- --template logo --size avatar \
+  --title "JL" --subtitle "Jaypore Labs" --bg accent \
+  --out social/linkedin/avatar-accent.png
+```
+
+### `banner` (cover image)
+Flags: `--title` (required, supports `\n`) · `--subtitle` · `--kicker`
+Use for: LinkedIn company + personal cover, X header.
+Renders the tagline as hero type, reserving bottom-left ~22% for the avatar overlay LinkedIn paints over the banner. Prefer size `banner` (1584×396) — LinkedIn scales it cleanly for both profile and company page. Use `banner-company` only when you want the 1128×191 exact crop.
+
+```bash
+npm run gen:post -- --template banner --size banner \
+  --title "AI-enabled software\nfor real businesses." \
+  --subtitle "Friendly product studio. We help teams put AI to work." \
+  --kicker "Est. 2017 · Remote-worldwide" \
+  --out social/linkedin/cover-banner.png
 ```
 
 ## Optional flags (all templates)

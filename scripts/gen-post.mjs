@@ -47,7 +47,10 @@ const SIZES = {
   square: { width: 1080, height: 1080, label: "Instagram post" },
   portrait: { width: 1080, height: 1350, label: "Instagram portrait" },
   story: { width: 1080, height: 1920, label: "Story / Reels" },
-  landscape: { width: 1600, height: 900, label: "LinkedIn / X" },
+  landscape: { width: 1600, height: 900, label: "LinkedIn / X feed" },
+  avatar: { width: 1080, height: 1080, label: "Profile avatar" },
+  banner: { width: 1584, height: 396, label: "LinkedIn cover banner" },
+  "banner-company": { width: 1128, height: 191, label: "LinkedIn company banner (exact)" },
 };
 
 // ---------------------------------------------------------------------------
@@ -809,12 +812,278 @@ function tCaseStudy({
   });
 }
 
+// ---------------------------------------------------------------------------
+// Logo template — profile avatar / brand mark
+// Flags: --title (monogram, default "JL"), --subtitle (wordmark under, default
+// "Jaypore Labs"), --bg ("ink" default or "accent" for a stamp variant)
+// ---------------------------------------------------------------------------
+function tLogo({
+  title = "JL",
+  subtitle = "Jaypore Labs",
+  bg = "ink",
+  accent,
+  size,
+}) {
+  const isAccentBg = bg === "accent";
+  const bgColor = isAccentBg ? accent : T.ink;
+  const titleColor = isAccentBg ? T.ink : T.paper;
+  const markColor = isAccentBg ? T.ink : accent;
+  const subtitleColor = isAccentBg ? "#0B0B0BCC" : T.paperDim;
+  const { width, height } = size;
+  const scale = width / 1080;
+  const monoFit = title.length <= 2;
+
+  return h(
+    "div",
+    {
+      style: {
+        width: `${width}px`,
+        height: `${height}px`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: bgColor,
+        color: titleColor,
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "Space Grotesk",
+      },
+    },
+    // gentle glow on ink variant
+    !isAccentBg
+      ? h("div", {
+          style: {
+            position: "absolute",
+            top: `-${Math.round(height * 0.15)}px`,
+            right: `-${Math.round(width * 0.1)}px`,
+            width: `${Math.round(width * 0.55)}px`,
+            height: `${Math.round(width * 0.55)}px`,
+            borderRadius: "50%",
+            background: `radial-gradient(50% 50% at 50% 50%, ${accent}55, transparent 70%)`,
+            display: "flex",
+          },
+        })
+      : null,
+    // monogram / title
+    h(
+      "div",
+      {
+        style: {
+          display: "flex",
+          fontFamily: "Space Grotesk",
+          fontWeight: 700,
+          fontSize: `${Math.round(
+            (monoFit ? 600 : Math.min(260, 2800 / title.length)) * scale
+          )}px`,
+          lineHeight: 0.9,
+          letterSpacing: "-0.055em",
+          color: titleColor,
+        },
+      },
+      title
+    ),
+    // accent bar under monogram
+    h("div", {
+      style: {
+        width: `${Math.round(160 * scale)}px`,
+        height: `${Math.round(8 * scale)}px`,
+        borderRadius: `${Math.round(4 * scale)}px`,
+        background: markColor,
+        display: "flex",
+        marginTop: `${Math.round(44 * scale)}px`,
+      },
+    }),
+    // subtitle wordmark
+    subtitle
+      ? h(
+          "div",
+          {
+            style: {
+              display: "flex",
+              marginTop: `${Math.round(36 * scale)}px`,
+              fontFamily: "JetBrains Mono",
+              fontSize: `${Math.round(30 * scale)}px`,
+              letterSpacing: "0.3em",
+              textTransform: "uppercase",
+              color: subtitleColor,
+            },
+          },
+          subtitle
+        )
+      : null
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Banner template — wide cover art for LinkedIn / X / FB.
+// Keeps the bottom-left quadrant mostly clear so LinkedIn's avatar overlay
+// doesn't collide with text. Tagline is the hero, centered vertically.
+// Flags: --title (required, supports \n), --subtitle, --kicker
+// Sizes: use `banner` (1584×396) or `banner-company` (1128×191 exact).
+// ---------------------------------------------------------------------------
+function tBanner({ title, subtitle = "", kicker = "", accent, size }) {
+  const { width, height } = size;
+  const scale = width / 1584;
+  const compact = height < 240;
+
+  // Layout math
+  const vPad = compact ? 28 : 40;
+  const hPad = compact ? 44 : 64;
+  // Avatar safe column: LinkedIn overlays an ~80px-radius circle around
+  // bottom-left at ~20px inset. Push headline right of this.
+  const titleLeft = compact ? 280 : 360;
+
+  const cleanLen = String(title).replace(/\\n|\n/g, "").length;
+  const titlePx = compact
+    ? Math.round(Math.min(44, 1800 / Math.max(cleanLen, 20)))
+    : Math.round(Math.min(120, 1900 / Math.max(cleanLen, 20)));
+
+  return h(
+    "div",
+    {
+      style: {
+        width: `${width}px`,
+        height: `${height}px`,
+        display: "flex",
+        background: T.ink,
+        color: T.paper,
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "Space Grotesk",
+      },
+    },
+    // grid texture
+    ...gridOverlay({ w: width, h: height }),
+    // warm wash top-right
+    h("div", {
+      style: {
+        position: "absolute",
+        top: `-${Math.round(height * 0.6)}px`,
+        right: `-${Math.round(height * 0.4)}px`,
+        width: `${Math.round(height * 3)}px`,
+        height: `${Math.round(height * 3)}px`,
+        borderRadius: "50%",
+        background: `radial-gradient(50% 50% at 50% 50%, ${accent}60, transparent 70%)`,
+        display: "flex",
+      },
+    }),
+    // secondary wash bottom-center for depth
+    h("div", {
+      style: {
+        position: "absolute",
+        bottom: `-${Math.round(height * 0.6)}px`,
+        left: `${Math.round(width * 0.45)}px`,
+        width: `${Math.round(height * 1.8)}px`,
+        height: `${Math.round(height * 1.8)}px`,
+        borderRadius: "50%",
+        background: `radial-gradient(50% 50% at 50% 50%, ${accent}35, transparent 70%)`,
+        display: "flex",
+      },
+    }),
+    // Hero headline — absolutely positioned, vertically centered, clears avatar
+    h(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          top: "50%",
+          left: `${titleLeft}px`,
+          right: `${hPad}px`,
+          transform: "translateY(-50%)",
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "Space Grotesk",
+          fontWeight: 700,
+          fontSize: `${titlePx}px`,
+          lineHeight: compact ? 1.05 : 0.98,
+          letterSpacing: "-0.04em",
+          color: T.paper,
+        },
+      },
+      ...multiline(title)
+    ),
+    // Top rail — wordmark + kicker
+    h(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          top: `${vPad}px`,
+          left: `${hPad}px`,
+          right: `${hPad}px`,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        },
+      },
+      wordmark({ scale: compact ? 0.7 : 0.95 }),
+      kicker
+        ? eyebrow(kicker, { scale: compact ? 0.7 : 0.95 })
+        : h(
+            "div",
+            {
+              style: {
+                display: "flex",
+                fontFamily: "JetBrains Mono",
+                fontSize: `${Math.round((compact ? 11 : 14) * 1)}px`,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: T.paperDim,
+              },
+            },
+            "jayporelabs.com"
+          )
+    ),
+    // Bottom-right — subtitle / URL
+    h(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          bottom: `${vPad}px`,
+          right: `${hPad}px`,
+          display: "flex",
+          alignItems: "center",
+          gap: `${compact ? 16 : 24}px`,
+        },
+      },
+      !compact && subtitle
+        ? h(
+            "div",
+            {
+              style: {
+                display: "flex",
+                fontFamily: "Space Grotesk",
+                fontWeight: 500,
+                fontSize: "22px",
+                lineHeight: 1.3,
+                color: T.paperDim,
+                maxWidth: "520px",
+                textAlign: "right",
+                justifyContent: "flex-end",
+              },
+            },
+            subtitle
+          )
+        : null,
+      ctaPill({
+        scale: compact ? 0.7 : 0.95,
+        accent,
+        text: "Let's talk",
+      })
+    )
+  );
+}
+
 const TEMPLATES = {
   quote: tQuote,
   stat: tStat,
   announcement: tAnnouncement,
   list: tList,
   "case-study": tCaseStudy,
+  logo: tLogo,
+  banner: tBanner,
 };
 
 // ---------------------------------------------------------------------------
@@ -880,6 +1149,7 @@ async function main() {
       client: { type: "string" },
       items: { type: "string" },
       accent: { type: "string" },
+      bg: { type: "string" },
       out: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
@@ -900,6 +1170,7 @@ async function main() {
     client: values.client,
     items: parseItems(values.items),
     accent: values.accent,
+    bg: values.bg,
   };
 
   const { bytes } = await render({
