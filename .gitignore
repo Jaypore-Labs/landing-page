@@ -137,3 +137,14 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Vercel
+.vercel
+
+# Unused local assets (not rendered; see feedback_no_images memory)
+/public/yash.png
+/public/portfolio/

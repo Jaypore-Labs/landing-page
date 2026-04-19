@@ -1,8 +1,8 @@
 export const siteConfig = {
   name: "Jaypore Labs",
   description:
-    "AI-first development agency helping SaaS founders build, scale, and succeed. Expert full-stack development with 8+ years of experience.",
-  tagline: "Build. Scale. Succeed.",
+    "Friendly, AI-first product studio. We help teams ship AI products fast and efficiently — from scribes and copilots to voice AI and full SaaS.",
+  tagline: "Ship AI. The friendly way.",
   url: "https://jayporelabs.com",
   email: "hello@jayporelabs.com",
   phone: "+91 XXXXXXXXXX",
@@ -124,7 +124,8 @@ export const portfolio = [
       "AI Scribe and Coding Platform for medical practitioners",
     description:
       "Nudge is an AI Scribe and Coding Platform that supports Psychiatry, Psychotherapy, Family Medicine, Internal Medicine, Pediatrics & More. It saves doctors hours of documentation time and provides advanced insights on each session.",
-    image: "/portfolio/nudge.jpg",
+    image: "/portfolio/nudge.png",
+    accent: "#FF4D1F",
     url: "https://getnudgeai.com",
     technologies: ["Electron", "React", "AI/ML", "Node.js"],
     highlights: [
@@ -141,7 +142,8 @@ export const portfolio = [
     shortDescription: "Voice Controlled Medical Assistant for Doctors",
     description:
       "Your Voice Controlled Medical Assistant that helps doctors focus more on patients rather than documentation. Streamlines the entire clinical workflow with intelligent voice commands.",
-    image: "/portfolio/curastream.jpg",
+    image: "",
+    accent: "#8BE9FD",
     url: "https://curastreamai.com",
     technologies: ["Voice AI", "React", "Node.js", "Speech Recognition"],
     highlights: [
@@ -158,7 +160,8 @@ export const portfolio = [
     shortDescription: "Advanced healthcare software for medical practitioners",
     description:
       "Lucy is an advanced healthcare software solution deployed in Luxembourg, serving over 100 doctors and clinics. Built with Electron, it handles end-to-end processes related to doctors & patients management. Led a team of 5 developers from scratch to production.",
-    image: "/portfolio/lucy.jpg",
+    image: "",
+    accent: "#B5E48C",
     url: "https://medlucy.com",
     technologies: ["Electron", "React", "Node.js", "PostgreSQL"],
     highlights: [
@@ -175,7 +178,8 @@ export const portfolio = [
     shortDescription: "Work-life balance tool backed by Logitech",
     description:
       "SmartHabits is an Electron-based software developed for Logitech to manage user's work activities, reduce stress, and improve overall well-being with timely suggested breaks and mini exercises.",
-    image: "/portfolio/smarthabits.jpg",
+    image: "/portfolio/smarthabits.png",
+    accent: "#F5F0E8",
     url: "https://smarthabits.logitech.com",
     client: "Logitech",
     technologies: ["Electron", "React", "Node.js"],
@@ -193,7 +197,8 @@ export const portfolio = [
     shortDescription: "AI meeting assistant for transcription and insights",
     description:
       "Sonnet AI is an AI meeting assistant that helps you transcribe meetings, handle documentation, and provide actionable insights from your conversations.",
-    image: "/portfolio/sonnet.jpg",
+    image: "/portfolio/sonnet.png",
+    accent: "#FFD166",
     url: "https://sonnetai.com",
     technologies: ["AI/ML", "React", "Node.js", "Speech Recognition"],
     highlights: [
@@ -210,7 +215,8 @@ export const portfolio = [
     shortDescription: "Internal tool for University of Arizona Biology Dept",
     description:
       "PresseLab was an internal software developed for University of Arizona Biology department for their internal model testing on microscopic data and visualization. Software involved selecting microscopic data and running AI model-based analysis.",
-    image: "/portfolio/presselab.jpg",
+    image: "",
+    accent: "#C77DFF",
     client: "University of Arizona",
     technologies: ["Electron", "Python", "AI/ML", "Data Visualization"],
     highlights: [
@@ -227,7 +233,8 @@ export const portfolio = [
     shortDescription: "Audit tool for London School of Medical Science",
     description:
       "Developed a complex Audit tool for the London School of Medical Science for analyzing their Audit Data, Representation, Visualization, and result calculation. Used by their team and remote health experts.",
-    image: "/portfolio/lsms.jpg",
+    image: "",
+    accent: "#06D6A0",
     client: "London School of Medical Science",
     technologies: ["Electron", "React", "Data Visualization", "Node.js"],
     highlights: [
@@ -244,7 +251,8 @@ export const portfolio = [
     shortDescription: "Screenshot enhancement for social media",
     description:
       "Haven is a tool for social media users to create impressive screenshots with varied backgrounds ranging from gradients to images to special effects, with export options for different social media platforms.",
-    image: "/portfolio/haven.jpg",
+    image: "",
+    accent: "#FF006E",
     technologies: ["Electron", "React", "Canvas API"],
     highlights: [
       "Multiple export sizes",
@@ -333,6 +341,127 @@ export const faq = [
   {
     question: "What makes Jaypore Labs different?",
     answer:
-      "Our AI-first approach, combined with 8+ years of experience working with global brands like Logitech and Mercedes Benz, sets us apart. We don't just build software; we build products that scale and succeed.",
+      "We're AI-first and small by design. You talk to the people writing the code, we ship weekly, and we lean into AI where it actually earns its keep. No middle layer, no buzzword bingo, no decks without demos.",
+  },
+];
+
+// What you actually get — deliverables matrix
+export const capabilities = [
+  {
+    group: "AI practice",
+    items: [
+      { title: "AI scribes", detail: "Domain-tuned scribes for medicine, law, meetings, voice notes" },
+      { title: "AI agents", detail: "Tool-calling agents with evals, fallbacks, and audit trails" },
+      { title: "RAG systems", detail: "Retrieval pipelines with vector search, rerankers, evals" },
+      { title: "Voice AI", detail: "Real-time STT/TTS, multi-speaker diarization, wake-word" },
+      { title: "LLM apps", detail: "Chat, copilots, summarisers with streaming and structured output" },
+      { title: "MCP servers", detail: "Model Context Protocol servers that plug into Claude, Cursor, IDEs" },
+    ],
+  },
+  {
+    group: "Product surfaces",
+    items: [
+      { title: "Web apps", detail: "Next.js / React · App Router · Server Actions · Edge runtime" },
+      { title: "Desktop apps", detail: "Electron apps that feel native — offline-first, auto-update" },
+      { title: "Mobile apps", detail: "React Native · Expo · iOS + Android from one codebase" },
+      { title: "Chrome extensions", detail: "MV3 extensions with AI assistance baked in" },
+      { title: "Internal tools", detail: "Admin dashboards, CMS, workflow automations" },
+      { title: "APIs + backends", detail: "Type-safe APIs, webhooks, background jobs, queues" },
+    ],
+  },
+  {
+    group: "Craft + care",
+    items: [
+      { title: "Design systems", detail: "Component libraries, tokens, docs — built to last" },
+      { title: "Data viz", detail: "Charts, dashboards, clinical reports — numbers that tell stories" },
+      { title: "Evals + monitoring", detail: "LLM evals, observability, incident response playbooks" },
+      { title: "Compliance", detail: "HIPAA, SOC2-ready architectures for regulated industries" },
+      { title: "Infra + DevOps", detail: "Vercel, AWS, Fly, Docker — boring on purpose" },
+      { title: "Team augmentation", detail: "Drop us in beside your team as senior AI engineers" },
+    ],
+  },
+];
+
+export const industries = [
+  { name: "Healthcare", detail: "Clinics, EHR add-ons, AI scribes, medical devices" },
+  { name: "Productivity", detail: "Meeting AI, wellness tools, focus + habits" },
+  { name: "Legal", detail: "Doc review, contract agents, intake tools" },
+  { name: "Enterprise", detail: "Internal tools, dashboards, AI copilots for knowledge work" },
+  { name: "Research", detail: "Labs, universities, scientific visualization" },
+  { name: "Consumer", detail: "Creator tools, voice apps, social products" },
+  { name: "Fintech", detail: "Dashboards, analytics, AI-assisted workflows" },
+  { name: "Education", detail: "Learning tools, tutors, assessment platforms" },
+];
+
+// Homepage manifesto — expanded principles
+export const principles = [
+  {
+    k: "01",
+    h: "AI-first, always.",
+    b: "We lead with AI where it earns its keep — scribes, copilots, agents. Everywhere else we keep software boring.",
+  },
+  {
+    k: "02",
+    h: "Friendly by default.",
+    b: "No architects peacocking. No gatekept Slack. You talk to the people writing your code, directly.",
+  },
+  {
+    k: "03",
+    h: "Ship weekly.",
+    b: "Every Friday you see something working. We iterate in public and measure in real users, not dry-runs.",
+  },
+  {
+    k: "04",
+    h: "Small by design.",
+    b: "Four-person studio on purpose. No middle layers, no handoffs, no Slack threads longer than a haiku.",
+  },
+  {
+    k: "05",
+    h: "Production, not prototype.",
+    b: "Every sprint ends in front of real users. Staging-only demos don't count. Reality is the grader.",
+  },
+  {
+    k: "06",
+    h: "No buzzword bingo.",
+    b: "We'll tell you when AI is the wrong answer. Half the time it is. We'd rather ship real than sound smart.",
+  },
+];
+
+// Text-driven hero specimens (replaces image reel)
+export const heroSpecimens = [
+  {
+    kicker: "AI Scribe · Healthcare",
+    title: "Nudge AI",
+    stat: "3 hrs",
+    statLabel: "saved per doctor, daily",
+    note: "Deployed across Psychiatry, Pediatrics, Family Medicine.",
+  },
+  {
+    kicker: "Voice AI · Medical",
+    title: "Curastream",
+    stat: "100%",
+    statLabel: "hands-free clinical workflow",
+    note: "Voice-controlled assistant for doctors in clinic.",
+  },
+  {
+    kicker: "Clinic OS · Luxembourg",
+    title: "Lucy",
+    stat: "100+",
+    statLabel: "doctors in production",
+    note: "End-to-end clinic OS. Led team of 5 to v1.",
+  },
+  {
+    kicker: "Consumer · Logitech",
+    title: "SmartHabits",
+    stat: "8",
+    statLabel: "wellness rituals, on the wrist",
+    note: "Electron wellness app built for Logitech.",
+  },
+  {
+    kicker: "Meeting AI · Consumer",
+    title: "Sonnet AI",
+    stat: "24/7",
+    statLabel: "meeting insights",
+    note: "AI that transcribes, tags, and surfaces actions.",
   },
 ];

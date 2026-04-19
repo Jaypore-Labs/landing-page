@@ -1,281 +1,212 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { Github, Linkedin, ArrowUpRight, CheckCircle, Award, Users, Globe, Zap } from "lucide-react";
-import { Container } from "@/components/ui/container";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CTA } from "@/components/sections/cta";
+import { ArrowUpRight, Github, Linkedin } from "lucide-react";
+import { PageHero } from "@/components/layout/page-hero";
+import { Marquee } from "@/components/sections/marquee";
+import { Capabilities } from "@/components/sections/capabilities";
+import { Industries } from "@/components/sections/industries";
+import { BigStatement } from "@/components/sections/big-statement";
 import { siteConfig, technologies } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Jaypore Labs, an AI-first development agency with 8+ years of experience building software for global brands like Logitech and Mercedes Benz.",
+  description:
+    "Friendly, AI-first product studio. Four-person team shipping AI products for Logitech, Mercedes, and clinics around the world.",
   openGraph: {
-    title: "About | Jaypore Labs",
-    description: "Learn about Jaypore Labs, an AI-first development agency with 8+ years of experience building software for global brands like Logitech and Mercedes Benz.",
+    title: "About · Jaypore Labs",
+    description:
+      "Friendly, AI-first product studio. Four-person team shipping AI products for Logitech, Mercedes, and clinics around the world.",
   },
 };
 
-const values = [
-  {
-    icon: Zap,
-    title: "AI-First Approach",
-    description: "We leverage cutting-edge AI technologies to build smarter, more efficient solutions.",
-  },
-  {
-    icon: Award,
-    title: "Quality Driven",
-    description: "Every line of code is written with care, following best practices and industry standards.",
-  },
-  {
-    icon: Users,
-    title: "Client Partnership",
-    description: "We work as an extension of your team, aligned with your goals and vision.",
-  },
-  {
-    icon: Globe,
-    title: "Global Perspective",
-    description: "Experience working with clients across 10+ countries gives us diverse insights.",
-  },
+const quickFacts = [
+  { k: "Studio size", v: "4 engineers" },
+  { k: "Founded", v: "2017" },
+  { k: "Based", v: "India · Remote-worldwide" },
+  { k: "Focus", v: "AI-first products" },
+  { k: "Typical engagement", v: "6–16 weeks" },
+  { k: "Rate", v: "$80–$140/hr" },
 ];
 
 export default function AboutPage() {
   return (
     <>
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-        <Container>
-          <div className="max-w-3xl mx-auto text-center">
-            <Badge variant="primary" className="mb-4">About Us</Badge>
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              Building the Future of Software
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">
-              We&apos;re an AI-first development agency helping SaaS founders and businesses build exceptional products that scale.
-            </p>
-          </div>
-        </Container>
-      </section>
+      <PageHero
+        eyebrow="Who we are"
+        title={
+          <>
+            A friendly,
+            <br />
+            <span className="italic font-medium text-accent">AI-first</span> studio.
+          </>
+        }
+        description={
+          <>
+            Jaypore Labs is a small product studio out of India. We help teams
+            ship AI products fast and efficiently — healthcare scribes,
+            copilots, voice AI, full SaaS. Since 2017, shipping to founders,
+            Logitech, Mercedes, and clinics around the world.
+          </>
+        }
+      />
 
-      {/* Story Section */}
-      <section className="py-24 bg-white dark:bg-slate-900">
-        <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">
-                Our Story
-              </h2>
-              <div className="space-y-4 text-slate-600 dark:text-slate-400">
-                <p>
-                  Jaypore Labs was founded with a simple mission: to help businesses build software that truly makes a difference. With {siteConfig.stats.yearsExperience} years of experience in full-stack development, we&apos;ve had the privilege of working with some of the world&apos;s most recognized brands.
-                </p>
-                <p>
-                  From developing healthcare solutions deployed in Luxembourg serving 100+ doctors, to building productivity tools for Logitech, our journey has been defined by solving complex problems and delivering exceptional results.
-                </p>
-                <p>
-                  Today, we focus on AI-first development, helping SaaS founders and businesses leverage modern technologies to build products that scale. Our expertise spans full-stack web development, desktop applications, AI integration, and more.
-                </p>
+      {/* Founder + quick facts */}
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-24 md:py-40 grid grid-cols-12 gap-8 items-start">
+          {/* Quick facts panel (replaces founder portrait) */}
+          <div className="col-span-12 md:col-span-5">
+            <div className="relative rounded-2xl border border-line-strong bg-muted/40 p-8 md:p-10 overflow-hidden">
+              <div
+                aria-hidden
+                className="absolute -top-20 -right-20 h-64 w-64 rounded-full accent-glow pointer-events-none"
+              />
+              <div className="relative flex items-center gap-3 mb-10">
+                <span className="h-px w-8 bg-accent" />
+                <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                  Studio card
+                </span>
               </div>
 
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="relative mb-10">
+                <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-3">
+                  Founder · {siteConfig.founder.experience}
+                </div>
+                <div className="display-tight text-paper text-[clamp(2.5rem,5vw,4rem)] leading-[0.95]">
+                  {siteConfig.founder.name}
+                </div>
+                <div className="mt-3 text-paper-dim">
+                  {siteConfig.founder.role}
+                </div>
+              </div>
+
+              <dl className="relative grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-6 mb-8">
+                {quickFacts.map((f) => (
+                  <div key={f.k}>
+                    <dt className="mono text-[10px] uppercase tracking-[0.22em] text-paper-dim mb-1">
+                      {f.k}
+                    </dt>
+                    <dd className="text-paper text-sm font-medium">{f.v}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="relative flex gap-2">
                 <a
                   href={siteConfig.founder.github}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-paper-dim hover:bg-accent hover:text-ink hover:border-accent transition-colors"
                 >
-                  <Button variant="outline" className="group">
-                    <Github className="w-4 h-4 mr-2" />
-                    GitHub
-                    <ArrowUpRight className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100 transition-opacity" />
-                  </Button>
+                  <Github className="w-4 h-4" />
+                </a>
+                <a
+                  href={siteConfig.founder.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-paper-dim hover:bg-accent hover:text-ink hover:border-accent transition-colors"
+                >
+                  <Linkedin className="w-4 h-4" />
                 </a>
                 <a
                   href={siteConfig.founder.upwork}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-line-strong px-4 py-2 mono text-[11px] uppercase tracking-[0.22em] text-paper hover:bg-paper hover:text-ink transition-colors"
                 >
-                  <Button variant="outline" className="group">
-                    Upwork Profile
-                    <ArrowUpRight className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100 transition-opacity" />
-                  </Button>
+                  Upwork
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
               </div>
             </div>
+          </div>
 
-            {/* Founder Card */}
-            <div>
-              <Card className="p-8">
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center mb-6">
-                    <span className="text-5xl font-bold text-white">
-                      {siteConfig.founder.name.charAt(0)}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                    {siteConfig.founder.name}
-                  </h3>
-                  <p className="text-violet-600 dark:text-violet-400 font-medium mb-4">
-                    {siteConfig.founder.role}
-                  </p>
-                  <p className="text-slate-600 dark:text-slate-400 mb-6">
-                    {siteConfig.stats.yearsExperience} years of experience building full-stack applications for global clients including Logitech and Mercedes Benz.
-                  </p>
-
-                  <div className="flex gap-4">
-                    <a
-                      href={siteConfig.founder.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
-                    >
-                      <Github className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                    </a>
-                    <a
-                      href={siteConfig.founder.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
-                    >
-                      <Linkedin className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                    </a>
-                  </div>
-                </div>
-              </Card>
+          {/* Story */}
+          <div className="col-span-12 md:col-span-7 md:pl-6">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="h-px w-10 bg-accent" />
+              <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                The story
+              </span>
             </div>
-          </div>
-        </Container>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-24 bg-slate-50 dark:bg-slate-800/50">
-        <Container>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              What We Stand For
+            <h2 className="display-tight text-paper text-[clamp(2.25rem,5vw,4.5rem)] mb-8">
+              Built around one question:
+              <br />
+              <span className="italic font-medium text-accent">does it ship?</span>
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Our core values guide everything we do, from how we write code to how we interact with clients.
-            </p>
-          </div>
+            <div className="space-y-5 text-paper-dim text-base md:text-lg leading-relaxed max-w-xl">
+              <p>
+                {siteConfig.founder.name} started this studio after eight years
+                leading engineering for healthcare and consumer tech — including
+                enterprise work with <span className="text-paper">Logitech</span>{" "}
+                and <span className="text-paper">Mercedes Benz</span>, and
+                leading a team of five to ship Lucy, a clinic platform now
+                serving 100+ doctors across Luxembourg.
+              </p>
+              <p>
+                Today we&apos;re four engineers deep, AI-first, and friendly
+                about it. If you want a polished deck and a 12-month roadmap,
+                we&apos;re the wrong studio. If you want working AI in front of
+                real users by next quarter — hello.
+              </p>
+              <p>
+                We pick one AI project at a time, ship weekly, and stick around
+                for the long tail. No juniors in a trench coat, no handoff
+                hell, no mystery gantts.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value) => {
-              const Icon = value.icon;
-              return (
-                <Card key={value.title}>
-                  <CardHeader>
-                    <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-violet-600 dark:text-violet-400" />
-                    </div>
-                    <CardTitle>{value.title}</CardTitle>
-                    <CardDescription>{value.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
+            <Link
+              href="/contact"
+              className="mt-10 group inline-flex items-center gap-3 rounded-full bg-accent text-ink px-6 py-3.5 text-sm font-medium hover:bg-accent-deep transition-colors"
+            >
+              Tell us about your AI idea
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper transition-transform group-hover:rotate-45">
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
           </div>
-        </Container>
+        </div>
       </section>
 
-      {/* Tech Stack */}
-      <section id="tech-stack" className="py-24 bg-white dark:bg-slate-900">
-        <Container>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Our Tech Stack
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              We work with modern, battle-tested technologies to deliver robust and scalable solutions.
-            </p>
-          </div>
+      {/* Manifesto — principles */}
+      <BigStatement />
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {technologies.map((tech) => (
-              <div
-                key={tech.name}
-                className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700"
-              >
-                <span className="font-medium text-slate-900 dark:text-white">{tech.name}</span>
-                <Badge variant="outline" className="text-xs">{tech.category}</Badge>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
+      {/* Capabilities */}
+      <Capabilities />
 
-      {/* Stats */}
-      <section className="py-16 bg-gradient-to-r from-violet-600 to-indigo-600">
-        <Container>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+      {/* Industries */}
+      <Industries />
+
+      {/* Stats band */}
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-20 md:py-28">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
             {[
-              { value: siteConfig.stats.yearsExperience, label: "Years Experience" },
-              { value: siteConfig.stats.projectsDelivered, label: "Projects Delivered" },
-              { value: siteConfig.stats.clientsServed, label: "Happy Clients" },
-              { value: siteConfig.stats.countries, label: "Countries Served" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-4xl font-bold mb-2">{stat.value}</div>
-                <div className="text-violet-200">{stat.label}</div>
+              { v: siteConfig.stats.yearsExperience, k: "Years shipping" },
+              { v: siteConfig.stats.projectsDelivered, k: "Products built" },
+              { v: siteConfig.stats.clientsServed, k: "Happy clients" },
+              { v: siteConfig.stats.countries, k: "Countries served" },
+            ].map((s) => (
+              <div key={s.k} className="border-t border-line-strong pt-6">
+                <div className="display-tight text-paper text-[clamp(3rem,8vw,6rem)] leading-none">
+                  {s.v}
+                </div>
+                <div className="mt-3 mono text-[11px] uppercase tracking-[0.2em] text-paper-dim">
+                  {s.k}
+                </div>
               </div>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-24 bg-white dark:bg-slate-900">
-        <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">
-                Why Work With Us?
-              </h2>
-              <div className="space-y-4">
-                {[
-                  "Proven track record with Fortune 500 companies",
-                  "AI-first approach for smarter solutions",
-                  "Full transparency throughout the project",
-                  "Direct communication with senior developers",
-                  "Flexible engagement models",
-                  "Post-launch support and maintenance",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-violet-600 flex-shrink-0" />
-                    <span className="text-slate-700 dark:text-slate-300">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Link href="/contact" className="inline-block mt-8">
-                <Button size="lg">
-                  Start a Conversation
-                </Button>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { title: "Logitech", desc: "SmartHabits wellness app" },
-                { title: "Mercedes Benz", desc: "Enterprise solutions" },
-                { title: "Healthcare", desc: "100+ doctors served" },
-                { title: "Universities", desc: "Research tools" },
-              ].map((client) => (
-                <Card key={client.title} className="text-center p-6">
-                  <div className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
-                    {client.title}
-                  </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    {client.desc}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <CTA />
+      {/* Tech stack marquee */}
+      <Marquee
+        words={technologies.map((t) => t.name)}
+        size="lg"
+        speed="slow"
+        accentEvery={3}
+      />
     </>
   );
 }

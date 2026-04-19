@@ -4,39 +4,39 @@ import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "accent" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", children, ...props }, ref) => {
-    const baseStyles =
-      "inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-full";
+    const base =
+      "group relative inline-flex items-center justify-center font-medium rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden";
 
-    const variants = {
+    const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
       primary:
-        "bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 focus-visible:ring-slate-900 dark:focus-visible:ring-white",
-      secondary:
-        "bg-violet-600 text-white hover:bg-violet-700 focus-visible:ring-violet-500",
+        "bg-paper text-ink hover:bg-paper/90",
+      accent:
+        "bg-accent text-ink hover:bg-accent-deep",
       outline:
-        "border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 focus-visible:ring-slate-500",
+        "border border-line-strong text-paper hover:bg-paper hover:text-ink",
       ghost:
-        "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:ring-slate-500",
+        "text-paper hover:text-accent",
     };
 
-    const sizes = {
+    const sizes: Record<NonNullable<ButtonProps["size"]>, string> = {
       sm: "px-4 py-2 text-sm",
       md: "px-5 py-2.5 text-sm",
-      lg: "px-6 py-3 text-sm",
+      lg: "px-7 py-3.5 text-sm tracking-wide",
     };
 
     return (
       <button
         ref={ref}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(base, variants[variant], sizes[size], className)}
         {...props}
       >
-        {children}
+        <span className="relative z-10 inline-flex items-center">{children}</span>
       </button>
     );
   }

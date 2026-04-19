@@ -1,11 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, User, Share2, Twitter, Linkedin } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Calendar, Clock, Linkedin, Twitter, User } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { Container } from "@/components/ui/container";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { getPostBySlug, getAllPostSlugs, getAllPosts } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
 
@@ -22,11 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const post = getPostBySlug(slug);
 
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    };
-  }
+  if (!post) return { title: "Post not found" };
 
   return {
     title: post.title,
@@ -50,47 +43,44 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 const mdxComponents = {
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mt-8 mb-4" {...props} />
+    <h1 className="display text-3xl md:text-4xl text-paper mt-12 mb-5" {...props} />
   ),
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mt-8 mb-4" {...props} />
+    <h2 className="display text-2xl md:text-3xl text-paper mt-10 mb-4" {...props} />
   ),
   h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-6 mb-3" {...props} />
+    <h3 className="display text-xl md:text-2xl text-paper mt-8 mb-3" {...props} />
   ),
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p className="text-slate-600 dark:text-slate-300 mb-4 leading-relaxed" {...props} />
+    <p className="text-paper-dim mb-5 leading-relaxed" {...props} />
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc list-inside text-slate-600 dark:text-slate-300 mb-4 space-y-2" {...props} />
+    <ul className="list-disc list-outside ml-5 text-paper-dim mb-5 space-y-2" {...props} />
   ),
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal list-inside text-slate-600 dark:text-slate-300 mb-4 space-y-2" {...props} />
+    <ol className="list-decimal list-outside ml-5 text-paper-dim mb-5 space-y-2" {...props} />
   ),
   li: (props: React.HTMLAttributes<HTMLLIElement>) => (
-    <li className="text-slate-600 dark:text-slate-300" {...props} />
+    <li className="text-paper-dim" {...props} />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a className="text-violet-600 dark:text-violet-400 hover:underline" {...props} />
+    <a className="text-accent hover:underline underline-offset-4" {...props} />
   ),
   code: (props: React.HTMLAttributes<HTMLElement>) => (
-    <code className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-sm font-mono" {...props} />
+    <code className="mono bg-muted px-2 py-0.5 rounded text-sm text-paper" {...props} />
   ),
   pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4 text-sm" {...props} />
+    <pre className="mono bg-muted border border-line text-paper p-5 rounded-xl overflow-x-auto mb-6 text-sm" {...props} />
   ),
   blockquote: (props: React.HTMLAttributes<HTMLQuoteElement>) => (
-    <blockquote className="border-l-4 border-violet-500 pl-4 italic text-slate-600 dark:text-slate-400 my-4" {...props} />
+    <blockquote className="border-l-2 border-accent pl-5 italic text-paper my-6 text-lg" {...props} />
   ),
 };
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
-
-  if (!post) {
-    notFound();
-  }
+  if (!post) notFound();
 
   const allPosts = getAllPosts();
   const relatedPosts = allPosts
@@ -101,36 +91,40 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <>
-      {/* Article Header */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-        <Container size="md">
+      {/* Header */}
+      <section className="relative bg-ink border-b border-line pt-36 md:pt-44 pb-16 md:pb-20 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute -top-40 right-1/2 translate-x-1/2 h-[420px] w-[720px] rounded-full accent-glow pointer-events-none"
+        />
+        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:gap-3 transition-all mb-8"
+            className="inline-flex items-center gap-2 mono text-[11px] uppercase tracking-[0.22em] text-paper-dim hover:text-accent transition-colors mb-10"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Blog
+            Back to journal
           </Link>
 
-          <Badge variant="primary" className="mb-4">
+          <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-6">
             {post.category}
-          </Badge>
+          </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+          <h1 className="display-tight text-paper text-[clamp(2.25rem,6vw,5.5rem)] mb-8">
             {post.title}
           </h1>
 
-          <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
+          <p className="text-lg text-paper-dim leading-relaxed max-w-2xl mb-10">
             {post.description}
           </p>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex flex-wrap items-center gap-6 mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
             <span className="flex items-center gap-2">
-              <User className="w-4 h-4" />
+              <User className="w-3.5 h-3.5" />
               {post.author}
             </span>
             <span className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-3.5 h-3.5" />
               {new Date(post.date).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
@@ -138,112 +132,105 @@ export default async function BlogPostPage({ params }: PageProps) {
               })}
             </span>
             <span className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
+              <Clock className="w-3.5 h-3.5" />
               {post.readingTime}
             </span>
           </div>
-        </Container>
+        </div>
       </section>
 
-      {/* Article Content */}
-      <section className="py-16 bg-white dark:bg-slate-900">
-        <Container size="md">
-          <article className="prose prose-lg dark:prose-invert max-w-none">
+      {/* Content */}
+      <section className="relative bg-ink border-b border-line py-16 md:py-24">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <article className="prose prose-lg max-w-none">
             <MDXRemote source={post.content} components={mdxComponents} />
           </article>
 
-          {/* Tags */}
           {post.tags.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
-                Tags
-              </h3>
+            <div className="mt-14 pt-8 border-t border-line">
+              <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-4">
+                Tagged
+              </div>
               <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
+                {post.tags.map((t) => (
+                  <span
+                    key={t}
+                    className="mono text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full border border-line text-paper-dim"
+                  >
+                    {t}
+                  </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Share */}
-          <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
-            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
-              Share this article
-            </h3>
-            <div className="flex gap-3">
+          <div className="mt-8 pt-8 border-t border-line flex items-center justify-between gap-6 flex-wrap">
+            <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+              Share
+            </div>
+            <div className="flex gap-2">
               <a
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-paper-dim hover:bg-accent hover:text-ink hover:border-accent transition-colors"
               >
-                <Twitter className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                <Twitter className="w-4 h-4" />
               </a>
               <a
                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-paper-dim hover:bg-accent hover:text-ink hover:border-accent transition-colors"
               >
-                <Linkedin className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                <Linkedin className="w-4 h-4" />
               </a>
             </div>
           </div>
-        </Container>
+        </div>
       </section>
 
-      {/* Related Posts */}
+      {/* Related */}
       {relatedPosts.length > 0 && (
-        <section className="py-16 bg-slate-50 dark:bg-slate-800/50">
-          <Container>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center">
-              Related Articles
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedPosts.map((relatedPost) => (
-                <Link key={relatedPost.slug} href={`/blog/${relatedPost.slug}`}>
-                  <Card className="h-full group cursor-pointer">
-                    <div className="p-6">
-                      <Badge variant="primary" className="text-xs mb-3">
-                        {relatedPost.category}
-                      </Badge>
-                      <h3 className="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-                        {relatedPost.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                        {relatedPost.description}
-                      </p>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
+        <section className="relative bg-ink border-b border-line">
+          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-20 md:py-28">
+            <div className="flex items-center gap-3 mb-10">
+              <span className="h-px w-10 bg-accent" />
+              <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                Keep reading
+              </span>
             </div>
-          </Container>
+
+            <ul className="border-t border-line">
+              {relatedPosts.map((p, i) => (
+                <li key={p.slug} className="border-b border-line group">
+                  <Link
+                    href={`/blog/${p.slug}`}
+                    className="flex items-center justify-between gap-6 py-6"
+                  >
+                    <div className="flex items-baseline gap-6 flex-1 min-w-0">
+                      <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim w-8 shrink-0">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div>
+                        <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-1">
+                          {p.category}
+                        </div>
+                        <h3 className="display text-xl md:text-2xl text-paper group-hover:text-accent transition-colors">
+                          {p.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line group-hover:bg-accent group-hover:text-ink group-hover:border-accent transition-colors shrink-0">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       )}
-
-      {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-violet-600 to-indigo-600">
-        <Container>
-          <div className="text-center text-white">
-            <h2 className="text-2xl font-bold mb-4">
-              Need Help With Your Project?
-            </h2>
-            <p className="text-violet-100 mb-8 max-w-xl mx-auto">
-              Let&apos;s discuss how we can help you build exceptional software.
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-violet-700 rounded-lg font-medium hover:bg-violet-50 transition-colors"
-            >
-              Get in Touch
-            </Link>
-          </div>
-        </Container>
-      </section>
     </>
   );
 }

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Geist, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { Cursor } from "@/components/fx/cursor";
+import { Grain } from "@/components/fx/grain";
 import { siteConfig } from "@/data/site";
 import "./globals.css";
 
@@ -11,16 +12,23 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} - AI-First Development Agency`,
-    template: `%s | ${siteConfig.name}`,
+    default: `${siteConfig.name} — We build things that ship.`,
+    template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
   keywords: [
@@ -45,7 +53,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} - AI-First Development Agency`,
+    title: `${siteConfig.name} — We build things that ship.`,
     description: siteConfig.description,
     images: [
       {
@@ -58,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} - AI-First Development Agency`,
+    title: `${siteConfig.name} — We build things that ship.`,
     description: siteConfig.description,
     images: ["/og-image.png"],
     creator: "@jayporelabs",
@@ -85,23 +93,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth">
       <head>
-        {/* Prevent flash of wrong theme */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const stored = localStorage.getItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (stored === 'dark' || (!stored && prefersDark) || stored === 'system' && prefersDark) {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
-          }}
-        />
-        {/* JSON-LD Structured Data for Organization */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -138,41 +131,15 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* JSON-LD Structured Data for LocalBusiness */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ProfessionalService",
-              name: siteConfig.name,
-              description: siteConfig.description,
-              url: siteConfig.url,
-              priceRange: "$$$",
-              address: {
-                "@type": "PostalAddress",
-                addressCountry: "IN",
-              },
-              areaServed: "Worldwide",
-              serviceType: [
-                "Software Development",
-                "Web Development",
-                "Mobile App Development",
-                "AI Integration",
-                "SaaS Development",
-              ],
-            }),
-          }}
-        />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300`}
+        className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <ThemeProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </ThemeProvider>
+        <Grain />
+        <Cursor />
+        <Header />
+        <main className="flex-1 relative">{children}</main>
+        <Footer />
       </body>
     </html>
   );

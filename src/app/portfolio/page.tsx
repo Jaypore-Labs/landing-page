@@ -1,207 +1,164 @@
 import { Metadata } from "next";
-import Link from "next/link";
-import { ExternalLink, ArrowRight } from "lucide-react";
-import { Container } from "@/components/ui/container";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CTA } from "@/components/sections/cta";
+import { ArrowUpRight } from "lucide-react";
+import { PageHero } from "@/components/layout/page-hero";
+import { SelectedWork } from "@/components/sections/selected-work";
+import { Industries } from "@/components/sections/industries";
+import { Marquee } from "@/components/sections/marquee";
 import { portfolio } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Explore our portfolio of successful projects including healthcare AI, enterprise software, and SaaS applications built for global clients.",
+  title: "Work",
+  description:
+    "Selected AI products — healthcare scribes, voice assistants, SaaS — shipped with Logitech, Luxembourg clinics, and ambitious founders.",
   openGraph: {
-    title: "Portfolio | Jaypore Labs",
-    description: "Explore our portfolio of successful projects including healthcare AI, enterprise software, and SaaS applications built for global clients.",
+    title: "Work · Jaypore Labs",
+    description:
+      "Selected AI products — healthcare scribes, voice assistants, SaaS — shipped with Logitech, Luxembourg clinics, and ambitious founders.",
   },
 };
 
-const categories = ["All", ...new Set(portfolio.map((p) => p.category))];
-
 export default function PortfolioPage() {
+  const more = portfolio.filter((p) => !p.featured);
+
   return (
     <>
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-        <Container>
-          <div className="max-w-3xl mx-auto text-center">
-            <Badge variant="primary" className="mb-4">Our Work</Badge>
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              Projects That Make an Impact
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">
-              From healthcare AI to enterprise productivity tools, explore the solutions we&apos;ve built for clients worldwide.
-            </p>
-          </div>
-        </Container>
-      </section>
+      <PageHero
+        eyebrow="Work archive"
+        title={
+          <>
+            AI products,
+            <br />
+            <span className="italic font-medium text-accent">in production.</span>
+          </>
+        }
+        description="Every project below shipped. Many are still in active development — used by doctors, founders, and enterprise teams today."
+      />
 
-      {/* Portfolio Grid */}
-      <section className="py-24 bg-white dark:bg-slate-900">
-        <Container>
-          {/* Featured Projects */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">
-              Featured Projects
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {portfolio
-                .filter((p) => p.featured)
-                .map((project) => (
-                  <Card key={project.id} className="overflow-hidden group">
-                    {/* Project Image */}
-                    <div className="aspect-video bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20 relative overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-8xl font-bold text-violet-500/20 dark:text-violet-400/20">
-                          {project.title.charAt(0)}
-                        </span>
-                      </div>
-                      {project.url && (
-                        <a
-                          href={project.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/90 dark:bg-slate-800/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        >
-                          <ExternalLink className="w-5 h-5 text-violet-600" />
-                        </a>
-                      )}
-                    </div>
+      <SelectedWork />
 
-                    <div className="p-8">
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <Badge variant="primary">{project.category}</Badge>
-                        {project.client && (
-                          <Badge variant="outline">{project.client}</Badge>
-                        )}
-                      </div>
-
-                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                        {project.title}
-                      </h3>
-                      <p className="text-slate-600 dark:text-slate-400 mb-6">
-                        {project.description}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {project.technologies.map((tech) => (
-                          <span
-                            key={tech}
-                            className="text-sm px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">
-                          Key Highlights
-                        </h4>
-                        <ul className="space-y-2">
-                          {project.highlights.map((highlight) => (
-                            <li
-                              key={highlight}
-                              className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"
-                            >
-                              <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-                              {highlight}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {project.url && (
-                        <a
-                          href={project.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 font-medium mt-6 hover:gap-3 transition-all"
-                        >
-                          Visit Project
-                          <ArrowRight className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+      {/* Archive grid — text-only, no images */}
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-24 md:py-32">
+          <div className="flex items-end justify-between gap-6 mb-14 flex-wrap">
+            <div>
+              <div className="flex items-center gap-3 mb-5">
+                <span className="h-px w-10 bg-accent" />
+                <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                  Also in the vault
+                </span>
+              </div>
+              <h2 className="display-tight text-paper text-[clamp(2rem,5vw,4rem)]">
+                More things we&apos;ve
+                <br />
+                <span className="italic font-medium text-accent">put out there.</span>
+              </h2>
             </div>
           </div>
 
-          {/* Other Projects */}
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">
-              More Projects
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {portfolio
-                .filter((p) => !p.featured)
-                .map((project) => (
-                  <Card key={project.id} className="overflow-hidden">
-                    <div className="aspect-[3/2] bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20 relative">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-6xl font-bold text-violet-500/20 dark:text-violet-400/20">
-                          {project.title.charAt(0)}
-                        </span>
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-line border-t border-line">
+            {more.map((p, i) => {
+              const accent = (p as { accent?: string }).accent ?? "#FF4D1F";
+              return (
+                <article
+                  key={p.id}
+                  className="group relative bg-ink p-6 md:p-8 flex flex-col min-h-[360px] overflow-hidden"
+                >
+                  {/* Accent glow */}
+                  <div
+                    aria-hidden
+                    className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full opacity-40 pointer-events-none transition-opacity duration-500 group-hover:opacity-70"
+                    style={{
+                      background: `radial-gradient(60% 60% at 50% 50%, ${accent}40, transparent 70%)`,
+                    }}
+                  />
+
+                  <div className="relative flex items-center justify-between mono text-[10px] uppercase tracking-[0.22em] text-paper-dim mb-8">
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="inline-block h-1.5 w-1.5 rounded-full"
+                        style={{ background: accent }}
+                      />
+                      {p.category}
+                    </span>
+                    <span>{String(i + 1).padStart(2, "0")}</span>
+                  </div>
+
+                  <h3
+                    className="relative display-tight text-[clamp(2rem,5vw,3.5rem)] leading-[0.9] mb-4"
+                    style={{ color: accent }}
+                  >
+                    {p.title}
+                  </h3>
+
+                  {p.client && (
+                    <div className="relative mono text-[10px] uppercase tracking-[0.22em] text-paper mb-5">
+                      <span className="text-paper-dim">Client ·</span> {p.client}
                     </div>
+                  )}
 
-                    <div className="p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="primary" className="text-xs">{project.category}</Badge>
-                        {project.client && (
-                          <Badge variant="outline" className="text-xs">{project.client}</Badge>
-                        )}
-                      </div>
+                  <p className="relative text-paper-dim text-sm leading-relaxed mb-6 flex-1">
+                    {p.shortDescription}
+                  </p>
 
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                        {project.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                        {project.shortDescription}
-                      </p>
+                  <div className="relative flex flex-wrap gap-1.5 mb-2">
+                    {p.technologies.slice(0, 3).map((t) => (
+                      <span
+                        key={t}
+                        className="mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full border border-line text-paper-dim"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
 
-                      <div className="flex flex-wrap gap-1">
-                        {project.technologies.slice(0, 3).map((tech) => (
-                          <span
-                            key={tech}
-                            className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-            </div>
+                  {p.url && (
+                    <a
+                      href={p.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-line-strong bg-ink/60 text-paper opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-ink group-hover:border-accent transition-all"
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  )}
+                </article>
+              );
+            })}
           </div>
-        </Container>
+        </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-slate-50 dark:bg-slate-800/50">
-        <Container>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      {/* Industries */}
+      <Industries />
+
+      {/* Stats band */}
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-16 md:py-24">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
             {[
-              { value: "50+", label: "Projects Delivered" },
-              { value: "30+", label: "Happy Clients" },
-              { value: "10+", label: "Countries Served" },
-              { value: "100%", label: "Client Satisfaction" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-4xl font-bold text-violet-600 dark:text-violet-400 mb-2">
-                  {stat.value}
+              { v: "50+", k: "Products shipped" },
+              { v: "30+", k: "Happy clients" },
+              { v: "10+", k: "Countries served" },
+              { v: "100%", k: "Still talking to us" },
+            ].map((s) => (
+              <div key={s.k} className="border-t border-line-strong pt-6">
+                <div className="display-tight text-paper text-[clamp(3rem,7vw,5rem)] leading-none">
+                  {s.v}
                 </div>
-                <div className="text-slate-600 dark:text-slate-400">{stat.label}</div>
+                <div className="mt-3 mono text-[11px] uppercase tracking-[0.2em] text-paper-dim">
+                  {s.k}
+                </div>
               </div>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
-      <CTA />
+      <Marquee
+        words={["Ship AI · Ship fast · Ship friendly", "In production since 2017"]}
+        size="lg"
+        speed="slow"
+      />
     </>
   );
 }

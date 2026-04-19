@@ -1,178 +1,234 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Code, Monitor, Brain, Rocket, Heart, Lightbulb, CheckCircle } from "lucide-react";
-import { Container } from "@/components/ui/container";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CTA } from "@/components/sections/cta";
-import { services, technologies } from "@/data/site";
+import { ArrowUpRight } from "lucide-react";
+import { PageHero } from "@/components/layout/page-hero";
+import { ServicesList } from "@/components/sections/services-list";
+import { Capabilities } from "@/components/sections/capabilities";
+import { Industries } from "@/components/sections/industries";
+import { Marquee } from "@/components/sections/marquee";
+import { technologies } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Full-stack development, AI integration, SaaS development, and more. Explore our comprehensive software development services.",
+  description:
+    "AI-first product work — scribes, copilots, voice AI, SaaS. Friendly studio, weekly demos, no buzzword bingo.",
   openGraph: {
-    title: "Services | Jaypore Labs",
-    description: "Full-stack development, AI integration, SaaS development, and more. Explore our comprehensive software development services.",
+    title: "Services · Jaypore Labs",
+    description:
+      "AI-first product work — scribes, copilots, voice AI, SaaS. Friendly studio, weekly demos, no buzzword bingo.",
   },
 };
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Code,
-  Monitor,
-  Brain,
-  Rocket,
-  Heart,
-  Lightbulb,
-};
+const phases = [
+  {
+    n: "01",
+    h: "Discovery",
+    b: "One week. We listen hard — user interviews, audits, AI feasibility checks. Output: a crisp problem statement and a bet map.",
+  },
+  {
+    n: "02",
+    h: "Blueprint",
+    b: "Architecture, wireframes, eval criteria, milestones. Fixed scope for the first ship, open-ended after. Written in plain English.",
+  },
+  {
+    n: "03",
+    h: "Build",
+    b: "Two-week sprints, Friday demos. Production on day one — no staging-only fantasies. CI, evals, monitoring, the works.",
+  },
+  {
+    n: "04",
+    h: "Launch + steady state",
+    b: "We ship. We watch the dashboards. We fix what breaks. Then we stick around as long as you need us.",
+  },
+];
+
+const engagementModels = [
+  {
+    name: "Project",
+    price: "Fixed scope",
+    summary: "A clear deliverable with a timeline. Best for MVPs and discrete AI features.",
+    fits: ["New AI product", "Prototype to production", "Defined scope"],
+  },
+  {
+    name: "Retainer",
+    price: "Monthly",
+    summary: "A dedicated slice of the studio every month. Best for ongoing AI products.",
+    fits: ["Continuous delivery", "Long-term roadmap", "Evolving product"],
+  },
+  {
+    name: "Augment",
+    price: "Per-engineer",
+    summary: "We plug in beside your team as senior AI engineers. Best for existing teams.",
+    fits: ["Team extension", "Senior AI depth", "Fast ramp-up"],
+  },
+];
 
 export default function ServicesPage() {
   return (
     <>
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-        <Container>
-          <div className="max-w-3xl mx-auto text-center">
-            <Badge variant="primary" className="mb-4">Our Services</Badge>
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              End-to-End Development Solutions
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">
-              From concept to deployment and beyond. We offer comprehensive software development services tailored to your business needs.
-            </p>
-          </div>
-        </Container>
-      </section>
+      <PageHero
+        eyebrow="What we do"
+        title={
+          <>
+            AI-first,
+            <br />
+            <span className="italic font-medium text-accent">friendly</span> software.
+          </>
+        }
+        description="From scribes to copilots to full SaaS. We take full ownership of the surface area, and we pick the stack on the merits — not because it pads the invoice."
+      />
 
-      {/* Services Grid */}
-      <section className="py-24 bg-white dark:bg-slate-900">
-        <Container>
-          <div className="space-y-24">
-            {services.map((service, index) => {
-              const Icon = iconMap[service.icon] || Code;
-              const isEven = index % 2 === 0;
+      <ServicesList />
 
-              return (
-                <div
-                  key={service.id}
-                  id={service.id}
-                  className={`flex flex-col ${isEven ? "lg:flex-row" : "lg:flex-row-reverse"} gap-12 items-center`}
-                >
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center mb-6">
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-                      {service.title}
-                    </h2>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 mb-6">
-                      {service.description}
-                    </p>
-                    <ul className="space-y-3 mb-8">
-                      {service.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-violet-600 flex-shrink-0" />
-                          <span className="text-slate-700 dark:text-slate-300">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href="/contact">
-                      <Button className="group">
-                        Discuss Your Project
-                        <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                  </div>
+      {/* Capabilities */}
+      <Capabilities />
 
-                  {/* Visual */}
-                  <div className="flex-1 w-full">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/20 dark:to-indigo-900/20 rounded-2xl flex items-center justify-center">
-                      <Icon className="w-24 h-24 text-violet-300 dark:text-violet-700" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Container>
-      </section>
-
-      {/* Technologies */}
-      <section id="tech-stack" className="py-24 bg-slate-50 dark:bg-slate-800/50">
-        <Container>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Technologies We Work With
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              We use modern, battle-tested technologies to build scalable and maintainable solutions.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            {technologies.map((tech) => (
-              <div
-                key={tech.name}
-                className="px-6 py-3 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium hover:border-violet-300 dark:hover:border-violet-600 transition-colors"
-              >
-                {tech.name}
+      {/* Engagement models */}
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-24 md:py-40">
+          <div className="grid grid-cols-12 gap-6 mb-14">
+            <div className="col-span-12 md:col-span-5">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="h-px w-10 bg-accent" />
+                <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                  Work with us
+                </span>
               </div>
-            ))}
+              <h2 className="display-tight text-paper text-[clamp(2.25rem,6vw,5rem)]">
+                Three ways
+                <br />
+                <span className="italic font-medium text-accent">to engage.</span>
+              </h2>
+            </div>
+            <div className="col-span-12 md:col-span-6 md:col-start-7 flex md:items-end">
+              <p className="text-paper-dim max-w-md text-base md:text-lg leading-relaxed">
+                Pick the shape that fits. We&apos;ll recommend one honestly —
+                sometimes that means a different studio entirely.
+              </p>
+            </div>
           </div>
-        </Container>
+
+          <ul className="grid grid-cols-1 md:grid-cols-3 gap-px bg-line border-t border-line">
+            {engagementModels.map((m, i) => (
+              <li key={m.name} className="bg-ink p-8 md:p-10">
+                <div className="flex items-baseline justify-between mb-8">
+                  <span className="display-tight text-accent text-5xl">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="mono text-[10px] uppercase tracking-[0.22em] text-paper-dim">
+                    {m.price}
+                  </span>
+                </div>
+                <h3 className="display text-2xl md:text-3xl text-paper mb-3">
+                  {m.name}
+                </h3>
+                <p className="text-paper-dim text-sm leading-relaxed mb-6">
+                  {m.summary}
+                </p>
+                <ul className="space-y-2 border-t border-line pt-5">
+                  {m.fits.map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-center gap-2 text-paper text-sm"
+                    >
+                      <span className="h-1 w-1 rounded-full bg-accent" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* Process */}
-      <section className="py-24 bg-white dark:bg-slate-900">
-        <Container>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Our Process
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              A proven methodology that ensures successful project delivery every time.
-            </p>
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-24 md:py-40">
+          <div className="grid grid-cols-12 gap-6 mb-14">
+            <div className="col-span-12 md:col-span-5">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="h-px w-10 bg-accent" />
+                <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                  Engagement cadence
+                </span>
+              </div>
+              <h2 className="display-tight text-paper text-[clamp(2.25rem,6vw,5rem)]">
+                From hello to
+                <br />
+                <span className="italic font-medium text-accent">in production.</span>
+              </h2>
+            </div>
+            <div className="col-span-12 md:col-span-6 md:col-start-7 flex md:items-end">
+              <p className="text-paper-dim max-w-md text-base md:text-lg leading-relaxed">
+                Four phases, designed so you see working AI by week four.
+                Not a proposal. Not a deck. Something you can click.
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                step: "01",
-                title: "Discovery",
-                description: "We dive deep into your requirements, goals, and constraints to understand the full picture.",
-              },
-              {
-                step: "02",
-                title: "Planning",
-                description: "Detailed technical planning, architecture design, and timeline estimation.",
-              },
-              {
-                step: "03",
-                title: "Development",
-                description: "Agile development with regular updates, code reviews, and continuous integration.",
-              },
-              {
-                step: "04",
-                title: "Launch & Support",
-                description: "Smooth deployment, monitoring, and ongoing support to ensure success.",
-              },
-            ].map((phase) => (
-              <Card key={phase.step} className="relative">
-                <CardHeader>
-                  <span className="text-5xl font-bold text-violet-100 dark:text-violet-900/30 absolute top-4 right-4">
-                    {phase.step}
-                  </span>
-                  <CardTitle className="relative z-10">{phase.title}</CardTitle>
-                  <CardDescription>{phase.description}</CardDescription>
-                </CardHeader>
-              </Card>
+          <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-line border-t border-line">
+            {phases.map((p) => (
+              <li key={p.n} className="bg-ink p-8 md:p-10">
+                <div className="display-tight text-accent text-5xl md:text-6xl mb-6">
+                  {p.n}
+                </div>
+                <h3 className="display text-2xl text-paper mb-3">{p.h}</h3>
+                <p className="text-paper-dim text-sm leading-relaxed">{p.b}</p>
+              </li>
             ))}
-          </div>
-        </Container>
+          </ol>
+        </div>
       </section>
 
-      <CTA />
+      {/* Industries */}
+      <Industries />
+
+      {/* Tech */}
+      <section className="relative bg-ink border-b border-line">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-24 md:py-32">
+          <div className="grid grid-cols-12 gap-6 mb-12">
+            <div className="col-span-12 md:col-span-6">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="h-px w-10 bg-accent" />
+                <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
+                  Tools of the trade
+                </span>
+              </div>
+              <h2 className="display-tight text-paper text-[clamp(2rem,5vw,4rem)]">
+                Stacks we&apos;re <span className="italic text-accent">fluent</span> in.
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 border-t border-line pt-8">
+            {technologies.map((t) => (
+              <span
+                key={t.name}
+                className="mono text-[11px] uppercase tracking-widest px-4 py-2.5 rounded-full border border-line text-paper-dim hover:border-accent hover:text-accent transition-colors"
+              >
+                {t.name}
+              </span>
+            ))}
+          </div>
+
+          <Link
+            href="/contact"
+            className="mt-12 inline-flex items-center gap-3 mono text-[11px] uppercase tracking-[0.22em] text-paper hover:text-accent transition-colors"
+          >
+            <span className="swipe-link">Tell us what you&apos;re building</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line-strong">
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      <Marquee
+        words={["Booking AI projects — Q2 2026", "Scribes · Copilots · Voice AI"]}
+        size="lg"
+        speed="slow"
+      />
     </>
   );
 }
