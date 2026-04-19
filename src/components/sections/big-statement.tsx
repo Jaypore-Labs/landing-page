@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { principles } from "@/data/site";
 
-const words = ["Ship", "AI", "that", "actually", "ships.", "Together."];
+const words = ["We", "bring", "AI", "into", "real", "software."];
 
 export function BigStatement() {
   const ref = useRef<HTMLDivElement | null>(null);

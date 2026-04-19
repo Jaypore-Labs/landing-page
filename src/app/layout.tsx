@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Cursor } from "@/components/fx/cursor";
 import { Grain } from "@/components/fx/grain";
-import { siteConfig } from "@/data/site";
+import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/json-ld";
+import { siteConfig, seoKeywords } from "@/data/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,52 +25,53 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const rootTitle = `${siteConfig.name} — AI-enabled software for real businesses`;
+
+export const viewport: Viewport = {
+  themeColor: "#0B0B0B",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — We build things that ship.`,
+    default: rootTitle,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: [
-    "software development",
-    "AI development",
-    "SaaS development",
-    "full-stack development",
-    "Electron apps",
-    "desktop applications",
-    "healthcare software",
-    "React development",
-    "Node.js development",
-    "web application development",
-    "custom software",
-    "MVP development",
+  keywords: seoKeywords,
+  applicationName: siteConfig.name,
+  authors: [
+    { name: siteConfig.founder.name, url: siteConfig.founder.linkedin },
   ],
-  authors: [{ name: siteConfig.founder.name }],
   creator: siteConfig.name,
   publisher: siteConfig.name,
+  category: "technology",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} — We build things that ship.`,
+    title: rootTitle,
     description: siteConfig.description,
     images: [
       {
-        url: "/og-image.png",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: siteConfig.name,
+        alt: `${siteConfig.name} — ${siteConfig.tagline}`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} — We build things that ship.`,
+    title: rootTitle,
     description: siteConfig.description,
-    images: ["/og-image.png"],
+    images: ["/opengraph-image"],
     creator: "@jayporelabs",
+    site: "@jayporelabs",
   },
   robots: {
     index: true,
@@ -85,6 +87,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: siteConfig.url,
   },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: {
+      ...(process.env.BING_SITE_VERIFICATION
+        ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+        : {}),
+    },
+  },
+  other: {
+    "ai-label": "This site is built by humans using AI responsibly.",
+  },
 };
 
 export default function RootLayout({
@@ -94,47 +107,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: siteConfig.name,
-              description: siteConfig.description,
-              url: siteConfig.url,
-              logo: `${siteConfig.url}/logo.png`,
-              founder: {
-                "@type": "Person",
-                name: siteConfig.founder.name,
-                jobTitle: siteConfig.founder.role,
-              },
-              contactPoint: {
-                "@type": "ContactPoint",
-                email: siteConfig.email,
-                contactType: "sales",
-              },
-              sameAs: [
-                siteConfig.social.github,
-                siteConfig.social.linkedin,
-                siteConfig.social.twitter,
-              ],
-              knowsAbout: [
-                "Software Development",
-                "AI Integration",
-                "Full-Stack Development",
-                "Desktop Applications",
-                "SaaS Development",
-                "Healthcare Technology",
-              ],
-            }),
-          }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col`}
       >
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <Grain />
         <Cursor />
         <Header />

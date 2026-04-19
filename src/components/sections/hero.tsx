@@ -14,14 +14,14 @@ import {
 import { heroSpecimens } from "@/data/site";
 
 const rotatingWords = [
+  "AI-enabled SaaS",
   "AI scribes",
-  "AI agents",
+  "AI copilots",
   "RAG pipelines",
-  "voice AI",
-  "copilots",
+  "voice AI tools",
+  "AI agents",
   "MCP servers",
-  "desktop apps",
-  "the whole SaaS",
+  "desktop apps with AI",
 ];
 
 const SPEC_ACCENTS = ["#FF4D1F", "#FFD166", "#8BE9FD", "#B5E48C", "#C77DFF"];
@@ -61,7 +61,7 @@ export function Hero() {
         <div className="flex items-center gap-3 text-paper-dim mono text-[11px] uppercase tracking-[0.22em]">
           <span className="inline-flex items-center gap-1.5 text-paper">
             <Sparkles className="w-3 h-3 text-accent" />
-            AI-first
+            AI-enablement
           </span>
           <span className="text-paper/30">/</span>
           <span>Friendly</span>
@@ -93,8 +93,8 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 1.15 }}
             className="mt-8 max-w-xl text-base sm:text-lg text-paper-dim leading-relaxed"
           >
-            A friendly, AI-first product studio. We help teams ship AI
-            products fast and efficiently — for founders, for{" "}
+            Friendly product studio. We build AI-enabled software and help
+            businesses put AI to work — for founders, for{" "}
             <span className="text-paper">Logitech</span>, for clinics in
             Luxembourg serving <span className="text-paper">100+ doctors</span>.
           </motion.p>
@@ -110,7 +110,7 @@ export function Hero() {
               data-cursor-label="BOOK"
               className="group inline-flex items-center gap-3 rounded-full bg-accent px-6 py-3.5 text-ink text-sm font-medium hover:bg-accent-deep transition-colors"
             >
-              Start an AI project
+              Bring AI to your business
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper transition-transform group-hover:rotate-45">
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </span>
@@ -170,7 +170,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pb-10 flex items-end justify-between gap-10 flex-wrap">
         <div className="grid grid-cols-3 gap-x-10 gap-y-4 sm:flex sm:items-end sm:gap-12">
           {[
-            { v: "50+", k: "AI products shipped" },
+            { v: "50+", k: "Products shipped" },
             { v: "8+", k: "Years in the trenches" },
             { v: "10+", k: "Countries served" },
           ].map((s, i) => (
@@ -211,9 +211,9 @@ export function Hero() {
 function HeadlineReveal() {
   return (
     <h1 className="display-tight text-paper text-[clamp(3.5rem,11vw,10.5rem)]">
-      <LineReveal delay={0.15}>Build AI</LineReveal>
+      <LineReveal delay={0.15}>Your business,</LineReveal>
       <LineReveal delay={0.35} className="text-accent italic font-medium">
-        that actually ships.
+        AI-ready.
       </LineReveal>
     </h1>
   );

@@ -6,20 +6,26 @@ import { Capabilities } from "@/components/sections/capabilities";
 import { ServicesList } from "@/components/sections/services-list";
 import { Industries } from "@/components/sections/industries";
 import { TestimonialQuote } from "@/components/sections/testimonial-quote";
+import {
+  ProfessionalServiceJsonLd,
+  ServicesJsonLd,
+} from "@/components/seo/json-ld";
 
 const marqueeLine = [
-  "Ship AI",
-  "Ship fast",
+  "AI-enabled software",
+  "Industry-first",
   "Ship friendly",
   "Built to last",
-  "AI-first",
-  "Independent",
+  "Weekly demos",
   "Deep craft",
+  "Independent",
 ];
 
 export default function HomePage() {
   return (
     <>
+      <ProfessionalServiceJsonLd />
+      <ServicesJsonLd />
       <Hero />
       <Clients />
       <Marquee words={marqueeLine} size="xl" speed="normal" />
@@ -31,7 +37,7 @@ export default function HomePage() {
       <Marquee
         words={[
           "Booking AI projects — Q2 2026",
-          "Ship AI the friendly way",
+          "Bringing AI to your business",
           "Hello from India",
         ]}
         size="lg"

@@ -6,16 +6,39 @@ import { ServicesList } from "@/components/sections/services-list";
 import { Capabilities } from "@/components/sections/capabilities";
 import { Industries } from "@/components/sections/industries";
 import { Marquee } from "@/components/sections/marquee";
-import { technologies } from "@/data/site";
+import {
+  BreadcrumbJsonLd,
+  ServicesJsonLd,
+} from "@/components/seo/json-ld";
+import { siteConfig, technologies } from "@/data/site";
+
+const desc =
+  "AI enablement · AI-enabled web apps · desktop apps · SaaS · healthcare AI · AI readiness consulting. Weekly demos, no buzzword bingo.";
 
 export const metadata: Metadata = {
   title: "Services",
-  description:
-    "AI-first product work — scribes, copilots, voice AI, SaaS. Friendly studio, weekly demos, no buzzword bingo.",
+  description: desc,
+  keywords: [
+    "AI enablement services",
+    "AI integration services",
+    "AI readiness consulting",
+    "AI scribes development",
+    "AI copilot development",
+    "healthcare AI software",
+    "AI SaaS development",
+    "RAG implementation",
+    "voice AI development",
+    "Electron AI apps",
+  ],
+  alternates: { canonical: `${siteConfig.url}/services` },
   openGraph: {
-    title: "Services · Jaypore Labs",
-    description:
-      "AI-first product work — scribes, copilots, voice AI, SaaS. Friendly studio, weekly demos, no buzzword bingo.",
+    title: `Services · ${siteConfig.name}`,
+    description: desc,
+    url: `${siteConfig.url}/services`,
+  },
+  twitter: {
+    title: `Services · ${siteConfig.name}`,
+    description: desc,
   },
 };
 
@@ -23,22 +46,22 @@ const phases = [
   {
     n: "01",
     h: "Discovery",
-    b: "One week. We listen hard — user interviews, audits, AI feasibility checks. Output: a crisp problem statement and a bet map.",
+    b: "One week inside your business. Interviews with users + operators, workflow mapping, AI opportunity audit. Output: a crisp problem statement and a bet map.",
   },
   {
     n: "02",
     h: "Blueprint",
-    b: "Architecture, wireframes, eval criteria, milestones. Fixed scope for the first ship, open-ended after. Written in plain English.",
+    b: "Architecture, wireframes, eval criteria, milestones. Fixed scope for the first ship, open-ended after. Written in plain English, not decks.",
   },
   {
     n: "03",
     h: "Build",
-    b: "Two-week sprints, Friday demos. Production on day one — no staging-only fantasies. CI, evals, monitoring, the works.",
+    b: "Two-week sprints, Friday demos. Production on day one — no staging-only fantasies. CI, LLM evals, monitoring, the works.",
   },
   {
     n: "04",
     h: "Launch + steady state",
-    b: "We ship. We watch the dashboards. We fix what breaks. Then we stick around as long as you need us.",
+    b: "We ship. We watch the dashboards. We tune the prompts and evals. Then we stick around as long as you need us.",
   },
 ];
 
@@ -46,19 +69,19 @@ const engagementModels = [
   {
     name: "Project",
     price: "Fixed scope",
-    summary: "A clear deliverable with a timeline. Best for MVPs and discrete AI features.",
-    fits: ["New AI product", "Prototype to production", "Defined scope"],
+    summary: "A clear deliverable with a timeline. Best for MVPs, discrete AI features, or adding AI to an existing product.",
+    fits: ["New AI-enabled product", "Prototype to production", "Defined scope"],
   },
   {
     name: "Retainer",
     price: "Monthly",
-    summary: "A dedicated slice of the studio every month. Best for ongoing AI products.",
-    fits: ["Continuous delivery", "Long-term roadmap", "Evolving product"],
+    summary: "A dedicated slice of the studio every month. Best for companies putting AI to work across multiple surfaces.",
+    fits: ["Continuous delivery", "Long-term roadmap", "Evolving AI surface"],
   },
   {
     name: "Augment",
     price: "Per-engineer",
-    summary: "We plug in beside your team as senior AI engineers. Best for existing teams.",
+    summary: "We plug in beside your team as senior AI engineers. Best when you have engineers but lack AI depth.",
     fits: ["Team extension", "Senior AI depth", "Fast ramp-up"],
   },
 ];
@@ -66,16 +89,23 @@ const engagementModels = [
 export default function ServicesPage() {
   return (
     <>
+      <ServicesJsonLd />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Services", href: "/services" },
+        ]}
+      />
       <PageHero
         eyebrow="What we do"
         title={
           <>
-            AI-first,
+            AI-enabled
             <br />
-            <span className="italic font-medium text-accent">friendly</span> software.
+            <span className="italic font-medium text-accent">software,</span> for your business.
           </>
         }
-        description="From scribes to copilots to full SaaS. We take full ownership of the surface area, and we pick the stack on the merits — not because it pads the invoice."
+        description="Six ways to put AI to work. From scribes and copilots to voice AI and full SaaS — we build, we integrate, and we help you decide if AI is worth the candle in the first place."
       />
 
       <ServicesList />
@@ -225,7 +255,7 @@ export default function ServicesPage() {
       </section>
 
       <Marquee
-        words={["Booking AI projects — Q2 2026", "Scribes · Copilots · Voice AI"]}
+        words={["Booking AI projects — Q2 2026", "Scribes · Copilots · Voice · RAG"]}
         size="lg"
         speed="slow"
       />

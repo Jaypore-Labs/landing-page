@@ -5,6 +5,7 @@ import { ArrowUpRight, Calendar, ChevronDown, Mail, MapPin, MessageCircle, Send 
 import { AnimatePresence, motion } from "framer-motion";
 import { PageHero } from "@/components/layout/page-hero";
 import { siteConfig, faq } from "@/data/site";
+import { submitInquiry } from "./actions";
 
 function ContactForm() {
   const [formData, setFormData] = useState({
@@ -16,13 +17,26 @@ function ContactForm() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setSubmitting(false);
-    setSubmitted(true);
+    setError(null);
+    try {
+      const res = await submitInquiry(formData);
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        setError(res.message);
+      }
+    } catch {
+      setError(
+        "Network broke. Email us directly at " + siteConfig.email + "?"
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -37,7 +51,10 @@ function ContactForm() {
           around.
         </p>
         <button
-          onClick={() => setSubmitted(false)}
+          onClick={() => {
+            setSubmitted(false);
+            setFormData({ name: "", email: "", company: "", budget: "", message: "" });
+          }}
           className="mono text-[11px] uppercase tracking-[0.22em] text-paper hover:text-accent transition-colors"
         >
           Send another
@@ -117,7 +134,7 @@ function ContactForm() {
         />
       </div>
 
-      <div className="pt-8">
+      <div className="pt-8 flex items-center gap-5 flex-wrap">
         <button
           type="submit"
           disabled={submitting}
@@ -128,6 +145,11 @@ function ContactForm() {
             <ArrowUpRight className="w-3.5 h-3.5" />
           </span>
         </button>
+        {error && (
+          <span className="mono text-[11px] uppercase tracking-[0.22em] text-accent">
+            {error}
+          </span>
+        )}
       </div>
     </form>
   );
@@ -191,12 +213,12 @@ export function ContactPageClient() {
         eyebrow="Get in touch"
         title={
           <>
-            Tell us about
+            Let&apos;s put AI
             <br />
-            <span className="italic font-medium text-accent">the idea.</span>
+            <span className="italic font-medium text-accent">to work.</span>
           </>
         }
-        description="We read every email. Reply within 24 hours. If it's a fit, we'll send a short brief and a call link. If it's not, we'll tell you who is."
+        description="We read every email. Reply within 24 hours. If it's a fit, we'll send a short brief and a call link. If it's not, we'll tell you who is — honestly."
       />
 
       <section className="relative bg-ink border-b border-line">

@@ -24,8 +24,8 @@ export function Capabilities() {
           <div className="col-span-12 md:col-span-5 md:col-start-8 flex md:items-end">
             <p className="text-paper-dim text-base md:text-lg leading-relaxed max-w-md">
               Everything below is something we&apos;ve shipped more than once —
-              for doctors, founders, or enterprise teams. No vaporware, no
-              &ldquo;we could figure it out.&rdquo;
+              for doctors, founders, or enterprise teams introducing AI into
+              real operations. No vaporware, no &ldquo;we could figure it out.&rdquo;
             </p>
           </div>
         </div>

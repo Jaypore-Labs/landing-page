@@ -6,16 +6,31 @@ import { Marquee } from "@/components/sections/marquee";
 import { Capabilities } from "@/components/sections/capabilities";
 import { Industries } from "@/components/sections/industries";
 import { BigStatement } from "@/components/sections/big-statement";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig, technologies } from "@/data/site";
+
+const desc =
+  "Friendly AI-enablement studio. Four-person team building AI-enabled software for founders, Logitech, Mercedes, and clinics around the world.";
 
 export const metadata: Metadata = {
   title: "About",
-  description:
-    "Friendly, AI-first product studio. Four-person team shipping AI products for Logitech, Mercedes, and clinics around the world.",
+  description: desc,
+  keywords: [
+    "AI product studio India",
+    "AI consulting agency",
+    "AI enablement studio",
+    "remote AI engineering team",
+    "healthcare AI team",
+  ],
+  alternates: { canonical: `${siteConfig.url}/about` },
   openGraph: {
-    title: "About · Jaypore Labs",
-    description:
-      "Friendly, AI-first product studio. Four-person team shipping AI products for Logitech, Mercedes, and clinics around the world.",
+    title: `About · ${siteConfig.name}`,
+    description: desc,
+    url: `${siteConfig.url}/about`,
+  },
+  twitter: {
+    title: `About · ${siteConfig.name}`,
+    description: desc,
   },
 };
 
@@ -31,20 +46,26 @@ const quickFacts = [
 export default function AboutPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "About", href: "/about" },
+        ]}
+      />
       <PageHero
         eyebrow="Who we are"
         title={
           <>
-            A friendly,
+            A friendly
             <br />
-            <span className="italic font-medium text-accent">AI-first</span> studio.
+            <span className="italic font-medium text-accent">AI-enablement</span> studio.
           </>
         }
         description={
           <>
-            Jaypore Labs is a small product studio out of India. We help teams
-            ship AI products fast and efficiently — healthcare scribes,
-            copilots, voice AI, full SaaS. Since 2017, shipping to founders,
+            Jaypore Labs is a small product studio out of India. We build
+            AI-enabled software and help businesses put AI to work — scribes,
+            copilots, voice AI, full SaaS. Since 2017, shipping for founders,
             Logitech, Mercedes, and clinics around the world.
           </>
         }
@@ -143,15 +164,15 @@ export default function AboutPage() {
                 serving 100+ doctors across Luxembourg.
               </p>
               <p>
-                Today we&apos;re four engineers deep, AI-first, and friendly
-                about it. If you want a polished deck and a 12-month roadmap,
-                we&apos;re the wrong studio. If you want working AI in front of
-                real users by next quarter — hello.
+                Today we&apos;re four engineers deep, industry-first, and
+                friendly about it. We don&apos;t sell AI models — we build the
+                software around them, and we help businesses put AI to work
+                without rewriting what already runs.
               </p>
               <p>
-                We pick one AI project at a time, ship weekly, and stick around
-                for the long tail. No juniors in a trench coat, no handoff
-                hell, no mystery gantts.
+                One project at a time, shipped weekly, stuck around for the
+                long tail. No juniors in a trench coat, no handoff hell, no
+                mystery gantts.
               </p>
             </div>
 
@@ -159,7 +180,7 @@ export default function AboutPage() {
               href="/contact"
               className="mt-10 group inline-flex items-center gap-3 rounded-full bg-accent text-ink px-6 py-3.5 text-sm font-medium hover:bg-accent-deep transition-colors"
             >
-              Tell us about your AI idea
+              Bring AI to your business
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper transition-transform group-hover:rotate-45">
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </span>

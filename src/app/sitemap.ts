@@ -1,65 +1,54 @@
 import { MetadataRoute } from "next";
 import { getAllPostSlugs } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
-import { portfolio, services } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;
+  const now = new Date();
 
-  // Static pages
-  const staticPages = [
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+      lastModified: now,
+      changeFrequency: "weekly",
       priority: 1,
     },
     {
       url: `${baseUrl}/services`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
+      lastModified: now,
+      changeFrequency: "monthly",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/portfolio`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+      lastModified: now,
+      changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
+      lastModified: now,
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
+      lastModified: now,
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
   ];
 
-  // Service pages (if you create individual service pages)
-  const servicePages = services.map((service) => ({
-    url: `${baseUrl}/services#${service.id}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  // Blog posts
-  const blogSlugs = getAllPostSlugs();
-  const blogPages = blogSlugs.map((slug) => ({
+  const blogPages: MetadataRoute.Sitemap = getAllPostSlugs().map((slug) => ({
     url: `${baseUrl}/blog/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
+    lastModified: now,
+    changeFrequency: "monthly",
     priority: 0.6,
   }));
 

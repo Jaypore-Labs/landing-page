@@ -4,16 +4,32 @@ import { PageHero } from "@/components/layout/page-hero";
 import { SelectedWork } from "@/components/sections/selected-work";
 import { Industries } from "@/components/sections/industries";
 import { Marquee } from "@/components/sections/marquee";
-import { portfolio } from "@/data/site";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { portfolio, siteConfig } from "@/data/site";
+
+const desc =
+  "Selected AI-enabled software — healthcare scribes, voice assistants, clinic OS, productivity SaaS — shipped with Logitech, Luxembourg clinics, and ambitious founders.";
 
 export const metadata: Metadata = {
   title: "Work",
-  description:
-    "Selected AI products — healthcare scribes, voice assistants, SaaS — shipped with Logitech, Luxembourg clinics, and ambitious founders.",
+  description: desc,
+  keywords: [
+    "AI software case studies",
+    "AI healthcare software",
+    "Electron AI apps",
+    "AI scribe examples",
+    "voice AI case study",
+    "Logitech software partner",
+  ],
+  alternates: { canonical: `${siteConfig.url}/portfolio` },
   openGraph: {
-    title: "Work · Jaypore Labs",
-    description:
-      "Selected AI products — healthcare scribes, voice assistants, SaaS — shipped with Logitech, Luxembourg clinics, and ambitious founders.",
+    title: `Work · ${siteConfig.name}`,
+    description: desc,
+    url: `${siteConfig.url}/portfolio`,
+  },
+  twitter: {
+    title: `Work · ${siteConfig.name}`,
+    description: desc,
   },
 };
 
@@ -22,16 +38,22 @@ export default function PortfolioPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Work", href: "/portfolio" },
+        ]}
+      />
       <PageHero
         eyebrow="Work archive"
         title={
           <>
-            AI products,
+            AI-enabled software,
             <br />
             <span className="italic font-medium text-accent">in production.</span>
           </>
         }
-        description="Every project below shipped. Many are still in active development — used by doctors, founders, and enterprise teams today."
+        description="Every project below shipped. Many are still in active development — used by doctors, founders, and enterprise teams putting AI to work every day."
       />
 
       <SelectedWork />
@@ -155,7 +177,7 @@ export default function PortfolioPage() {
       </section>
 
       <Marquee
-        words={["Ship AI · Ship fast · Ship friendly", "In production since 2017"]}
+        words={["AI-enabled · Industry-first · Friendly", "In production since 2017"]}
         size="lg"
         speed="slow"
       />

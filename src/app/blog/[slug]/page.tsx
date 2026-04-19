@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Calendar, Clock, Linkedin, Twitter, User } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { getPostBySlug, getAllPostSlugs, getAllPosts } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
 
@@ -21,10 +22,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!post) return { title: "Post not found" };
 
+  const canonical = `${siteConfig.url}/blog/${slug}`;
   return {
     title: post.title,
     description: post.description,
     authors: [{ name: post.author }],
+    keywords: post.tags,
+    alternates: { canonical },
     openGraph: {
       title: post.title,
       description: post.description,
@@ -32,6 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: post.date,
       authors: [post.author],
       tags: post.tags,
+      url: canonical,
     },
     twitter: {
       card: "summary_large_image",
@@ -91,6 +96,23 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Journal", href: "/blog" },
+          { name: post.title, href: `/blog/${slug}` },
+        ]}
+      />
+      <ArticleJsonLd
+        article={{
+          title: post.title,
+          description: post.description,
+          author: post.author,
+          date: post.date,
+          slug,
+          tags: post.tags,
+        }}
+      />
       {/* Header */}
       <section className="relative bg-ink border-b border-line pt-36 md:pt-44 pb-16 md:pb-20 overflow-hidden">
         <div

@@ -32,9 +32,9 @@ export function ServicesList() {
 
           <div className="col-span-12 md:col-span-6 md:col-start-7 flex md:items-end">
             <p className="text-paper-dim text-base md:text-lg leading-relaxed max-w-md">
-              Six disciplines. One team. We stay narrow so we can go deep —
-              picking the craft for each problem instead of selling you
-              everything at once.
+              Six ways to bring AI into your business. Whether you&apos;re
+              starting fresh or retrofitting an existing product, we pick the
+              shape that fits — not the one that pads the invoice.
             </p>
           </div>
         </div>

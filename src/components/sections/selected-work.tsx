@@ -25,9 +25,9 @@ export function SelectedWork() {
               </span>
             </div>
             <h2 className="display-tight text-paper text-[clamp(3rem,9vw,8rem)]">
-              AI products we&apos;ve
+              AI-enabled software
               <br />
-              <span className="italic font-medium text-accent">put live.</span>
+              <span className="italic font-medium text-accent">we&apos;ve put live.</span>
             </h2>
           </div>
           <Link

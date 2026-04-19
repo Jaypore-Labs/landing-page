@@ -2,16 +2,32 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calendar, Clock } from "lucide-react";
 import { PageHero } from "@/components/layout/page-hero";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { getAllPosts, getAllCategories } from "@/lib/blog";
+import { siteConfig } from "@/data/site";
+
+const desc =
+  "Field notes on AI enablement — bringing AI into healthcare, legal, and enterprise workflows. Shipping patterns, eval playbooks, and the occasional strong opinion.";
 
 export const metadata: Metadata = {
   title: "Journal",
-  description:
-    "Field notes from the studio — building AI products, shipping fast, and keeping software boring in the right places.",
+  description: desc,
+  keywords: [
+    "AI enablement blog",
+    "AI adoption case studies",
+    "AI engineering essays",
+    "healthcare AI playbook",
+  ],
+  alternates: { canonical: `${siteConfig.url}/blog` },
   openGraph: {
-    title: "Journal · Jaypore Labs",
-    description:
-      "Field notes from the studio — building AI products, shipping fast, and keeping software boring in the right places.",
+    title: `Journal · ${siteConfig.name}`,
+    description: desc,
+    url: `${siteConfig.url}/blog`,
+    type: "website",
+  },
+  twitter: {
+    title: `Journal · ${siteConfig.name}`,
+    description: desc,
   },
 };
 
@@ -21,6 +37,12 @@ export default function BlogPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Journal", href: "/blog" },
+        ]}
+      />
       <PageHero
         eyebrow="Field notes"
         title={

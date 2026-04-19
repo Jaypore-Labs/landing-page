@@ -76,9 +76,9 @@ export function Footer() {
         >
           Let&apos;s make
           <br />
-          something
+          your software
           <br />
-          <span className="italic font-medium text-accent">real.</span>
+          <span className="italic font-medium text-accent">AI-ready.</span>
         </motion.h2>
 
         <div className="mt-12 md:mt-20 grid grid-cols-12 gap-8">

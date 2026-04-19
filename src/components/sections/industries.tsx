@@ -16,16 +16,16 @@ export function Industries() {
               </span>
             </div>
             <h2 className="display-tight text-paper text-[clamp(2.25rem,6vw,5rem)]">
-              Industries we&apos;ve
+              Where we&apos;ve brought
               <br />
-              <span className="italic font-medium text-accent">been inside.</span>
+              <span className="italic font-medium text-accent">AI to work.</span>
             </h2>
           </div>
           <div className="col-span-12 md:col-span-6 md:col-start-7 flex md:items-end">
             <p className="text-paper-dim text-base md:text-lg leading-relaxed max-w-md">
-              Depth beats breadth, but we&apos;ve been around. Regulated,
-              consumer, enterprise — the shape of the product differs, the
-              discipline doesn&apos;t.
+              Regulated, consumer, enterprise — the shape of the product
+              differs, the discipline doesn&apos;t. Depth beats breadth, and
+              we&apos;ve been inside each of these long enough to be useful.
             </p>
           </div>
         </div>
