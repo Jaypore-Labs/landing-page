@@ -97,31 +97,32 @@ Or post sequentially over 9 days (recommended pace for a new account) at 10am IS
 
 ---
 
-> **03-scribe-stat.png** — 3 hours, saved daily
+> **03-track-record.png** — 50+ products shipped
 >
-> Three hours, per doctor, every day.
+> Eight years. 50+ products in production.
 >
-> That's a typical outcome for a well-built AI scribe — listening, structuring the note, mapping to codes, handing it back before the clinician leaves the room.
+> Across healthcare, productivity, enterprise, and research — web, mobile, desktop, SaaS, AI integration, internal tools. Founders on day one. Global consumer brands. Clinics in Europe. Research teams across three continents.
 >
-> The hard part is never the LLM. It's the plumbing — privacy, EHR integration, specialty templates, the eval harness that catches drift. That's where we spend our time: AI where it earns its keep, boring software everywhere else.
+> The common thread isn't the stack. It's industry-first engineering: we learn your business before we touch the code.
 >
-> #AIScribe #ClinicalAI #MedicalAI #HealthcareTech
+> #ProductStudio #EngineeringCulture #Software #AI
 
 ---
 
 > **04-capabilities.png** — What we build
 >
-> Five shapes we build most often. All AI-enabled, all grounded in real workflows:
+> Six shapes we build most often:
 >
-> · AI scribes — specialty-tuned, eval-gated
-> · Copilots inside apps — streaming, tool-calling, structured output
-> · RAG pipelines — vector search, rerankers, evaluations
-> · Voice interfaces — real-time STT/TTS, wake-word, diarisation
-> · MCP servers — plug in to Claude, Cursor, IDEs
+> · Web applications — Next.js, React, type-safe, shipped weekly
+> · Mobile apps — React Native, Expo, one codebase
+> · Desktop apps — Electron, offline-first, auto-update
+> · SaaS platforms — MVP to production, multi-tenant, billing
+> · AI integration — scribes, copilots, agents, RAG, voice
+> · Internal tools — admin, dashboards, workflow automation
 >
 > If you're thinking about any of these, our DMs are open.
 >
-> #AIEngineering #AIProducts #AIScribe #Copilots #RAG #MCP
+> #ProductStudio #Engineering #SaaS #AI #WebDevelopment
 
 ---
 
@@ -216,7 +217,7 @@ Highlights are the pinned reels above the feed. They let visitors jump to catego
 
 | Week | Mon | Wed | Fri |
 | --- | --- | --- | --- |
-| 1 | `01-welcome` | `03-scribe-stat` | `05-playbook` (carousel) |
+| 1 | `01-welcome` | `03-track-record` | `05-playbook` (carousel) |
 | 2 | `02-manifesto` | `04-capabilities` | `06-no-buzzword` |
 | 3 | `07-ship-weekly` | `08-first-reply` | `09-industry-first` |
 | 4 | Daily-article carousel #1 | carousel #2 | Field-note single post |

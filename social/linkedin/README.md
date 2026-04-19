@@ -18,7 +18,7 @@ All assets are rendered at 2× or 3× their logical size so they stay razor-shar
 | `cover-banner-company.png` | 1128×191 | **3384×573** | Optional — LinkedIn's exact company banner spec, rendered at 3× for sharpness. |
 | `featured-1-positioning.png` | 1600×900 | **3200×1800** | Featured section slot 1 — positioning statement. |
 | `featured-2-engagement.png` | 1600×900 | **3200×1800** | Featured section slot 2 — three engagement models. |
-| `featured-3-scribe.png` | 1600×900 | **3200×1800** | Featured section slot 3 — AI scribe outcome. |
+| `featured-3-track-record.png` | 1600×900 | **3200×1800** | Featured section slot 3 — 50+ products shipped. |
 
 ---
 
@@ -147,17 +147,21 @@ Pair each image with a ~150-word post. Rough drafts you can edit:
 >
 > #AIEngineering #AIEnablement #Engagement
 
-### Post 3 — with `featured-3-scribe.png`
+### Post 3 — with `featured-3-track-record.png`
 
-> Three hours saved per doctor, every day.
+> 50+ products. Eight years. Four continents.
 >
-> That's a typical outcome for a well-built AI scribe — listening, structuring the note, mapping to codes, handing it back before the clinician leaves the room.
+> Web, mobile, desktop, SaaS, AI — across healthcare, productivity, enterprise, research. The stack changes. The discipline doesn't.
 >
-> The hard part is never the LLM. It's the plumbing — privacy, EHR integration, specialty-specific templates, the eval harness that catches drift month-over-month. That's where we spend our time: AI where it earns its keep, boring software everywhere else.
+> What we've learned shipping that many products at a small studio:
 >
-> If you're building a scribe (or thinking about one), our DMs are open.
+> → Pick the surface before you pick the stack. A clinic workflow needs desktop; a founder's onboarding needs web; both might need a copilot.
+> → Ship something usable in week four, every time. Scope collapses to fit. That's a feature, not a bug.
+> → Industry-first, then AI-first. We learn the business before we learn the codebase.
 >
-> #AIScribe #ClinicalAI #MedicalAI
+> If you're building something — AI-enabled or just software that works — say hi.
+>
+> #ProductStudio #Software #Engineering #AI
 
 ---
 
@@ -215,12 +219,12 @@ npm run gen:post -- --template list --size landscape \
   --kicker "How to work with us" \
   --out social/linkedin/featured-2-engagement.png
 
-# featured — field note
+# featured — track record
 npm run gen:post -- --template stat --size landscape \
-  --stat "3 hrs" --label "saved per doctor, daily." \
-  --subtitle "A typical outcome for a well-built scribe. The plumbing matters more than the model." \
-  --kicker "Field note" \
-  --out social/linkedin/featured-3-scribe.png
+  --stat "50+" --label "products shipped." \
+  --subtitle "Web, desktop, mobile, SaaS, AI — across four continents. Industry-first engineering since 2017." \
+  --kicker "Track record" \
+  --out social/linkedin/featured-3-track-record.png
 ```
 
 Want a new angle? See [`.claude/skills/post-image.md`](../../.claude/skills/post-image.md) for every template/size.
