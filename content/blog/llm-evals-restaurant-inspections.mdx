@@ -1,0 +1,60 @@
+---
+title: "LLM evals are restaurant health inspections"
+description: "Periodic. Visible. Non-negotiable. If your AI product doesn't treat evals like a health inspector, you'll ship silent drift."
+date: "2026-04-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM Evals", "AI Engineering", "Testing", "Observability", "AI Tools"]
+---
+
+Most teams treat LLM evals like a science fair project. You run them once to make a slide deck, publish a number, and move on.
+
+Restaurants learned this doesn't work.
+
+A health inspection isn't a demo. It's a contract. Periodic. Visible. Non-negotiable. The certificate goes on the wall. If you fail, you close. If you skip a round, someone notices. The whole system exists because without it, standards drift — and nobody notices until people get sick.
+
+Your evals should work like that.
+
+## Why "eval at launch, then forget" fails
+
+The failure mode is quiet. You ship an AI feature. Evals pass. You celebrate. Six weeks later, the upstream model is updated, or your prompt grew a new clause, or the input distribution shifted because a popular customer segment joined. The output is subtly worse. Nobody's looking at evals anymore. The bug lives in production for months before a user complains on social media.
+
+Silent drift is the LLM equivalent of a salmonella outbreak. Nobody wants to be the one who shipped it.
+
+The pattern is familiar — we've seen it in healthcare AI, legal AI, coding copilots, voice assistants. The tech changes; the failure mode doesn't.
+
+## Four things evals and health inspections share
+
+**They happen on a schedule, whether you feel like it or not.** A health inspector doesn't wait to be invited. They show up quarterly. Your eval harness should run on every deploy, every prompt change, every model-version bump. No exceptions for "the demo is tomorrow."
+
+**The criteria are written down, specifically.** Inspectors don't grade on vibes. They check water temperature, fridge temperature, hand-wash frequency, the exact things at the exact thresholds. Evals should do the same: specific test inputs, expected behaviours, numerical thresholds. "The output should be helpful" is not an eval — it's a wish.
+
+**The result is posted publicly.** That certificate on the wall is load-bearing. Customers look for it. Employees feel it. Teams with public eval dashboards — even just an internal Notion page — behave differently from teams that run evals in private. Visibility creates accountability.
+
+**Failure means something.** A restaurant that fails inspection closes. An eval that fails should block the deploy. If a regression can pass, you've told the team evals are advisory. They'll be treated that way.
+
+## Four shifts for your team
+
+**Run evals in CI, on every PR.** Not nightly. Not "before major releases." On every PR that touches a prompt, a model version, a tool definition, or a retrieval pipeline. If the full suite is slow, run a smoke set on PRs and the full set on main.
+
+**Version the eval set itself.** When a new test case is added, the diff should show it. When a threshold changes, someone should sign off. Eval sets drift too — keep them in the repo, reviewed like code.
+
+**Measure specific behaviours, not vibes.** For a scribe: "note contains diagnosis code when one was discussed" is an eval. For a copilot: "refuses to answer when confidence is below X" is an eval. Each one is a yes/no question. Avoid LLM-as-judge for the core suite; use it only where you can't automate otherwise, and audit the judge periodically.
+
+**Post the results.** Even a simple dashboard that says "last suite run: 94% pass, down from 97% three weeks ago" changes behaviour. Get the numbers out of Slack DMs and into a place your CEO could glance at.
+
+## Close
+
+A health inspector in a kitchen doesn't stop cooks from cooking. They stop cooks from *quietly* getting away with a dirty fridge. That's the role of an eval: not to constrain creativity, but to make drift visible while it's still small.
+
+Put the certificate on the wall. Post the results. Run them on schedule. Boring, non-negotiable, load-bearing.
+
+## Related reading
+
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — the shift that makes evals possible in the first place.
+- [Your AI agent should plan like a kitchen brigade](/blog/ai-agent-kitchen-brigade) — evals belong at the station level, not the whole-agent level.
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — where eval hooks can plug in across tools.
+
+---
+
+*We build AI-enabled software and help teams put AI to work. If you're setting up an eval harness for an AI product, we'd love to hear about it. [Get in touch.](/contact)*

@@ -47,14 +47,16 @@ Use `/daily-article` skill to turn any row below into a full content package (bl
 
 | Status | Slug | Idea |
 | --- | --- | --- |
-| ✅ Published | `medieval-scribes-ai-scribes` | AI scribes × medieval scriptoria (first sample) |
-| ✅ Published | `ai-assistant-is-a-midwife` | AI coding assistants × midwives (this batch) |
-| ✅ Published | `mcp-is-usb-c-for-ai` | MCP × USB-C (this batch) |
-| ✅ Published | `prompts-are-recipes` | Prompts × recipes (this batch) |
-| ✅ Published | `ai-agent-kitchen-brigade` | AI agents × kitchen brigade (this batch) |
-| 📝 Next up | `llm-evals-restaurant-inspections` | Evals × health inspections |
-| 📝 Next up | `rag-is-a-public-library` | RAG × Dewey Decimal |
+| ✅ Published | `medieval-scribes-ai-scribes` | AI scribes × medieval scriptoria |
+| ✅ Published | `ai-assistant-is-a-midwife` | AI coding assistants × midwives |
+| ✅ Published | `mcp-is-usb-c-for-ai` | MCP × USB-C |
+| ✅ Published | `prompts-are-recipes` | Prompts × recipes |
+| ✅ Published | `ai-agent-kitchen-brigade` | AI agents × kitchen brigade |
+| ✅ Published | `llm-evals-restaurant-inspections` | Evals × health inspections |
+| ✅ Published | `rag-is-a-public-library` | RAG × Dewey Decimal / public libraries |
 | 📝 Next up | `tool-calling-dog-training` | Tool-calling × dog training |
+| 📝 Next up | `llm-cost-water-metering` | LLM cost management × utility metering |
+| 📝 Next up | `ai-code-review-bifocals` | AI code review × bifocal glasses |
 
 ---
 

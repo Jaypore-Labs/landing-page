@@ -1,5 +1,10 @@
 import { MetadataRoute } from "next";
-import { getAllPostSlugs } from "@/lib/blog";
+import {
+  getAllPostSlugs,
+  getAllCategories,
+  getAllTags,
+  slugify,
+} from "@/lib/blog";
 import { siteConfig } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -52,5 +57,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...blogPages];
+  const categoryPages: MetadataRoute.Sitemap = getAllCategories().map((c) => ({
+    url: `${baseUrl}/category/${slugify(c)}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.5,
+  }));
+
+  const tagPages: MetadataRoute.Sitemap = getAllTags().map((t) => ({
+    url: `${baseUrl}/tag/${slugify(t)}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.4,
+  }));
+
+  return [...staticPages, ...blogPages, ...categoryPages, ...tagPages];
 }

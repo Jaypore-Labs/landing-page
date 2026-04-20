@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Cursor } from "@/components/fx/cursor";
@@ -7,6 +10,8 @@ import { Grain } from "@/components/fx/grain";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/json-ld";
 import { siteConfig, seoKeywords } from "@/data/site";
 import "./globals.css";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -117,6 +122,22 @@ export default function RootLayout({
         <Header />
         <main className="flex-1 relative">{children}</main>
         <Footer />
+        <Analytics />
+        <SpeedInsights />
+        {GA_ID ? (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}', { anonymize_ip: true });`}
+            </Script>
+          </>
+        ) : null}
       </body>
     </html>
   );

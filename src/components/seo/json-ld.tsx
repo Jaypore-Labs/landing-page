@@ -71,6 +71,32 @@ export function OrganizationJsonLd() {
   return <JsonLd data={data} />;
 }
 
+export function PersonJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${siteConfig.url}/about#person`,
+    name: siteConfig.founder.name,
+    jobTitle: siteConfig.founder.role,
+    description:
+      "Founder of Jaypore Labs. 8+ years building AI-enabled software for global brands, clinics in Europe, and ambitious founders.",
+    url: `${siteConfig.url}/about`,
+    worksFor: { "@id": `${siteConfig.url}#organization` },
+    sameAs: [siteConfig.founder.github, siteConfig.founder.linkedin],
+    knowsAbout: [
+      "AI-enabled software",
+      "AI integration",
+      "Next.js",
+      "React",
+      "Electron",
+      "Healthcare software",
+      "SaaS",
+      "LLM integration",
+    ],
+  };
+  return <JsonLd data={data} />;
+}
+
 export function WebSiteJsonLd() {
   const data = {
     "@context": "https://schema.org",

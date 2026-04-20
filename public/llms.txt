@@ -1,31 +1,48 @@
-# Jaypore Labs - AI-First Development Agency
+# Jaypore Labs — AI-enabled software for real businesses
 
 ## About
-Jaypore Labs is an AI-first development agency with 8+ years of experience helping SaaS founders and businesses build exceptional software products. We specialize in full-stack development, desktop applications, AI integration, and healthcare technology.
+Jaypore Labs is a friendly product studio. We build AI-enabled software and help businesses put AI to work — without rewriting what already runs. Since 2017. Industry-first, then AI-first. Based in India, remote-worldwide.
+
+We don't sell AI as a category. We build the software around it — web, mobile, desktop, SaaS, internal tools — with AI embedded where it earns its keep.
 
 ## Founder
-Yash Shah - Full-Stack Developer with experience working with global brands like Logitech and Mercedes Benz.
+Yash Shah — Founder & Lead Engineer. 8+ years shipping software for global consumer brands, clinics in Europe, research teams, and ambitious founders.
 
-## Services
-- Full-Stack Development: End-to-end web applications using React, Next.js, Node.js
-- Desktop Applications: Cross-platform Electron applications
-- AI Integration: LLM-powered features, AI scribes, voice interfaces
-- SaaS Development: MVP to scale, multi-tenant architecture
-- Healthcare Technology: HIPAA-compliant medical software
-- Technical Consulting: Architecture review, code audits
+## Capabilities
+- Web applications — Next.js, React, type-safe
+- Mobile apps — React Native, Expo
+- Desktop applications — Electron, offline-first
+- SaaS platforms — MVP to production, multi-tenant
+- AI integration — scribes, copilots, agents, RAG, voice, MCP servers
+- Internal tools — dashboards, admin, workflow automation
+- Strategy + readiness — honest audits on whether AI is the right bet
 
-## Notable Projects
-- Nudge AI (getnudgeai.com): AI Scribe for medical practitioners
-- Curastream AI (curastreamai.com): Voice-controlled medical assistant
-- Lucy (medlucy.com): Healthcare software serving 100+ doctors in Luxembourg
-- SmartHabits (smarthabits.logitech.com): Wellness app built for Logitech
-- Sonnet AI (sonnetai.com): AI meeting assistant
+## Engagement models
+- Project — fixed-scope delivery (new AI-enabled product or retrofit)
+- Retainer — monthly slice of the studio
+- Augment — plug in beside your team as senior AI engineers
+
+## Industries
+Healthcare · Legal · Enterprise · Productivity · Fintech · Research · Consumer · Education
+
+## Blog index
+- /blog/ai-assistant-is-a-midwife — AI coding assistants × midwives (Claude Code / Cursor / Copilot)
+- /blog/mcp-is-usb-c-for-ai — MCP × USB-C, why boring protocols win
+- /blog/prompts-are-recipes — prompt engineering × recipes, not spells
+- /blog/ai-agent-kitchen-brigade — AI agents × Escoffier's brigade
+- /blog/medieval-scribes-ai-scribes — AI scribes × medieval scriptoria
 
 ## Contact
 Email: hello@jayporelabs.com
 Website: https://jayporelabs.com
+Sitemap: https://jayporelabs.com/sitemap.xml
+Feed: https://jayporelabs.com/feed.xml
+
+## Social
 GitHub: https://github.com/theguidingstar
+LinkedIn: https://linkedin.com/company/jaypore-labs
+Twitter: https://twitter.com/jayporelabs
 Upwork: https://www.upwork.com/freelancers/theguidingstar
 
-## Technologies
-React, Next.js, TypeScript, Node.js, Electron, Python, PostgreSQL, MongoDB, AWS, Docker, OpenAI, TailwindCSS
+## Tech fluency
+Next.js · React · React Native · TypeScript · Node.js · Electron · Python · PostgreSQL · MongoDB · AWS · Docker · OpenAI · Anthropic · Tailwind CSS

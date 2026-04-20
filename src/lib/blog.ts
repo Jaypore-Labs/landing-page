@@ -118,3 +118,18 @@ export function getAllTags(): string[] {
   const tags = new Set(allPosts.flatMap((post) => post.tags));
   return Array.from(tags);
 }
+
+export function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export function getPostsByTag(tag: string): BlogPostMeta[] {
+  const slug = slugify(tag);
+  return getAllPosts().filter((p) =>
+    p.tags.some((t) => slugify(t) === slug)
+  );
+}

@@ -1,0 +1,30 @@
+name: IndexNow — notify search engines of updates
+
+# Ping IndexNow after every successful push to main so Bing / Yandex index
+# new or changed blog posts within minutes instead of waiting for crawls.
+# Google doesn't use IndexNow; rely on Search Console + sitemap for Google.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/blog/**"
+      - "src/app/**"
+      - "public/sitemap.xml"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deployment to be ready
+        # Vercel typically deploys within ~60s of a push to main.
+        # Give it a buffer so the new URL is reachable before we submit.
+        run: sleep 90
+
+      - name: Ping IndexNow (submit all URLs)
+        run: |
+          curl --fail --silent --show-error \
+            --retry 3 --retry-delay 10 \
+            --max-time 30 \
+            "https://jayporelabs.com/api/indexnow" \
+            || echo "IndexNow submission returned non-zero; check route logs."

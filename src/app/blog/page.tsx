@@ -90,12 +90,13 @@ export default function BlogPage() {
                     All
                   </span>
                   {categories.map((c) => (
-                    <span
+                    <Link
                       key={c}
-                      className="mono text-[11px] uppercase tracking-widest px-4 py-2 rounded-full border border-line text-paper-dim"
+                      href={`/category/${c.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
+                      className="mono text-[11px] uppercase tracking-widest px-4 py-2 rounded-full border border-line text-paper-dim hover:bg-paper hover:text-ink transition-colors"
                     >
                       {c}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               )}

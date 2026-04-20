@@ -1,0 +1,60 @@
+---
+title: "RAG is a public library (and Dewey was right)"
+description: "Retrieval is a 150-year-old problem. Public libraries solved most of it before silicon existed. Your RAG pipeline should take notes."
+date: "2026-04-15"
+author: "Yash Shah"
+category: "AI"
+tags: ["RAG", "Vector Search", "AI Engineering", "Information Retrieval", "LLM"]
+---
+
+Every week, a team asks us the same question. *"How do we make our RAG better?"*
+
+Usually they've already tried the obvious levers — bigger embeddings, smaller chunks, a reranker bolted on the end. Sometimes it helps. Sometimes it doesn't.
+
+The framing is wrong. You don't need a better RAG pipeline. You need a better library.
+
+## The 19th century solved this
+
+In 1876, Melvil Dewey published a classification system. Before him, most libraries filed books by acquisition date or by donor. You wanted a book on beekeeping? You asked the librarian, who remembered where it was. When the librarian left, the knowledge walked out the door.
+
+Dewey's insight wasn't a better shelf. It was a better *index* — a hierarchical, memorable, standardised classification that let anyone, with no prior knowledge of the library, find a book by navigating a well-defined taxonomy. The physical shelves got better because the metadata got better.
+
+That's your RAG system. It's not a shelf problem. It's a catalog problem.
+
+## What libraries got right
+
+Four things a public library nails that most RAG pipelines don't.
+
+**Documents have structural metadata, not just content.** A library book isn't just a blob — it's a record with title, author, year, subject codes, language, edition, dewey number, and cross-references. When you search, you're searching across that structured metadata and the content. Most RAG pipelines throw away everything but the raw text. Then they wonder why "show me the 2024 contracts" doesn't work — the model has no way to filter by year because *year isn't a field anymore, it's just text in a paragraph somewhere*.
+
+**Ranking is layered, not flat.** A library doesn't show you every book that mentions "beekeeping." It shows you the book whose subject is beekeeping, then books that cite it, then books in adjacent shelves. Layered retrieval: primary match, secondary context, tertiary browse. RAG pipelines often concat-and-stuff: top-20 chunks by cosine similarity, thrown at the LLM in arbitrary order. Layer the retrieval. Different layers for different kinds of relevance.
+
+**There's a reference librarian in the loop.** In a good library, when a patron's question is unclear, the reference librarian asks clarifying questions before pulling books. In a good RAG pipeline, the LLM should do the same: if the query is ambiguous, generate sub-queries, rewrite, disambiguate — then retrieve. A single-shot query → retrieve → answer pipeline misses the layer where actual understanding happens.
+
+**The card catalog is maintained.** Libraries don't add books without catalog entries. And when a book is reclassified or editions merge, the catalog is updated. RAG pipelines often treat ingestion as one-shot — embed once, never touch again. But when your docs update, your taxonomy shifts, your chunking strategy evolves — all of that requires re-indexing. Treat the index like a living catalog, not a backup.
+
+## Four practical shifts
+
+**Store metadata alongside embeddings.** For every chunk, record: source document, section, date, author, doc type, access permissions, last-updated. Use these as filters, not as text the model has to parse.
+
+**Layer your retrieval.** Start with exact-match on metadata (date, author, type). Then semantic search on the remainder. Then rerank with a purpose-built model. Three passes, each cheap, each narrowing. Faster and more precise than one big cosine-similarity bucket.
+
+**Put a reference-librarian step before retrieval.** Have a small cheap model rewrite the user's query into 2–4 sub-queries before searching. "Do we have any 2024 contracts mentioning indemnity?" becomes three queries: filter year=2024, filter doc_type=contract, semantic search "indemnity". Dewey would approve.
+
+**Maintain the catalog.** When you add docs, update embeddings *and* taxonomy. When your team introduces a new doc type, add it as a facet. Build a script that re-indexes on a schedule. It's plumbing; do it once, benefit forever.
+
+## Close
+
+The temptation with any hot technology is to assume your problem is new. Most retrieval problems aren't. The mechanism is new — vectors, not index cards — but the shape is the same. Libraries worked out the shape before silicon existed.
+
+Treat your RAG system like a library, maintained like a library, indexed like a library. Dewey was right.
+
+## Related reading
+
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — write your retrieval prompts down like recipes, not spells.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the discipline that catches RAG drift.
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — where retrieval tooling plugs into any agent cleanly.
+
+---
+
+*We build AI-enabled software and help teams put AI to work. If you're designing a retrieval system for real documents, we'd love to hear about it. [Get in touch.](/contact)*

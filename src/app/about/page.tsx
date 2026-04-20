@@ -6,7 +6,7 @@ import { Marquee } from "@/components/sections/marquee";
 import { Capabilities } from "@/components/sections/capabilities";
 import { Industries } from "@/components/sections/industries";
 import { BigStatement } from "@/components/sections/big-statement";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, PersonJsonLd } from "@/components/seo/json-ld";
 import { siteConfig, technologies } from "@/data/site";
 
 const desc =
@@ -52,6 +52,7 @@ export default function AboutPage() {
           { name: "About", href: "/about" },
         ]}
       />
+      <PersonJsonLd />
       <PageHero
         eyebrow="Who we are"
         title={
