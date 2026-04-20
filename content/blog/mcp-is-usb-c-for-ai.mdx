@@ -1,0 +1,54 @@
+---
+title: "MCP servers are USB-C for AI"
+description: "One boring protocol is ending the AI integration drawer. Here's why MCP wins, and what to do about it this quarter."
+date: "2026-04-19"
+author: "Yash Shah"
+category: "AI"
+tags: ["MCP", "AI Integration", "Protocols", "AI Tools", "Engineering"]
+---
+
+Before USB-C, your desk had eight cables. MicroUSB for the phone. Lightning for the iPad. Barrel plug for the speaker. Mini-DisplayPort for the projector. USB-A to USB-B for the printer. You knew the drawer in which each one lived. You also knew you'd be late to a meeting the day you grabbed the wrong one.
+
+AI before MCP had the same drawer.
+
+The Model Context Protocol is standardisation-by-agreement. One cable. It connects any AI to any tool, any data source, any integration — cleanly, on both ends. And like USB-C, the reason it matters isn't the specific shape of the plug. It's what the universal plug *unlocks*.
+
+## Why protocols feel boring (and why that's the point)
+
+"A protocol" sounds dull. It's a schema for function calling. You can describe it in three paragraphs. Most engineers' first reaction is: surely the AI vendors will each do their own; this won't last; everyone will fork; we'll be back to drawers.
+
+And yet — here's USB-C on every modern laptop, phone, tablet, monitor, and audio interface. Here's MCP, shipped by Anthropic, wrapped by Cursor, Claude Code, Continue, and half of the tools-listing repos on GitHub. The "this won't last" case is getting weaker by the week.
+
+Boring protocols survive. Exciting ones die in the pitch deck.
+
+## What MCP and USB-C share
+
+Four structural traits explain why they succeed where a hundred other standards failed.
+
+**The plug is dumb.** USB-C doesn't know what's on the other side. It carries power, data, video, audio, whatever. The smarts are in the devices, not the connector. MCP doesn't know what the tool does. It carries function calls and responses. The smarts are in the AI and the tool, not the protocol. Thin protocols survive.
+
+**Both sides have incentive to adopt.** USB-C works because both the phone maker and the charger maker benefit. MCP works because both the AI provider and the tool author benefit. One-sided standards die. The second a tool-builder realises they can ship one integration and reach Claude, GPT, Gemini, and whatever's next — they're not building three versions anymore.
+
+**The spec is plain.** Good protocols are not exciting. They specify JSON schemas, error types, retries, timeouts. There's no "vision." There's a document that says what bytes go where. MCP reads like USB-C's wire specification: deliberately plain. That's the feature. When you read an MCP server in a new language, you can port it in an afternoon.
+
+**Ecosystem effects kick in fast.** Once USB-C crossed a threshold of devices, the drawer emptied because nobody bought the old cables. MCP is crossing a similar threshold for agent tooling. Twelve months in, tool discoverability was a nightmare; twenty-four months in, there are registries. Build-your-own-integration is starting to feel like a regression.
+
+## Four moves if you're shipping AI-enabled software
+
+**Ship your tools as MCP servers.** If your product has any API surface — internal or external — wrap it in MCP. You get Claude, GPT, Cursor, every copilot-style interface for free. This is a one-afternoon task for most APIs and compounds in value every week.
+
+**Don't fork the protocol.** You will be tempted to add a custom field, a special error code, a non-standard capability. Resist. USB-C "with proprietary extensions" is PCs with non-spec dongles again — and nobody cares about your special capability if it means your tool doesn't work in Claude Code.
+
+**Design servers to be boring.** Good MCP servers are humble. They describe their tools precisely, return errors gracefully, log enough to debug. They don't invent abstractions on top of MCP — they just do the thing. Save the cleverness for inside the tool; keep the protocol layer surprise-free.
+
+**Use MCP locally too.** USB-C made "same cable at the office and at home" normal. MCP does the same for your team's tools. Your internal CRM, runbook, ticket system — all as MCP servers. Then any coding assistant your team uses plugs into everything, without six custom OAuth dances.
+
+## The horizon
+
+The most important thing about USB-C is not that it exists — it's that nobody thinks about it anymore. You plug in and it works. That's the horizon for MCP. When nobody's writing "MCP" in their blog titles anymore, it will have won.
+
+Until then, this is a good time to ship a server.
+
+---
+
+*We build AI-enabled software and help teams put AI to work. If you're building or integrating MCP servers, we'd love to hear about it. [Get in touch.](/contact)*

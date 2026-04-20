@@ -1,0 +1,56 @@
+---
+title: "Your AI agent should plan like a kitchen brigade"
+description: "One model with forty tools breaks at step five. Escoffier solved this in 1880. The brigade system is the missing manual for agent design."
+date: "2026-04-17"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Agent Design", "LLM", "Product Design", "Architecture"]
+---
+
+The first AI agent you build will want to do everything itself. One model, one loop, one giant tool list, trying to answer *"what's next?"* every tick. This works for toy problems. It breaks at about five actions in.
+
+Professional kitchens figured out a better way 150 years ago.
+
+The brigade system — invented by Escoffier in the 1880s — divided a kitchen into specialised stations, each with a clear owner, a clear scope, and a shared system for coordinating. The saucier makes sauces. The garde manger does cold. The expediter runs the pass. Nobody does everything. Everyone knows who does what.
+
+Your AI agent should have the same shape.
+
+## Why "one agent with all the tools" fails
+
+"Just give the model all the tools and let it decide" is a seductive pitch. It's simple to build. It's close to how the demos work. It's what most of the "agent" frameworks assume.
+
+It also doesn't scale. A single model with 40 tools is a single model with 40 tools: each prompt carries the description of all of them, each decision has 40 options, and every tool call is a chance for the model to pick badly. Latency compounds, token costs compound, failures compound. The agent works great for the first three steps of a five-step task — and then drifts.
+
+The instinct to *"just use a bigger model"* or *"just add a better system prompt"* is how the first line cook became a single-station kitchen. It doesn't work. Escoffier didn't hire bigger cooks.
+
+## What brigades and good agents share
+
+Four structural features:
+
+**Specialised stations.** A brigade doesn't have one generalist doing pasta, fish, and desserts. It has a pasta station, a poissonnier, a pastry chef. Each has a tight tool set, a clear set of prompts, a scope they don't stray from. Agents designed this way — a "research" agent with web and RAG tools, a "writer" agent with composition tools, an "editor" agent with evals — produce cleaner, cheaper, more debuggable outputs. Each station has five tools, not fifty.
+
+**The pass is a protocol.** In a brigade, the pass is the counter where everything is coordinated. Plates leave the pass; they don't move without the expediter's signal. In an agent system, the pass is a structured handoff format — a small, typed interface between stations. It's boring. It's rigid. That's why it works. Stations don't negotiate; they conform to the interface.
+
+**The expediter is the only generalist.** A brigade has one role that sees the whole flow: the expediter at the pass. They don't cook. They coordinate. In an agent system, this is your planner or orchestrator — a small, cheap model that calls the specialists in the right order, checks their output, and routes. They don't use the specialist tools; they use the stations themselves as tools.
+
+**Signals, not arguments.** A busy kitchen communicates in short, pre-agreed signals: *"oui, chef," "behind you," "plating three."* Not paragraphs. Brigade-shaped agents work the same way: stations emit small structured events, the orchestrator consumes them. Verbose agent-to-agent prose is the equivalent of a station chef narrating to the expediter why they chose rosemary. It's a smell.
+
+## Four design moves
+
+**Make stations, not megaprompts.** Three agents with 5 tools each outperform one agent with 15 tools nine times out of ten. The reason isn't reasoning depth — it's attention and cost. Smaller tool lists, tighter scope, cleaner behaviour.
+
+**The pass is a schema.** Define the handoff format before you define the stations. Use strict types: Pydantic, Zod, JSON Schema. If a station has to parse freeform text to understand what to do, you've moved the complexity to the wrong place.
+
+**Use cheap orchestrators.** Your expediter doesn't need to write code or summarise a document — it needs to pick the next station and route. Use the smallest, fastest model you can. Burn good money on the specialists.
+
+**Measure per-station.** Evals belong at the station level, not the whole-agent level. If the sauce is off, you don't re-taste the entire menu. Test the saucier. Run station-level evals on every deploy.
+
+## Division of labour, plus protocol
+
+There's a reason every serious kitchen in the world uses some version of the brigade. It's not because it's old. It's because division of labour, plus a coordination protocol, scales further than any amount of genius.
+
+Agent design is still arguing with that lesson. We don't have to.
+
+---
+
+*We build AI-enabled software and help teams put AI to work. If you're designing agent systems, we'd love to hear about it. [Get in touch.](/contact)*
