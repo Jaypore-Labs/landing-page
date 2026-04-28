@@ -7,94 +7,157 @@ category: "Engineering"
 tags: ["AI Agents", "Observability", "Engineering", "Building Agents", "Debugging"]
 ---
 
-A team chasing an agent bug spent two days reconstructing what the agent had done by re-running similar inputs. They couldn't reproduce the original failure. The original incident's context was lost forever. The bug remained unfixed.
+A team I helped at the start of the year spent two days reconstructing what their agent had done by re-running similar inputs and triangulating between fragments of half-deleted logs. They couldn't reproduce the original failure. The original incident's context was permanently lost — the logs had aged out of their default 7-day retention.
 
-Observability for agents isn't optional. Without traces, every incident is detective work without evidence.
+The bug remained unfixed. The customer who had complained never got a satisfying answer. The team filed a ticket called "improve agent logging," which sat in the backlog for six months. By the time they returned to it, two more similar incidents had occurred.
+
+Observability for agents isn't optional. Without traces, every incident is detective work without evidence. The cost of building traces upfront is hours; the cost of *not* having them when you need them is days, plus a customer relationship you may not get back.
 
 ## The span model
 
-The pattern that works: every agent action becomes a span in a trace.
-
-A trace is a tree:
+The pattern that works: every agent action becomes a span in a distributed trace. The trace is a tree:
 
 - Root span: the user's request.
 - Child spans: the agent's planning calls.
 - Grandchild spans: each tool call within each plan step.
-- Sub-spans: any sub-agent calls.
+- Sub-spans: any sub-agent calls or downstream service hops.
 
-Each span has start time, end time, inputs, outputs, errors, model version, prompt version. The trace is the agent's entire reasoning recorded.
+A real OpenTelemetry-style trace from a research agent we shipped:
 
-When something goes wrong, the engineer pulls the trace. The full chain is visible. Debugging is concrete.
+```
+[research_agent.run] (root, 8.2s, $0.40)
+├── [agent.plan] (model_call, 3.2s, $0.04)
+│       └── attrs: model=claude-opus-4-7-20260315
+│                  prompt_version=research-planner-v1.4
+│                  input_tokens=2418, output_tokens=812
+├── [agent.act.step_1] (1.1s)
+│   └── [tool.fetch_company_basics] (1.0s, $0.001)
+│        └── attrs: company_domain=acme.com
+│                   result_size_bytes=1832
+├── [agent.act.step_2] (model_call, 8.4s, $0.12)
+│       └── attrs: model=claude-opus-4-7-20260315
+│                  prompt_version=research-cluster-v1.4
+│                  input_tokens=3940, output_tokens=2103
+├── [agent.act.step_3.parallel] (22.5s, $0.18)
+│   ├── [tool.list_recent_press] (3.4s)
+│   ├── [tool.list_open_roles] (2.1s)
+│   ├── [tool.scan_recent_funding] (4.7s)
+│   └── [agent.summarise_per_cluster] (model_call, 12.3s, $0.18)
+├── [agent.act.step_4] (model_call, 5.1s, $0.06)
+│       └── attrs: prompt_version=research-compose-v1.4
+│                  input_tokens=4810, output_tokens=1842
+└── [agent.act.step_5.format] (deterministic, 0.1s, $0)
+```
+
+Every node has start time, end time, inputs, outputs, errors, model version, prompt version. The trace is the agent's entire reasoning recorded.
+
+When something goes wrong, the engineer pulls the trace by request ID. The full chain is visible. Debugging is concrete instead of speculative.
 
 ## Tool-call attributes
 
-For each tool span:
+For each tool span, the attributes that need to be captured:
 
-- Tool name and version.
-- Arguments (with PII redacted where appropriate).
-- Result (with PII redacted).
-- Latency.
-- Cost (token spend on the model call that produced the args, plus any tool-side cost).
-- Error if any.
+```python
+@dataclass
+class ToolSpanAttributes:
+    tool_name: str
+    tool_version: str
+    args: dict           # PII redacted before logging
+    args_hash: str       # sha256 of full args, for dedup and replay
+    result: dict | None  # PII redacted; or None if too large
+    result_hash: str
+    result_size_bytes: int
+    latency_ms: int
+    cost_usd: float
+    cache_hit: bool
+    error: str | None
+    error_type: str | None  # e.g. "RateLimitError", "ValidationError"
+    retry_attempt: int
+    parent_step_idx: int
+```
 
 These are the evidence a debugger needs. Skipping any field is data loss that surfaces later.
 
+The PII-redaction step is non-optional. Most agent traces will at some point capture a customer name, an email, or a confidential document title. The logging layer redacts before persistence. We typically use a regex+entity-recognition redactor; the redactor itself is versioned and tested separately.
+
 ## Cost breakdowns
 
-The trace tracks cost throughout:
+Cost is tracked through the trace, not as an afterthought. Per-span cost. Per-tool cost. Per-task cost. Per-user cost. Per-tenant cost.
 
-- Per-span cost.
-- Per-tool cost.
-- Per-task cost.
-- Per-user/per-tenant cost.
+```sql
+-- Per-tool cost over the last 7 days
+SELECT
+  tool_name,
+  COUNT(*) AS calls,
+  SUM(cost_usd) AS total_cost,
+  AVG(cost_usd) AS avg_cost,
+  PERCENTILE_CONT(cost_usd, 0.95) WITHIN GROUP (ORDER BY cost_usd) AS p95_cost
+FROM agent_tool_spans
+WHERE started_at > NOW() - INTERVAL '7 days'
+GROUP BY tool_name
+ORDER BY total_cost DESC;
+```
 
-Without cost tracking at the trace level, the team can't answer questions like "which tasks are the most expensive?" or "which customer is burning the most spend?". With it, cost optimisation becomes targetable.
+Without cost tracking at the trace level, the team can't answer questions like "which tasks are the most expensive?" or "which tenant is burning the most spend?" or "did our latest prompt change increase per-task cost?". With it, cost optimisation becomes targetable rather than speculative.
 
 ## Reviewer UX
 
-Traces are read by engineers debugging. The UX matters:
+Traces are read by engineers debugging. The UX matters more than most teams think.
 
-- Tree view of the trace, expandable.
-- Search by span name, error, user.
-- Replay capability — re-run the agent with the same inputs.
-- Diff capability — compare two runs.
+What works:
 
-Most managed agent platforms provide some of this. Self-built agents need to build it. Either way, the team has to invest in the reading experience or the traces are write-only logs.
+- Tree view of the trace, expandable. The default view collapsed; click to expand any branch.
+- Search by span name, error, user, model version, prompt version.
+- Filter by cost band, latency band, error type.
+- Replay capability — re-run the agent with the same inputs, same model version, same prompt version. The trace's `args_hash` makes this deterministic for tool-side responses.
+- Diff capability — compare two runs side-by-side, highlight where they diverged.
 
-## A trace anatomy
+Most managed agent platforms (Datadog, Honeycomb, Langfuse, Helicone) provide the basics. Self-built agents build it on top of OpenTelemetry. Either way, the team has to invest in the reading experience or the traces are write-only logs that nobody opens.
 
-A real trace from an agent we built:
+## A trace anatomy that earned its keep
+
+A real example from the team I started with. After we wired up traces, a customer reported that a synthesis was "missing a specific theme they cared about." The engineer pulled the trace by request ID:
 
 ```
-Root: "Synthesise this week's customer feedback"
-├─ Plan (model call, 3.2s, $0.04)
-│  Generated 5-step plan
-├─ Step 1: Fetch tickets (tool call, 1.1s, $0.001)
-│  Returned 247 tickets
-├─ Step 2: Cluster (model call, 8.4s, $0.12)
-│  Returned 7 clusters
-├─ Step 3: Per-cluster summary (model calls × 7, total 22.5s, $0.18)
-├─ Step 4: Compose report (model call, 5.1s, $0.06)
-└─ Step 5: Format output (template, 0.1s, $0)
-
-Total: 40.4s, $0.40
+[research_agent.run] (req_4471, 8.4s)
+├── [agent.plan] OK
+├── [agent.act.step_1] [tool.fetch_corpus] (1832 documents fetched)
+├── [agent.act.step_2] [agent.cluster] (7 clusters identified)  ← problem here
+├── [agent.act.step_3] [agent.summarise_per_cluster] (7 summaries)
+└── [agent.act.step_4] [agent.compose] (1 final report)
 ```
 
-When a customer reported the synthesis was missing a specific theme, the engineer pulled the trace. Step 2's clustering didn't surface the theme. The fix: better clustering prompt. The fix shipped same-day because the trace made the cause visible.
+Clicking into step 2 showed which documents had ended up in which cluster. The customer's specific theme was buried inside a larger generic cluster. The cluster-prompt was the bug. The fix was a prompt-tightening that improved cluster granularity for that document type.
+
+The fix shipped same-day because the trace made the cause visible. Without traces, the same bug would have been "the synthesis is sometimes wrong, we'll keep an eye on it" for another six weeks.
+
+## Operational discipline
+
+A few patterns we've converged on:
+
+**Retention.** 30 days for full traces, 12 months for span-summary metadata. Storage cost is bounded; debugging value is high during the window when issues actually surface.
+
+**Sampling.** 100% sampling for production traces is usually feasible up to a few thousand requests per minute. Past that, sample at 10-50% with always-on sampling for errors and high-cost outliers.
+
+**Privacy.** Every PII-bearing field is redacted before persistence. The redactor is versioned. New fields go through a redaction-review.
+
+**Access control.** Traces can include sensitive customer content. Access is role-gated. Engineering on-call can read; product can read summaries; nobody else needs raw traces.
 
 ## What we won't ship
 
-**Agents without trace-level observability.**
+**Agents without trace-level observability.** Every incident becomes detective work otherwise.
 
 **Traces that don't capture model versions and prompt versions.** When a regression happens after a model bump, version data is what diagnoses it.
 
-**Logs without redaction.** PII in logs is a regulatory risk.
+**Logs without redaction.** PII in logs is a regulatory risk and a security exposure.
 
-**Logs that are write-only.** If nobody can read the traces, they're not observability.
+**Logs that are write-only.** If nobody can read the traces, they're not observability. They're just storage cost.
 
 ## Close
 
 Agent observability is the difference between debugging-by-evidence and debugging-by-guess. The trace captures what happened. The reviewer reads it. Bugs get fixed because their causes are visible. Skip the observability and every incident becomes detective work without clues.
+
+The team I started with now has agent-trace dashboards on the same screens as their service traces. The agent is, finally, a normal piece of infrastructure rather than a magic box.
 
 ## Related reading
 

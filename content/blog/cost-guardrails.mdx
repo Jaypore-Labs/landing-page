@@ -7,88 +7,191 @@ category: "Engineering"
 tags: ["AI Agents", "Cost Management", "Engineering", "Building Agents", "Operations"]
 ---
 
-A team got a $14,000 surprise bill in a single weekend. An agent had entered a loop — calling a tool, getting back results, re-calling the tool with slightly different arguments, getting back similar results, ad infinitum. The cost monitoring caught it Monday morning. The damage was done.
+A team I worked with last year got a $14,000 surprise bill for a single weekend. The bill was for a single agent that had entered a tight loop — calling a tool, getting back ambiguous results, re-calling the tool with slightly different arguments, getting back similar results, ad infinitum. Forty-eight hours of compounding token spend. The cost-monitoring email arrived Monday morning. By then the damage was done.
 
-Cost guardrails are the engineering work that prevents this. The agent that has them is bounded. The agent that doesn't is a future incident.
+The team had ship discipline elsewhere. Their CI was rigorous, their PR review was thoughtful, their on-call rotation was real. They simply hadn't built the cost-side guardrails yet, because nothing had ever required it before. Fourteen thousand dollars later, they have.
+
+Cost guardrails are the engineering work that prevents this. The agent that has them is bounded. The agent that doesn't is a future incident — usually less spectacular than $14K, but always eventually expensive.
 
 ## Per-task ceilings
 
-Every agent task has a budget:
+Every agent task has a budget. We define three:
 
-- Token budget (max tokens consumed per task).
-- Wall-time budget (max minutes per task).
-- Tool-call budget (max calls per task).
+- **Token budget.** Max tokens consumed per task.
+- **Wall-time budget.** Max minutes from task start to completion.
+- **Tool-call budget.** Max calls per task.
 
-When any budget is approached, the agent surfaces and asks. When any is exceeded, the agent stops.
+When any budget is approached (typically 80% of ceiling), the agent surfaces it. When any is exceeded, the agent stops. Hard.
 
-Without these, agents can spiral. With them, the spiral has a known stopping point.
+A real implementation:
+
+```python
+@dataclass
+class TaskBudget:
+    max_tokens: int = 50_000
+    max_wall_seconds: int = 600
+    max_tool_calls: int = 25
+    warn_at_pct: float = 0.80
+
+class BudgetTracker:
+    def __init__(self, budget: TaskBudget):
+        self.budget = budget
+        self.tokens_used = 0
+        self.tool_calls_used = 0
+        self.started_at = time.monotonic()
+
+    def record_tokens(self, n: int):
+        self.tokens_used += n
+        if self.tokens_used > self.budget.max_tokens:
+            raise BudgetExceeded("tokens", self.tokens_used, self.budget.max_tokens)
+        self._check_warn()
+
+    def record_tool_call(self):
+        self.tool_calls_used += 1
+        if self.tool_calls_used > self.budget.max_tool_calls:
+            raise BudgetExceeded("tool_calls", self.tool_calls_used, self.budget.max_tool_calls)
+        if self._wall_seconds() > self.budget.max_wall_seconds:
+            raise BudgetExceeded("wall_seconds", self._wall_seconds(), self.budget.max_wall_seconds)
+        self._check_warn()
+
+    def _wall_seconds(self) -> float:
+        return time.monotonic() - self.started_at
+
+    def _check_warn(self):
+        # Surface to the agent so it can self-truncate
+        ...
+```
+
+The runaway-loop incident at the team I started with would have tripped the tool-call budget within minutes if it had existed. The $14K becomes $14.
 
 ## Org budgets
 
-Per-task ceilings prevent individual incidents. Per-org budgets prevent compound incidents:
+Per-task ceilings prevent individual incidents. Per-org budgets prevent compound incidents — the case where many small per-task overruns sum to a large per-day cost.
 
 - Daily token budget per organisation.
 - Monthly cost budget per agent.
 - Per-tenant budgets in multi-tenant systems.
 
-Alerts fire as budgets approach. Hard stops kick in at the budget. The team can adjust if the budget is wrong, but the system doesn't accidentally exceed.
+```yaml
+# config/agent-budgets.yaml
+agents:
+  support-tier1:
+    daily_tokens: 5_000_000
+    monthly_cost_usd: 1500
+    per_user_daily_tokens: 50_000
+    alert_at_pct: 80
+    halt_at_pct: 100
+  research-assistant:
+    daily_tokens: 10_000_000
+    monthly_cost_usd: 4000
+    per_user_daily_tokens: 200_000
+    alert_at_pct: 80
+    halt_at_pct: 100
+```
+
+Alerts fire as budgets approach. Hard halts kick in at the budget. The team can adjust if the budget is wrong, but the system doesn't accidentally exceed.
 
 ## Alerting
 
-Cost alerts are first-class. The team gets notified when:
+Cost alerts are first-class. Real Prometheus rules from a deployment we shipped:
 
-- Daily spend on track to exceed the day's budget.
-- Per-task spend is unusually high.
-- A specific tool is being called more than usual.
-- Token consumption is trending up week-over-week.
+```yaml
+- alert: AgentDailyTokenBudgetApproaching
+  expr: |
+    sum(increase(agent_tokens_total[24h])) by (agent)
+      / on(agent) agent_daily_token_budget
+      > 0.80
+  for: 5m
+  labels: { severity: warning, team: ai-platform }
+  annotations:
+    summary: "{{ $labels.agent }} approaching daily token budget"
+    runbook: "https://wiki/agent-cost-incident"
 
-These aren't hypothetical alerts; they're real cost-tracking dashboards the team checks.
+- alert: AgentDailyTokenBudgetExceeded
+  expr: |
+    sum(increase(agent_tokens_total[24h])) by (agent)
+      / on(agent) agent_daily_token_budget
+      >= 1.0
+  for: 1m
+  labels: { severity: page, team: ai-platform }
+  annotations:
+    summary: "{{ $labels.agent }} EXCEEDED daily budget — auto-halt active"
+    runbook: "https://wiki/agent-cost-incident"
+```
+
+The first alert is a warning. The second pages. By the time the second fires, the agent has already auto-halted because the halt condition fires faster than the alert.
 
 ## Kill-switch defaults
 
-Every agent ships with a kill switch. The team can:
+Every agent ships with a kill switch. Multiple levels of granularity:
 
 - Stop a specific running task.
-- Pause all tasks in a workflow.
-- Disable the agent globally for a tenant.
+- Pause all tasks for a tenant.
+- Pause all tasks for an agent.
 - Disable the agent globally.
 
-Multiple levels of granularity. Multiple authorisation paths (engineering for the granular, leadership for the global).
+The kill switch is tested, drilled, documented in the runbook. Otherwise, when it's needed, it doesn't work.
 
-The kill switch is tested. Drilled. Documented in the runbook. Otherwise, when it's needed, it doesn't work.
+```python
+def is_agent_killed(agent_id: str, tenant_id: str | None) -> bool:
+    if redis.get(f"kill:global"):
+        return True
+    if redis.get(f"kill:agent:{agent_id}"):
+        return True
+    if tenant_id and redis.get(f"kill:tenant:{agent_id}:{tenant_id}"):
+        return True
+    return False
+```
+
+A pre-task check catches all three levels before any tokens are spent. The kill keys are set with TTL so they age out if forgotten — but the team also has a dashboard showing active kill switches, because forgotten kill switches that auto-expire are a different kind of incident.
 
 ## A real overrun
 
-A scenario: an agent's prompt was patched, and the new prompt induced a verbose-reasoning pattern. The agent started using 4× more tokens per task.
+A team's agent had a prompt patched on a Wednesday afternoon. The new prompt induced a verbose-reasoning pattern. The agent started using 4× more tokens per task.
 
-Without guardrails: this would have shown up as a billing spike at month-end.
+Without guardrails: this would have shown up as a billing spike at month-end. The team's CFO would have asked the engineering lead to "explain this," and a Friday afternoon would have been spent on a forensic accounting exercise.
 
-With guardrails: the daily-spend alert fired within hours. The team investigated, identified the prompt change, reverted, and re-ran. Total damage: $200 instead of $14,000.
+With guardrails: the daily-spend alert fired within four hours of the change going live. The on-call investigated, identified the prompt change, reverted, and re-ran the eval. Total damage: $200 instead of an estimated $14,000 if the spike had run for the full month. The team's engineer drafting the prompt change went on to author the team's "prompt changes that affect verbosity" checklist, which is now part of every agent-prompt PR template.
 
 ## Cost as a first-class feature
 
-Cost is treated as a feature, not a side effect:
+Cost is treated as a feature, not an afterthought:
 
 - Each agent's cost-per-task is a published metric.
-- Cost regressions are eval failures.
+- Cost regressions are eval failures (we have a `test_cost_within_budget` in CI).
 - Cost dashboards are reviewed weekly.
-- Cost optimization is dedicated engineering work.
+- Cost optimisation is dedicated engineering work, scheduled on the roadmap, not done in spare time.
 
-This is the discipline that scales. Agents that aren't cost-managed don't survive scale economics.
+The `test_cost_within_budget` test is simple but catches a lot:
+
+```python
+def test_cost_per_task_within_budget():
+    cases = load_cost_eval_cases(50)
+    costs = [run_and_measure(c).cost_usd for c in cases]
+    p50 = statistics.median(costs)
+    p95 = statistics.quantiles(costs, n=20)[18]  # 95th percentile
+
+    assert p50 < BUDGET["p50_cost_usd"]
+    assert p95 < BUDGET["p95_cost_usd"]
+```
+
+Run on every PR that touches the agent's prompt or tools. Cost regressions are caught at PR time, not at month-end.
 
 ## What we won't ship
 
-**Agents without per-task ceilings.**
+**Agents without per-task ceilings.** Open-ended retries are a cost and reliability hazard.
 
-**Agents without org-level budgets.**
+**Agents without org-level budgets.** Per-task ceilings catch individual runaways; org budgets catch compound effects.
 
-**Cost dashboards no one reads.** If the team doesn't check, the dashboard doesn't help.
+**Cost dashboards no one reads.** If the team doesn't check, the dashboard doesn't help. Make cost review a recurring agenda item, not an aspirational link.
 
-**Cost optimisation that breaks correctness.** Cheap and wrong is worse than expensive and right.
+**Cost optimisation that breaks correctness.** Cheap and wrong is worse than expensive and right. Always re-run the quality eval after a cost change.
 
 ## Close
 
-Cost guardrails are the engineering work that turns agents from a billing risk into a managed line item. Per-task ceilings. Org budgets. Alerts. Kill switches. The discipline pays for itself within the first month of agent operation.
+Cost guardrails turn agents from a billing risk into a managed line item. Per-task ceilings. Org budgets. Alerts. Kill switches. The discipline pays for itself the first time it stops a runaway, which it will, eventually, on every agent that ships at scale.
+
+The team I started with now has cost-budget review as a standing 15-minute item in their weekly engineering meeting. It's boring. That's the goal.
 
 ## Related reading
 
