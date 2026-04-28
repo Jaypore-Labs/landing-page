@@ -7,72 +7,171 @@ category: "Engineering"
 tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Test Pyramid"]
 ---
 
-The classic test pyramid — unit at the base, integration in the middle, end-to-end at the top — still applies to AI products. AI just adds new layers that don't fit the pyramid's existing slots.
+The classic test pyramid — unit at the base, integration in the middle, end-to-end at the top — still applies to AI products. Every team that's tried to throw it out has rediscovered why it exists. AI just adds new layers that don't fit cleanly into the existing slots, and the failure mode is teams that either:
 
-It's not "throw out everything you knew." It's "the pyramid grew sideways."
+a) Skip the new layers and ship features that work in tests but fail in production, or
+b) Skip the old layers because "the AI replaces them," and ship features whose deterministic glue code is buggy in ways the model can't catch.
 
-## Where unit tests still earn their keep
+The pyramid grew sideways. Here's the shape we use, with concrete examples.
+
+## What survives unchanged
 
 Unit tests still pay for:
 
-- Pure functions in the codebase (formatters, validators, parsers).
-- Schema definitions.
-- Tool implementations (the deterministic logic the agent calls).
-- Helper utilities.
+- **Pure functions.** Formatters, validators, parsers, date math, currency conversions, slug generators.
+- **Schema definitions.** Pydantic models, Zod schemas, OpenAPI specs.
+- **Tool implementations.** The deterministic logic the agent calls — the SQL builder, the email-template renderer, the audit-log writer.
+- **Helper utilities.** Anything in `lib/` or `utils/` that has a clear input-output contract.
 
-These don't disappear because AI is added. They cover the deterministic substrate the AI sits on.
+These don't disappear because AI is added to the system. If anything, they're more important: the model produces probabilistic output, but the tools and validators around it are the deterministic substrate the model sits on. A bug in your slug generator ships under any model.
 
-## Where integration tests shift
+```python
+# This test still earns its keep in 2026
+def test_slugify_handles_unicode():
+    assert slugify("Café au Lait") == "cafe-au-lait"
+    assert slugify("Über") == "uber"
+    assert slugify("日本語") == ""  # Falls back gracefully
+```
 
-Integration tests for AI products:
+Run it on every PR. Catches what humans miss.
 
-- Multi-step flows that combine deterministic + LLM components.
-- Tool use that spans multiple services.
-- RAG pipelines (retrieval + synthesis).
+## What shifts: integration tests
 
-These are useful but slower than unit tests. Run a smaller set on every PR; full set on main.
+Integration tests for AI products test cross-component behaviour. The components are the same as before — services, queues, databases, third-party APIs — plus a new one: the LLM call.
 
-## Where eval becomes its own layer
+Two flavours of integration test for AI features:
 
-Evals are the new layer:
+**Contract integration tests.** Mock the LLM with predictable responses. Test the plumbing — that tool calls fire in the right order, that responses get persisted, that errors propagate correctly. Fast and deterministic.
 
-- Per-feature eval sets.
-- Drift evals.
-- Behavioural evals.
-- Adversarial evals.
+```python
+def test_classifier_persists_to_db_and_routes_to_correct_queue(monkeypatch):
+    monkeypatch.setattr("app.llm.classify", fake_classify_returns_billing)
+    response = client.post("/tickets", json=sample_ticket)
+    assert response.status_code == 201
 
-These don't fit "unit" or "integration" cleanly. They run against the LLM-powered features. They have their own discipline.
+    saved = db.query(Ticket).filter_by(id=response.json()["id"]).first()
+    assert saved.category == "billing"
+    assert saved.routed_queue == "billing-tier-1"
+```
+
+**Behavioural integration tests.** Call the actual LLM. Test that the system as a whole produces useful output for representative inputs. Slower, costs money, has variance — run nightly or pre-release, not on every PR.
+
+Both are useful. Each catches what the other misses.
+
+## What's new: the eval layer
+
+Evals are a new layer in the pyramid, sitting alongside integration tests but doing different work. An eval set is a curated collection of input/output pairs (or input/property checks) that exercises the *LLM-powered* behaviour specifically.
+
+```yaml
+# evals/support_classifier.yaml
+- id: billing_duplicate_charge
+  input: "I was charged twice this month"
+  expected:
+    category: billing
+    requires_human: false
+- id: explicit_abuse
+  input: "you people are scammers, refund me NOW"
+  expected:
+    category: complaint
+    requires_human: true
+    escalation_priority: urgent
+```
+
+Evals run on every prompt change, every model bump, every behavioural refactor. They have their own pass rate, their own threshold, their own gating logic in CI. They don't replace integration tests; they complement them.
+
+## What's new: drift evals
+
+Drift evals are evals that run on a schedule against production-like inputs to detect *unexpected* changes in behaviour. The eval set is unchanged. The model is unchanged. The prompt is unchanged. The drift eval is asking: *do the outputs look the same as last week?*
+
+Drift is sneaky. Provider models get updated. Subtle output style shifts. Length changes. Tone changes. None of it crashes anything. None of it fails strict-schema validation. It just changes, and the cumulative effect after a quarter is a feature that doesn't quite feel the way it used to.
+
+A drift eval looks like a snapshot test, but with tolerance:
+
+```python
+def test_no_significant_drift_in_classifier_output():
+    cases = load_drift_cases()
+    diffs = []
+    for case in cases:
+        last_week = load_baseline(case.id)
+        this_week = run_classifier(case.input)
+        diff = semantic_diff(last_week, this_week)
+        if diff.score > DRIFT_THRESHOLD:
+            diffs.append((case.id, diff))
+    assert len(diffs) < 3, f"Drift detected: {diffs}"
+```
+
+This runs nightly. When it triggers, the team investigates. Often it's nothing — an intentional improvement. Sometimes it's a quiet regression that schema-mode validation didn't catch.
+
+## What's new: behavioural evals
+
+Behavioural evals test "is the agent doing what we want it to do" at a higher level than per-output checks. They're closer to acceptance tests than to unit tests.
+
+Examples:
+
+- "When the user asks an off-topic question, the agent declines politely without overstepping."
+- "When the user is clearly frustrated, the agent escalates within two turns."
+- "When the agent doesn't have enough information to answer, it asks a clarifying question instead of guessing."
+
+These are easier to write as LLM-as-judge evals (with a calibrated judge, not a vibes one) than as exact-string assertions. They're slower and more expensive than schema evals. Run them less frequently — pre-release, not pre-merge.
 
 ## The pyramid redrawn
 
-The new shape:
+Putting it all together, the shape we run looks like this:
 
 ```
-       e2e + manual
-     ↗               ↘
-integration      eval (new)
-     ↘               ↗
-       unit
+                     End-to-end (5%)
+                        ↑
+                Behavioural evals (10%)
+                        ↑
+              Integration tests + drift evals (20%)
+                        ↑
+                  Schema evals (25%)
+                        ↑
+                   Unit tests (40%)
 ```
 
-Unit at the base. Integration and evals as middle layers. End-to-end and manual at the top.
+The percentages are rough — adjust to your domain. A regulated team weighs evals heavier. A high-throughput consumer team might weigh behavioural evals lighter.
 
-The pyramid keeps its shape (more cheap tests at the base, fewer expensive tests at the top). Evals get their own slot at the integration level.
+Every layer has its cadence:
+
+- Unit + schema evals: every PR.
+- Integration tests (contract): every PR.
+- Integration tests (behavioural with real LLM): nightly.
+- Drift evals: nightly.
+- Behavioural evals: pre-release.
+- End-to-end: pre-release.
+
+Cadence matches cost. Cheap fast tests run often. Expensive slow tests run rarely. The whole pyramid stays solvent.
 
 ## A real test plan
 
-For a typical AI feature:
+For a typical AI feature — say, a customer-support classifier — the test plan we ship looks like:
 
-- Unit tests for the deterministic logic (validators, formatters).
-- Integration tests for the multi-component flows.
-- Eval set for the LLM-powered behaviour.
-- Adversarial eval for safety.
-- Drift eval for ongoing monitoring.
-- Manual end-to-end for visual/UX correctness.
+- 60-80 unit tests for the supporting code (validators, slug generators, queue routers).
+- 30-40 contract integration tests with mocked LLM responses.
+- 10-15 behavioural integration tests that hit the real LLM and run nightly.
+- 200-cell schema eval set, run on every prompt change, threshold at 92% pass.
+- 50-cell drift eval set, run nightly, alerting on semantic-diff above threshold.
+- 30 behavioural eval cases run pre-release with LLM-as-judge scoring.
+- 5-10 end-to-end tests run pre-release with a recorded production sample.
 
-Each layer runs at appropriate cadence. Each catches what the others miss.
+About a third of the testing investment is in the new layers. The rest is the classical pyramid, which still earns its keep.
 
-## What Unit at the base, integration in the middle, evals beside integration, end-to-end at the top. Skip any layer and the product has a blind spot.
+## What we won't ship
+
+**Features without an eval set.** "We'll add evals later" is the most reliable predictor of an eventual production incident.
+
+**Eval suites that don't gate anything.** A pass rate posted on a dashboard nobody reads is a metric, not a test.
+
+**Drift evals nobody investigates.** If the alert fires and nobody looks, drop the alert.
+
+**End-to-end suites that have grown to 200 cases.** End-to-end is expensive and slow; if you have 200 of them, your pyramid is upside down. Move tests down a layer where most of them belong.
+
+## Close
+
+The new test pyramid integrates evals as first-class layers alongside the classic pyramid. Unit at the base, integration in the middle, evals beside integration, behavioural and end-to-end at the top. Skip any layer and the product has a blind spot somewhere.
+
+The teams that get this right have AI features that survive scale. The teams that skip the new layers have AI features that survive demos. Both teams ship something. Only one of them keeps shipping.
 
 ## Related reading
 

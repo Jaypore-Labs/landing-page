@@ -7,59 +7,169 @@ category: "Engineering"
 tags: ["MCP", "AI Protocols", "Engineering", "Tools", "Standards"]
 ---
 
-Model Context Protocol (MCP) is a standard for connecting AI assistants to external tools and data. Released by Anthropic in late 2024, adopted across the industry by 2026, it's now the default integration pattern for production AI systems.
+If you're an engineer building anything where an AI assistant needs to read or write to your team's tools, you've probably heard "MCP" thrown around in the last year. Most explanations get long and theoretical. This is the short version. Ten minutes; what you need to start.
 
-This is the primer. Ten minutes; what you need to start.
+## What MCP actually is
 
-## What MCP is
+MCP — the Model Context Protocol — was released by Anthropic in late 2024 as an open spec, and adopted broadly across the industry through 2025. By 2026 it's the default integration pattern for production AI systems.
 
-MCP defines:
+The protocol defines four things, and that's it:
 
-- A protocol for AI assistants to call external tools.
-- A schema for tool definitions.
-- A transport layer (stdio, HTTP, SSE).
-- A pattern for resources (read-only data the assistant can access).
-- A pattern for prompts (reusable prompt templates).
+1. A way for an AI assistant (the *client*) to discover what tools an external system (the *server*) exposes.
+2. A way for the assistant to call those tools and get results.
+3. A way for the assistant to read documents and resources the server exposes.
+4. A way for the assistant to use prompt templates the server provides.
 
-A server speaks MCP and exposes tools. A client (the AI assistant) calls the tools.
+That's the whole spec. Everything else — auth, transport, hosting, observability — is engineering practice on top of those four primitives.
+
+If you've ever written a JSON-RPC service, an MCP server is going to feel familiar. If you've written an OpenAPI-described HTTP API, MCP is the LLM-tooling equivalent. The spec is small and deliberately so.
 
 ## Why it exists
 
-Before MCP, every AI integration was bespoke:
+Before MCP, every AI integration was bespoke. Slack-Claude, Slack-ChatGPT, Linear-Claude, Linear-ChatGPT — the matrix grew quadratically with the number of assistants and the number of tools. Engineers writing integrations had to learn each provider's tool-use format and hand-roll the conversion.
 
-- Custom tool-calling formats per assistant.
-- Custom transports per tool.
-- Custom auth per tool.
+MCP standardises the boundary. One server speaks MCP. Many AI assistants can call it. The integration cost stops scaling with the number of assistants you support.
 
-MCP standardises. One server speaks MCP. Many AI assistants can call it.
+Here's the practical effect. A team I worked with in 2023 built a Linear integration for Claude. Custom code, ~800 lines in Python. The same team in 2026 stood up an MCP-compatible Linear server: the official open-source one, zero custom code, configured by adding two lines to `~/.claude.json`. The investment is durable across providers — when they later started using the same Linear data through ChatGPT, ChatGPT also speaks MCP, so it just worked.
 
-## Where it fits
+## A minimal MCP server
 
-MCP fits between AI assistants and the tools they need:
+The spec is easier to understand from a 30-line example than from a 30-page document. Here's a Node MCP server that exposes one tool:
 
-- Slack, Linear, Notion, GitHub all expose MCP servers.
-- The AI assistant (Claude, ChatGPT, etc.) connects to the server.
-- The assistant can then call the tools.
+```javascript
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+
+const server = new Server(
+  { name: "weather", version: "1.0.0" },
+  { capabilities: { tools: {} } }
+);
+
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [{
+    name: "get_weather",
+    description: "Get the current weather for a city.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        city: { type: "string", description: "City name (e.g., 'Jaipur', 'Berlin')" }
+      },
+      required: ["city"]
+    }
+  }]
+}));
+
+server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  if (req.params.name === "get_weather") {
+    const { city } = req.params.arguments;
+    const data = await fetchWeather(city);
+    return { content: [{ type: "text", text: JSON.stringify(data) }] };
+  }
+  throw new Error(`Unknown tool: ${req.params.name}`);
+});
+
+await server.connect(new StdioServerTransport());
+```
+
+That's the whole thing. Run it. Point an MCP-aware AI assistant at it. The assistant will discover `get_weather`, see its argument shape, and call it when asked about the weather.
+
+A Python equivalent is similarly small:
+
+```python
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import Tool, TextContent
+
+app = Server("weather")
+
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    return [
+        Tool(
+            name="get_weather",
+            description="Get the current weather for a city.",
+            inputSchema={
+                "type": "object",
+                "properties": {"city": {"type": "string"}},
+                "required": ["city"],
+            },
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, args: dict):
+    if name == "get_weather":
+        data = await fetch_weather(args["city"])
+        return [TextContent(type="text", text=json.dumps(data))]
+
+async def main():
+    async with stdio_server() as (r, w):
+        await app.run(r, w, app.create_initialization_options())
+```
+
+Both servers expose the same tool. Both are usable from any MCP-aware client. The protocol is the same. The implementation language doesn't matter.
+
+## How clients connect
+
+For Claude Code (and similar assistants), the connection is configured in a JSON file the assistant reads at startup:
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "node",
+      "args": ["/Users/yash/projects/weather-mcp/server.js"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Two servers configured. The assistant launches them as child processes, talks to them over stdio, and exposes their tools to the model. From the user's perspective, asking Claude "what's the weather in Jaipur?" or "list my open GitHub PRs" both just work. The integration plumbing is invisible.
+
+## Where MCP fits
+
+The right mental model: MCP fits between AI assistants and the tools they need.
+
+- Slack, Linear, Notion, GitHub, Stripe, Postgres, BigQuery, S3 — all have community or vendor-maintained MCP servers in 2026.
+- The AI assistant (Claude, ChatGPT, etc.) connects to the server using the assistant's standard MCP client.
+- The assistant can then call the tools, read the resources, and use the prompt templates.
 
 Same server, multiple assistants, no custom integration per assistant.
 
-## A real example
+Where MCP does *not* fit: it's not a replacement for HTTP APIs your services expose to humans or to other services. Your customer-facing REST API stays REST. Your internal microservice gRPC interfaces stay gRPC. MCP is specifically the *AI-to-tool* boundary. Don't try to make it carry traffic it wasn't designed for.
 
-A simple MCP server exposes one tool: `get_weather(city: str)`. The server speaks MCP via stdio. Any MCP-compatible AI assistant can connect, see the tool, and call it.
+## What's next
 
-The team that built the server: 30 lines of Node or Python. The integration with the AI assistant: zero code. Just a config entry pointing at the server.
+Most teams start with an existing MCP server. Connect it to the team's AI assistant. Use it. Notice where it's helpful and where it isn't.
 
-## How to start
+Building your own MCP server is the next step, usually because the team has internal tools — a private analytics dashboard, an internal admin panel, a custom workflow system — that no public MCP server exposes. The walkthroughs for Node and Python (linked below) cover that with realistic examples.
 
-Most teams start with an existing MCP server (Slack, GitHub, Postgres). Connect it to the team's AI assistant. Use the tools.
+Past that, the engineering work concentrates around five things:
 
-Building your own MCP server is the next step. See the MCP server walkthroughs (Node and Python) for the next step.
+1. **Tool naming and schemas.** Your MCP server's quality is mostly determined by how well its tools are named, scoped, and typed. Same discipline as API design.
+2. **Authentication.** Local, single-user MCP servers don't need auth. Remote, multi-user servers need OAuth or scoped tokens.
+3. **Transport choice.** stdio for local, HTTP for shared, SSE when the server needs to push events.
+4. **Observability.** Production MCP servers need structured logs, traces, and metrics, just like any production service.
+5. **Versioning.** When the server's tools change, consumers need to know. Semantic versioning applies.
 
-## What ## Close
+Each of these has its own article in this catalogue, linked below.
 
-MCP is the protocol that's quietly rewiring how AI assistants connect to everything else. It's the USB-C moment for AI tooling. Standards take time to land; this one has landed.
+## Close
 
-If you're building or integrating AI tooling, MCP is the protocol to learn first.
+MCP is the protocol that's quietly rewiring how AI assistants connect to everything else. It's the USB-C moment for AI tooling. The spec is small. The discipline is the rest.
+
+If you're building or integrating AI tooling in 2026, MCP is the protocol to learn first. The investment compounds across whatever AI assistants you use today, and whatever ones you might use tomorrow.
 
 ## Related reading
 

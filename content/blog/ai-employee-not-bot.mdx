@@ -7,51 +7,86 @@ category: "Strategy"
 tags: ["AI Employees", "Claude Code", "Business AI", "AI Adoption", "Org Design"]
 ---
 
-A founder we worked with last year described his goal in one sentence: "I want an AI marketer who has a Slack handle, attends our Monday standup, takes ownership of campaigns, and gets feedback in their performance review." He didn't want a bot. He wanted a teammate.
+A founder named Priya described her goal to me in one sentence over a video call last summer. "I want an AI marketer who has a Slack handle, attends our Monday standup, takes ownership of campaigns, and gets feedback in their performance review."
 
-The reframe is doing more work than it sounds like. A bot is a tool you use; an AI employee is a colleague who shows up. The difference shows up in five places: the job description, the reporting line, the first 90 days, the performance review, and how you decide to fire them.
+She didn't want a bot. She wanted a teammate. And the way she said "performance review" — like an actual cycle, with goals and 1:1s and a stack rank — was the part that made me sit up. Most founders pitching AI features describe them as features. She was describing a hire.
+
+The reframe is doing more work than it sounds like. A bot is a tool you use; an AI employee is a colleague who shows up. The difference shows up in five places: the job description, the reporting line, the first 90 days, the performance review, and how you decide to fire them. If you can't get specific about all five, you don't have an AI employee. You have a Slack channel full of demos.
 
 ## The job-description test
 
 If you can't write a job description for the AI's role — like you would for a human teammate — you don't have an AI employee. You have a feature.
 
-The job description forces clarity:
+The job description forces clarity. Here's the actual JD we wrote for Priya's marketing-ops AI, redacted for the company's privacy:
 
-- **Title and team.** "Marketing Operations AI, reports to Head of Marketing."
-- **Mission.** What the role exists to accomplish.
-- **Outcomes.** What this role is responsible for delivering, measurably.
-- **Day-to-day responsibilities.** What activities fill the role's week.
-- **Boundaries.** What this role explicitly does not do.
-- **Tools.** What systems and access the role has.
-- **Reviewer.** Who signs off on this role's output.
+```
+Role: Marketing Operations AI — Campaign Brief Specialist
+Reports to: Head of Marketing
+Slack: @mops-ai
 
-Most "AI strategies" we see don't pass the job-description test. The closest the team has is "we're using AI for X." That's a feature, not a role. Roles have ownership.
+Mission
+  Convert raw inputs (kickoff transcripts, Slack threads, exec priorities,
+  prior-campaign performance) into approved campaign briefs at 5x the
+  team's current pace, while keeping brand voice and approval discipline
+  intact.
+
+Day-to-day responsibilities
+  - Draft campaign briefs from kickoff-meeting transcripts within 4 hours
+    of meeting end.
+  - Run brand-voice eval on every draft before it reaches the director.
+  - Track brief status through approval (legal, brand, exec).
+  - Surface brief delays in the Monday operations standup channel.
+
+Outcomes the role is graded on
+  - Brief turnaround time (target: -50% within Q2).
+  - First-review approval rate (target: 80%+ by Q3).
+  - Brand-voice eval pass rate (target: 100% before reaching director).
+  - Edits-per-brief trend (declining).
+
+Boundaries — explicitly out of scope
+  - Approving briefs (humans only).
+  - Setting creative direction (humans only).
+  - Publishing channel-specific copy (humans only).
+  - Communicating with external partners (humans only).
+
+Tools the role has
+  - Read access to: meeting-recording vendor, prior-campaign archive,
+    brand-voice eval set, performance dashboards.
+  - Write access to: brief-drafts repo, approval-tracker, Monday-standup channel.
+
+Reviewer of record: Head of Marketing
+On-call (when something goes wrong): Marketing Ops Lead
+```
+
+Notice how specific that gets. "Mission" is the kind of thing a normal JD has, sure. But "boundaries — explicitly out of scope" and "tools the role has" are the parts that turn it from a feature pitch into a real role. Most "AI strategies" we see don't pass the JD test. The closest the team has is a Notion doc that says "we're using AI for marketing." That's a feature, not a role. Roles have ownership. Features are everyone's problem and therefore nobody's.
 
 ## The reporting line
 
-An AI employee has a manager. The manager:
+An AI employee has a manager. A specific person, with a name and a calendar invite. The manager:
 
-- Sets the role's KPIs.
-- Reviews the role's outputs weekly.
-- Provides feedback that shapes the role's prompts and tools.
+- Sets the role's KPIs and reviews them weekly.
+- Reads the role's outputs at a defined cadence (weekly to start, monthly later).
+- Provides feedback that shapes the role's prompts, tools, and access.
 - Makes the call to expand or contract the role's scope.
-- Owns the decision to retire or replace the role.
+- Owns the kill switch — and has tested it in the last quarter.
 
-Without a clear manager, the AI employee gets reviewed by nobody, drifts, and quietly fails. With one, the AI's outputs improve over time the way any teammate's would.
+Without a clear manager, the AI employee gets reviewed by nobody, drifts, and quietly fails. We've seen this enough times to recognise it on first look. The pattern: a Slack channel called `#ai-projects` with thirty members, none of whom owns any specific output. After six months everyone agrees "the AI thing isn't really working" and nobody can explain why because nobody was watching.
+
+With a named manager, the AI's outputs improve over time the way any teammate's would. Edits get logged. Patterns surface. The manager updates the prompt or the tools. The role gets sharper. This is just management, applied to a different kind of report.
 
 ## The first 90 days
 
 Human teammates have an onboarding plan. AI employees should too:
 
-**Week 1.** Set up tools, access, integrations. Run pilot tasks under close supervision. The manager reviews every output.
+**Week 1.** Set up tools, access, integrations. Run pilot tasks under close supervision. The manager reviews every output. Edits are captured into the eval set verbatim.
 
-**Week 2-4.** The AI takes on routine tasks. Manager reviews most outputs. Edits feed the eval set.
+**Week 2-4.** The AI takes on routine tasks. Manager reviews most outputs. Edge cases escalate. Edit volume should be visibly declining by end of week 4.
 
-**Month 2.** The AI handles defined responsibilities with spot-check review. Edge cases escalate.
+**Month 2.** The AI handles defined responsibilities with spot-check review. Manager reviews ~30% of outputs at random. Eval set has grown by 50-100 cases from real edits.
 
-**Month 3.** The AI is operational. The manager reviews weekly metrics, not every output.
+**Month 3.** The AI is operational. Manager reviews weekly metrics, not every output. Onboarding is officially complete; the role moves to steady-state.
 
-This onboarding plan looks suspiciously like the one for a new hire because it should. Treating AI like a teammate means giving it the time to get good.
+This onboarding plan looks suspiciously like the one for a new hire because it should. Treating AI like a teammate means giving it the time to get good. The teams that try to skip the first 90 days end up at month four wondering why the AI is still producing the same kind of output it did at week 1. The answer is that nobody invested in the feedback loop.
 
 ## The performance review
 
@@ -63,9 +98,43 @@ What does the review measure?
 - What were the most-edited outputs (signal of weakness)?
 - What were the most-praised outputs (signal of strength)?
 - What scope expanded? What scope contracted?
-- What tools or data does the role need to perform better?
+- What tools or data does the role need to perform better next quarter?
 
-The review feeds back into the role's prompts, tools, and access. Quarterly. Same as a human review cycle. The AI gets sharper over time because its manager invests in the same way they would in a human report.
+The review feeds back into the role's prompts, tools, and access. Quarterly. Same as a human review cycle. The AI gets sharper over time because its manager invests in it the same way they would in a human report.
+
+Here's an actual review summary we did with Priya's team at end of Q1:
+
+```
+Q1 Review — Marketing Ops AI (mops-ai-v1.4)
+Manager: Priya, Head of Marketing
+Cycle: 2026-01-01 to 2026-03-31
+
+KPIs
+  Brief turnaround:        4.2 days → 1.8 days  ✓ on target
+  First-review approval:   42%      → 71%       ✓ on target
+  Brand-voice eval pass:   88%      → 99.2%     ✓ on target
+  Edits per brief:         24       → 11        ✓ improving
+
+Most-edited output type: paid-social briefs (avg 18 edits)
+  → Action: expand voice eval set with 30 paid-social paired examples
+            before Q2.
+
+Most-praised output type: nurture-email briefs (avg 4 edits)
+  → Action: codify what's working into the prompt as a few-shot example.
+
+Scope adjustments
+  - Added: weekly competitive-content scan (started Feb 14).
+  - Removed: ad-copy generation (out of scope; moved to a separate role).
+
+Asks for next quarter
+  - Read access to the customer-research repo.
+  - A second voice eval reviewer (Priya only currently).
+  - Budget for the 30 paid-social examples.
+
+Status: Continuing. Prompt + eval refresh planned for week of 2026-04-13.
+```
+
+That document is recognisable as a performance review. It's also the artifact that makes the AI role real to leadership. When the CFO asks "what's our ROI on AI," Priya doesn't say "well, it's hard to measure." She says: "Brief turnaround down 57%, first-review approval up 29 points, marketing operations capacity up roughly 40% without adding headcount. Here's the doc."
 
 ## How to fire one
 
@@ -77,9 +146,9 @@ Reasons to retire an AI employee:
 - The workflow has evolved past what the role was scoped for.
 - The cost of operating the role exceeds the value it delivers.
 - The role's outputs are causing more harm (in errors, in CSAT degradation, in compliance exposure) than they save.
-- The model behind the role has changed and the role can't be recovered.
+- The model behind the role has changed substantially and the role can't be recovered.
 
-The retirement is a decision, not an oversight. There's a knowledge-capture step (what worked, what didn't, what's the playbook for the next attempt) and a stakeholder-comms step (who needs to know the role is no longer covered). Same as firing a human, minus the HR conversation.
+The retirement is a deliberate act, not an oversight. There's a knowledge-capture step (what worked, what didn't, what's the playbook for the next attempt) and a stakeholder-comms step (who needs to know the role is no longer covered). Same as firing a human, minus the HR conversation.
 
 ## What this gives you
 
@@ -90,11 +159,13 @@ When you treat AI as a teammate-with-a-desk:
 - The investment is sized appropriately. AI employees deserve the time to onboard, the feedback to improve, and the budget to operate.
 - The retirement is graceful. When a role outlives its usefulness, it ends.
 
-When you treat AI as a feature, you get a Slack channel full of demos and a quarter where nobody can show what it actually accomplished.
+When you treat AI as a feature, you get a Slack channel full of demos and a quarter where nobody can show what it actually accomplished. We've sat in too many of those quarterly reviews to want to sit in any more.
 
 ## Close
 
-Each subsequent article walks a specific role — marketing operations, sales discovery, customer success, operations, finance, recruiting, comms, founder ops. Each role has the same five components: job description, reporting line, first 90 days, performance review, and an end-of-role plan. Take any of them seriously and you have a real AI employee on the team.
+Priya's marketing-ops AI is now in its fourth quarter. It has a name, a Slack handle, KPIs on the company dashboard, and a prompt-and-tool repo that's reviewed every Monday morning. It also has an end. Priya's plan, written down, is to retire it in late 2027 if the role hasn't justified its operating cost by then. The plan exists. The retirement is a decision the team will make with data, not a conversation that happens by accident at the next budget meeting.
+
+If you're putting AI to work in your business, that's the bar. Not "we have AI." A real role, with a real manager, with a real plan. The technology is the easy part. The discipline is the project.
 
 ## Related reading
 

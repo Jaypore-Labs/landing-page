@@ -7,80 +7,156 @@ category: "Engineering"
 tags: ["LLM", "Structured Output", "Engineering", "Predictable Output", "Schemas"]
 ---
 
-A team shipped a feature using "JSON mode" assuming it gave them structured output. The model returned JSON. The JSON's structure varied wildly: sometimes an array of objects, sometimes a single object, sometimes a nested wrapper. The downstream code broke on every variant.
+A team I spent two days helping last quarter shipped a feature using "JSON mode" and assumed it gave them structured output. The model dutifully returned JSON. The JSON's *structure* varied wildly: sometimes an array of objects, sometimes a single object, sometimes a nested wrapper with a `result` key, occasionally an object with a `data` key whose value was a stringified JSON they had to parse twice. The downstream code broke on every variant.
 
-JSON mode and schema mode are not the same thing. JSON mode says "the output is valid JSON." Schema mode says "the output matches this schema." The schema is what actually makes outputs trustworthy.
+JSON mode and schema mode are not the same thing. JSON mode says "the output is syntactically valid JSON." Schema mode says "the output matches this specific schema." The schema is what actually makes outputs trustworthy. JSON mode is a partial guarantee that solves a small part of the problem.
 
-## The comparison
+This article is about the difference, why both layers matter, and what a working production setup looks like.
 
-**JSON mode** (provider-side): the model is constrained to produce syntactically-valid JSON. The shape is up to the model.
+## The three layers
 
-**Schema mode** (provider-side, where supported): the model is constrained to produce JSON matching a specific schema. Both syntax and structure are guaranteed.
+There are three distinct enforcement layers, and you almost certainly want all three:
 
-**Pydantic/Zod validation** (client-side): the client validates the output against a schema. Outputs that don't match are rejected.
+1. **JSON mode (provider-side).** The model is constrained to produce syntactically valid JSON. Most major providers support this. It eliminates trailing commas, unquoted keys, and other parse failures.
 
-The right pattern is usually schema mode + client-side validation. Belt and suspenders.
+2. **Schema mode (provider-side, where supported).** The model is constrained to produce JSON matching a specific JSON Schema or equivalent type system. Both syntax and structure are guaranteed at generation time.
 
-## Failure modes
+3. **Client-side validation.** The client validates the parsed output against a schema using Pydantic, Zod, ajv, or equivalent. Outputs that don't match are rejected.
 
-Even with schema mode, outputs can fail:
+Most teams set up layer 1 and skip layers 2 and 3, then wonder why their feature is unreliable. The right pattern is schema mode + client-side validation. Belt and suspenders.
 
-- Schema-mode supports a subset of JSON Schema; some constraints don't enforce.
-- Edge cases in the schema (recursive types, complex unions) may not constrain reliably.
-- Provider regressions introduce variance.
+## A real comparison
 
-Client-side validation catches what provider constraints miss.
+Here's the same task implemented three ways. The task: classify a customer support ticket and return a structured result.
 
-## Validation layer
+**JSON mode only — fragile.** The prompt asks for JSON. The provider enforces syntactic JSON. The structure is up to the model:
 
-The validation layer is non-negotiable:
+```python
+response = client.messages.create(
+    model="claude-opus-4-7",
+    messages=[{
+        "role": "user",
+        "content": f"Classify this ticket and return JSON: {ticket.text}"
+    }],
+)
+text = response.content[0].text
+data = json.loads(text)  # Parses, but who knows what's in it
+category = data.get("category") or data.get("ticket_category") or data["class"]
+# This is the kind of code that produces 3am pages
+```
 
-- Every LLM output passes through it.
-- Failures are logged with full context.
-- Failures go to retry or fallback, not to the downstream system.
+That code "works" right up until the day the model decides to return `{"classification": "billing"}` instead of `{"category": "billing"}`. Or returns the JSON inside a markdown code fence. Or wraps everything in `{"result": {...}}`.
 
-A team without a validation layer is trusting the provider's enforcement entirely. That trust is misplaced.
+**Schema mode — better.** The provider's structured-output API constrains the output:
 
-## A real implementation
+```python
+schema = {
+    "type": "object",
+    "properties": {
+        "category": {
+            "type": "string",
+            "enum": ["billing", "technical", "feature_request", "complaint", "other"]
+        },
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "reasoning": {"type": "string", "minLength": 20}
+    },
+    "required": ["category", "confidence", "reasoning"],
+    "additionalProperties": False
+}
+
+response = client.messages.create(
+    model="claude-opus-4-7",
+    messages=[{"role": "user", "content": f"Classify: {ticket.text}"}],
+    response_format={"type": "json_schema", "schema": schema},
+)
+data = json.loads(response.content[0].text)
+```
+
+The provider enforces the schema at generation time. Output keys are right. Categories are restricted to the enum. Confidence is a number in range. This catches roughly 99% of structural failures.
+
+**Schema mode plus client validation — production-ready.** Even with schema mode, you parse and validate client-side. Belt and suspenders:
 
 ```python
 from pydantic import BaseModel, Field
 from typing import Literal
 
 class TicketClassification(BaseModel):
-    category: Literal["billing", "technical", "feature_request", "complaint"]
-    confidence: float = Field(ge=0, le=1)
-    reasoning: str = Field(min_length=20, max_length=500)
+    category: Literal["billing", "technical", "feature_request", "complaint", "other"]
+    confidence: float = Field(ge=0.0, le=1.0)
+    reasoning: str = Field(min_length=20)
 
-# LLM call with schema
-response = call_llm(
-    prompt=...,
-    schema=TicketClassification.model_json_schema()
+response = client.messages.create(
+    model="claude-opus-4-7",
+    messages=[{"role": "user", "content": f"Classify: {ticket.text}"}],
+    response_format={"type": "json_schema", "schema": TicketClassification.model_json_schema()},
 )
 
-# Client-side validation
 try:
-    classified = TicketClassification.model_validate_json(response.text)
+    classified = TicketClassification.model_validate_json(response.content[0].text)
 except ValidationError as e:
-    log_failure(e, response.text)
-    classified = retry_or_fallback()
+    log_validation_failure(ticket.id, response, e)
+    raise UnclassifiableTicket(ticket.id, e)
 ```
 
-Provider-side schema constrains the LLM. Pydantic validates. Failures are handled.
+Now the type system protects the rest of the codebase. `classified.category` has a tight type. `classified.confidence` is a float in [0, 1]. Anything else gets caught and surfaced as a real exception, not a quiet downstream bug.
+
+## Why both layers
+
+Provider schema mode enforces a subset of JSON Schema. Some constraints aren't enforceable at generation time even when they're expressible in the schema. Examples:
+
+- Recursive types (`Tree { value: int, children: list[Tree] }`).
+- Cross-field invariants (`if requires_human is True then escalation_reason is not null`).
+- Numeric ranges that depend on enum values (different bounds for different categories).
+
+Pydantic and Zod can express these as validators. The provider can't always honour them at generation time. So you enforce what the provider can enforce at generation, and you enforce the rest at validation.
+
+Provider regressions also exist. Models get bumped. Schema-mode behaviour subtly drifts. Client-side validation catches what the provider's enforcement misses, and surfaces the regression cleanly when it happens.
+
+## Failure handling
+
+Even with both layers, output sometimes still fails validation. When it does:
+
+```python
+def classify_ticket(ticket: Ticket, retries: int = 1) -> TicketClassification:
+    for attempt in range(retries + 1):
+        raw = call_llm(ticket)
+        try:
+            return TicketClassification.model_validate_json(raw)
+        except ValidationError as e:
+            log_failure(ticket.id, raw, e, attempt)
+            if attempt == retries:
+                return fallback_classification(ticket, e)
+            # Optional: bump temperature down on retry
+            continue
+```
+
+Three options when validation fails: retry once, fall back to a deterministic default, or escalate to a human. The right choice depends on how stakes-bearing the feature is.
+
+For a support classifier with a human reviewer downstream, fallback to "category=other, requires_human=true" is fine. For a fraud-decision feature with money at stake, escalate to a human reviewer; never auto-resolve.
+
+## Performance and cost
+
+Schema mode usually has small, predictable cost overhead — typically 5-15% in our measurements, because the constrained generation can occasionally take a few more tokens to hit a valid path. Client-side validation is essentially free at the millisecond scale.
+
+The retry path is what costs money. If your validation failure rate is low (well under 1% with both layers), retries cost nothing meaningful. If it's high (above 5%), the retry budget compounds and you should fix the prompt instead of paying the retries forever.
 
 ## What we won't ship
 
-**JSON mode treated as schema enforcement.**
+**JSON mode treated as schema enforcement.** Every team that's done this has had to roll back at least one feature. JSON mode is necessary, not sufficient.
 
-**Outputs without client-side validation.**
+**Outputs without client-side validation.** "We use schema mode, that's enough" — until the day a provider regression breaks schema mode subtly and you ship malformed data into your downstream pipeline for two days before noticing.
 
-**Retries that don't change anything.** If the first call failed validation, the second is likely to fail too unless something changes (different prompt, different model, different temperature).
+**Retries that don't change anything.** If the first call failed validation, the second call with identical inputs is likely to fail too. Either change something (the model, the prompt, the temperature) or escalate.
 
-**Fallback paths that aren't tested.**
+**Fallback paths that aren't tested.** The fallback runs as often as the LLM is wrong. If your fallback code path has bugs, those bugs ship in production. Test the fallback like you test the happy path.
 
 ## Close
 
-Structured output is more than JSON mode. The schema is the contract. Provider constraint helps. Client-side validation catches what provider misses. The system stays reliable because both layers do their work.
+Structured output is more than JSON mode. The schema is the contract. Provider constraint helps; client-side validation catches what provider misses; failure handling closes the loop. The system stays reliable because all three layers do their work.
+
+The team I started with shipped their fix in a week: added Pydantic models for every LLM-output type, switched to schema mode where their provider supported it, added a validation layer at every system boundary, wrote tests for the fallback paths. Their incident rate on that feature dropped from "weekly" to "we haven't paged on this in three months" — measured at the time of writing.
+
+That's the gain. It's not free. It's also not optional, if "optional" means "we don't want to be paged on this feature."
 
 ## Related reading
 

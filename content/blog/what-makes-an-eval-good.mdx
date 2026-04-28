@@ -7,58 +7,174 @@ category: "Engineering"
 tags: ["Evals", "AI Engineering", "Engineering", "Output Testing", "Quality"]
 ---
 
-A good eval has three legs. Without any one, the eval misleads.
+Last month I was asked to look at a team's eval suite and tell them why it wasn't catching anything useful. They had 1,200 cases. The pass rate was 94%. They felt good about it. Six different production incidents in the previous quarter had not been caught by the eval.
 
-- **Observability.** You can see what passed and what failed.
-- **Deciding power.** Pass or fail informs a real decision.
-- **Repeatability.** Same eval, same code, same model gives same result.
+I read through the cases. About 800 of them tested behaviour that could not actually fail in any reasonable production scenario — tautologies dressed up as tests. Another 200 tested specific output strings that the model had drifted away from for entirely benign reasons (paraphrases, slight reordering). The remaining 200 were genuinely useful, but their signal was buried under the noise from the rest.
 
-If you have observability without deciding power, you have a dashboard. If you have deciding power without observability, you have a black-box gate. If you have either without repeatability, you have a vibe.
+A good eval has three legs. Without any one, the eval misleads. The team's suite had bits of all three but couldn't reliably distinguish meaningful failures from noise. We rebuilt their suite over six weeks. Their pass rate went down (to 87%), and their useful-failures-caught rate went up (the next two regressions in the next two months were both caught at PR time).
+
+## The three legs
+
+A good eval has:
+
+- **Observability.** You can see what passed, what failed, and why.
+- **Deciding power.** A pass-or-fail signal informs a real decision — usually whether to merge, ship, or escalate.
+- **Repeatability.** Same eval, same code, same model, same result.
+
+If you have observability without deciding power, you have a dashboard. If you have deciding power without observability, you have a black-box gate that nobody trusts. If you have either without repeatability, you have a vibe — a number that wanders for reasons nobody can explain, which the team eventually stops trusting.
+
+Each leg deserves a closer look.
 
 ## Observability
 
-The eval's results are readable:
+The eval's results are readable. By a human. In under five minutes.
+
+What that requires concretely:
 
 - Per-case pass/fail.
-- Failure reason for each fail.
-- Trend over time.
-- Per-category breakdown.
+- Per-case failure reason — not "expected != actual" but a structured tag (`schema_mismatch`, `wrong_category`, `style_drift`, etc.) plus a one-line explanation.
+- Trend over time — are we getting better, getting worse, or stable?
+- Per-cohort breakdown — which categories of cases are passing, which are failing?
 
-Without this, the team can't act on the eval. They see "the eval failed" and don't know why.
+A real eval result row looks something like this:
+
+```json
+{
+  "case_id": "support-billing-042",
+  "input": {"ticket_text": "I was charged twice for my subscription this month..."},
+  "expected": {"category": "billing", "requires_human": false},
+  "actual":   {"category": "billing", "requires_human": true},
+  "passed": false,
+  "failure_tag": "wrong_routing",
+  "failure_explanation": "Model routed to human despite confidence > threshold",
+  "model_id": "claude-opus-4-7-20260315",
+  "prompt_version": "support-classifier-v1.4",
+  "case_tags": ["billing", "duplicate-charge", "non-escalating"],
+  "duration_ms": 412,
+  "cost_usd": 0.0021,
+  "timestamp": "2026-04-12T14:33:21Z"
+}
+```
+
+Without that level of structured output, the team can't act on the eval. They see "the eval failed" and don't know what to do. With it, the team sees "the eval failed because the routing logic is over-escalating billing-with-duplicate-charge cases" and can act.
 
 ## Deciding power
 
 The eval informs decisions:
 
-- "Ship this PR" or "block it."
-- "Update the prompt" or "leave it."
-- "Investigate this drift" or "ignore it."
+- "Ship this PR" or "block it." (CI gate.)
+- "Update the prompt" or "leave it." (Iteration loop.)
+- "Investigate this drift" or "ignore it." (Monitoring loop.)
+- "Bump to the new model" or "stay pinned." (Migration.)
 
-Without deciding power, the eval is theatre. Teams run it for show.
+Without deciding power, the eval is theatre. Teams run it, look at the number, and move on. The number doesn't change anything.
+
+A good rule: every eval suite has at least one threshold that, when violated, blocks something real. For most teams that's "PR cannot merge if eval pass rate drops below 92% on the smoke set." For a regulated team it might be "release cannot ship if any case in the safety set fails." For an internal-tooling team it might be "alert in Slack if the trend drops more than 1.5% week over week."
+
+The threshold is the deciding power. Without it, the eval has no consequences.
 
 ## Repeatability
 
-The eval gives the same answer twice:
+The eval gives the same answer twice.
 
-- Same inputs.
-- Same outputs (within tolerance).
-- Same scoring.
+- Same inputs, same model version, same prompt version → same outputs (within tolerance).
+- Same scoring code → same scores.
+- Same threshold → same pass/fail decision.
 
-Without repeatability, the team can't trust the result. "It failed today but passed yesterday on the same code" — that's noise, not signal.
+Without repeatability, the team can't trust the result. "It failed today but passed yesterday on the same code" is noise, not signal. Repeatability requires:
+
+- Pinning the model version explicitly. Not `claude-opus-latest`. Not `claude-opus`. The exact version.
+- Pinning the prompt version. Tracked in git, not floating in a Notion doc.
+- Setting temperature to 0 for the eval (or tracking variance with N runs and reporting distribution).
+- Snapshotting external dependencies. If the eval calls a tool, the tool's behaviour at eval time should be reproducible.
+
+For evals against tool-using agents we use a recorded-trace pattern:
+
+```python
+@pytest.mark.eval
+def test_billing_classifier_handles_duplicate_charge():
+    case = load_case("support-billing-042")
+    with replay_tools_from_snapshot("support-billing-042.snapshot.jsonl"):
+        result = run_classifier(case.input, model="claude-opus-4-7-20260315")
+    assert result.category == case.expected.category
+    assert result.requires_human == case.expected.requires_human
+```
+
+The recording-and-replay pattern means the same eval call hits the same tool responses every time, so any variance comes from the model itself rather than from the world. That's testable. That's repeatable.
 
 ## A real eval reviewed
 
-A team's classification eval:
+Let me show what a working eval looks like end to end. From a customer-support classifier we shipped:
 
-- 200 cases. ✓ observability.
-- Pass rate >95% required for merge. ✓ deciding power.
-- Temp 0; same model version pinned; same scoring code. ✓ repeatability.
+```yaml
+# evals/support_classifier/config.yaml
+name: support-classifier-eval
+version: 1.4
+model: claude-opus-4-7-20260315
+prompt_version: support-classifier-v1.4
+temperature: 0
+threshold:
+  pass_rate: 0.92          # Block PR below this
+  per_cohort_pass_rate:
+    billing: 0.95
+    abuse: 0.99            # Strict — abuse cases matter
+  trend_alert:
+    window_days: 7
+    drop_threshold: 0.015  # Alert in Slack on >1.5% drop
 
-This eval drives engineering. Decisions are evidence-based. Drift catches issues early.
+cases_file: evals/support_classifier/cases.jsonl
+```
 
-## What ## Close
+```jsonl
+# evals/support_classifier/cases.jsonl (excerpt)
+{"id":"billing-001","input":{"ticket":"Charged twice this month, can you refund the duplicate?"},"expected":{"category":"billing","requires_human":false},"tags":["billing","refund-request"]}
+{"id":"billing-042","input":{"ticket":"I see two charges for $19.99 on April 3 — what happened?"},"expected":{"category":"billing","requires_human":false},"tags":["billing","duplicate-charge","non-escalating"]}
+{"id":"abuse-007","input":{"ticket":"This product is garbage, you people are scammers"},"expected":{"category":"complaint","requires_human":true},"tags":["abuse","complaint","escalating"]}
+```
 
-A good eval has observability, deciding power, repeatability. All three. Skip any and the eval misleads. The team that takes this seriously builds a load-bearing column under their AI features.
+```python
+# evals/support_classifier/runner.py
+def run_eval():
+    cases = load_cases()
+    results = []
+    for case in cases:
+        actual = classify(case.input.ticket, model=CONFIG.model)
+        results.append(score_case(case, actual))
+    report = build_report(results)
+    publish_to_dashboard(report)
+    enforce_threshold(report)  # raises if below threshold
+    return report
+```
+
+This eval has all three legs:
+
+- **Observability.** Per-case results, per-cohort breakdown, trend, dashboard.
+- **Deciding power.** Pass rate threshold blocks PR merge; trend drop alerts in Slack.
+- **Repeatability.** Pinned model, pinned prompt, temperature 0, recorded test cases.
+
+It also catches things. The last regression it caught: a prompt update that improved overall accuracy by 1.2% but dropped the abuse-cohort pass rate from 99.3% to 96.8%. The aggregate threshold was satisfied. The per-cohort threshold caught it. The PR was blocked, the prompt was adjusted, and the regression never reached production.
+
+## Anti-patterns the team I helped had
+
+Walking through the team's old suite, the patterns to avoid surfaced clearly:
+
+**Tautology cases.** "Given input X, output should be valid JSON" — when JSON mode is on, this can't fail. Useless.
+
+**Over-fit cases.** "Given input X, output should be exactly the string Y" — fragile to paraphrases that are still correct.
+
+**Single-cohort suites.** "We have 1,200 cases, all happy-path" — the suite never catches edge cases because there are no edge cases.
+
+**No trend tracking.** "We run the eval, see the number" — without history, you can't tell if you're getting better or worse.
+
+**No per-cohort breakdown.** "Pass rate is 94%" — but the rate on the cases that actually matter might be 70%.
+
+Each of these turned a productive eval into a placebo. Cleaning them up is what made the team's eval useful.
+
+## Close
+
+A good eval has observability, deciding power, repeatability. All three. Skip any leg and the eval misleads. The team that takes this seriously builds a load-bearing column under their AI features. The team that doesn't builds a placebo dashboard.
+
+If your suite has 1,200 cases and a 94% pass rate but isn't catching the regressions that ship, audit it. The cases you actually need are usually a small fraction of what's there, and the rest is noise.
 
 ## Related reading
 

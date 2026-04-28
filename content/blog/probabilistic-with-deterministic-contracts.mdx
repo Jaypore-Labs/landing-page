@@ -7,79 +7,152 @@ category: "Engineering"
 tags: ["LLM", "Engineering", "Predictable Output", "Contracts"]
 ---
 
-A team shipped an LLM-powered feature that worked 92% of the time and broke production code 8% of the time. The 8% wasn't random — it was the LLM occasionally returning JSON with a trailing comma, an extra field, or a slight schema variance. The team's downstream code didn't tolerate variance. Each variance was a paged incident.
+A team I spent two days helping last year had shipped an LLM-powered feature that worked 92% of the time and broke production code the other 8%. The 8% wasn't random failure; it was the model occasionally returning JSON with a trailing comma, or an extra field, or a value type that didn't match what the downstream code expected. The team's downstream code didn't tolerate any variance. Each variance was a paged incident.
 
-LLMs are probabilistic. The systems they live in are not. Bridging the two is engineering work, and it starts with explicit contracts.
+Their first instinct was to make the model "more reliable" through better prompts. Their second was to add try/catch around the parser and "just retry." Neither fixed the underlying problem, which was that the boundary between the LLM and the rest of the system had no contract.
+
+LLMs are probabilistic. The systems they live in are not. Bridging the two is engineering work, and it starts with explicit contracts at every system boundary.
 
 ## The contract pattern
 
-The pattern: every LLM output that crosses a system boundary has a contract.
+The pattern: every LLM output that crosses a system boundary has a contract. By "boundary" I mean the line between the LLM-generation step and any code that has to operate on the output as data — a downstream service call, a database write, a UI render, an action handler.
 
-- **Schema-defined.** Structured output, validated at the boundary.
-- **Tolerance-bounded.** The system specifies what acceptable variance looks like (e.g., extra whitespace, case-insensitivity).
-- **Failure-handled.** What happens when the output doesn't match the contract? Retry, fallback, escalate.
+A contract has four pieces:
 
-Without contracts, every LLM call is a gamble against the downstream system's tolerance.
+- **Schema-defined.** Structured output, validated at the boundary. Pydantic, Zod, ajv, whatever your stack uses — the schema is enforced before the data is trusted.
+- **Tolerance-bounded.** The system specifies what acceptable variance looks like — extra whitespace OK, case-insensitive matching for enums OK, additional optional fields silently dropped, etc.
+- **Failure-handled.** What happens when the output doesn't match the contract? Retry, fallback, escalate, log — and which of those, when?
+- **Versioned.** When the schema changes, both sides know. Bumping a contract is a release event.
+
+Without a contract, every LLM call is a gamble against the downstream system's tolerance. With one, the boundary is enforced and breakage moves from production into the validation layer where it belongs.
 
 ## Schema-first design
 
-The contract is designed first:
+The contract is designed first. The LLM prompt comes after. Reverse the order and the system inherits whatever the LLM happens to produce, which is rarely what you wanted.
 
-- The downstream consumer's needs.
-- The schema that satisfies them.
-- The validation layer.
-- The failure path.
+A real contract for a customer-support classifier:
 
-The LLM prompt comes after. The prompt is engineered to produce the schema-shaped output. Reverse the order and the system inherits whatever the LLM happens to produce.
+```python
+from pydantic import BaseModel, Field
+from typing import Literal
+
+class TicketClassification(BaseModel):
+    """The contract between the LLM and the downstream router."""
+
+    category: Literal[
+        "billing",
+        "technical",
+        "feature_request",
+        "complaint",
+        "abuse",
+        "other"
+    ]
+    confidence: float = Field(ge=0.0, le=1.0)
+    reasoning: str = Field(min_length=20, max_length=500)
+    suggested_priority: Literal["low", "medium", "high", "urgent"] = "medium"
+    requires_human: bool = False
+    escalation_reason: str | None = None  # required if requires_human is True
+
+    @model_validator(mode="after")
+    def escalation_consistency(self):
+        if self.requires_human and not self.escalation_reason:
+            raise ValueError("escalation_reason required when requires_human is True")
+        return self
+```
+
+That schema enforces several things the prompt cannot:
+
+1. The category is one of six known values. Anything else fails validation.
+2. The confidence is a real number between 0 and 1.
+3. There's required reasoning, and it's not too short to be useful or too long to clutter logs.
+4. Priority is one of four levels.
+5. If the agent says a human is needed, it must say why.
+
+The prompt sent to the model is engineered to produce this schema. We use the provider's structured-output mode where supported, and we always validate client-side in addition.
 
 ## Tolerance bands
 
-Some variance is acceptable. The contract specifies:
+Some variance is acceptable. The contract specifies what:
 
-- Whitespace tolerated.
-- Case tolerated where appropriate.
-- Optional fields with defaults.
-- Numeric precision bounds.
+- **Whitespace.** Trim leading/trailing whitespace on string fields. Don't care about internal newlines unless the schema says so.
+- **Case for enums.** "Billing", "BILLING", and "billing" all map to "billing".
+- **Optional fields with defaults.** If `suggested_priority` is missing, default to "medium" and log it.
+- **Numeric precision.** Confidence rounded to two decimals is fine. Confidence reported to twelve decimals is also fine.
+- **Extra fields.** Drop them silently or pass them through, depending on your downstream — but the schema says which.
 
-Tolerance bands are explicit. Implicit tolerance gets the team into trouble.
+Tolerance bands are explicit. Implicit tolerance — "we'll just figure it out" — is how teams end up with an "is the empty string falsy in this code path?" debug session at midnight.
 
 ## Reviewer loop
 
 When the LLM violates the contract, three options:
 
-- **Retry.** Sometimes the next attempt works.
-- **Fallback.** A simpler, deterministic path.
-- **Escalate.** A human handles this case.
+- **Retry.** Sometimes the next attempt works, especially if the failure was a transient temperature artifact.
+- **Fallback.** A simpler, deterministic path. For our classifier, the fallback is "category=other, requires_human=true, escalation_reason='classifier_validation_failure'".
+- **Escalate.** A human handles this case directly.
 
-The choice depends on the use case. Critical paths escalate. Best-effort paths fall back.
+The choice depends on the use case. Critical paths escalate. Best-effort paths fall back. High-volume cheap-to-retry paths retry.
 
-## A real contract
+```python
+def classify_ticket(ticket: Ticket, retries_left: int = 1) -> TicketClassification:
+    raw = call_llm_for_classification(ticket)
+    try:
+        return TicketClassification.model_validate_json(raw)
+    except ValidationError as e:
+        log_validation_failure(ticket.id, raw, e, retries_left=retries_left)
+        if retries_left > 0:
+            return classify_ticket(ticket, retries_left=retries_left - 1)
+        return TicketClassification(
+            category="other",
+            confidence=0.0,
+            reasoning="Classifier validation failed; routing to human.",
+            requires_human=True,
+            escalation_reason="classifier_validation_failure",
+        )
+```
 
-A scenario: an LLM that classifies support tickets into categories.
+This is unglamorous code. It is also the code that turns a 92%-reliable LLM into a 99.99%-reliable feature. The retry catches transient hiccups. The fallback catches everything else. The downstream router never sees malformed data.
 
-Contract:
-- Output is JSON: `{"category": str, "confidence": float, "reasoning": str}`.
-- `category` must be one of a fixed set of 12 values.
-- `confidence` is in [0, 1].
-- `reasoning` is 1-3 sentences.
+## Versioning
 
-Validation: pydantic schema at the boundary. Failures get logged and retried once. Persistent failures route to a human.
+When the schema changes, both sides know.
 
-The LLM is reliable at producing this output 99%+ of the time. The validation catches the rare misses. The downstream code never sees a malformed response.
+We treat contract changes the way good API teams treat API changes. Schemas have version numbers. New optional fields are minor bumps. Removing or renaming fields is a major bump. Major bumps require coordinated deploys; minor bumps don't.
+
+```python
+SCHEMA_VERSION = "1.4"
+
+class TicketClassificationV1_4(BaseModel):
+    schema_version: Literal["1.4"] = "1.4"
+    # ... fields as above
+```
+
+The version number is in the output. Logs capture it. When we look back at a classification three months later, we know which schema version produced it. When we're debugging a regression after a model bump, the schema version helps us tell whether the problem is the model or the contract.
+
+## A real shipping decision
+
+A team I worked with last quarter was deciding whether to ship a payments-fraud classifier into production. The LLM was scoring at 96% accuracy on their eval set. The remaining 4% was malformed JSON, hallucinated categories, and a few cases where the model invented a confidence score outside [0,1].
+
+We added the contract. Same model. Same prompt. Validation layer wrapping every call. The validation layer sometimes triggered a retry. About 0.7% of calls went to the human-review fallback after a retry also failed.
+
+Net production reliability: 99.95% (validated outputs reaching downstream). Net cost increase: about 4% (the retries and the fallback). The team shipped.
+
+That trade — 4% cost for orders-of-magnitude reliability — is what a contract buys you. It's not free. It's also not optional, if "optional" means "we'd like fewer 3am pages."
 
 ## What we won't ship
 
-**LLM outputs crossing system boundaries** without contract validation.
+**LLM outputs crossing system boundaries** without contract validation. Every time we've shipped one of these, we've had to roll it back inside two weeks.
 
-**Tolerance bands** that are implicit rather than specified.
+**Tolerance bands** that are implicit. If the contract doesn't say what's allowed, somebody will guess wrong.
 
-**Failure paths** that aren't tested (the failure path runs as often as the LLM is wrong; if it's broken, the wrong-day surfaces it).
+**Failure paths** that aren't tested. The fallback runs as often as the LLM is wrong. Test it like you'd test the happy path.
 
-**Skipping retry budgets.** Open-ended retries are a cost and reliability hazard.
+**Open-ended retries.** Retries are a cost and reliability hazard. Bound them.
 
 ## Close
 
-Probabilistic systems live inside deterministic ones. The contract is the bridge. Schema first. Tolerance specified. Failures handled. Skip any of these and the system inherits the LLM's variance, which compounds into incidents.
+Probabilistic systems live inside deterministic ones. The contract is the bridge. Schema first. Tolerance specified. Failures handled. Versioned. Skip any of these and the system inherits the LLM's variance, which compounds into incidents.
+
+The team I worked with on the fraud classifier made one durable rule after that engagement: no LLM output crosses a system boundary without a contract. Every team's worth adopting that rule before they ship their second feature.
 
 ## Related reading
 

@@ -7,52 +7,117 @@ category: "AI"
 tags: ["AI Agents", "Healthcare AI", "AI Scribes", "Production AI", "Clinical AI"]
 ---
 
-A consulting firm walked into a regional clinic last year with a deck. The deck said the agent could *triage incoming patients, suggest treatments, and flag medication interactions*. The clinic's medical director asked one question: "Who signs the chart?" The deal didn't go forward.
+A consulting firm walked into a regional clinic last year with a beautiful slide deck. The deck claimed the agent could *triage incoming patients, suggest treatments, and flag medication interactions*. Forty-eight slides of capability. Three case studies. One demo with a stethoscope-shaped icon for some reason.
 
-That question is the line. On one side is documentation. On the other is decision. Healthcare agents that respect the line ship. Ones that don't end up in a presentation about "the future of medicine" and never see a real patient.
+The clinic's medical director, Dr. Anaya, asked one question. "Who signs the chart?"
+
+The room went quiet. The answer was supposed to be: the doctor, of course. But that's not what the architecture suggested. The architecture suggested an agent making a recommendation that a doctor would "approve" — which, when you read the fine print, meant clicking through a queue of suggestions in less time than it would take to read them. The deal didn't go forward.
+
+That question — *who signs the chart?* — is the line. On one side is documentation. On the other is decision. Healthcare agents that respect the line ship and survive audits. Ones that don't end up in a Powerpoint about "the future of medicine" and never see a real patient.
 
 ## What works: the scribe pattern
 
-The most-deployed agent pattern in healthcare today is the AI scribe. The doctor wears a small mic. The patient and doctor talk normally. The scribe captures the conversation, structures it into a SOAP note, and writes it back to the EHR. The doctor reviews and signs.
+The most-deployed agent pattern in healthcare today is the AI scribe, and it's not subtle. The doctor wears a small mic. The patient and doctor talk normally. The mic captures the conversation. A model structures it into a SOAP note (Subjective, Objective, Assessment, Plan), which is what doctors have been writing in charts for fifty years. The note goes back to the EHR. The doctor reads it, edits anything wrong, and signs.
 
-The scribe doesn't decide anything. It documents. The decision-maker — the licensed clinician — stays the decision-maker. That preserves the chain of accountability, which is what makes the scribe survive a deposition, a malpractice review, an audit. It also makes the scribe a 50-minute-per-shift time-saver, which is what makes clinicians actually use it.
+The scribe doesn't decide anything. It documents. The decision-maker — the licensed clinician — stays the decision-maker. That preserves the chain of accountability, which is what makes the scribe survive a malpractice deposition, an HHS audit, a state-board inquiry. It also makes the scribe a 50-minute-per-shift time-saver, which is what makes clinicians actually use the thing instead of fighting it.
 
-We've built and shipped scribes into psychiatric clinics, pediatric urgent cares, and dental practices. Same pattern every time. The scribe drafts. The clinician owns.
+We've shipped scribes into psychiatric clinics, pediatric urgent cares, and dental practices. Same pattern every time. The scribe drafts. The clinician owns. A typical pipeline looks something like this:
+
+```
+[mic] → [WebRTC stream]
+     → [STT: Deepgram or Whisper, with medical vocabulary]
+     → [redact PHI from non-clinical asides]
+     → [LLM: structure into SOAP, with strict schema]
+     → [validate: required fields, length bounds, code-reference check]
+     → [EHR write API]: status = DRAFT, awaiting clinician sign-off
+     → [audit log] : capture everything for 7+ years
+```
+
+A few details matter and most pilots get them wrong:
+
+```python
+# Required structure for every note before it touches the EHR
+class SOAPNote(BaseModel):
+    encounter_id: str
+    patient_id: str
+    clinician_id: str  # The signer. Always.
+    subjective: str = Field(min_length=10, max_length=4000)
+    objective: str = Field(min_length=10, max_length=4000)
+    assessment: str = Field(min_length=10, max_length=4000)
+    plan: str = Field(min_length=10, max_length=4000)
+    icd10_codes: list[ICD10Code] = []
+    cpt_codes: list[CPTCode] = []
+    medications_discussed: list[str] = []
+    status: Literal["draft"] = "draft"  # The model can NEVER set this to "signed"
+    model_version: str
+    prompt_version: str
+    audio_hash: str  # for traceability without storing audio if policy says no
+    created_at: datetime
+```
+
+Notice what `status` can be. The model is statically incapable of producing a signed note. That's not a guardrail in a system prompt — guardrails in system prompts get jailbroken. It's a type-level constraint. The signing endpoint is a different code path, requires a clinician's authentication, and is logged separately.
 
 ## What doesn't work: the nurse pattern
 
-Pilots that try to make an agent *act* on the medical decision side keep failing. The pattern looks innocent — "the agent suggests a medication adjustment for the doctor to approve." But the moment a clinician approves something the agent surfaced, two things happen:
+Pilots that try to make an agent *act* on the medical decision side keep failing. The pattern looks innocent. A vendor pitches "the agent suggests a medication adjustment for the doctor to approve." Sounds harmless. The doctor's still in the loop, right?
 
-1. The clinician's review behavior shifts toward the suggestion. (Anchoring. Well documented.)
-2. The agent's failure becomes the clinician's signature.
+Two things happen the moment a clinician approves something the agent surfaced.
 
-That's a regulatory problem. It's also a malpractice problem. And it means clinics with risk-averse counsel won't deploy the agent at all, no matter how good its medical reasoning is.
+First, the clinician's review behaviour shifts toward the suggestion. This is anchoring, and it's well documented in clinical literature going back to the 1990s. Doctors who get a suggestion plus a chart are less critical of the chart than doctors who only get the chart.
 
-The nurse pattern can probably work eventually — with FDA clearance, dedicated eval discipline, and a different liability model. But it's not the work of a Tuesday afternoon agentic pilot. Most teams treating it that way are about to have a hard conversation with the risk officer.
+Second — and this is the one that ends the conversation with risk officers — the agent's failure becomes the clinician's signature. If the agent recommends a dosage that turns out to be wrong, and the doctor approved it, the chart says the doctor prescribed it. The agent does not appear in the medical record. The doctor does. The malpractice carrier does not care that an AI was involved. They care whose name is on the order.
+
+That's why the most experienced general counsels in healthcare push back on "AI suggests treatment, doctor approves" architectures even when they look safe in a demo. The structural liability transfer happens regardless of how the workflow is described in the pilot doc.
+
+The "nurse pattern" can probably work eventually — with FDA clearance for specific decision categories, dedicated eval discipline, and a different liability model where the AI vendor accepts indemnification. But it's not the work of a Tuesday afternoon agentic pilot.
 
 ## The four conditions for healthcare agents
 
-If you're building one for industry, four conditions are non-negotiable:
+If you're building one, four conditions are non-negotiable.
 
-**1. The licensed clinician owns the chart.** No exceptions. The agent's output is a draft. The signature is human.
+**1. The licensed clinician owns the chart.** No exceptions. The agent's output is a draft. The signature is human. Architecturally, the signing path is separate from the drafting path. A model cannot, by construction, produce a signed record.
 
-**2. PHI never leaves the controlled boundary.** Whether that means an on-prem inference setup, a HIPAA-compliant vendor, or a redaction layer — pick one and audit it.
+**2. PHI never leaves the controlled boundary.** Whether that means an on-prem inference setup, a HIPAA-compliant vendor with a Business Associate Agreement, or a redaction layer that strips identifiers before transmission — pick one and audit it. Vendors will tell you their cloud is "HIPAA-compliant." Make them sign the BAA. Read the BAA. Then ask them what their breach-notification SLA is.
 
-**3. There's a complete trail.** Every input, every output, every model version, every prompt version, every reviewer's edit — logged and retrievable for at least the period required by your jurisdiction.
+**3. There's a complete trail.** Every input the agent saw, every output it produced, every model version, every prompt version, every reviewer's edit — logged and retrievable for at least the period required by your jurisdiction. For most US states, that's 7 years for adult records and 21 for pediatric. Plan for the longer number.
 
-**4. The eval set has clinician input.** A scribe that drafts notes is graded on what *clinicians* find useful, not on what an LLM judges as well-structured. The eval discipline has to include clinical reviewers.
+```python
+# Audit log row, simplified
+{
+    "event_id": "uuid",
+    "timestamp": "2026-04-12T14:33:21.014Z",
+    "encounter_id": "enc_abc123",
+    "agent_version": "scribe-1.4.2",
+    "model_id": "claude-opus-4-7-20260315",
+    "prompt_hash": "sha256:...",
+    "inputs": {"audio_hash": "sha256:...", "context_hash": "sha256:..."},
+    "outputs": {"note_hash": "sha256:..."},
+    "actor": "system",
+    "reviewer_id": null,  # Filled in when clinician reviews
+    "review_action": null,  # accept | edit | reject
+    "edits": null,  # Diff of the clinician's edits
+    "signing_clinician": null,  # Filled in only when signed
+    "phi_redaction_version": "redactor-2.1.0"
+}
+```
 
-## Where the line might move
+This row gets written before the note touches the EHR. The signing event writes a corresponding row. Both are immutable; corrections are append-only. If a regulator shows up in 2031 asking what the agent did on a specific day in March 2026, the answer exists.
 
-The line will move. There are categories of medical decision where agents will eventually be trusted to act — radiology assists, scheduling, prescription renewals for stable chronic conditions. The path there is not "ship a more confident pilot." It's accumulating eval data, getting regulatory clearance category-by-category, and earning trust the way every previous medical technology has — slowly, with paperwork, with skeptics.
+**4. The eval set has clinician input.** A scribe is graded on what *clinicians* find useful, not on what an LLM-as-judge thinks is well-structured. We typically run 200-case evals with three psychiatrists, three pediatricians, and three internists for a multi-specialty deployment. It's expensive. It's also the only way to know whether the agent is actually helping.
 
-The teams that respect that timeline will own the next decade of healthcare AI. The teams that try to leapfrog it will end up writing post-mortems.
+## What a real deployment looks like
+
+We worked with a chain of dental practices in 2025. Sixteen offices. The pain point was documentation: hygienists were spending forty minutes per shift on charting. The deployment took eleven weeks end-to-end. About seventy percent of that time was the boring stuff — BAAs with the inference vendor, integration with their PMS (Dentrix), redaction tooling, an audit-log table, eval-set construction with three of their senior hygienists.
+
+The actual model and prompt work was maybe two weeks of a six-person team's time. The remaining time was discipline. That ratio — twenty percent model, eighty percent discipline — is what we see across every clinical deployment that survives.
+
+A year in, the chain saved an average of thirty-eight minutes per hygienist per shift. Not the seventy-percent reduction the pilot pitch promised, but real, measurable, and consistent. Charge-capture also improved because the scribe surfaced CPT codes hygienists sometimes forgot — the ROI ended up being driven as much by capture as by time.
 
 ## Close
 
-Healthcare agents work when they document. They fail when they decide. The scribe yes / nurse no test is unglamorous, but it's how the work survives the parts of healthcare that aren't about technology — the audits, the deps, the bedside conversations, the families.
+Healthcare agents work when they document. They fail when they decide. The scribe yes / nurse no test is unglamorous, but it's how the work survives the parts of healthcare that aren't about technology — the audits, the depositions, the bedside conversations, the families.
 
-If you're building a healthcare agent, write down which side of the line every output sits on. If anything sits on the decision side, ask who signs.
+If you're building a healthcare agent, write down which side of the line every output sits on. If anything sits on the decision side, ask who signs. If you don't have an answer, you don't have a deployable agent yet.
 
 ## Related reading
 
