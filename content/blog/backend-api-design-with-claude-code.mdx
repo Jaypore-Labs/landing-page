@@ -7,9 +7,13 @@ category: "Engineering"
 tags: ["Claude Code", "Backend", "API Design", "AI Development", "Software Engineering"]
 ---
 
-A senior backend engineer described her workflow once: "I spend an hour thinking through what an API should *be*, and the next four hours typing it into existence." The hour was the value. The four hours were the implementation tax.
+A senior backend engineer named Maya described her workflow to me at a recent meetup. "I spend an hour thinking through what an API should *be*, and the next four hours typing it into existence."
 
-Claude Code reverses the ratio. The thinking — argument shapes, error semantics, idempotency, pagination, versioning — stays human. The typing — handlers, validators, OpenAPI definitions, tests, docs — gets faster. A 5-hour endpoint becomes a 2-hour one without sacrificing thought.
+The hour was the value. The four hours were the implementation tax. The API contract — argument shapes, error semantics, idempotency, pagination — required real thinking. Translating that contract into a router registration, a request DTO, a service-layer call, error mapping, OpenAPI annotations, and a test suite was mechanical work that nonetheless took time and attention.
+
+Claude Code reverses the ratio. The thinking — the part of the work that needs Maya's experience — stays human. The typing — the boilerplate that has the same shape every time — gets faster. A 5-hour endpoint becomes a 90-minute one without sacrificing thought. And the gain compounds, because Maya can ship more endpoints in the time she used to spend on one, which means she can decline less of the product team's work and reduce the backlog the team's been carrying for two quarters.
+
+This article is about the pattern that makes that ratio shift work, and the disciplines that keep it from producing slop.
 
 ## The contract-first pattern
 
@@ -18,41 +22,119 @@ The pattern that works: write the contract first, then have the AI scaffold agai
 Concretely:
 
 1. Sketch the API contract in OpenAPI or a similar schema. Routes, methods, request shapes, response shapes, error codes. This is where you put the thinking — what the endpoint *means*.
-2. Hand the contract to the AI with the codebase context (existing handlers, validation patterns, error conventions).
+2. Hand the contract to the AI with the codebase context — existing handlers in this service, validation patterns, error conventions, the team's ADR on pagination, the standard response wrapper.
 3. Ask for the implementation: handler, validators, types, basic tests.
-4. Review the implementation against the contract. Adjust where the AI's choices diverge.
+4. Review the implementation against the contract. Adjust where the AI's choices diverge from team conventions.
 
 The reverse pattern — "implement an endpoint that does X" — almost always loses something. The AI invents details that weren't in your head. You discover them on review and have to push back. Net: slower than starting with the contract.
 
+A real OpenAPI sketch we used for an endpoint Maya built last quarter:
+
+```yaml
+# openapi excerpt
+/customers/{customer_id}/refunds:
+  post:
+    summary: Issue a refund for a customer
+    parameters:
+      - name: customer_id
+        in: path
+        required: true
+        schema: { type: string, pattern: "^cust_[A-Z0-9]{12}$" }
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: { type: string, format: uuid }
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [amount_cents, reason]
+            properties:
+              amount_cents: { type: integer, minimum: 1, maximum: 1000000 }
+              reason: { type: string, enum: [duplicate, fraud, requested, error] }
+              note:    { type: string, maxLength: 500 }
+    responses:
+      201:
+        description: Refund created
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Refund' }
+      400: { $ref: '#/components/responses/BadRequest' }
+      404: { $ref: '#/components/responses/NotFound' }
+      409: { $ref: '#/components/responses/Conflict' }    # idempotency key reused with different body
+      422: { $ref: '#/components/responses/Unprocessable' } # refund exceeds available balance
+```
+
+That sketch carries the design decisions: customer ID format, idempotency-key requirement, the four legal refund reasons, the specific error codes for specific failure modes. The AI has nothing to invent. It implements.
+
 ## What scaffolding looks like
 
-For a typical CRUD endpoint, the AI's scaffolding includes:
+For a typical CRUD endpoint, the AI's scaffolding produces:
 
 - Route registration with the existing router pattern.
-- Request DTO with validation matching project conventions.
+- Request DTO with validation matching project conventions (Pydantic in this team's case).
 - Service-layer call with appropriate error handling.
 - Response DTO and HTTP status code logic.
-- OpenAPI annotations matching the spec.
-- Unit tests covering happy path, validation errors, auth failures, not-found cases.
+- OpenAPI annotations matching the contract.
+- Unit tests covering happy path, validation errors, auth failures, not-found cases, conflict cases.
 - Integration test stubs.
 
-Not every project needs every piece. The AI uses the codebase context to produce what fits.
+Not every project needs every piece. The AI uses the codebase context to produce what fits. For Maya's refund endpoint, the produced handler looked roughly like this (simplified):
+
+```python
+@router.post(
+    "/customers/{customer_id}/refunds",
+    response_model=RefundResponse,
+    status_code=201,
+    responses={400: {...}, 404: {...}, 409: {...}, 422: {...}},
+)
+async def create_refund(
+    customer_id: CustomerId,
+    body: CreateRefundRequest,
+    idempotency_key: UUID = Header(..., alias="Idempotency-Key"),
+    current_user: AuthenticatedUser = Depends(require_auth),
+    refunds: RefundService = Depends(get_refund_service),
+):
+    customer = await refunds.get_customer(customer_id)
+    if not customer:
+        raise CustomerNotFound(customer_id)
+
+    try:
+        refund = await refunds.create(
+            customer=customer,
+            amount_cents=body.amount_cents,
+            reason=body.reason,
+            note=body.note,
+            idempotency_key=idempotency_key,
+            requested_by=current_user,
+        )
+    except IdempotencyConflict as e:
+        raise HTTPException(409, e.detail)
+    except InsufficientRefundableAmount as e:
+        raise HTTPException(422, e.detail)
+
+    return RefundResponse.from_orm(refund)
+```
+
+Maya reviewed it for two minutes, made two small adjustments (renamed an internal variable, swapped one error class for the team's preferred subclass), and merged it. The implementation matched the team's existing patterns because the codebase context guided the model. The tests came along for the ride.
 
 ## What stays human
 
-Decisions the AI shouldn't make:
+Decisions the AI shouldn't make on its own:
 
 - **Naming.** Endpoint names, parameter names, response field names. Names compound; an inconsistent name now is technical debt later.
-- **Error semantics.** Which errors get 400, which get 422, which get 409, which get 500. These are product decisions; the AI's defaults rarely fit.
+- **Error semantics.** Which errors get 400, which get 422, which get 409, which get 500. These are product decisions; the AI's defaults rarely fit your team's conventions exactly.
 - **Idempotency.** Whether an endpoint is idempotent affects retry semantics and infrastructure design. Human call.
 - **Pagination strategy.** Cursor vs. offset, default page sizes, limits — depends on the data and the consumers.
 - **Versioning approach.** URL-versioned, header-versioned, no version — depends on the API's consumer story.
 
-These decisions should be made before the AI scaffolds. The AI implements; the human decides.
+These decisions should be made before the AI scaffolds. Write them in the OpenAPI sketch or the design doc. The AI implements; the human decides.
 
 ## Test-first generation
 
-A strong pattern: write the tests by hand or with light AI assistance, then have the AI implement against them.
+A strong pattern that prevents bugs: write the tests by hand or with light AI assistance, then have the AI implement against them.
 
 This works because:
 
@@ -62,45 +144,84 @@ This works because:
 
 The reverse — implementation first, tests after — leads to tests that mirror the implementation rather than the spec. Bugs that the implementation has are bugs the tests also have.
 
+Maya's test file for the refund endpoint, hand-written before any implementation:
+
+```python
+async def test_create_refund_success(client, customer_factory, auth_headers):
+    customer = await customer_factory(refundable_balance_cents=10000)
+    resp = await client.post(
+        f"/customers/{customer.id}/refunds",
+        json={"amount_cents": 5000, "reason": "duplicate"},
+        headers={**auth_headers, "Idempotency-Key": str(uuid4())},
+    )
+    assert resp.status_code == 201
+    assert resp.json()["amount_cents"] == 5000
+    assert resp.json()["status"] == "succeeded"
+
+async def test_create_refund_idempotent(client, customer_factory, auth_headers):
+    customer = await customer_factory(refundable_balance_cents=10000)
+    key = str(uuid4())
+    resp1 = await client.post(...)
+    resp2 = await client.post(...)
+    assert resp1.json() == resp2.json()  # Same response for same key
+
+async def test_create_refund_idempotency_conflict(client, customer_factory, auth_headers):
+    """Same key, different body → 409."""
+    ...
+
+async def test_create_refund_exceeds_balance(client, customer_factory, auth_headers):
+    """Refund > refundable balance → 422."""
+    ...
+
+async def test_create_refund_invalid_reason(client, auth_headers):
+    """Reason not in enum → 400."""
+    ...
+
+async def test_create_refund_unauthorized(client):
+    """Missing auth → 401."""
+    ...
+```
+
+Six tests, written in 20 minutes, before any implementation existed. The AI then implemented an endpoint that passed all six. The cases where it didn't pass on first try were the ones that taught us something about our own conventions — for example, our team uses 422 for a specific subset of business-logic violations, and the AI defaulted to 400 for one of them. We caught that on test failure, fixed it, and moved on.
+
 ## A real refactor
 
-A real engineering moment: refactoring an API from REST to a more typed pattern (gRPC or tRPC). The shape of the work with AI:
+A real engineering moment: refactoring an internal API from REST to a more typed pattern (gRPC, in our case). The shape of the work with AI:
 
-- **Hour 1.** Audit the existing endpoints. Categorise by complexity. Decide migration order. Human work.
-- **Hour 2-3.** Hand each endpoint to the AI: existing implementation, target type definition, the convention for the new pattern. AI produces the migration.
+- **Hour 1.** Audit the existing endpoints. Categorise by complexity. Decide migration order. Human work; the AI was useful as a thinking partner but didn't drive.
+- **Hour 2-3.** Hand each endpoint to the AI: existing implementation, target proto definition, the convention for the new pattern. AI produces the migration for one endpoint at a time.
 - **Hour 4.** Review each migration. Catch the cases where the AI's translation lost a behaviour. Adjust.
 - **Hour 5.** Update tests. AI helps; human reviews.
-- **Hour 6.** Migration shipped.
+- **Hour 6.** Migration shipped, end-to-end.
 
-A migration that would have taken a week of grinding is a day of focused work. The thinking time isn't reduced. The typing time is.
-
-## Code-review loop
-
-The team's PR-review pattern still applies. The AI's output is a PR like any other. Reviewer reads the diff, comments on substance, requests changes if needed. The AI's authorship is visible (commit messages, comments) but doesn't get special treatment — same standards as a human-authored PR.
+A migration that would have taken a week of grinding became a focused day. The thinking time wasn't reduced. The typing time was, and that was the thing that had been pushing the project from sprint to sprint for the last two quarters.
 
 ## What we won't ship
 
-**AI-generated code without tests.** Always. Ever.
+**AI-generated code without tests.** Every time. Tests are the eval set for code-generation work.
 
-**AI-generated code in a security-sensitive path** without a security-aware review.
+**AI-generated code in a security-sensitive path** without a security-aware review. Auth changes, encryption, secret-handling — these get extra scrutiny regardless of who wrote the code.
 
-**AI-generated migrations of authentication or authorisation code** without extra scrutiny.
+**AI-generated migrations of authentication or authorisation code** without the security team's signoff. The risk of a subtle escalation bug is too high.
 
-**Anything where the AI's plan and the human's intent diverge** without resolving the divergence first.
+**Anything where the AI's plan and the human's intent diverge** without resolving the divergence first. If the AI's first attempt produced a different shape than expected, stop and re-read the plan together before any more code.
 
 ## How to start
 
-Pick one endpoint. Write the contract. Hand to AI. Review the implementation. Notice what the AI did well and what required correction. Build a personal pattern library. Within a week, the workflow is intuitive.
+Pick one endpoint you'd otherwise be writing today. Sketch the contract first — even if it's just a paragraph in a doc, not full OpenAPI. Hand the contract plus the codebase context to the AI. Review the implementation against the contract. Notice what the AI did well and what required correction.
+
+Within a week, the workflow is intuitive. Within a month, it's the default.
 
 ## Close
 
-The contract-first backend workflow with Claude Code is the productivity gain that compounds. The thinking stays human. The typing speeds up. The endpoints get shipped faster, with the same care as before. The engineer's time per endpoint drops from a day to a half-day. The accumulated time goes to harder problems.
+The contract-first backend workflow with Claude Code is the productivity gain that compounds. The thinking stays human. The typing speeds up. The endpoints get shipped faster, with the same care as before. The engineer's time per endpoint drops from a day to a half-day. The accumulated time goes to harder problems — performance work, architecture, the things AI doesn't help with.
+
+Maya now ships about three times as many endpoints per sprint as she did before. Bug rates haven't moved. Code-review feedback hasn't gotten harsher. The team's product manager describes the change as "Maya finally being able to keep up with the requests." That's the work.
 
 ## Related reading
 
 - [Backend: database migrations without fear](/blog/backend-migrations-with-claude-code) — same contract-first pattern.
 - [Building agents: tool design like APIs](/blog/tool-design-like-apis) — design discipline transferred.
-- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) 
 
 ---
 

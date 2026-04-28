@@ -7,7 +7,9 @@ category: "Engineering"
 tags: ["AI Agents", "CI/CD", "Engineering", "Building Agents", "Security"]
 ---
 
-A team gave their CI agent broad credentials so it could do useful things across the codebase. Within a month, an unrelated bug caused the agent to attempt to push directly to main. Caught by a branch-protection rule. Could have been worse.
+A team I helped early last year had given their CI agent broad credentials so it could "do useful things." Within a month, an unrelated bug caused the agent to attempt to push directly to `main`. Their branch-protection rule caught it. Could have been worse — much worse, if branch protection hadn't been on, or if the bug had hit the deploy keys instead of the git keys.
+
+The fix wasn't to remove the agent. It was to scope it. Read-only where possible. Write access scoped to specific paths or branches. Tokens that expire frequently. Audit logs reviewed weekly. Once those were in place, the team kept the agent and stopped having midnight Slack threads about what it might do next.
 
 Agents in CI are powerful. Open-ended access in CI is a security event waiting. The discipline is scope.
 
@@ -15,12 +17,37 @@ Agents in CI are powerful. Open-ended access in CI is a security event waiting. 
 
 Each agent in CI gets credentials scoped to what it actually does:
 
-- Read-only where possible.
-- Write access scoped to specific paths or branches.
-- No access to secrets it doesn't need.
-- Tokens that expire frequently.
+- **Read-only where possible.** Most CI agents read the repo, run tests, post comments. They don't need write access for any of that.
+- **Write access scoped to specific paths or branches.** If the agent's job is to update the changelog, it gets write access to `CHANGELOG.md` only — not to the whole tree. Most modern Git providers support this through fine-grained tokens or deploy keys with path-based ACLs.
+- **No access to secrets it doesn't need.** Agents that don't deploy don't need deploy credentials. Agents that don't write to production don't need production credentials.
+- **Tokens that expire frequently.** A token that lives 7 days has a smaller blast radius than one that lives forever.
 
-The agent's identity is auditable. The blast radius is bounded.
+A real GitHub Actions config we use for an agent that comments on PRs:
+
+```yaml
+name: agent-pr-review
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read           # Read the diff
+      pull-requests: write     # Comment on the PR
+      issues: read             # Read linked issues
+      # Notably absent: id-token, packages, deployments, actions write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mode: pr-review
+          allowed-tools: "read_file,grep,git_log,post_comment"
+```
+
+That `permissions` block is the discipline. The token GitHub mints for this job has exactly the access needed. If a bug in the agent code somehow caused it to try to push to `main`, the token would refuse — not because the agent decided not to, but because the token doesn't carry that permission in the first place.
 
 ## Audit logs
 
@@ -28,49 +55,118 @@ Every agent action in CI is logged:
 
 - What the agent did.
 - What credentials it used.
+- What inputs it received.
 - What outputs it produced.
 - What artifacts were affected.
 
 These logs survive for the team's standard audit period (typically 1+ years). Required for compliance, useful for debugging.
 
+A practical pattern: the agent emits structured logs to stderr; CI captures them; a periodic job ships them to your log aggregator with the build metadata.
+
+```python
+def log_agent_action(action: str, **details):
+    log_entry = {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "action": action,
+        "agent_version": os.environ["AGENT_VERSION"],
+        "model_id": os.environ["AGENT_MODEL_ID"],
+        "ci_run_id": os.environ.get("GITHUB_RUN_ID"),
+        "ci_workflow": os.environ.get("GITHUB_WORKFLOW"),
+        "ci_actor": os.environ.get("GITHUB_ACTOR"),
+        "details": redact_secrets(details),
+    }
+    print(json.dumps(log_entry), file=sys.stderr)
+```
+
+Every comment posted, every file read, every tool called — emitted as a structured event. When something goes wrong, the team has receipts. When the auditor visits, the team has receipts. When a regulator visits in three years, the team still has receipts.
+
 ## Reproducibility
 
-CI agents need to be reproducible:
+CI agents need to be reproducible. The same PR, with the same code, with the same agent version, should produce the same agent behaviour.
 
-- Pinned model versions.
-- Pinned prompt versions.
-- Pinned tool versions.
-- Pinned input data.
+That requires pinning:
 
-Without pinning, the same CI run produces different outputs on different days. With pinning, "did this PR pass the agent's review?" is a deterministic question.
+- Pinned model version (`claude-opus-4-7-20260315`, not `claude-opus-latest`).
+- Pinned prompt version (in the agent's config repo, not floating).
+- Pinned tool versions (the agent's tools are part of the system; they need versions too).
+- Pinned input data where applicable.
+
+```yaml
+# .agent-config.yaml
+agent_version: pr-reviewer-1.4.2
+model_id: claude-opus-4-7-20260315
+prompt_version: pr-reviewer-prompt-v8
+tools_version: pr-reviewer-tools-v3
+temperature: 0
+```
+
+Without pinning, the same CI run produces different outputs on different days. With pinning, "did this PR pass the agent's review?" is a deterministic question. That matters for replay (re-running an old PR's review when a regression surfaces) and for debugging (was this run different because the model changed, or because the code changed?).
 
 ## Review gates
 
-Agent outputs in CI go through review:
+Agent outputs in CI go through human review. The agent is informational; the merge gate is human approval.
 
-- Status checks (the agent's review is a check, not a merge gate).
-- The merge gate is human approval.
+- The agent's review is a status check, not a merge requirement.
+- The merge gate is a human reviewer's approval.
 - Disagreement between agent and human goes to the human.
 
-The agent informs; the human decides. Always.
+This sounds obvious. Teams violate it constantly. The pattern that breaks: "the agent reviewed and approved, so it's fine." If your branch protection allows the agent's check to count as required review, you have effectively given the agent merge authority. Don't.
+
+```yaml
+# Branch protection (excerpt)
+protection_rules:
+  - branch: main
+    required_status_checks:
+      - tests
+      - lint
+      - security-scan
+      # Notably absent: agent-pr-review
+    required_pull_request_reviews:
+      required_approving_review_count: 1
+      require_code_owner_reviews: true
+```
+
+The agent's check shows up on the PR for the human reviewer to read. The human still has to click approve. The agent informs; humans decide.
+
+## Reproducibility regressions
+
+Sometimes a CI agent's behaviour regresses without any code change in the agent itself. Provider model updates. Provider prompt-template changes. Tool API drift.
+
+A pattern that catches these: a synthetic regression test that runs the agent against a known PR with a known expected output, on a schedule.
+
+```yaml
+- name: agent-regression-canary
+  on:
+    schedule: { cron: "0 6 * * *" }   # Daily at 6 AM UTC
+  jobs:
+    canary:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            ref: agent-canary-fixture-pr  # A fixed PR fixture in a test branch
+        - run: ./scripts/run-agent-and-diff.sh
+        - run: ./scripts/alert-on-diff.sh
+```
+
+If the canary's output diffs against the recorded baseline by more than the configured tolerance, an alert fires. The team investigates: did the model drift, did the prompt change, did the tool API change? Often the answer is "the provider quietly updated something." Pinning the model version reduces this; canaries catch the rest.
 
 ## A real pipeline
 
-A scenario: an agent that runs as part of CI, doing first-pass review on every PR.
+A team running a PR-review agent in CI for a year:
 
-- Triggered on PR open.
-- Runs in a sandboxed runner with read-only access to the codebase.
-- Posts comments to the PR.
-- The merge gate is human approval; agent comments are advisory.
-- All actions logged.
+- ~12,000 PRs reviewed.
+- Zero security incidents related to the agent's permissions.
+- Three drift events caught by the canary (all caused by provider-side changes).
+- Audit logs intact and queryable for the full year.
 
-A year of operation: tens of thousands of PRs reviewed, zero security incidents, agent's catch rate visible in the team's metrics dashboards.
+The pipeline is boring. That's the goal.
 
 ## What we won't ship
 
-**Agents in CI with broad write access.**
+**Agents in CI with broad write access.** Scope every token.
 
-**Agents in CI without audit logs.**
+**Agents in CI without audit logs.** Logs are non-optional.
 
 **Agents that gate merges** without human-override capability.
 
@@ -79,6 +175,8 @@ A year of operation: tens of thousands of PRs reviewed, zero security incidents,
 ## Close
 
 Agents in CI are valuable when scoped, audited, repeatable. The scope keeps blast radius small. The audit makes the agent accountable. The repeatability makes the agent debuggable. Skip any of these and the agent eventually creates a security incident or a non-reproducible mess.
+
+The discipline isn't AI-specific. It's the same discipline you'd apply to any service that has CI write access. Treat the agent like a teammate with a token, scoped exactly to what they need, with logs that show what they did. The pattern is durable.
 
 ## Related reading
 

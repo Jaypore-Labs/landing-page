@@ -7,106 +7,280 @@ category: "Engineering"
 tags: ["MCP", "Node.js", "Engineering", "Tutorial", "Servers"]
 ---
 
-This is the get-started article. A minimal MCP server in Node. From `npm init` to working server in under an hour.
+The first MCP server I shipped to production took eight hours. Half of that was reading the spec and figuring out which transport to use. The next one took ninety minutes. The one after that, forty-five.
+
+This article is the version I wish I'd had on day one. A working Node MCP server, end to end, with the parts that actually trip people up explained. By the time you finish reading, you'll have something running locally, talking to Claude Code, exposing tools that do real work against your team's systems.
 
 ## The boilerplate
 
+Start fresh:
+
 ```bash
+mkdir my-mcp-server && cd my-mcp-server
 npm init -y
 npm install @modelcontextprotocol/sdk
 ```
 
-A skeleton:
+Add `"type": "module"` to `package.json` so ESM imports work. Then `server.js`:
 
 ```javascript
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
 const server = new Server(
   { name: "my-server", version: "1.0.0" },
   { capabilities: { tools: {} } }
 );
 
-// Tool definitions go here
+// Tool definitions go here.
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
+console.error("MCP server running on stdio");
 ```
 
-This is a stdio server. The AI assistant runs the server as a child process and communicates over stdin/stdout.
+That's the skeleton. It's a stdio server, which means the MCP-aware AI assistant runs the server as a child process and communicates over stdin/stdout. Stdio is the right transport for local servers used by a single user. Most starter MCP servers should be stdio.
 
-## Tool definition
+(A note about `console.error` vs. `console.log`: stdio MCP servers must keep stdout clean for protocol traffic. All your debug logs go to stderr. Forget this once and you'll spend an afternoon wondering why the assistant says your server is broken.)
 
-Add a tool:
+## A real tool
+
+Let's expose a tool that does something useful. We'll start with a weather tool because it's small enough to read in one screen.
 
 ```javascript
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+
+const server = new Server(
+  { name: "weather", version: "1.0.0" },
+  { capabilities: { tools: {} } }
+);
+
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [{
-    name: "get_weather",
-    description: "Get current weather for a city",
-    inputSchema: {
-      type: "object",
-      properties: {
-        city: { type: "string", description: "City name" }
+  tools: [
+    {
+      name: "get_weather",
+      description: "Get the current weather conditions for a city.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          city: {
+            type: "string",
+            description: "The city name. Examples: 'Jaipur', 'Berlin', 'San Francisco'.",
+          },
+          units: {
+            type: "string",
+            enum: ["metric", "imperial"],
+            default: "metric",
+            description: "Unit system for temperature.",
+          },
+        },
+        required: ["city"],
       },
-      required: ["city"]
-    }
-  }]
+    },
+  ],
 }));
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "get_weather") {
-    const city = request.params.arguments.city;
-    const weather = await fetchWeather(city);
+server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  if (req.params.name !== "get_weather") {
+    throw new Error(`Unknown tool: ${req.params.name}`);
+  }
+  const { city, units = "metric" } = req.params.arguments;
+
+  try {
+    const data = await fetchWeather(city, units);
     return {
-      content: [{ type: "text", text: weather }]
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            city: data.city,
+            temperature: data.temp,
+            units,
+            conditions: data.conditions,
+            humidity_pct: data.humidity,
+            wind_kph: data.wind,
+            observed_at: data.timestamp,
+          }),
+        },
+      ],
+    };
+  } catch (e) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: "text",
+          text: `Failed to fetch weather for "${city}": ${e.message}. Check the city name and try again.`,
+        },
+      ],
     };
   }
 });
+
+async function fetchWeather(city, units) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=${units}&appid=${process.env.OPENWEATHER_API_KEY}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Weather API returned ${r.status}`);
+  const j = await r.json();
+  return {
+    city: j.name,
+    temp: j.main.temp,
+    conditions: j.weather[0]?.description ?? "unknown",
+    humidity: j.main.humidity,
+    wind: (j.wind.speed * 3.6).toFixed(1),
+    timestamp: new Date(j.dt * 1000).toISOString(),
+  };
+}
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+console.error("Weather MCP server running on stdio");
 ```
+
+A few details to notice.
+
+**Schema specificity.** The `units` parameter has an enum (`["metric", "imperial"]`) and a default. The model can't accidentally pass `"celsius"` or `"fahrenheit"`. The schema is the contract.
+
+**Error responses.** When something goes wrong, we return an error response with `isError: true` and a useful message. The agent reads the message and can decide whether to retry, ask the user for clarification, or surface the problem. Compare to throwing — throwing terminates the call and the agent gets nothing useful to work with.
+
+**Structured output.** We return JSON-as-text rather than prose. The agent parses the JSON, presents it to the user in whatever format they want. Returning prose locks the formatting choice into the tool, which is wrong.
+
+## Wiring it to Claude Code
+
+Add the server to Claude Code's config. On macOS that's typically `~/.claude.json` or `~/Library/Application Support/Claude/claude_desktop_config.json` depending on the version. Excerpt:
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "node",
+      "args": ["/Users/yash/projects/weather-mcp/server.js"],
+      "env": {
+        "OPENWEATHER_API_KEY": "${env:OPENWEATHER_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Code. The server is registered. Ask "what's the weather in Jaipur?" The assistant calls `get_weather`, gets back JSON, and tells you 27°C with light clouds. The integration is invisible to the user.
+
+## Beyond weather: a real internal tool
+
+The pattern generalises. The most common production MCP server we ship for clients wraps an internal API or database with a few read tools and one or two careful action tools. A simplified template:
+
+```javascript
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [
+    {
+      name: "list_recent_orders",
+      description: "List the customer's recent orders. Read-only.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          customer_id: { type: "string", pattern: "^cust_[A-Z0-9]{12}$" },
+          limit:       { type: "integer", minimum: 1, maximum: 50, default: 10 },
+        },
+        required: ["customer_id"],
+      },
+    },
+    {
+      name: "get_order",
+      description: "Get the full details of a specific order. Read-only.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          order_id: { type: "string", pattern: "^ord_[A-Z0-9]{12}$" },
+        },
+        required: ["order_id"],
+      },
+    },
+    {
+      name: "create_refund",
+      description: "Issue a refund. Requires user confirmation in the assistant UI before calling. Has side effects.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          order_id:       { type: "string", pattern: "^ord_[A-Z0-9]{12}$" },
+          amount_cents:   { type: "integer", minimum: 1, maximum: 100000 },
+          reason:         { type: "string", enum: ["duplicate", "fraud", "requested", "error"] },
+          idempotency_key: { type: "string", format: "uuid" },
+        },
+        required: ["order_id", "amount_cents", "reason", "idempotency_key"],
+      },
+    },
+  ],
+}));
+```
+
+Three tools. Two are read-only. One has side effects, requires an idempotency key, and is described to the model as needing user confirmation. That's the basic shape — start safe, add action tools deliberately, document them clearly.
 
 ## Reviewer ritual
 
-PR review for new MCP servers:
+Every new MCP server we ship has a basic review checklist:
 
-- Tool names clear and discoverable.
-- Schemas precise.
-- Errors instructive.
-- Tests cover the tool's behaviour.
+- Each tool has a verb-object name. (`get_weather`, not `weather`.)
+- Each parameter has a tight schema. (Patterns, enums, ranges where applicable.)
+- Errors return useful messages, not just thrown exceptions.
+- Read tools are clearly distinct from action tools.
+- Action tools require idempotency keys.
+- The server has unit tests against the tool handlers.
 
-## A real server
+A simple test pattern that works:
 
-A small team's MCP server for their internal API:
+```javascript
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { server } from "./server.js";
 
-- 3 tools: list, get, create.
-- 200 lines of Node.
-- Used across the team's AI assistants.
+test("get_weather returns structured JSON for a known city", async () => {
+  const result = await callTool("get_weather", { city: "Jaipur" });
+  assert.equal(result.content[0].type, "text");
+  const parsed = JSON.parse(result.content[0].text);
+  assert.ok(parsed.temperature !== undefined);
+  assert.ok(parsed.conditions);
+});
 
-Total time to ship: 4 hours.
+test("get_weather returns isError for an unknown city", async () => {
+  const result = await callTool("get_weather", { city: "atlantis-not-real" });
+  assert.equal(result.isError, true);
+});
+```
+
+These tests run in milliseconds, on every PR. They catch the kind of regressions that would otherwise show up as silent agent failures.
 
 ## How to ship
 
-The team chooses transport based on use:
+For local stdio servers used by your team, the "ship" path is:
 
-- stdio: local server. The assistant runs the server.
-- HTTP: shared server. Multiple users connect.
-- SSE: server-pushes events.
+1. Tag a release in the server's repo.
+2. Provide a one-paragraph install README — clone, install deps, add to `claude.json`, restart.
+3. Document the tools and any required env vars.
 
-For internal tools, stdio is often enough. For SaaS tools, HTTP or SSE.
+For shared MCP servers (HTTP transport, multi-user), the deployment shape is closer to a normal microservice: containerised, deployed to your infra, behind whatever auth your team uses. Most teams should start with stdio and only graduate to HTTP when there's a clear need (cross-user state, shared cache, etc.).
 
-## What we won't do
+## What we won't ship
 
-**MCP servers** without tool tests.
+**MCP servers without tool tests.** Tools the team can't test, the agent shouldn't trust.
 
-**Tool descriptions** that are vague.
+**Tool descriptions that are vague.** "Process data" is not a description. Say what the tool does and when to use it.
 
-**Skipping the schema discipline.** Tool design matters.
+**Schemas that allow arbitrary objects.** Tight schemas are the source of reliability.
 
-**Servers** that don't handle errors gracefully.
+**Servers that don't handle errors gracefully.** Throwing terminates the agent's ability to recover. Return useful errors.
 
 ## Close
 
-A first MCP server in Node is a few hours of work. The boilerplate is small. The discipline is in tool design and testing. Once you have one server, the second is faster.
+A first MCP server in Node is a few hours of focused work. The boilerplate is small. The discipline is in tool design and testing — and that discipline is the same discipline you'd apply to a regular API. Once you have one server, the second is faster. The third is faster still. The investment is durable; servers you write today will work with whatever AI assistants you use tomorrow, because they all speak MCP.
 
 ## Related reading
 

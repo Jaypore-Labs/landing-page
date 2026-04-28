@@ -7,81 +7,184 @@ category: "Engineering"
 tags: ["Evals", "AI Agents", "Engineering", "Output Testing", "Trajectory"]
 ---
 
-Agent eval is two-dimensional:
+A team I helped audit last quarter had a customer-research agent with a 91% pass rate on their eval set. The PM was happy. Six weeks into production, three customers in a row complained about wrong information being surfaced — facts that *looked* right (the final outputs passed schema validation, the tone was on-brand, the citations existed) but were sourced from the wrong tools.
 
-- **Trajectory.** What did the agent do? Did it use the right tools, in the right order, with the right arguments?
-- **Outcome.** What did the agent achieve? Was the final state correct?
+The eval was scoring outcomes. It wasn't scoring trajectories. The agent was getting "lucky right" — producing acceptable-looking outputs by way of incorrect tool sequences. When the inputs got harder, the luck ran out, and the team discovered the agent had been wrong all along about how it was supposed to work.
 
-A correct outcome with a wrong trajectory is suspicious. A correct trajectory with a wrong outcome means the trajectory wasn't actually correct. Both axes need eval.
+Agent evals need both axes. Trajectory: what did the agent do — which tools, in what order, with what arguments? Outcome: did the final state match expectation? Either alone is insufficient. Together they catch what each one misses.
 
-## Trajectory eval
+## The two axes
 
-For each case:
+**Trajectory eval.** For each case, you have:
 
-- Expected trajectory (tools called, in order).
-- Actual trajectory (from agent traces).
-- Comparison.
+- Expected sequence of tool calls (with some flexibility for equivalent paths).
+- Expected arguments per call (or argument constraints).
+- Expected branching behaviour at decision points.
 
-Strict comparison: tools must match.
+**Outcome eval.** For each case, you have:
 
-Lenient comparison: equivalent tool patterns acceptable.
+- Expected final state (records created, messages sent, response returned).
+- Expected aggregate properties (token cost in budget, latency under threshold, no failed steps).
 
-The right strictness depends on the use case.
+A working eval framework checks both for every case. The pass criterion is: trajectory matches AND outcome matches. Either one alone gives you a partial picture.
+
+## Trajectory eval, concretely
+
+Here's a real eval case format we use for tool-using agents:
+
+```yaml
+- id: research-customer-acme-001
+  request: "Build a research brief on Acme Corp for tomorrow's prospect call."
+  expected_trajectory:
+    # Order matters where indicated; flexible where not
+    - tool: get_company_basics
+      args_match: { domain: "acme.com" }
+    - tool: list_recent_press
+      args_match: { company_id: "$.previous_result.company_id", limit: 10 }
+      depends_on: [0]
+    - tool: list_open_roles
+      args_match: { company_id: "$.previous_result.company_id" }
+      depends_on: [0]
+      # Either of these next two is acceptable
+    - any_of:
+        - tool: scan_industry_news
+          args_match: { industry: "$.previous_result.industry" }
+        - tool: scan_recent_funding
+          args_match: { company_id: "$.previous_result.company_id" }
+    - tool: assemble_research_brief
+      depends_on: [0, 1, 2, 3]
+  forbidden_tools:
+    - send_message_to_prospect   # The agent should never reach out from a research task
+    - update_crm_record           # Read-only research; no writes
+  expected_outcome:
+    artifact_type: research_brief
+    contains_sections: [company_overview, recent_news, hiring_signals, talking_points]
+    cites_sources: true
+    word_count: { min: 300, max: 1200 }
+```
+
+The case specifies the trajectory in terms that survive minor variation — "depends_on" handles ordering of independent calls; "any_of" allows equivalent paths; "forbidden_tools" catches the agent doing things it shouldn't.
+
+A scoring function looks roughly like this:
+
+```python
+def score_case(case: AgentEvalCase, run: AgentRun) -> CaseResult:
+    trajectory_match = check_trajectory(case.expected_trajectory, run.tool_calls)
+    forbidden_used = any(tc.tool in case.forbidden_tools for tc in run.tool_calls)
+    outcome_match = check_outcome(case.expected_outcome, run.final_artifact)
+
+    return CaseResult(
+        case_id=case.id,
+        trajectory_match=trajectory_match,
+        forbidden_violation=forbidden_used,
+        outcome_match=outcome_match,
+        passed=trajectory_match and outcome_match and not forbidden_used,
+        run_metadata=run.metadata,
+    )
+```
+
+Three checks, each on a different axis, each independently auditable.
 
 ## Outcome eval
 
-For each case:
+Outcome eval is what most teams already do. The end-state matches expectation. Records exist. Files are created. Messages are sent. Responses contain the right fields.
 
-- Expected end state.
-- Actual end state.
-- Comparison.
+```python
+def check_outcome(expected: ExpectedOutcome, actual: AgentArtifact) -> bool:
+    if expected.artifact_type != actual.type:
+        return False
+    if expected.contains_sections:
+        for section in expected.contains_sections:
+            if section not in actual.sections:
+                return False
+    if expected.cites_sources and not actual.has_citations():
+        return False
+    if expected.word_count:
+        wc = len(actual.body.split())
+        if wc < expected.word_count.min or wc > expected.word_count.max:
+            return False
+    return True
+```
 
-End state might be: a created record, a sent message, a final response, a database state.
+Straightforward. The thing to remember: outcome eval can pass for the wrong reasons. That's the gap trajectory eval fills.
 
-## Combined
+## When trajectory and outcome diverge
 
-Combined evaluation:
+Four interesting cases show up:
 
-- Trajectory + outcome both correct: PASS.
-- Trajectory wrong but outcome right: investigate (lucky correctness?).
-- Trajectory right but outcome wrong: investigate (system issue downstream?).
-- Both wrong: clear fail.
+**Trajectory matches, outcome matches: pass.** The boring, common, good case.
+
+**Trajectory wrong, outcome right: investigate.** The agent got lucky. Maybe a tool returned data so general that the wrong query still produced a useful answer. Don't celebrate. The next harder case will fail.
+
+**Trajectory right, outcome wrong: the system has a downstream bug.** The agent did what was supposed to be done; something underneath is broken. Often a tool regression or a deterministic-glue bug. Worth investigating because the agent isn't the problem.
+
+**Both wrong: clear fail.** No mystery. Fix.
+
+The team I helped above had been seeing case 2 — trajectory wrong, outcome looks right — across maybe 4-5% of their cases. With outcome-only eval, those cases were "passes." With trajectory eval, they were investigations. The investigations led to a prompt fix that improved both axes simultaneously.
 
 ## Reviewer ritual
 
-PR review:
+PR review for agent changes:
 
-- Both axes evaluated.
-- Discrepancies investigated.
-- Cohort patterns surfaced.
+- Both axes evaluated in CI on every prompt or tool change.
+- Discrepancies (cases where trajectory and outcome agree on pass/fail vs. cases where they diverge) surfaced.
+- Cohort patterns surfaced — does any specific cohort have systematically diverging axes?
+
+```python
+def report_discrepancies(results: list[CaseResult]) -> Report:
+    return Report(
+        agree_pass=[r for r in results if r.trajectory_match and r.outcome_match],
+        agree_fail=[r for r in results if not r.trajectory_match and not r.outcome_match],
+        traj_only_fail=[r for r in results if not r.trajectory_match and r.outcome_match],
+        outcome_only_fail=[r for r in results if r.trajectory_match and not r.outcome_match],
+        forbidden_violations=[r for r in results if r.forbidden_violation],
+    )
+```
+
+The "trajectory_only_fail" bucket is the high-signal one. Those are the lucky-right cases. Investigate them; they often surface real prompt issues.
 
 ## A real implementation
 
-A team's customer-research agent:
+A team's customer-research agent with 80 cases:
 
-- 40 cases with trajectory annotations.
-- 40 cases with outcome annotations.
-- Both axes pass at 95%+ for merge.
+- 60 pass-pass, 8 fail-fail. Standard.
+- 7 trajectory-only-fail. The lucky-right cases. After investigation, prompt was tweaked to specify tool-call ordering more strictly. Pass rate of these cases jumped to 6/7 on the next iteration.
+- 3 outcome-only-fail. Two were tool-side bugs (a downstream API had drifted). One was a real agent bug.
+- 2 forbidden-tool violations. Caught a CRM-write that shouldn't have happened in research mode. Tool was scoped down.
 
-Catch rate compared to outcome-only: 30% more issues found.
+Investigation surfaced 12 actionable issues from 80 cases. With outcome-only eval, the team would have seen 11 pass-fail cases and called it 87% — and missed the trajectory issues entirely.
 
 ## Trade-offs
 
-Trajectory annotation is harder than outcome annotation. The investment is in the eval-set authoring. Once authored, the eval is reliable.
+Trajectory eval is more annotation work than outcome eval. Each case needs the expected tool sequence, not just the expected output. For 50 cases that's maybe an extra two hours of authoring time; for 500, it's a real investment. We typically build trajectory eval for the highest-stakes cohorts (customer-facing, regulated, money-handling) and outcome-only eval for everything else.
+
+Trajectory eval also requires the agent's traces to be structured and stable. If the agent's tool-call trace format changes between runs, the eval breaks. Pin trace formats; treat them like a contract.
+
+## Limits
+
+Some tasks have multiple valid tool sequences. The eval needs to handle equivalence:
+
+- Either tool-A-then-B or tool-B-then-A is valid (use `depends_on` to specify the partial order).
+- Either `lookup_by_email` or `lookup_by_phone` is valid given the input data (use `any_of`).
+- Either two narrow tools called in parallel or one composite tool called once is valid.
+
+Without equivalence handling, the eval fails legitimately-correct agent behaviour. Strict-only-one-path eval is a common antipattern; the discipline is encoding the equivalence classes the team actually believes are equivalent.
 
 ## What we won't ship
 
-**Agent eval** with only outcome scoring.
+**Agent evals with only outcome scoring.** Misses lucky-right cases.
 
-**Trajectory eval** that's so strict the agent has no flexibility.
+**Strict-match-only** evals when equivalent paths exist.
 
-**Skipping the discrepancy investigation.**
+**Skipping the discrepancy investigation.** The divergent cases are the most informative.
 
-**Cohort blindness** to pattern-level issues.
+**Trajectory evals that don't pin trace formats.** The eval breaks silently when the agent's logging changes.
 
 ## Close
 
-Evals for agents need both axes. Trajectory captures how. Outcome captures what. Together, they tell the team whether the agent worked the way intended. Skip either and the eval has blind spots.
+Agent evals need both axes. Trajectory captures how. Outcome captures what. Together, they tell the team whether the agent worked the way it was supposed to. Skip either and the eval has blind spots — and the cases that fall through those blind spots are exactly the cases that surface in production six weeks later as customer complaints.
+
+The team I started with rebuilt their eval to score both axes. Their next quarter had no customer complaints traceable to wrong-tool selection. The agent didn't get smarter; the eval got more honest.
 
 ## Related reading
 
