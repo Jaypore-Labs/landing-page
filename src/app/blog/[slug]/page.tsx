@@ -4,8 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Calendar, Clock, Linkedin, Twitter, User } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
-import { getPostBySlug, getAllPostSlugs, getAllPosts, slugify } from "@/lib/blog";
-import { findSeriesBySlug } from "@/data/series";
+import { getPostBySlug, getAllPostSlugs, getAllPosts } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
 
 interface PageProps {
@@ -89,18 +88,9 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!post) notFound();
 
   const allPosts = getAllPosts();
-  const seriesSlug = post.series ? slugify(post.series) : null;
-  const seriesMeta = seriesSlug ? findSeriesBySlug(seriesSlug) : undefined;
-  const seriesSiblings = post.series
-    ? allPosts
-        .filter((p) => p.series === post.series && p.slug !== slug)
-        .sort((a, b) => (a.seriesOrder ?? 999) - (b.seriesOrder ?? 999))
-    : [];
-  const relatedPosts = (
-    seriesSiblings.length > 0
-      ? seriesSiblings
-      : allPosts.filter((p) => p.slug !== slug && p.category === post.category)
-  ).slice(0, 3);
+  const relatedPosts = allPosts
+    .filter((p) => p.slug !== slug && p.category === post.category)
+    .slice(0, 3);
 
   const shareUrl = `${siteConfig.url}/blog/${slug}`;
 
@@ -138,20 +128,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             Back to journal
           </Link>
 
-          <div className="flex flex-wrap items-center gap-3 mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-6">
-            <span>{post.category}</span>
-            {seriesMeta && (
-              <>
-                <span className="text-paper/30">/</span>
-                <Link
-                  href={`/series/${seriesMeta.slug}`}
-                  className="text-accent hover:underline underline-offset-4"
-                >
-                  {seriesMeta.eyebrow} · {seriesMeta.shortTitle}
-                  {post.seriesOrder ? ` · #${String(post.seriesOrder).padStart(2, "0")}` : ""}
-                </Link>
-              </>
-            )}
+          <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-6">
+            {post.category}
           </div>
 
           <h1 className="display-tight text-paper text-[clamp(2.25rem,6vw,5.5rem)] mb-8">

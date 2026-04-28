@@ -1,12 +1,10 @@
 ---
 title: "Context engineering: what to load, what to defer"
 description: "The context window is a budget. Spending it badly is the most common production failure mode."
-date: "2026-08-19"
+date: "2026-04-20"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["AI Agents", "Context Engineering", "Engineering", "Building Agents", "LLM"]
-series: "Building agents"
-seriesOrder: 6
 ---
 
 A team's agent worked perfectly in testing and failed in production. The bug: in testing, the user's history fit easily in context. In production, with multi-turn conversations, the context grew until earlier instructions got crowded out. The agent forgot what it was supposed to do.

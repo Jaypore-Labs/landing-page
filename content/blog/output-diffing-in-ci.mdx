@@ -1,12 +1,10 @@
 ---
 title: "Output diffing in CI"
 description: "Diffing the model's output against expected catches regressions early. The diff is the eval."
-date: "2026-10-15"
+date: "2026-03-04"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Diffing", "Engineering", "Predictable Output", "CI"]
-series: "Predictable AI output"
-seriesOrder: 22
 ---
 
 A team's prompt change passed the eval. They merged. Two weeks later, customer complaints surfaced about a category of behaviour the eval hadn't covered. The team realised: the eval had checked accuracy, not output. Output had drifted on cases the eval didn't flag.
@@ -79,7 +77,6 @@ Output diffing in CI catches regressions accuracy alone misses. The diff is info
 
 - [Drift catchers](/blog/drift-catchers) — companion monitoring.
 - [Versioning model + prompt as a unit](/blog/versioning-model-and-prompt) — surrounding pattern.
-- [Predictable output series](/series/predictable-ai-output) — wider context.
 
 ---
 

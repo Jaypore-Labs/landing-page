@@ -1,12 +1,10 @@
 ---
 title: "The judge pattern: agents that grade other agents"
 description: "Two model calls beat one when correctness matters more than latency. The judge pattern is the discipline."
-date: "2026-08-20"
+date: "2026-03-16"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["AI Agents", "LLM Evals", "Engineering", "Building Agents", "Quality"]
-series: "Building agents"
-seriesOrder: 7
 ---
 
 A team's customer-facing agent had been hallucinating product features. The eval set caught most of it but production traffic surfaced new patterns the eval didn't cover. The fix: a judge model that runs on every output before it goes to the customer.

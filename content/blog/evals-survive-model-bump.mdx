@@ -1,12 +1,10 @@
 ---
 title: "Evals that survive a model bump"
 description: "Provider model upgrades break evals if the eval depends on specific model behaviour. The discipline is decoupling."
-date: "2026-12-28"
+date: "2026-03-12"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Evals", "Model Bump", "Engineering", "Output Testing", "Migration"]
-series: "Evals & output testing"
-seriesOrder: 24
 ---
 
 A team's eval scored at 96% on model X. Provider released model Y. Same eval scored at 78%. The team panicked. Investigation revealed: the eval was over-fit to model X's specific phrasings. Model Y was producing different but equally valid outputs.

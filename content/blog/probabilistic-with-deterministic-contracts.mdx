@@ -1,12 +1,10 @@
 ---
 title: "Why probabilistic systems still need deterministic contracts"
 description: "LLMs are probabilistic; the systems they live in are not. The contract is the bridge."
-date: "2026-09-16"
+date: "2026-03-20"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Engineering", "Predictable Output", "Contracts"]
-series: "Predictable AI output"
-seriesOrder: 1
 ---
 
 A team shipped an LLM-powered feature that worked 92% of the time and broke production code 8% of the time. The 8% wasn't random — it was the LLM occasionally returning JSON with a trailing comma, an extra field, or a slight schema variance. The team's downstream code didn't tolerate variance. Each variance was a paged incident.

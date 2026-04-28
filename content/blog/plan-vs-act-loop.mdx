@@ -1,12 +1,10 @@
 ---
 title: "Plan vs. act: the agent loop everyone gets wrong"
 description: "Most agent failures trace to one missing step — the explicit plan before action. The two-step loop is the design."
-date: "2026-08-12"
+date: "2026-03-25"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["AI Agents", "Agent Architecture", "Engineering", "Building Agents"]
-series: "Building agents"
-seriesOrder: 1
 ---
 
 Most failed agents we've audited fail in the same way. The user asks for something complex. The agent immediately starts taking actions. Halfway through, it realises step 3 should have been step 5. Or it does step 4, which conflicts with step 2. Or it does six steps and forgets why it started.
@@ -85,13 +83,7 @@ Many teams' first agents are one-shot. They demo well. They survive the simple c
 
 The shift to plan-then-act is more a discipline than a technical change. The model is the same. The architecture is different. The reliability gain is large.
 
-## What this series will cover
-
-The next 24 articles walk specific patterns: tool design, skills files, managed agents, sub-agents, context engineering, judges, memory, failure modes, long-horizon work, observability, prompt evolution, cost guardrails, safety, multimodal, voice, browsing, code-writing, CI deployment, versioning, A/B testing, rollback, explanation, multi-agent orchestration, retirement.
-
-Each one is a piece of the architecture that makes agents survive past the demo.
-
-## Close
+## What ## Close
 
 The plan-vs-act loop is the architectural decision that makes agents production-grade. The plan is reviewable. The acting is procedural. The model is used twice — for different work, with different prompts. The reliability gain compounds.
 

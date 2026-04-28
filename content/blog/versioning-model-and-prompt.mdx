@@ -1,12 +1,10 @@
 ---
 title: "Versioning model + prompt as a unit"
 description: "The model and the prompt are coupled. Versioning them together is the discipline that makes regressions tractable."
-date: "2026-10-01"
+date: "2026-04-20"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Versioning", "Engineering", "Predictable Output", "Reproducibility"]
-series: "Predictable AI output"
-seriesOrder: 12
 ---
 
 A team's output quality dropped overnight. Investigation: the provider had bumped the model. The team's prompt had been engineered against the previous model. Same prompt, new model, different outputs. The team had no way to compare; nothing was versioned together.

@@ -1,12 +1,10 @@
 ---
 title: "Tool failure modes: timeouts, retries, idempotency"
 description: "Tools fail in known ways. The discipline is engineering for the failure, not pretending it won't happen."
-date: "2026-08-24"
+date: "2026-04-21"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["AI Agents", "Tool Design", "Engineering", "Building Agents", "Reliability"]
-series: "Building agents"
-seriesOrder: 9
 ---
 
 A team's agent triggered a duplicate-charge incident. The agent had called the payment-processing tool, the tool had timed out, the agent had retried, the tool had succeeded both times. The customer saw two charges. The team saw a Saturday on the phone with a regulator.

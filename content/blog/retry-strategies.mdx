@@ -1,12 +1,10 @@
 ---
 title: "Retry strategies that don't compound errors"
 description: "Naive retries make failures worse. Engineered retries with idempotency, backoff, and budgets are reliability tools."
-date: "2026-09-22"
+date: "2026-04-30"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Retry", "Engineering", "Predictable Output", "Reliability"]
-series: "Predictable AI output"
-seriesOrder: 5
 ---
 
 A team's "automatic retry on failure" pattern caused a customer-facing incident. The LLM's first call had succeeded but the team's downstream connection had timed out. The retry produced a duplicate output. The user saw the same email twice. Compounding the original failure.

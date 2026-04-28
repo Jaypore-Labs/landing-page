@@ -1,12 +1,10 @@
 ---
 title: "Fall-back chains: cheap → expensive → human"
 description: "When the cheap model fails, escalate to the expensive one. When that fails, escalate to a human."
-date: "2026-10-06"
+date: "2026-04-27"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Fallback", "Engineering", "Predictable Output", "Reliability"]
-series: "Predictable AI output"
-seriesOrder: 15
 ---
 
 A team's classifier ran on a smaller, cheaper model. 95% of queries were handled cleanly. 5% produced low-confidence outputs. Without fallback, those 5% became silent errors. With fallback, they routed to a more capable model, and from there to humans for the cases neither model could handle.
@@ -88,7 +86,6 @@ Fall-back chains are the architectural pattern that combines cost discipline wit
 
 - [Confidence calibration](/blog/confidence-calibration) — preceding discipline.
 - [Cost guardrails](/blog/cost-guardrails) — same cost engineering.
-- [Predictable output series](/series/predictable-ai-output) — wider context.
 
 ---
 

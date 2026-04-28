@@ -1,17 +1,15 @@
 ---
 title: "The new test pyramid for AI products"
 description: "The classic test pyramid still applies. New layers — evals, drift, behavioural — sit alongside it."
-date: "2026-10-21"
+date: "2026-03-11"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Test Pyramid"]
-series: "Testing in the age of AI"
-seriesOrder: 1
 ---
 
 The classic test pyramid — unit at the base, integration in the middle, end-to-end at the top — still applies to AI products. AI just adds new layers that don't fit the pyramid's existing slots.
 
-This series walks the new shape. It's not "throw out everything you knew." It's "the pyramid grew sideways."
+It's not "throw out everything you knew." It's "the pyramid grew sideways."
 
 ## Where unit tests still earn their keep
 
@@ -74,19 +72,12 @@ For a typical AI feature:
 
 Each layer runs at appropriate cadence. Each catches what the others miss.
 
-## What this series will cover
-
-The next 24 articles walk specific testing topics: integration tests for AI features, golden-set discipline, behavioural assertions, property-based testing for LLMs, snapshot tests, eval-driven development, regression cohorts, drift tests, CI strategy, determinism harnesses, mocking, test data management, PII in fixtures, agent traces, streaming responses, retrieval pipelines, e2e tests, performance, cost tests, accessibility, privacy, prompt injection, UX, post-launch.
-
-## Close
-
-The new test pyramid integrates evals as a first-class layer alongside the classic levels. Unit at the base, integration in the middle, evals beside integration, end-to-end at the top. Skip any layer and the product has a blind spot.
+## What Unit at the base, integration in the middle, evals beside integration, end-to-end at the top. Skip any layer and the product has a blind spot.
 
 ## Related reading
 
 - [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — eval framing.
 - [ML: eval harness from a spec](/blog/ml-eval-harness-from-spec) — eval scaffolding.
-- [Predictable AI output series](/series/predictable-ai-output) — what the eval layer tests.
 
 ---
 

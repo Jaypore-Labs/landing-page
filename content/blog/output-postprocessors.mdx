@@ -1,12 +1,10 @@
 ---
 title: "Output post-processors that don't hide the truth"
 description: "Post-processors clean the model's output. Done badly, they hide failures. Done well, they make the failures visible."
-date: "2026-10-07"
+date: "2026-03-06"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Post-processing", "Engineering", "Predictable Output", "Transparency"]
-series: "Predictable AI output"
-seriesOrder: 16
 ---
 
 A team had a post-processor that "cleaned" model outputs. It stripped boilerplate, normalised whitespace, and corrected common issues. It also silently dropped fields the model occasionally produced incorrectly. The team thought their model accuracy was 98%. It was 91%; the post-processor was hiding the difference.
@@ -79,7 +77,6 @@ Post-processors are useful when transparent. The discipline is logging actions, 
 
 - [Output validation libs](/blog/output-validation-libs) — preceding layer.
 - [Drift catchers](/blog/drift-catchers) — similar visibility discipline.
-- [Predictable output series](/series/predictable-ai-output) — wider context.
 
 ---
 

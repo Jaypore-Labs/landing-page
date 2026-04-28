@@ -1,52 +1,158 @@
 ---
 title: "The agent maturity curve"
 description: "Most teams talk about 'agents in production' but mean wildly different things. Here's the curve, the rungs, and why the boring milestones matter."
-date: "2026-04-29"
+date: "2026-03-02"
 author: "Yash Shah"
 category: "AI"
 tags: ["AI Agents", "Production AI", "Engineering", "AI Strategy"]
-series: "AI agents in industry"
-seriesOrder: 1
 ---
 
-Every other week a team tells us they have *agents in production*. Half the time they mean a Slack bot that uses an LLM. The other half they mean a tool-using system that's writing into the company's general ledger. Both are real. They're not on the same planet.
+I had two very different calls last Tuesday. Both were with founders. Both told me they had "an AI agent in production." One was a Slack bot in their team's workspace. It read messages, summarised them at end of day, and posted into a private channel. Two of their engineers had built it on a Sunday. The other was a system writing entries into the company's general ledger. It had a named owner, an evaluation suite, an on-call rotation, and a contract with their auditor that explicitly listed it as a control.
 
-Before we run a series on agents in industry, we need a shared map. So here it is — five rungs of agent maturity, ordered by what's actually at stake.
+These two things are both "agents in production." They are not on the same planet.
 
-## The five rungs
+If you are running an AI program at a company, this confusion is expensive. You promote work that hasn't been earned. You dismiss work that has been. You ask "are we ahead?" and get an answer that depends entirely on how the team you happened to ask defines the word.
 
-**Rung 1 — Pilot.** A single engineer or small team has an agent running in a sandbox. Maybe it's hooked to a real LLM, maybe a tool or two. There's no reviewer, no eval set, no on-call. The agent's output goes into a Notion doc or a Slack channel. **Stakes: zero.** Failure is invisible. Most "agent demos" live here forever.
+I have been working with teams shipping agents into messy industries — healthcare clinics, factory floors, regional banks, brokerages — for the better part of two years now. The map I keep drawing for them is the one I want to share here. Five rungs. Each one a different kind of stake. Each transition a different kind of work.
 
-**Rung 2 — POC.** Same agent, now running for a few real users. The team has *some* logging and *one* manual reviewer. There's a prompt-versioning convention, even if it's just a Git branch. The agent output influences a human decision but doesn't *make* one. **Stakes: low.** Failures are caught by the reviewer or the user.
+## What the rung is, what it isn't
 
-**Rung 3 — Scoped production.** The agent has a real owner, an eval suite running in CI, and a defined scope. The output is shipped to users without a manual reviewer in the loop, but only inside a narrow lane (e.g., "summarise this support ticket," not "send this email"). There's a kill switch. **Stakes: medium.** Failures degrade UX or burn money quietly.
+The rung is not "how good is the model." It is not "how many tools does it have." It is not "how many users." It is the answer to a single question:
 
-**Rung 4 — Owned production.** The agent has a product manager. It has SLOs (latency, cost, quality). It runs against a regression cohort that gets added to weekly. There's a runbook. There's an on-call. The agent does take some terminal actions — sends emails, creates tickets, posts updates. The blast radius is bounded by tool design. **Stakes: high.** Failures show up in support, in dashboards, in invoices.
+> If this agent does the wrong thing, what happens, and who finds out?
 
-**Rung 5 — Retired.** The agent is shut down. Either the workflow outgrew it, the model behind it changed and recovery wasn't worth the effort, or — most often — the team realised the underlying need was solved by a deterministic pipeline plus a tiny model. **Stakes: zero again.** What matters is that the team learnt something and wrote it down.
+That's it. That single question separates a Slack-bot pilot from a system the auditor takes seriously. Everything else — eval coverage, observability, documentation — is the engineering response to that question.
+
+## Rung 1 — Pilot
+
+A single engineer or small team has the agent running. It is hooked to a real LLM, often through `@anthropic-ai/sdk` or whichever provider is closest at hand:
+
+```python
+from anthropic import Anthropic
+client = Anthropic()
+
+response = client.messages.create(
+    model="claude-opus-4-7",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": user_prompt}],
+)
+print(response.content[0].text)
+```
+
+There is no reviewer. There is no eval set. The agent's output goes into a Notion doc or a Slack channel where two people might look at it. The team is excited. They demoed it to the CEO. The CEO said "this is great, ship it" — but did not say where, when, or under what guarantees.
+
+**Stakes: zero.** Failure is invisible. Most "AI agent demos" you see at conferences and on LinkedIn live here forever. There is nothing wrong with this rung. It is where every agent starts. The question is whether you stay here for six months or three years.
+
+The signal that you've outgrown Rung 1 is when somebody who isn't on the build team says, with a straight face, "Can we use this for X?" — and X is something that matters.
+
+## Rung 2 — POC
+
+The same agent, but now real users are touching it. Maybe seven of them. Maybe seventy. The team has logging, even if "logging" means a Postgres table called `agent_runs` with columns for input, output, and timestamp:
+
+```sql
+CREATE TABLE agent_runs (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     UUID NOT NULL,
+    request     JSONB NOT NULL,
+    response    TEXT,
+    tokens_in   INTEGER,
+    tokens_out  INTEGER,
+    cost_usd    NUMERIC(10, 4),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX agent_runs_created_idx ON agent_runs (created_at DESC);
+```
+
+There's one manual reviewer — usually the engineer who built the thing — and a prompt-versioning convention, even if it's just `prompts/v1.txt`, `prompts/v2.txt` checked into Git. The agent's output influences a human decision. It does not make one.
+
+**Stakes: low.** Failures get caught by the reviewer or the user. The blast radius is small.
+
+I worked with an audit firm last year whose tax-research agent lived at Rung 2 for fourteen months. Every senior associate had access to it. They used it to draft research memos that partners always re-wrote. The firm got real value — drafts arrived faster — and never paid the cost of an error, because no draft ever left the partner's desk without a human signature. That was the right rung for them. They eventually moved one workflow to Rung 3, kept everything else at Rung 2, and were honest with themselves about what each one was.
+
+## Rung 3 — Scoped production
+
+This is where things get serious. The agent has:
+
+- A named owner (a real human, not a Slack channel).
+- An eval suite running in CI on every prompt change.
+- A defined scope — *what this agent does and does not do*, in writing.
+- A kill switch wired into the deploy.
+
+The output ships to users without a manual reviewer in the loop, but only inside a narrow lane. "Summarise this support ticket" is a Rung-3 task. "Send this email" is not. The eval might look something like this in pseudocode:
+
+```python
+# evals/support_summary.py
+def test_summary_includes_resolution():
+    cases = load_eval_set("support_tickets_v3.jsonl")
+    failures = []
+    for case in cases:
+        out = run_agent(case.ticket)
+        if not has_resolution_field(out):
+            failures.append(case.id)
+    assert len(failures) / len(cases) < 0.02, f"Failure rate above 2%: {failures}"
+```
+
+If that test fails on a PR, the PR doesn't merge. That is the discipline.
+
+**Stakes: medium.** Failures degrade UX or burn money quietly. They do not put anyone in physical danger; they do not generate a regulator letter; but they do produce angry customers and confused metrics. Recovery time is hours, not minutes.
+
+The thing that pushes a team from Rung 2 to Rung 3 is rarely technical. The model didn't get better; the discipline did. Usually it's a stakeholder — a head of support, a head of ops — saying "I would rather have one agent that's actually owned than five that someone vaguely hopes work."
+
+## Rung 4 — Owned production
+
+The agent has a product manager. Its KPIs go on the company's regular metrics dashboard. It has SLOs. It has a runbook in the on-call wiki. It has an alert that fires when its cost-per-request exceeds threshold:
+
+```yaml
+# alerts/agent_cost.yaml
+- alert: AgentCostBudgetExceeded
+  expr: |
+    rate(agent_cost_usd_total{agent="support-tier1"}[1h])
+      > 4.16  # $100/day
+  for: 15m
+  annotations:
+    summary: "Support agent burning cost above plan"
+    runbook: "https://wiki.internal/agent-cost-incident"
+```
+
+It takes terminal actions — it sends emails, it creates tickets, it posts to the public status page — but the *blast radius* of any single action is bounded by tool design. The email-send tool requires a customer-id and template-id; it cannot send arbitrary text to arbitrary recipients. The ticket-creator tool can only file in the project the agent is configured to touch. The status-page tool requires a confirmation token regenerated every five minutes by the on-call.
+
+**Stakes: high.** Failures show up in support, in dashboards, in invoices. They are recoverable but expensive. A bad batch of agent-sent emails is a half-day of customer-success comms work. A bad ticket-routing run is a quarter of a sprint's productivity. Recovery time is hours to a day.
+
+There aren't many Rung-4 agents in the world right now. I can think of maybe nine I've personally seen. They share a few traits: an engineering manager who treats the agent like a service, a product manager who treats it like a product, and an on-call rotation that treats it like infrastructure.
+
+## Rung 5 — Retired
+
+The agent is shut down. Pick your reason:
+
+- The workflow it served changed shape and the agent no longer fits.
+- The team realised the underlying need was solved by a 50-line deterministic pipeline plus a tiny model — no LLM required.
+- The provider deprecated the model and the team chose not to migrate.
+- The cost-to-value math flipped.
+
+**Stakes: zero again.** What matters is what the team learned and whether they wrote it down. A retired agent that produced a clear post-mortem and a "what we'd do differently" doc is worth more to the next team than a Rung-3 agent that nobody understands.
+
+This is the rung most teams never reach because they never decommission anything. They let the agent rot until it breaks, and then they call the breakage an incident. Treat the retirement as a deliberate act and your next agent gets better.
 
 ## What teams plateau on
 
-Most teams in industry sit at Rung 2. They have a few POCs, none of which has earned the budget for an eval suite, an owner, or an on-call. The thing that pushes a team to Rung 3 is rarely technical. It's a stakeholder who says "I'd rather have one agent that's actually owned than five that someone vaguely hopes work." The thing that pushes a team to Rung 4 is even rarer: an outage that nobody owned, followed by the discipline to never let that happen again.
+Most teams sit at Rung 2 indefinitely. Three or four POCs, none of which has earned the budget for an eval suite, an owner, or an on-call. The plateau is not technical. It is organisational. Somebody has to say "we are picking one of these and giving it the resources of a real product." Usually that person is a director or VP who has read enough internal updates to be tired of the word "promising."
 
-This series is mostly about Rungs 3 and 4 — agents that real industries are betting on. We'll write about healthcare, legal, finance, manufacturing, retail, and the rest in turn. For each industry we'll ground the article in a specific deployment, with the eval-set design, the kill-switch design, and the reviewer pattern. The boring milestones.
+The thing that pushes a team from Rung 3 to Rung 4 is rarer still: an outage that nobody owned, followed by the team's discipline to never let that happen again. I have watched two companies make this jump. Both did it after a Friday afternoon that nobody wants to relive.
 
 ## How to know which rung you're on
 
-Four questions. If you can answer "yes" to all of them, you're at Rung 3 or above. If not, you're at Rung 2.
+Four questions. If the answer is "yes" to all four, you're at Rung 3 or above. If not, you're at Rung 2.
 
-1. **Does the agent have a named owner who can revert it within an hour?**
-2. **Is there an eval set that runs in CI on every prompt change, with a real pass/fail gate?**
-3. **Is there a kill switch wired into the production deploy?**
-4. **Are failures detectable by something other than a customer email?**
+1. Does the agent have a named owner who can revert it within an hour?
+2. Is there an eval set that runs in CI on every prompt change, with a real pass/fail gate?
+3. Is there a kill switch wired into the production deploy, and has someone tested it in the last quarter?
+4. Are failures detectable by something other than a customer email?
 
-A surprising number of "agents in production" fail at question 4.
+A surprising number of "agents in production" fail at question four. If your only failure-detection mechanism is the support inbox, you are at Rung 2 wearing a Rung-3 costume.
 
-## Close
+## What For each one I'll ground the article in a specific deployment we've worked on or watched closely. The eval-set design. The kill-switch design. The reviewer pattern. The boring milestones.
 
-Agents are not a binary thing — "in production" or "not in production." They're a curve. Most teams telling you they have agents in production are at a different point on the curve than the team next door. The interesting work happens between Rung 3 and Rung 4. The boring milestones are what gets you there.
-
-Over the next 24 articles in this series we'll walk through specific industries — healthcare, legal, finance, manufacturing, logistics, education, government, retail, energy, construction, pharma, media, hospitality, SaaS, agriculture, non-profit, telecom, and research. Each one with concrete deployment patterns, not just frameworks.
+The rungs are how I'll keep the conversations honest. When somebody tells you "we have agents in production," you'll know to ask: which rung?
 
 ## Related reading
 
@@ -56,4 +162,4 @@ Over the next 24 articles in this series we'll walk through specific industries 
 
 ---
 
-*We build AI-enabled software and help businesses put AI to work. If you're trying to move an agent from Rung 2 to Rung 3, we'd love to hear about it. [Get in touch.](/contact)*
+*We build AI-enabled software and help businesses put AI to work. If you're trying to move an agent from Rung 2 to Rung 3, [get in touch.](/contact)*

@@ -1,12 +1,10 @@
 ---
 title: "Idempotency keys for LLM calls"
 description: "Deduplication on the LLM call side prevents duplicate work, duplicate costs, and duplicate outputs to users."
-date: "2026-09-30"
+date: "2026-03-27"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Idempotency", "Engineering", "Predictable Output", "Reliability"]
-series: "Predictable AI output"
-seriesOrder: 11
 ---
 
 A team's customer-email-generation feature shipped with retry-on-network-failure. The first incident was an unrelated timeout that didn't actually fail upstream. The retry succeeded; the original call had also succeeded. The customer received two emails.
@@ -87,7 +85,6 @@ Idempotency keys are basic API engineering applied to LLM calls. The implementat
 
 - [Tool failure modes](/blog/tool-failure-modes) — idempotency in tool context.
 - [Retry strategies](/blog/retry-strategies) — surrounding pattern.
-- [Predictable output series](/series/predictable-ai-output) — wider context.
 
 ---
 

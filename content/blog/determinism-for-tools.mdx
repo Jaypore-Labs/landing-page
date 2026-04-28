@@ -1,12 +1,10 @@
 ---
 title: "Determinism for tool calls: keys, ordering, side-effects"
 description: "Tool calls have side effects. Determinism is the engineering that makes side effects safe to retry."
-date: "2026-10-12"
+date: "2026-03-04"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Tools", "Engineering", "Predictable Output", "Determinism"]
-series: "Predictable AI output"
-seriesOrder: 19
 ---
 
 A team's agent created a customer record, then crashed. The retry created a second customer record. The team's customer database had a duplicate that took hours to find.
@@ -82,7 +80,6 @@ Determinism for tool calls is the engineering that makes retries safe. Side-effe
 
 - [Idempotency keys for LLM calls](/blog/idempotency-keys-for-llm-calls) — companion pattern.
 - [Tool failure modes](/blog/tool-failure-modes) — surrounding engineering.
-- [Predictable output series](/series/predictable-ai-output) — wider context.
 
 ---
 

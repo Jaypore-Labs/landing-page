@@ -1,12 +1,10 @@
 ---
 title: "Structured output: JSON mode, schemas, why one beats the other"
 description: "JSON mode and schema mode are not the same thing. The schema is what makes outputs trustworthy."
-date: "2026-09-17"
+date: "2026-03-30"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Structured Output", "Engineering", "Predictable Output", "Schemas"]
-series: "Predictable AI output"
-seriesOrder: 2
 ---
 
 A team shipped a feature using "JSON mode" assuming it gave them structured output. The model returned JSON. The JSON's structure varied wildly: sometimes an array of objects, sometimes a single object, sometimes a nested wrapper. The downstream code broke on every variant.

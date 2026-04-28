@@ -1,12 +1,10 @@
 ---
 title: "MCP tool schemas: arg shapes that help"
 description: "Schemas tell the AI what arguments mean. Precision in schemas reduces wrong-arg rates."
-date: "2027-01-06"
+date: "2026-03-26"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["MCP", "Schemas", "Engineering", "Tool Design", "Arguments"]
-series: "MCP & AI protocols"
-seriesOrder: 6
 ---
 
 A team's MCP tool took a parameter `id`. Sometimes the AI sent a customer ID; sometimes an invoice ID. The tool returned errors. The cause: the schema said `id: string` without specifying which entity.

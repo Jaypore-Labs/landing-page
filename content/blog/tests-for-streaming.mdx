@@ -1,12 +1,10 @@
 ---
 title: "Tests for streaming responses"
 description: "Streaming responses have their own contract. The tests verify the stream, not just the final text."
-date: "2026-11-11"
+date: "2026-03-05"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Streaming"]
-series: "Testing in the age of AI"
-seriesOrder: 16
 ---
 
 A team's streaming endpoint returned text that was eventually correct but arrived in chunks that broke their UI. The tests checked the assembled final text — clean. The stream itself — broken. Users saw partial words, missing punctuation, jarring transitions.

@@ -1,12 +1,10 @@
 ---
 title: "The judge pattern for confidence"
 description: "Pay double for confidence when the cost of being wrong is higher than the cost of two model calls."
-date: "2026-09-23"
+date: "2026-04-09"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Judges", "Engineering", "Predictable Output", "Quality"]
-series: "Predictable AI output"
-seriesOrder: 6
 ---
 
 Most teams' first LLM feature has one model call per request. The team ships, accuracy is 92%, the 8% misses cause occasional incidents. Adding a judge — a second model call that grades the first — bumps reliability to 98%+. The cost: double the inference. The trade-off: usually worth it for stakes-bearing features.

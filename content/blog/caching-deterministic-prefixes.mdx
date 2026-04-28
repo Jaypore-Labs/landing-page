@@ -1,12 +1,10 @@
 ---
 title: "Caching deterministic prefixes"
 description: "Long, repeated prompt prefixes are the cheapest optimisation in LLM ops. Cache them."
-date: "2026-10-02"
+date: "2026-04-10"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Caching", "Engineering", "Predictable Output", "Cost"]
-series: "Predictable AI output"
-seriesOrder: 13
 ---
 
 A team's customer-support agent had a 4,000-token system prompt + tool definitions + few-shot examples. Every call paid for the same 4,000 tokens of input. With prompt caching, that prefix cost dropped to 10% of the original. Latency dropped meaningfully too.
@@ -75,7 +73,6 @@ Caching deterministic prefixes is high-leverage, low-effort. Most teams can adop
 
 - [Cost guardrails](/blog/cost-guardrails) — surrounding cost discipline.
 - [Context engineering](/blog/context-engineering) — what's in the prefix.
-- [Predictable output series](/series/predictable-ai-output) — wider context.
 
 ---
 

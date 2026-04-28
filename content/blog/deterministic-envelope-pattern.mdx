@@ -1,17 +1,15 @@
 ---
 title: "The deterministic-envelope pattern"
 description: "Wrap probabilistic outputs in deterministic post-processing. The envelope is the productisation."
-date: "2026-10-20"
+date: "2026-03-17"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["LLM", "Architecture", "Engineering", "Predictable Output", "Patterns"]
-series: "Predictable AI output"
-seriesOrder: 25
 ---
 
-The closing pattern of this series is the deterministic-envelope. The model produces output. The envelope wraps it: validation, normalisation, citation-grounding, redaction, formatting. The customer never sees the raw model output. They see what survives the envelope.
+The deterministic-envelope is the closing pattern that ties together the predictable-output discipline. The model produces output. The envelope wraps it: validation, normalisation, citation-grounding, redaction, formatting. The customer never sees the raw model output. They see what survives the envelope.
 
-This pattern integrates everything the series has covered.
+This pattern integrates the predictable-output disciplines covered in companion articles.
 
 ## The envelope concept
 
@@ -59,7 +57,7 @@ def respond_to_user(user_input):
     return compose_response(redacted)
 ```
 
-Each step is its own engineering work covered earlier in the series. The envelope composes them.
+Each step is its own engineering work covered in companion articles. The envelope composes them.
 
 ## Reviewer ritual
 
@@ -103,15 +101,14 @@ The envelope adds latency and code complexity. Trade-offs:
 
 ## Close
 
-The deterministic-envelope pattern is the closing of this series. Probabilistic models produce outputs. Deterministic envelopes wrap those outputs in the discipline that makes them shippable. Schema, citation, confidence, refusal, style, redaction — each a layer. Together, the envelope. Skip the envelope and the agent's outputs are raw model variance reaching users directly.
+The deterministic-envelope pattern is what ties the predictable-output discipline together. Probabilistic models produce outputs. Deterministic envelopes wrap those outputs in the discipline that makes them shippable. Schema, citation, confidence, refusal, style, redaction — each a layer. Together, the envelope. Skip the envelope and the agent's outputs are raw model variance reaching users directly.
 
 This concludes the predictable-output series. The next series — testing in the age of AI — covers the discipline that catches what envelope alone misses.
 
 ## Related reading
 
-- [Probabilistic with deterministic contracts](/blog/probabilistic-with-deterministic-contracts) — series opener.
+- [Probabilistic with deterministic contracts](/blog/probabilistic-with-deterministic-contracts) 
 - [The agent maturity curve](/blog/agent-maturity-curve) — where this maturity lives.
-- [Predictable output series](/series/predictable-ai-output) — full series.
 
 ---
 
