@@ -1,0 +1,83 @@
+---
+title: "MCP for CI/CD: build-system tools as agent inputs"
+description: "Build systems exposed via MCP let agents reason about pipelines."
+date: "2027-02-01"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "CI/CD", "Engineering", "Build Systems", "DevOps"]
+series: "MCP & AI protocols"
+seriesOrder: 24
+---
+
+A team's CI exposed MCP for build-system access. The agent could trigger builds, read logs, and check status. What used to be a separate UI became conversational.
+
+MCP for CI/CD lets agents reason about pipelines.
+
+## The CI integration
+
+Common tools:
+
+- `trigger_build(branch, options?)`
+- `get_build_status(build_id)`
+- `get_build_logs(build_id)`
+- `list_recent_builds(branch?)`
+- `cancel_build(build_id)`
+
+The AI assistant can interact with the build system without the user leaving the chat.
+
+## Reviewer ritual
+
+PR review:
+
+- Auth scoped (only authorised users can trigger).
+- Audit log captures who triggered what.
+- Confirmation pattern for destructive actions (cancel).
+
+## A real pipeline
+
+A team's CI MCP server:
+
+- Read tools always available.
+- Trigger requires the user's role and an explicit confirmation.
+- Cancel requires a confirmation with reason.
+- Audit log to a permanent store.
+
+Engineers ask the assistant "is the build green?" instead of opening the CI UI. Time saved compounds.
+
+## Trade-offs
+
+- Convenience: developers stay in the assistant.
+- Risk: more attack surface.
+
+The risk is managed by auth and confirmation discipline.
+
+## Limits
+
+- Some CI operations can't be automated safely (production deploys).
+- Some operations require additional context the assistant doesn't have.
+
+For these, the agent surfaces the option but doesn't execute.
+
+## What we won't ship
+
+**CI MCP servers** without per-user auth.
+
+**Auto-deploy** to production via MCP.
+
+**Skipping confirmation** for destructive actions.
+
+**Servers** without audit logs.
+
+## Close
+
+MCP for CI/CD turns build systems into agent inputs. Read tools enable reasoning. Action tools enable workflow. The discipline keeps it safe. Engineers' workflows compress.
+
+## Related reading
+
+- [MCP for actioning tools](/blog/mcp-actioning-tools) — surrounding pattern.
+- [Agents in CI: scoped, audited, repeatable](/blog/agents-in-ci) — companion topic.
+- [DevOps: CI pipeline diagnosis at 2am](/blog/devops-ci-2am-diagnosis) — same workflow context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're integrating MCP with CI/CD, we'd love to hear about it. [Get in touch.](/contact)*

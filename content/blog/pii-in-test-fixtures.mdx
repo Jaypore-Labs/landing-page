@@ -1,0 +1,91 @@
+---
+title: "PII in test fixtures: the boring legal slope"
+description: "PII in tests is a compliance issue waiting. The redaction pipeline is non-optional."
+date: "2026-11-09"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Privacy"]
+series: "Testing in the age of AI"
+seriesOrder: 14
+---
+
+A team's test fixtures contained customer names, emails, and phone numbers — pulled from production data months ago. Nobody had thought about it. The fixtures sat in the repo, accessible to every engineer, indexed by code search.
+
+PII in test fixtures is a compliance issue waiting. The redaction pipeline is non-optional.
+
+## The redaction rule
+
+Any production data used in tests goes through redaction:
+
+- Names → tokenised pseudonyms.
+- Emails → fake@example.com (with a stable mapping per fixture).
+- Phone numbers → 555-prefix fakes.
+- IDs → sequential fakes.
+- Addresses → fake addresses.
+- Payment info → never.
+- Health info → carefully (HIPAA implications).
+
+Redaction is automated. Manual redaction misses things.
+
+## Tooling
+
+Common patterns:
+
+- Faker library for generation.
+- Detection libraries for finding PII (Microsoft Presidio, etc.).
+- Pipeline that runs detection + redaction on any production sample.
+- CI check that flags potential PII in test fixtures.
+
+## Reviewer ritual
+
+PR review for new test fixtures:
+
+- Did the fixture come from production?
+- Was redaction applied?
+- Does CI flag any potential PII?
+
+## A real workflow
+
+A team's pipeline:
+
+- Sanitisation tool runs on any production data going to test fixtures.
+- CI scans test fixtures for PII patterns; fails if found.
+- Quarterly audit of all fixtures.
+- Documentation of redaction approach.
+
+The team has had zero PII-in-test-fixture incidents since adopting this.
+
+## Compliance
+
+Beyond engineering hygiene, this is a regulatory matter:
+
+- GDPR: PII in tests is a data-handling concern.
+- HIPAA: PHI in tests is a violation.
+- CCPA: similar concerns.
+- SOC 2: tests are part of the auditable scope.
+
+A regulator looking at the team's test code shouldn't find unredacted PII.
+
+## What we won't ship
+
+**Test fixtures** with raw production PII.
+
+**Manual redaction** as the only line of defence.
+
+**No CI checks** for PII patterns.
+
+**Skipping the quarterly audit.**
+
+## Close
+
+PII in test fixtures is the boring slope that becomes a compliance event. Automated redaction. CI checks. Audits. The team's engineering hygiene and regulatory posture both depend on getting this right.
+
+## Related reading
+
+- [Test-data management for AI](/blog/test-data-management-ai) — surrounding pattern.
+- [Privacy tests: PII redaction assertions](/blog/privacy-tests-ai) — companion discipline.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening PII handling, we'd love to hear about it. [Get in touch.](/contact)*

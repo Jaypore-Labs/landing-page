@@ -1,0 +1,86 @@
+---
+title: "Agents in education: tutor agents and the assessment problem"
+description: "Tutoring is hard because tutoring is feedback. Agents that grade their own students rarely teach anything useful."
+date: "2026-05-15"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "EdTech", "Education AI", "Production AI", "Tutoring"]
+series: "AI agents in industry"
+seriesOrder: 13
+---
+
+Tutoring is not lecturing. Lecturing is content delivery; tutoring is *feedback delivery*. The hard part isn't explaining the concept — it's noticing what the student misunderstood and adjusting. Most AI tutors still optimise for the easy half.
+
+The hard half — the noticing — is where agents can be uniquely good or uniquely bad. The line between the two is whether the agent can be trusted to assess the student's work without grading down to its own answer key.
+
+## What a real tutor does
+
+A real tutor reads a student's work and notices three things:
+
+1. **What the student got right** (and confirms it explicitly).
+2. **What the student got wrong** (and gets specific about *what kind* of wrong it is — calculation slip, conceptual misunderstanding, missing prerequisite).
+3. **What to do next** — a problem that targets the misunderstanding without overwhelming the student.
+
+Notice that "give the answer" isn't on the list. A tutor who gives answers makes a student feel better and learn nothing. The economic model of human tutoring rests on this: parents pay because their kid actually improves, not because their kid gets through the homework.
+
+AI tutors that hand out answers under pressure (and they all face pressure — students are good at extracting answers) lose the educational value. The discipline is in saying no.
+
+## Curriculum-aware retrieval
+
+Working tutor agents are tightly bound to a curriculum. They read what the student is supposed to be learning this week, last week, and next week. They know what concepts the student has been assessed on, where the student has struggled, and what the next-skill scaffolding is.
+
+This means a working tutor agent has:
+
+- A curriculum schema that maps lessons to skills to assessments.
+- A per-student state — what's been covered, what's been mastered, what's pending.
+- A retrieval layer that pulls the relevant curriculum chunk into the model's context for every interaction.
+
+Without this, the agent is just a smart chatbot answering homework questions. With it, the agent is actually adjusting to the student.
+
+## Assessment guardrails
+
+The hardest sub-problem: the agent often has to assess the student's answer against the curriculum's expected answer. If the agent is permissive, it congratulates wrong answers. If it's strict, it nitpicks. Neither helps the student learn.
+
+The pattern that works:
+
+- **Compare against multiple acceptable forms.** "8/4" and "2" and "two" are all the same answer. The eval set captures this.
+- **Distinguish process errors from content errors.** A right answer arrived at by wrong reasoning needs different feedback than a wrong answer with right reasoning.
+- **Quote the student's specific work** when giving feedback. Generic feedback is worthless; specific feedback is what makes a kid sit up.
+
+The eval set for the assessment layer is the most important asset in the project. Build it with teachers. Update it weekly. The teacher's tacit knowledge is the ground truth.
+
+## Equity considerations
+
+Tutor agents aren't equal-opportunity if they're not built with care. Three asymmetries to watch:
+
+**Language.** Students whose home language differs from the curriculum's language need different scaffolding. The agent should detect and adapt; if it can't, it shouldn't deploy in those classrooms.
+
+**Reading level.** Younger students or students with lower reading levels can't navigate dense feedback prose. The agent's output should be calibrated to the student's reading level — different output for a third-grader than for an eighth-grader.
+
+**Access.** A tutor agent that requires a parent to be present, or a quiet room, or reliable internet, won't help the kids who already need help most. Build the offline-or-low-bandwidth case from day one.
+
+## What we won't ship
+
+**Pure essay grading without teacher review.** The AP-style essay grader without a teacher in the loop is a regulatory and educational mistake. Teachers grade. Agents draft, suggest, and explain.
+
+**Anything claiming to predict student success.** This drifts into educational discrimination quickly and isn't worth the risk.
+
+**Tutor agents that surveille.** A tutor agent that reports to the teacher every student interaction — including the student's frustration, language, off-topic comments — chills student engagement. Privacy boundaries matter.
+
+## How to start
+
+Pick a single subject and grade level. Build the curriculum schema. Build the eval set with two teachers. Build the agent. Deploy it as an *optional* tool the student can use during homework time. Measure: assessment accuracy, learning gains over a marking period, student-engagement scores. Expand only after the first deployment shows real learning gains.
+
+## Close
+
+Tutor agents are feedback agents. They earn their keep by being curriculum-aware, assessment-rigorous, and equity-conscious. They lose their keep the moment they start handing out answers. Build for the noticing, not the explaining.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — tutor agents on the curve.
+- [Agents in healthcare: scribe yes, nurse no](/blog/agents-in-healthcare) — same line about the agent's authority.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the assessment-eval discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a tutor agent, we'd love to hear about it. [Get in touch.](/contact)*

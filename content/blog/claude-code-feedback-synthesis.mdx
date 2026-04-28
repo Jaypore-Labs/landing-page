@@ -1,0 +1,128 @@
+---
+title: "Product: synthesising 1,000 tickets into 7 themes"
+description: "Customer feedback at scale defeats most product teams. AI employees do the synthesis weekly so PMs can spend time on the decisions."
+date: "2026-06-23"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Product AI", "AI Employees", "Customer Feedback", "Product Management"]
+series: "Claude Code in business"
+seriesOrder: 15
+---
+
+A product leader at a mid-market SaaS told us his team's quarterly customer-feedback review took ten days of one PM's time. The output was usually two themes everyone already knew about and four they'd missed — surfaced too late to influence the roadmap that quarter.
+
+The feedback-synthesis AI employee runs the analysis weekly. Themes surface as they emerge, not after the quarter is over. PMs spend time on the decisions, not the cataloguing.
+
+## The shape of the role
+
+**Title.** Product Operations AI — Customer Feedback Specialist.
+
+**Mission.** Continuously synthesise customer feedback from all channels into themed insights for the product team.
+
+**Outcomes.** Time-from-feedback-to-theme-surfaced, theme accuracy (PM agreement), feedback-coverage (% of inputs included).
+
+**Reports to.** Head of Product or VP Product.
+
+**Tools.** Support-ticket read access, sales-call read access (via discovery summaries), in-product feedback capture, NPS/CSAT survey responses, customer-advisory-board notes.
+
+**Boundaries.** Synthesises and themes. Doesn't prioritise the roadmap. Doesn't decide what to build.
+
+## What "all channels" means
+
+Customer feedback enters the company through more channels than most teams track:
+
+- **Support tickets.** Raw bug reports, feature requests, complaints.
+- **Sales calls.** Discovery transcripts (via the sales-discovery AI employee).
+- **CS calls.** Health-check meetings, renewal conversations.
+- **NPS/CSAT.** Open-text survey responses.
+- **In-product feedback.** Thumbs-up/down, "tell us what you think" widgets.
+- **Customer advisory boards.** Quarterly meetings with strategic accounts.
+- **Social media and review sites.** Public sentiment.
+- **Email.** Direct customer emails to anyone in the company.
+
+The agent reads across all of these. Most teams analyse one or two channels and miss the rest.
+
+## Themes vs. tags
+
+The hard part isn't tagging individual pieces of feedback. The hard part is recognising when ten differently-worded pieces of feedback are about the same underlying issue.
+
+The agent's clustering picks up:
+
+- "The export takes forever" + "I can't get my data out fast enough" + "PDF generation is slow" — same theme.
+- "Where's our SOC 2?" + "Can you share your security policies?" + "We need ISO 27001" — same theme (security/compliance documentation gap).
+- "Can we customise..." + "I wish I could change..." + "Why is this hard-coded?" — same theme (configuration limits).
+
+The themes are surfaced with sample feedback quotes per theme, source distribution (which channels), severity distribution (what % of customers raising it are at-risk vs. healthy), and trend (rising or stable).
+
+## The PM workflow
+
+Weekly, the PM reads the agent's themed report. The report includes:
+
+- New themes that emerged this week.
+- Themes that grew (more feedback, broader source coverage, higher-severity customers).
+- Themes that shrank (fewer mentions; might indicate a fix landed).
+- Open questions ("we have 30 mentions of X but it's unclear whether they want behaviour A or behaviour B; might be worth a customer-discovery session").
+
+The PM decides what to investigate further. The agent runs the discovery — pulling additional context from the original sources, surfacing the customer accounts most affected, drafting questions for follow-up customer interviews.
+
+## Quarterly review compresses
+
+Quarterly customer-feedback reviews shift from cataloguing to deciding. The agent has been running synthesis all quarter. The QBR is about:
+
+- Which themes inform the next quarter's roadmap?
+- Which themes need deeper customer-discovery work?
+- Which themes are operational (CS, support, training) rather than product?
+
+The PM's day-of-QBR prep drops from days to hours.
+
+## The eval set is built from PM agreement
+
+Each themed report goes to the PM. The PM tags themes as accurate, partially-right, or wrong. This feeds the agent's eval. Over a quarter, theme accuracy climbs from "we mostly agree" to "we almost always agree." After two quarters, the PM trusts the themed report enough to act on it without re-doing the synthesis.
+
+## What this enables
+
+A product team running this AI employee for 6 months ends up with:
+
+- Weekly themed reports tracked in a searchable archive.
+- Trend visibility — which themes are growing, which are shrinking, which are new.
+- Customer-quote library tied to themes — fuel for product communications.
+- Roadmap input that's tied to evidence rather than the loudest internal voice.
+
+This last item is the underrated win. Roadmap discussions become evidence-based. "We should build this" gets backed by "here's the feedback themes that support it" instead of "I have a feeling."
+
+## What we won't ship
+
+**Auto-prioritising the roadmap.** Roadmap is the PM and leadership's call.
+
+**Auto-emailing customers based on feedback patterns.** Customer outreach is a relationship.
+
+**Anonymising in a way that loses customer-account context.** PMs need to know which accounts are saying what.
+
+**Sharing internal customer feedback externally** without the customer's permission.
+
+## The KPIs the head of product watches
+
+1. **Themed-report cadence and freshness.**
+2. **PM agreement rate** with themed reports.
+3. **Roadmap-decision evidence** (% of roadmap items with documented theme-evidence).
+4. **Customer-feedback coverage** (% of feedback channels included in synthesis).
+
+If PM agreement plateaus below 80%, the eval needs more pairs.
+
+## How to start
+
+Pick three feedback channels — support tickets, sales calls, NPS responses are common starters. Run the agent for a month. Tune. Add channels one at a time. Quarterly, evaluate whether the roadmap discussions are getting better.
+
+## Close
+
+The feedback-synthesis AI employee is a teammate whose job is the analysis layer between raw customer feedback and product decisions. The themes emerge weekly. The PM's time goes to deciding what to do about them. The compounding effect — better-informed roadmaps — shows up in retention and customer satisfaction over quarters, not weeks.
+
+## Related reading
+
+- [Sales: discovery summariser](/blog/claude-code-sales-discovery) — upstream of feedback synthesis.
+- [CS: renewal-risk scoring](/blog/claude-code-renewal-risk) — uses the same feedback signal differently.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI product employee, we'd love to hear about it. [Get in touch.](/contact)*

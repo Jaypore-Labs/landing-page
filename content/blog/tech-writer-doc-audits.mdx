@@ -1,0 +1,110 @@
+---
+title: "Tech writer: doc audits that catch what humans miss"
+description: "Documentation audits are exactly the work technical writers want to do but rarely have time for. AI-assisted audits make the cadence sustainable."
+date: "2026-08-07"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Tech Writing", "Documentation", "AI Development", "Audits"]
+series: "AI for software development"
+seriesOrder: 23
+---
+
+A technical writer at a developer-tools company told us her doc audit was "annual, dreaded, and incomplete." The team's docs sprawled across product reference, integration guides, API docs, blog content, and tutorials. A complete audit was impossible without disrupting the team's writing pipeline.
+
+Claude Code makes audits weekly rather than annual. The AI reads the docs, the codebase, and the support tickets. The technical writer reviews findings and ships fixes. The doc set stays sharp.
+
+## The audit checklist
+
+The audit hits a defined checklist:
+
+- **Accuracy.** Code examples that compile? Commands that work? URLs that resolve? API references that match the current API?
+- **Completeness.** New features without docs? Deprecated features still documented as current? Common questions in support tickets that aren't answered in the docs?
+- **Findability.** Search-intent gaps — what people search for (in product or external) that doesn't lead to the right page?
+- **Voice consistency.** Drift from the voice guide?
+- **Linking.** Broken internal links? Missing cross-references?
+- **Localisation status** (where applicable).
+
+Each finding is structured: page, issue, severity, recommended fix.
+
+## Search-intent diff
+
+The most underrated audit dimension is search-intent. The AI compares:
+
+- Top product-search queries that don't lead to a doc page.
+- Top external-search queries (via GA4) that lead to docs but bounce.
+- Top support-ticket questions that have no doc answer.
+
+These three signals identify content gaps. The technical writer prioritises which to fill.
+
+## Reviewer loop
+
+Each finding becomes work:
+
+- High-severity (broken example, deprecated API documented as current) — fixed within the week.
+- Medium (gaps in coverage, voice drift) — sprint backlog.
+- Low (linking improvements, cross-references) — month backlog.
+
+The technical writer ships fixes. AI helps draft the new content; the writer edits to voice and accuracy.
+
+## Update workflow
+
+Each fix updates the doc, with a small changelog entry. The audit re-runs on a schedule:
+
+- Daily: link-check, code-example compilation.
+- Weekly: full audit pass.
+- Quarterly: deep audit with content-strategy review.
+
+Within a quarter, the doc set's quality gap relative to the product's evolution closes.
+
+## A real audit
+
+A scenario: weekly audit on a 800-page doc set.
+
+**Day 1.** AI runs audit. 47 findings: 3 broken examples, 8 deprecated APIs documented, 12 voice drift, 15 search-intent gaps, 9 broken links.
+
+**Day 2.** Technical writer triages. Fixes 3 broken examples and 9 broken links same-day.
+
+**Day 3.** Drafts updates for 8 deprecated-API pages.
+
+**Days 4-5.** Drafts content for top 5 search-intent gaps.
+
+**Day 6.** Voice-drift review.
+
+A week of focused work clears most of the audit. The doc set is materially better.
+
+## What stays human
+
+- Voice and tone decisions.
+- Information architecture.
+- Customer-empathy judgments.
+- Decisions about which gaps matter most.
+
+Senior tech-writing judgment. The AI handles the cataloguing.
+
+## What we won't ship
+
+**Auto-publishing doc updates.** Every change is reviewed.
+
+**AI-generated docs without verification** of every code example and command.
+
+**Reorganisation of information architecture** without writer review.
+
+**Anything that masks structural issues** by paving over them.
+
+## How to start
+
+Run the audit on the existing doc set. Triage. Fix the high-severity findings. Establish the weekly cadence. The doc set's drift becomes visible and managed.
+
+## Close
+
+Doc audits with Claude Code are the cadence that makes a doc set stay sharp. The AI catches the mechanical issues. The writer addresses the content gaps. The product's evolution doesn't outpace the docs anymore. Customer self-serve improves measurably.
+
+## Related reading
+
+- [Marketing: SEO audits as a Claude Code workflow](/blog/claude-code-seo-audits) — same audit-discipline pattern.
+- [Tech lead: PR reviews deeper than 'lgtm'](/blog/tech-lead-pr-reviews) — same pattern, different artifact.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising doc workflows, we'd love to hear about it. [Get in touch.](/contact)*

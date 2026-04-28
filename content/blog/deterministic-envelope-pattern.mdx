@@ -1,0 +1,118 @@
+---
+title: "The deterministic-envelope pattern"
+description: "Wrap probabilistic outputs in deterministic post-processing. The envelope is the productisation."
+date: "2026-10-20"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Architecture", "Engineering", "Predictable Output", "Patterns"]
+series: "Predictable AI output"
+seriesOrder: 25
+---
+
+The closing pattern of this series is the deterministic-envelope. The model produces output. The envelope wraps it: validation, normalisation, citation-grounding, redaction, formatting. The customer never sees the raw model output. They see what survives the envelope.
+
+This pattern integrates everything the series has covered.
+
+## The envelope concept
+
+The envelope is everything between the model's output and the user:
+
+- Schema validation.
+- Citation verification.
+- Confidence-threshold check.
+- Refusal-pattern check.
+- Style normalisation.
+- PII redaction.
+- Final-output composition.
+
+Outputs that don't survive the envelope don't reach the user. They retry, fall back, or escalate.
+
+## Implementation
+
+```python
+def respond_to_user(user_input):
+    raw_output = call_model(user_input)
+    
+    # Validate schema
+    validated = validate_schema(raw_output)
+    if not validated:
+        return retry_or_fallback()
+    
+    # Verify citations
+    if not verify_citations(validated):
+        return retry_or_fallback()
+    
+    # Check confidence
+    if validated.confidence < threshold:
+        return idk_response(routing=appropriate_route())
+    
+    # Apply refusal grammar if needed
+    if validated.is_refusal:
+        return format_refusal(validated)
+    
+    # Normalise style
+    normalised = normalise_style(validated)
+    
+    # Redact PII
+    redacted = redact_pii(normalised)
+    
+    return compose_response(redacted)
+```
+
+Each step is its own engineering work covered earlier in the series. The envelope composes them.
+
+## Reviewer ritual
+
+The envelope is reviewed:
+
+- Layer-by-layer correctness.
+- Performance (latency added by each layer).
+- Failure rates per layer.
+- Aggregate trust signal.
+
+## A real shipping decision
+
+A team's customer-facing agent ships only with the envelope:
+
+- Schema validation: catches format issues.
+- Citation verification: catches hallucination.
+- Confidence threshold: surfaces IDK.
+- Refusal grammar: makes refusals consistent.
+- Style normalisation: keeps voice on-brand.
+- PII redaction: keeps privacy.
+
+Without all of these, the agent isn't production-ready. With all of them, it is.
+
+## Trade-offs
+
+The envelope adds latency and code complexity. Trade-offs:
+
+- For high-stakes user-facing agents: required.
+- For low-stakes internal agents: maybe over-engineered.
+- For real-time/voice: pick the layers carefully; not all fit the latency budget.
+
+## What we won't ship
+
+**Production agents** without an envelope.
+
+**Envelope layers** that aren't tested.
+
+**Envelopes** that hide the layers' actions in observability.
+
+**"Just disable the envelope for time pressure."** The envelope is what makes the agent production-ready.
+
+## Close
+
+The deterministic-envelope pattern is the closing of this series. Probabilistic models produce outputs. Deterministic envelopes wrap those outputs in the discipline that makes them shippable. Schema, citation, confidence, refusal, style, redaction — each a layer. Together, the envelope. Skip the envelope and the agent's outputs are raw model variance reaching users directly.
+
+This concludes the predictable-output series. The next series — testing in the age of AI — covers the discipline that catches what envelope alone misses.
+
+## Related reading
+
+- [Probabilistic with deterministic contracts](/blog/probabilistic-with-deterministic-contracts) — series opener.
+- [The agent maturity curve](/blog/agent-maturity-curve) — where this maturity lives.
+- [Predictable output series](/series/predictable-ai-output) — full series.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping production envelopes, we'd love to hear about it. [Get in touch.](/contact)*

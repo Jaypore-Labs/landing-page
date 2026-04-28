@@ -1,0 +1,125 @@
+---
+title: "QA: flaky test triage at scale"
+description: "Flake metrics tell you what's broken; AI triage tells you why. Quarantine and root-cause work compress dramatically."
+date: "2026-07-31"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "QA", "Testing", "Flaky Tests", "AI Development"]
+series: "AI for software development"
+seriesOrder: 18
+---
+
+A QA engineer told us once that her team's CI status was "green about 60% of the time, yellow about 35%, red about 5%." The 35% yellow — flake-failing builds — was the dominant cost. It eroded engineering trust in CI. It led to the rewriting of "rerun and pray" as standard practice. It hid real failures inside the noise.
+
+Claude Code makes flake triage scale. The AI does the pattern-matching across hundreds of failures. The engineer does the root-cause work on the patterns that actually need it. The flake rate drops measurably.
+
+## Flake-rate measurement
+
+The first job: measure honestly. The AI ingests test-run history and produces:
+
+- Per-test flake rate over the last 30 days.
+- Top 20 flaky tests by impact.
+- Categorisation of likely cause patterns.
+- Trend (improving, stable, worsening).
+
+Most teams don't have this number. Without it, flake conversation is anecdotal. With it, the conversation is data-driven.
+
+## The quarantine pattern
+
+The pattern: tests above a flake-rate threshold get quarantined. Quarantined tests:
+
+- Don't fail the build (so they don't block work).
+- Are tagged in the test runner.
+- Have a ticket filed against the responsible team.
+- Are tracked on a quarantine-aging dashboard.
+
+Quarantine isn't permission to ignore. It's permission to focus. The team works through the quarantine by aging — oldest first. New flakes go in, fixed flakes come out.
+
+Without quarantine: every flake fails everyone's build, all the time. With it: the cost is bounded and visible.
+
+## Root-cause workflow
+
+For each flaky test, the AI's first-pass categorisation:
+
+- **Timing.** Tests that pass when slower, fail when faster. (Race conditions.)
+- **Order-dependent.** Tests that pass in isolation, fail in a suite. (State pollution.)
+- **External dependency.** Tests that fail when an external service is slow. (Network or third-party flake.)
+- **Resource contention.** Tests that fail under parallel execution. (Shared resource issue.)
+- **Data dependency.** Tests that fail when test data is in an unexpected state. (Fixture management.)
+
+Each category has a known fix pattern. The AI suggests; the engineer verifies and implements.
+
+## Trend tracking
+
+The team's weekly review:
+
+- New flakes added.
+- Flakes fixed.
+- Quarantine size trend.
+- Top contributors to flake rate.
+
+If quarantine is growing, the team's flake-write rate exceeds its flake-fix rate. That's a budgeting problem to surface to leadership.
+
+## A real triage
+
+A scenario: 47 tests in quarantine. The AI's analysis:
+
+- 18 are timing-related; 12 of those follow the same pattern (waiting for a UI element that's now rendered async).
+- 9 are order-dependent; all share state in a singleton config.
+- 7 are external-dependency on a flaky third-party API.
+- 8 are resource-contention on a shared test database.
+- 5 are unique cases that need individual investigation.
+
+Three patterns. Each fixable with a one-time effort:
+
+1. Update the UI test helper to wait for async-rendered elements properly. Fixes 12 tests in one PR.
+2. Refactor the shared singleton to be test-isolated. Fixes 9 tests in one PR.
+3. Mock the flaky third-party API. Fixes 7 tests in one PR.
+
+What looked like 47 separate problems is 3 systemic issues. The team can fix the patterns instead of patching one test at a time.
+
+## The reviewer loop
+
+Engineers fixing flakes write a brief root-cause note for each. Notes accumulate. The AI surfaces patterns across notes:
+
+- "This is the third flake caused by event-loop ordering."
+- "This is the second flake caused by environment-variable leak."
+
+These patterns inform team conventions. Sometimes a doc update; sometimes a lint rule; sometimes an architectural change. Either way, prevention work compounds.
+
+## What stays human
+
+- The quarantine threshold decision.
+- Prioritisation of which flakes to fix first.
+- Architectural changes to prevent flake categories.
+- The decision to delete tests that aren't worth maintaining.
+
+Senior judgment. The AI handles the categorisation.
+
+## What we won't ship
+
+**"Fixing" flakes by adding retries** without root-cause investigation.
+
+**Quarantine without follow-up.** Quarantined tests aren't deleted; they're tracked.
+
+**AI-generated test fixes** without engineer review.
+
+**Anything that hides real failures** inside flake noise. If the team can't tell flake from real failure, the eval isn't working.
+
+## How to start
+
+Measure the flake rate today. Establish the quarantine threshold. Set up the AI triage. Fix the top 10 flakes. The team's CI green rate improves measurably within a sprint.
+
+## Close
+
+Flaky test triage with Claude Code is the difference between "we have flakes" and "we have a plan for flakes." The categorisation is fast. The patterns surface. The team's prevention work has a feedback loop. CI's green rate climbs.
+
+## Related reading
+
+- [QA: test-plan generation](/blog/qa-test-plan-from-criteria) — companion role.
+- [SRE: postmortem first drafts](/blog/sre-postmortem-drafts) — same root-cause discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're cleaning up flake debt, we'd love to hear about it. [Get in touch.](/contact)*

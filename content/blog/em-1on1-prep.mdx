@@ -1,0 +1,118 @@
+---
+title: "EM: 1:1 prep + roadmap sanity check"
+description: "Engineering managers' weekly preparation often gets squeezed. AI-assisted briefings make 1:1s and roadmap reviews substantively better."
+date: "2026-08-06"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Engineering Management", "AI Development", "1:1s", "Roadmap"]
+series: "AI for software development"
+seriesOrder: 22
+---
+
+An engineering manager described his Sunday-evening pattern: "I open my notes for tomorrow's 1:1s and realise I haven't kept up with what each report has been doing this week." The reports' work was visible — commits, PR reviews, project updates — but assembling it into 1:1-ready prep was its own chore. The chore got skipped most weeks. The 1:1s suffered.
+
+Claude Code makes the prep automatic. The 1:1s become substantively better because the EM walks in informed.
+
+## The 1:1 prep brief
+
+Before each 1:1, the AI assembles a brief on the report:
+
+- **What they shipped this week.** Commits, PRs merged, tickets closed. With links and brief context.
+- **What they reviewed.** PRs reviewed, with notable comments.
+- **What they discussed.** Slack messages in significant threads (with privacy considerations).
+- **What they're working on now.** Active tickets, in-progress branches, recent activity.
+- **What's blocking.** Tickets that aged, PRs awaiting review, dependencies surfaced in their work.
+- **Recent feedback signals.** From other team members, customer feedback if relevant, peer-review patterns.
+- **Concern flags.** Patterns that might warrant a manager's attention — sustained overtime, drop in activity, unusual escalations.
+
+The EM reads the brief in 5 minutes. Walks into the 1:1 grounded.
+
+## The conversation, not the data
+
+The brief isn't a script. It's a starting point:
+
+- "I noticed you spent a lot of this week unblocking the platform team — how's that landing for you?"
+- "The migration ticket has been open for three weeks; what's making it sticky?"
+- "Your last few PRs have been smaller than usual; intentional or context-switch fatigue?"
+
+The conversation is what the EM is paid for. The brief makes the conversation grounded instead of generic.
+
+## Concern flags
+
+The flags are surfaced gently:
+
+- Hours pattern (lots of weekend commits) → manager checks in on workload.
+- Sustained low PR-review participation → manager checks in on team-investment energy.
+- Unusual ticket-closure pattern (lots of small fixes, no feature work) → manager checks in on growth and challenge.
+
+These aren't accusations. They're prompts. The manager decides what (if anything) to address.
+
+## Roadmap sanity check
+
+A separate weekly brief: roadmap status:
+
+- Items on track.
+- Items at risk (with the indicators).
+- Items completed since last review.
+- New dependencies surfaced.
+- Resource issues.
+
+The EM reviews. Surfaces concerns to leadership early. Adjusts plans before they slip publicly.
+
+## Follow-up discipline
+
+The 1:1 produces follow-ups. The AI helps:
+
+- Drafting the manager's notes (action items, things to follow up on next week).
+- Surfacing whether last week's follow-ups were addressed.
+- Flagging recurring issues across multiple weeks.
+
+This is the discipline that makes 1:1s feel valuable to reports. Without it, conversations don't seem to compound. With it, the report can see the manager paying attention.
+
+## A weekly ritual
+
+A team running this for a quarter:
+
+- Manager prep time per 1:1: 5 minutes (brief read) + reflection.
+- Quality of conversations: measurably up (per manager and report self-report).
+- Concern catch rate: faster (manager spots patterns earlier).
+- Roadmap risk catch rate: faster.
+
+The compounding effect: reports feel more managed, less ignored. Retention improves.
+
+## What stays human
+
+- The conversations.
+- The decisions about what to escalate.
+- The relationship work.
+- The career conversations.
+
+Senior management work. The AI handles the data prep.
+
+## What we won't ship
+
+**Surveillance of individual employees** beyond what's appropriate.
+
+**Performance-evaluation inputs from this brief.** The brief is for the manager's prep, not for performance comp.
+
+**Automated escalations to higher management** without the manager's decision.
+
+**Sharing 1:1 brief content** with the report or anyone else.
+
+## How to start
+
+Set up the brief for one report. Run it for two weeks. Refine. Expand to the rest of the team.
+
+## Close
+
+1:1 prep with Claude Code is the difference between phoning it in and showing up grounded. Manager time is preserved. Conversations get richer. The reports feel managed in a way that compounds. Engineering management gets sharper across the team.
+
+## Related reading
+
+- [EM: PR reviewer that flags scope creep](/blog/claude-code-pr-reviewer) — companion role.
+- [EM: sprint-planning copilot](/blog/claude-code-sprint-planning) — companion role.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening EM workflows, we'd love to hear about it. [Get in touch.](/contact)*

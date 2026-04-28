@@ -1,0 +1,88 @@
+---
+title: "Self-consistency: when N=3 beats a smarter prompt"
+description: "Generating multiple candidates and selecting the most consistent one beats a cleverer prompt for many tasks."
+date: "2026-09-24"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Self-consistency", "Engineering", "Predictable Output", "Sampling"]
+series: "Predictable AI output"
+seriesOrder: 7
+---
+
+A team chasing the last few percentage points of accuracy on a math-reasoning feature spent a week iterating the prompt. The prompt got more elaborate; accuracy ticked up by 1%. They tried generating 3 candidates per request and selecting the majority answer. Accuracy jumped 8%.
+
+Self-consistency — sample N candidates, pick the most common — is a brute but effective technique for tasks where reasoning leads to a discrete answer.
+
+## The voting pattern
+
+The pattern:
+
+- Generate N samples (typically 3-5) at non-zero temperature.
+- Each sample is a complete reasoning + answer.
+- Tally answers across samples.
+- Pick the most common answer (or weight by confidence if available).
+
+Works for tasks with discrete answers — classification, math, multiple-choice, structured-extraction.
+
+Doesn't work as well for prose generation where there's no "answer" to vote on.
+
+## Cost shape
+
+The cost is N times a single call. For N=3, triple the cost.
+
+Worth it when:
+
+- Accuracy gain matters more than cost.
+- Task has discrete answers to vote on.
+- Latency budget can absorb (calls can be parallel).
+
+## Failure modes
+
+- **Tied votes.** What's the tie-break rule? Define it.
+- **Mode collapse.** All samples produce the same wrong answer. Voting doesn't help; the underlying model is wrong.
+- **Long-tail variance.** Many distinct answers, no clear majority. The task may be too uncertain for self-consistency to fix.
+
+## Reviewer signal
+
+Cases where self-consistency disagreed (N=3 produced 2-1 split, for example) are the team's signal:
+
+- Was the majority right?
+- Was the minority right?
+- Both wrong?
+
+These edge cases inform prompt iteration and eval-set growth.
+
+## A real benchmark
+
+A team's reasoning task:
+
+- Base accuracy: 78%.
+- N=3 self-consistency: 86%.
+- N=5 self-consistency: 88%.
+- N=10 self-consistency: 89%.
+
+Diminishing returns past N=5. Team shipped N=3 (best cost-quality balance for their use case).
+
+## What we won't ship
+
+**Self-consistency on prose tasks** without a voting mechanism that handles the prose.
+
+**N=10+ for marginal accuracy gain** when N=3 is already at the goal.
+
+**Self-consistency in latency-critical paths** where N parallel calls don't fit the budget.
+
+**Skipping the eval to confirm the gain.** The gain might be smaller than expected on your specific task.
+
+## Close
+
+Self-consistency is brute force that often beats clever. For tasks with discrete answers, sample N and vote. The accuracy gain is usually worth the cost. Skip the cleverness; ship the votes.
+
+## Related reading
+
+- [Judge pattern for confidence](/blog/judge-pattern-confidence) — alternative approach.
+- [Temperature, top-p, the production tradeoff](/blog/temperature-top-p-tradeoff) — variance management.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're using self-consistency, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,91 @@
+---
+title: "Agents in government: constituent services with public-records care"
+description: "Government agents work when the records-retention rule is built in from day one. Privacy and FOIA are not edge cases."
+date: "2026-05-18"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "GovTech", "Government AI", "Production AI", "Public Records"]
+series: "AI agents in industry"
+seriesOrder: 14
+---
+
+A municipal IT director told us last quarter that her city's biggest barrier to deploying constituent-service agents wasn't the technology. It was the public-records archivist. Every agent interaction is a public record under their state's open-records law. Without a retention and retrieval system from day one, the agent's deployment was indefensible.
+
+Government agents that ship build for the archivist first. The chatbot that answers "where do I pay my water bill?" is the easy part. The audit trail that survives a FOIA request is the hard part. Most pilots invert the priority and pay for it.
+
+## The records retention rule
+
+In most US jurisdictions and many international ones, every government interaction with a constituent is a public record. The agent's logs are public records. The audit trail is a public record. A FOIA request can demand all of these be produced.
+
+This shapes the agent's design at the foundation:
+
+- **Retention period** — typically 3-7 years depending on the jurisdiction.
+- **Retrievability** — must be searchable and producible without rebuilding the database.
+- **PII handling** — public records need redaction tooling because not everything in them is releasable.
+- **Format** — must be in a format the records department can actually export.
+
+A team that builds the agent without thinking through this is going to face a FOIA request and discover their logs are unstructured JSON in a vendor's database. That conversation usually ends in pulling the agent.
+
+## Translation as a primary feature
+
+The single highest-impact use case for government agents in many cities is translation. A constituent calls in or messages in their home language; the agent translates to the agency's working language; routes appropriately; translates the response back. For populations who speak any of dozens of languages, a translation layer that works at the speed of the conversation is transformative.
+
+This is also where the agent earns its trust. Translation is concrete, measurable, and relatively low-stakes — a translation error usually surfaces immediately because the constituent doesn't get what they asked for. Build translation, build it well, then expand to other use cases.
+
+## Privacy boundaries
+
+Privacy in government context isn't just PII. It's also:
+
+- **Information the constituent is entitled to keep private** (immigration status, addiction services, mental-health interactions).
+- **Information that's a record but isn't releasable** (names of minors, undercover officers, ongoing investigations).
+- **Information whose disclosure has differential consequences** (an arrest record is different from a conviction record).
+
+The agent's logging needs to be *more* careful than the average system, not less. PII redaction tools, role-based access, and explicit "this conversation is not recorded" pathways for sensitive topics are non-negotiable.
+
+## What works in production
+
+A working constituent-services agent we've seen do well:
+
+- Answers FAQs about services, eligibility, hours, locations.
+- Helps constituents fill out forms (with privacy-aware data handling).
+- Schedules appointments.
+- Translates incoming messages and outgoing responses.
+- Routes complex questions to the right department.
+- Logs every interaction with full retention compliance.
+
+It does not:
+
+- Make eligibility decisions.
+- Cite specific case files.
+- Provide legal advice.
+- Discuss specific people other than the constituent themselves.
+
+## The pilot blueprint
+
+Phase 1 (3-6 months): one department, one channel. Translation + FAQ + form-help. No personal-record access.
+
+Phase 2 (6-12 months): expand to scheduling and document submission. Add role-based access controls.
+
+Phase 3 (12+ months): expand to additional departments. Integrate with case management for status lookups (read-only, with full audit).
+
+Cities that compress this timeline tend to face their first FOIA-driven crisis in month 4 and end up doing the audit work retroactively. Cities that take it seriously end up with a permanent fixture and constituent-satisfaction gains they can publish.
+
+## Procurement and the open-records dance
+
+Government procurement has its own logic. Contracts must specify data ownership, retention, retrieval, and what happens at end-of-contract. The agent's vendor cannot retain the city's logs after contract end. The vendor cannot use the city's data to train models without specific written authorisation. These clauses matter.
+
+A surprising number of pilots get to deployment and discover the contract didn't address any of this. Going back to negotiate clauses is hard once the agent is live.
+
+## Close
+
+Government agents work when the public-records discipline is the design. The translation layer is the single most underrated win. The privacy boundaries are tighter than commercial-sector defaults. Build for the archivist, then for the constituent.
+
+## Related reading
+
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — same audit-trail principle, different regulator.
+- [The agent maturity curve](/blog/agent-maturity-curve) — government agents on the curve.
+- [Agents in customer support](/blog/agents-in-customer-support) — escalation contract restated for public services.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a government services agent, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,84 @@
+---
+title: "Agents on the factory floor"
+description: "Maintenance agents earn their keep when they read PLC data and write work orders — not when they 'predict failure' in a slide."
+date: "2026-05-11"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Manufacturing AI", "Industry 4.0", "Production AI", "OT"]
+series: "AI agents in industry"
+seriesOrder: 9
+---
+
+A plant manager we worked with last year had eleven dashboards and one job: keep the line running. The eleven dashboards weren't his problem. The problem was that none of them turned into a work order without a human re-typing the diagnosis into the maintenance system. The agent we built didn't *predict failures*. It read PLC data, wrote draft work orders, and assigned them to the right tech. The plant manager's day got better immediately.
+
+This is most of factory-floor AI, properly framed. Boring integration work, written into a workflow, with a tight feedback loop. Not predictive maintenance as a slide deck.
+
+## The integration is the agent
+
+Factory floors run on protocols built when the iPhone was unreleased. PLCs, OPC-UA, MQTT brokers, SCADA dashboards, ERPs that won't be replaced this decade. The agent's first job is *reading* this data — pulling sensor histories, alarms, and run-state into a context the model can reason over.
+
+This integration is 80% of the project. The model is the easy part. We've seen pilots that spent six months on prompt tuning and never built the integration; they all ended in the same place — beautiful slides, no deployment.
+
+The factory-floor agents that ship spend the project budget on:
+
+- A reliable connector to the PLC/SCADA layer.
+- A timeseries store with at least 90 days of sensor history.
+- A schema that maps machines to maintenance plans, parts inventory, and tech assignments.
+- A write-back path into the CMMS (the maintenance system) — work orders, status updates, completion notes.
+
+The model is pasted into the middle of all of this. It reads context, drafts a work order, hands off to a human dispatcher.
+
+## Where the agent earns its keep
+
+**Alarm summarisation.** A line that goes down at 2 AM has 200 alarms. The agent reads the alarm sequence, the recent run-state, and the maintenance history, and produces a one-paragraph summary the night-shift tech can act on. Mean-time-to-repair drops because the tech isn't decoding alarm storms.
+
+**Work-order drafting.** Sensor anomaly detected → agent drafts a work order with suggested action, parts to bring, estimated duration, urgency. Maintenance dispatcher reviews and assigns. Saves the dispatcher 5-10 minutes per alert; on a busy line, that's hours per shift.
+
+**Maintenance-history retrieval.** Tech walks up to a misbehaving machine, asks the agent (via tablet or phone) "what's been done on this machine recently?" — agent surfaces the last 90 days of work orders, parts replaced, and any open issues. Tech's diagnosis time drops.
+
+**Run-book retrieval.** When a fault appears, the agent retrieves the relevant procedure from the plant's run-book library and surfaces the steps to the tech. No more digging through PDFs in the maintenance shed.
+
+## Where the agent shouldn't act
+
+The agent doesn't write to the PLC. It doesn't change set-points. It doesn't bypass interlocks. The decision boundary stays with humans — operators, maintenance techs, plant supervisors — for the same reason healthcare agents don't sign charts. Liability follows the action, not the model.
+
+Even with that boundary, the agent reduces friction across the workflow, which is where the ROI sits.
+
+## The eval set is the calibration
+
+Eval cases for a factory-floor agent are concrete:
+
+- Given this alarm sequence + run-state, the agent's draft work order should match a maintenance lead's draft within X categories.
+- Given this anomaly + maintenance history, the agent's recommended parts list should match the parts the tech actually used 80% of the time.
+- Given this run-book search query, the agent should retrieve the right procedure from the top 3 results.
+
+The eval set has to be built with the maintenance team, not by the engineers building the agent. The maintenance team's tacit knowledge is the ground truth.
+
+## The ROI math the plant manager believes
+
+Forget "AI productivity gains." The plant manager wants to know:
+
+- How many minutes per shift do dispatchers save?
+- How does mean-time-to-repair change?
+- Does scheduled-maintenance compliance go up?
+- Are we using fewer expedited parts orders?
+
+Each of these has a dollar number attached and a baseline he's measured for years. The agent's job is to move those numbers measurably without moving any of them in the wrong direction. The agent that does this is a permanent fixture. The agent that produces "AI insights" without moving the numbers is a pilot they end at the next budget review.
+
+## How to start
+
+Pick one cell, one line, one machine type. Wire the integration. Build the agent for *one* workflow — alarm summarisation, work-order drafting, maintenance-history retrieval. Run it for a quarter with the maintenance team. Measure the four metrics. Expand to a second workflow only after the first one is generating real numbers.
+
+## Close
+
+Factory-floor agents are integration projects with a model in the middle. The integration is most of the work. The model is the easy part. The teams that get this right ship something the plant manager actually uses. The teams that try to lead with the model produce a presentation.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — manufacturing agents on the curve.
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — same audit-trail principles, different tools.
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — the integration layer agents need.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a factory-floor agent, we'd love to hear about it. [Get in touch.](/contact)*

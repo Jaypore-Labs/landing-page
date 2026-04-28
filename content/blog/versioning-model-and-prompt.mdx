@@ -1,0 +1,91 @@
+---
+title: "Versioning model + prompt as a unit"
+description: "The model and the prompt are coupled. Versioning them together is the discipline that makes regressions tractable."
+date: "2026-10-01"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Versioning", "Engineering", "Predictable Output", "Reproducibility"]
+series: "Predictable AI output"
+seriesOrder: 12
+---
+
+A team's output quality dropped overnight. Investigation: the provider had bumped the model. The team's prompt had been engineered against the previous model. Same prompt, new model, different outputs. The team had no way to compare; nothing was versioned together.
+
+Model and prompt are coupled. The output is a function of both. Versioning them as a unit is the discipline that makes regressions tractable.
+
+## The release-bundle pattern
+
+Each release bundles:
+
+- Specific model version (provider + model name + version pinning).
+- Specific prompt version.
+- Specific tool version.
+- Specific eval-set version.
+- Release notes.
+
+The bundle is named (v1.4.2). It's tagged in the repo. It's deployed atomically.
+
+## Migration
+
+When the model bumps:
+
+- Test the prompt against the new model.
+- Compare eval results.
+- Decide: ship as-is, adjust prompt, pin to old model, or abort.
+
+Without bundle versioning, the team can't easily compare. With it, comparison is a CI run.
+
+## Rollback
+
+If a release regresses:
+
+- Revert to the prior bundle.
+- Production resumes prior behaviour.
+- Investigation continues at non-emergency pace.
+
+Rollback is mechanical when bundles are versioned. Without them, rollback is partial — you might revert the prompt but the model has bumped underneath you.
+
+## Reviewer ritual
+
+Each bundle release goes through review:
+
+- Eval results before and after.
+- Cost shape change.
+- Latency change.
+- Risk assessment.
+
+The same discipline as application-code releases.
+
+## A real release
+
+A team's release flow:
+
+- Engineer changes prompt → PR → CI runs eval against pinned model → merge if passing → tag bundle vX.Y.Z.
+- Engineer wants to bump model → PR → CI runs eval against new model with current prompt → if passing, ship; if failing, adjust prompt.
+- Provider bumps model unexpectedly → eval cron catches drift → team responds.
+
+The bundle is the unit of management. Everything else flows from it.
+
+## What we won't ship
+
+**Prompts and models versioned separately** with no bundle concept.
+
+**Releases without eval evidence.**
+
+**Provider-default model versions** in production. Always pin where supported.
+
+**"Just bump the model" without prompt re-eval.**
+
+## Close
+
+Versioning model + prompt as a unit is the discipline that makes LLM systems engineered. Bundles are tagged, deployed, reviewed, rolled back. Without bundling, the team is at the mercy of provider drift and prompt drift independently. Bundle them; control them.
+
+## Related reading
+
+- [Agent versioning](/blog/agent-versioning) — same discipline applied to agents.
+- [Pinning model versions](/blog/pinning-model-versions) — provider-side pinning.
+- [Prompt evolution](/blog/prompt-evolution) — drift detection.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening versioning, we'd love to hear about it. [Get in touch.](/contact)*

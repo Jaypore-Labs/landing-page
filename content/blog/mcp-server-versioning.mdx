@@ -1,0 +1,83 @@
+---
+title: "MCP server versioning: shipping breaking changes safely"
+description: "MCP servers evolve. Breaking changes need migration paths."
+date: "2027-01-14"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Versioning", "Engineering", "Architecture", "Migration"]
+series: "MCP & AI protocols"
+seriesOrder: 12
+---
+
+A team's MCP server changed a tool's argument shape. Existing AI assistant configurations broke. The team scrambled to update each consumer. Some users had stale assistant configs and didn't notice for weeks.
+
+MCP servers are APIs. Breaking changes need migration paths.
+
+## The versioning discipline
+
+Each MCP server:
+
+- Has a version number.
+- Documents breaking changes in release notes.
+- Provides a deprecation period for old behaviour.
+- Coordinates with consumers before the deprecation ends.
+
+## Migration patterns
+
+**Add new, deprecate old.** New tool alongside old. Old tool annotated as deprecated. Removed after a deprecation period.
+
+**Add new argument, default the old.** New optional argument. Existing callers continue working with default behaviour.
+
+**Bump major version.** Breaking change documented. Consumers update at their own pace.
+
+## Reviewer ritual
+
+PR review for breaking changes:
+
+- Migration path documented.
+- Deprecation period set.
+- Consumers notified.
+- Rollback plan exists.
+
+## A real release
+
+A team's MCP server v2.0:
+
+- Three breaking changes.
+- v1.x continues to work; deprecated.
+- v2.0 documented with migration guide.
+- Three-month deprecation period.
+- Consumers contacted ahead of time.
+
+The migration was smooth because the discipline held.
+
+## Trade-offs
+
+- Strict versioning: more work for the team; less work for consumers.
+- Loose versioning: less work for the team; consumers break.
+
+Lean strict. The number of consumer-engineering hours saved exceeds the team's overhead.
+
+## What we won't ship
+
+**Breaking changes** without migration paths.
+
+**Deprecations** without communication.
+
+**Version numbers** that don't follow semantic versioning.
+
+**Releases** without rollback plans.
+
+## Close
+
+MCP server versioning is API versioning. The same disciplines apply. Migration paths, deprecation periods, communication. Skip these and consumers break.
+
+## Related reading
+
+- [Versioning model + prompt as a unit](/blog/versioning-model-and-prompt) — same discipline, different artifact.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+- [MCP server observability](/blog/mcp-server-observability) — companion topic.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're versioning MCP servers, we'd love to hear about it. [Get in touch.](/contact)*

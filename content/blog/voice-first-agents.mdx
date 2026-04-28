@@ -1,0 +1,103 @@
+---
+title: "Voice-first agents: the latency budget you live within"
+description: "Voice agents have a 250ms ceiling that text agents don't. Architecture choices follow."
+date: "2026-09-02"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Voice AI", "Engineering", "Building Agents", "Latency"]
+series: "Building agents"
+seriesOrder: 16
+---
+
+A team building a voice-first agent kept hitting 700ms response latency. Users hated it. The conversation felt halting, awkward, robotic. Text-mode versions of the same agent worked fine; voice was the problem.
+
+Voice has a 250ms ceiling. Below 250ms, the agent feels conversational. Above, it feels broken. Every architectural decision in a voice agent is shaped by this constraint.
+
+## The 250ms ceiling
+
+Conversational latency between humans is roughly 200ms. The brain's expectation is set by this. An agent that takes longer feels:
+
+- 250-500ms: slightly slow.
+- 500-1000ms: noticeably awkward.
+- 1000ms+: not a conversation.
+
+Voice agents that hit 250ms feel natural. Voice agents that exceed it feel like phone IVR systems.
+
+## Streaming TTS
+
+The first lever: stream the text-to-speech output while the agent is still generating.
+
+- Agent starts generating response.
+- First sentence is sent to TTS.
+- TTS starts speaking the first sentence while agent generates the second.
+- Latency to first sound drops from "model finishes" to "first token arrives."
+
+This alone takes most voice agents from 700ms+ to under 400ms.
+
+## Interruption handling
+
+Real conversations have interruptions. Voice agents need to handle them:
+
+- Detect when the user starts speaking.
+- Stop speaking (immediately).
+- Reset the agent's reasoning to absorb the new input.
+- Continue from where the user took the conversation.
+
+Without interruption handling, the agent talks over the user. Awkward in person; trust-destroying in production.
+
+## Eval cadence
+
+Voice eval sets are different from text eval sets. They include:
+
+- Audio quality (TTS output is intelligible).
+- Latency (first-sound and full-utterance).
+- Turn-taking (interruption handling, end-of-turn detection).
+- Conversational naturalness (human reviewers rate).
+
+Without these, "the agent works in text" doesn't mean "the agent works in voice."
+
+## A real voice agent
+
+A telephone-based scheduling agent we worked on:
+
+- ASR (audio-to-text) latency: ~150ms.
+- LLM call: streamed; first token in ~200ms.
+- TTS: streamed; first sound in ~50ms after first token.
+- Total first-sound latency: ~400ms.
+
+Under the 250ms ideal, but well within tolerance. Users described the agent as "responsive and helpful." The architecture choices that got there — pre-warming, streaming, parallel ASR/LLM/TTS pipelines — were each engineering work.
+
+## Architecture trade-offs
+
+Voice budget shapes:
+
+- Model choice (smaller/faster models often beat larger/slower in voice).
+- Tool calls (each round-trip costs latency; minimise).
+- Reasoning depth (long reasoning is felt as silence).
+- Context window (large contexts add ms; trim aggressively).
+
+Voice agents make different choices than text agents. The same agent reused across modes will be wrong for one of them.
+
+## What we won't ship
+
+**Voice agents** with first-sound latency >500ms.
+
+**Voice agents** without interruption handling.
+
+**Voice agents** without conversational-naturalness eval.
+
+**Reused text-agent prompts in voice** without acknowledging the latency hit from verbosity.
+
+## Close
+
+Voice-first agents live inside the 250ms budget. Streaming TTS, interruption handling, latency-aware architecture are the engineering. The eval set captures voice-specific dimensions. The agent that gets these right feels like a conversation. The agent that doesn't is the IVR system everyone hates.
+
+## Related reading
+
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+- [Context engineering](/blog/context-engineering) — context-budget pressure on voice.
+- [Cost guardrails](/blog/cost-guardrails) — same engineering-first discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping voice agents, we'd love to hear about it. [Get in touch.](/contact)*

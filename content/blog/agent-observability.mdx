@@ -1,0 +1,109 @@
+---
+title: "Agent observability: traces that tell you what happened"
+description: "Without traces, an agent is a magic box. With them, debugging is a Tuesday-afternoon job."
+date: "2026-08-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Observability", "Engineering", "Building Agents", "Debugging"]
+series: "Building agents"
+seriesOrder: 11
+---
+
+A team chasing an agent bug spent two days reconstructing what the agent had done by re-running similar inputs. They couldn't reproduce the original failure. The original incident's context was lost forever. The bug remained unfixed.
+
+Observability for agents isn't optional. Without traces, every incident is detective work without evidence.
+
+## The span model
+
+The pattern that works: every agent action becomes a span in a trace.
+
+A trace is a tree:
+
+- Root span: the user's request.
+- Child spans: the agent's planning calls.
+- Grandchild spans: each tool call within each plan step.
+- Sub-spans: any sub-agent calls.
+
+Each span has start time, end time, inputs, outputs, errors, model version, prompt version. The trace is the agent's entire reasoning recorded.
+
+When something goes wrong, the engineer pulls the trace. The full chain is visible. Debugging is concrete.
+
+## Tool-call attributes
+
+For each tool span:
+
+- Tool name and version.
+- Arguments (with PII redacted where appropriate).
+- Result (with PII redacted).
+- Latency.
+- Cost (token spend on the model call that produced the args, plus any tool-side cost).
+- Error if any.
+
+These are the evidence a debugger needs. Skipping any field is data loss that surfaces later.
+
+## Cost breakdowns
+
+The trace tracks cost throughout:
+
+- Per-span cost.
+- Per-tool cost.
+- Per-task cost.
+- Per-user/per-tenant cost.
+
+Without cost tracking at the trace level, the team can't answer questions like "which tasks are the most expensive?" or "which customer is burning the most spend?". With it, cost optimisation becomes targetable.
+
+## Reviewer UX
+
+Traces are read by engineers debugging. The UX matters:
+
+- Tree view of the trace, expandable.
+- Search by span name, error, user.
+- Replay capability — re-run the agent with the same inputs.
+- Diff capability — compare two runs.
+
+Most managed agent platforms provide some of this. Self-built agents need to build it. Either way, the team has to invest in the reading experience or the traces are write-only logs.
+
+## A trace anatomy
+
+A real trace from an agent we built:
+
+```
+Root: "Synthesise this week's customer feedback"
+├─ Plan (model call, 3.2s, $0.04)
+│  Generated 5-step plan
+├─ Step 1: Fetch tickets (tool call, 1.1s, $0.001)
+│  Returned 247 tickets
+├─ Step 2: Cluster (model call, 8.4s, $0.12)
+│  Returned 7 clusters
+├─ Step 3: Per-cluster summary (model calls × 7, total 22.5s, $0.18)
+├─ Step 4: Compose report (model call, 5.1s, $0.06)
+└─ Step 5: Format output (template, 0.1s, $0)
+
+Total: 40.4s, $0.40
+```
+
+When a customer reported the synthesis was missing a specific theme, the engineer pulled the trace. Step 2's clustering didn't surface the theme. The fix: better clustering prompt. The fix shipped same-day because the trace made the cause visible.
+
+## What we won't ship
+
+**Agents without trace-level observability.**
+
+**Traces that don't capture model versions and prompt versions.** When a regression happens after a model bump, version data is what diagnoses it.
+
+**Logs without redaction.** PII in logs is a regulatory risk.
+
+**Logs that are write-only.** If nobody can read the traces, they're not observability.
+
+## Close
+
+Agent observability is the difference between debugging-by-evidence and debugging-by-guess. The trace captures what happened. The reviewer reads it. Bugs get fixed because their causes are visible. Skip the observability and every incident becomes detective work without clues.
+
+## Related reading
+
+- [Plan vs. act](/blog/plan-vs-act-loop) — what the trace records.
+- [Cost guardrails](/blog/cost-guardrails) — uses cost-trace data.
+- [SRE: postmortem first drafts](/blog/sre-postmortem-drafts) — same evidence-based discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building agent observability, we'd love to hear about it. [Get in touch.](/contact)*

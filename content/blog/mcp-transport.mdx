@@ -1,0 +1,82 @@
+---
+title: "MCP transport: stdio vs. HTTP vs. SSE"
+description: "Three transports; three deployment models. Pick the right one."
+date: "2027-01-12"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Transport", "Engineering", "Architecture", "Deployment"]
+series: "MCP & AI protocols"
+seriesOrder: 10
+---
+
+MCP supports three transports. Each fits a different deployment model.
+
+## The three transports
+
+**stdio.** The server runs as a child process of the AI client. Communication via stdin/stdout. Lightweight; local-only.
+
+**HTTP.** Standard request/response. Multi-user; cross-machine. The AI client makes HTTP requests.
+
+**SSE (Server-Sent Events).** HTTP-based but server-pushed. The server can send events to the client.
+
+## When each wins
+
+- **stdio:** local servers, single user, internal tools. Most starter MCP servers.
+- **HTTP:** SaaS-style servers, multi-user, cross-machine deployment.
+- **SSE:** servers that need to push events (notifications, long-running operations).
+
+## A real choice
+
+A team building three MCP servers:
+
+- Internal data tools: stdio. Each engineer runs locally.
+- SaaS analytics tool: HTTP. Multi-user; remote.
+- Real-time notifications: SSE. Server pushes to AI when events occur.
+
+The transport per server matches its deployment.
+
+## Trade-offs
+
+- **stdio:** simplest, local-only.
+- **HTTP:** more complex, broadly deployable.
+- **SSE:** most complex, supports server-push.
+
+## Reviewer ritual
+
+PR review:
+
+- Transport choice documented.
+- Transport choice fits deployment.
+- Failure modes (transport-level) handled.
+
+## Limits
+
+Some MCP features depend on transport:
+
+- Server-push only works with SSE.
+- Stateful sessions are easier with stdio.
+- Cross-region deployments need HTTP.
+
+## What we won't ship
+
+**stdio servers** in multi-user contexts.
+
+**HTTP servers** without TLS.
+
+**SSE without** appropriate timeout handling.
+
+**Transport** chosen for engineering convenience rather than deployment fit.
+
+## Close
+
+MCP transport is a deployment decision. stdio for local, HTTP for shared, SSE for push-based. Pick based on use. The transport shapes the rest of the architecture.
+
+## Related reading
+
+- [MCP server hosting](/blog/mcp-server-hosting) — companion topic.
+- [Your first MCP server (Node)](/blog/first-mcp-server-node) — surrounding context.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're choosing MCP transport, we'd love to hear about it. [Get in touch.](/contact)*

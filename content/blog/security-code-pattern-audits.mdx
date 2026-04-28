@@ -1,0 +1,127 @@
+---
+title: "Security: code-pattern audits and CVE sweeps"
+description: "Security work that matters most is repetitive: pattern audits, CVE sweeps, dependency reviews. AI-assisted scaffolding makes the discipline maintainable."
+date: "2026-08-03"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Security", "AI Development", "CVE", "Code Audit"]
+series: "AI for software development"
+seriesOrder: 19
+---
+
+A security engineer at a mid-size SaaS told us last quarter that her team's audit cadence had been "annual, externally driven." Internal audits were aspirational; quarterly reviews fell through; the only systematic pass was when a customer's compliance team forced one.
+
+Claude Code makes the internal audit cadence sustainable. The AI runs the pattern sweeps. The engineer reviews the findings. The discipline scales without the headcount.
+
+## Pattern library
+
+The pattern library is the team's accumulated security knowledge:
+
+- **Authentication patterns.** What auth pattern do new endpoints use? Are there endpoints missing auth?
+- **Authorization patterns.** Are permission checks consistent? Are there role-based gaps?
+- **Input validation.** Are inputs validated at the right layer? Are validation patterns consistent?
+- **Output encoding.** Are outputs encoded for the right context (HTML, SQL, log)?
+- **Secret handling.** Are secrets in env vars (not code), is logging redacting them, are they rotated?
+- **Crypto.** Is the team using approved crypto patterns? Are key sizes current?
+- **Dependency patterns.** Is the team using current versions of security-critical libraries?
+
+Each pattern has a positive (what to do) and negative (what to avoid) example. The library lives in the codebase.
+
+## Sweep automation
+
+The AI runs sweeps on the codebase, comparing against the pattern library:
+
+- New endpoints without auth checks.
+- Routes accessing user data without authorisation.
+- Inputs reaching SQL without parameterisation.
+- Logging that includes likely-sensitive data.
+- Hardcoded secrets in code or config.
+- Dependencies with known CVEs.
+- Crypto patterns using deprecated algorithms.
+
+Each finding is structured: file, line, pattern, recommended fix.
+
+## Triage loop
+
+Findings get triaged weekly:
+
+- **Critical.** Active vulnerability requiring immediate fix. Hours.
+- **High.** Issue likely to be exploitable. Days.
+- **Medium.** Defensive issue or hardening opportunity. Sprint.
+- **Low.** Style/practice improvement. Backlog.
+
+The security engineer triages. False positives are tagged so the AI doesn't keep surfacing them. Real findings flow into the team's tracker.
+
+## CVE sweeps
+
+The dependency-CVE sweep is its own discipline:
+
+- Daily scan of all dependencies against CVE databases.
+- Per-CVE assessment: does the codebase actually use the affected functionality?
+- Severity-weighted upgrade plan: critical CVEs ship same week, lower-severity batched.
+
+The AI helps with the assessment ("yes, the codebase imports this function in two places" or "no, this functionality is unused"). The engineer makes the upgrade call.
+
+## Reviewer discipline
+
+Each security finding becomes a PR. The PR review:
+
+- Confirms the finding is real (not false positive).
+- Reviews the fix for completeness.
+- Confirms no regressions introduced.
+- Updates the pattern library if the fix reveals a new pattern.
+
+Security PRs get extra reviewer attention. A merge with a missed issue compounds.
+
+## A real audit pass
+
+A scenario: monthly audit on a 200K-line codebase.
+
+**Hour 1.** AI runs the full sweep. 47 findings.
+
+**Hour 2.** Security engineer triages. 12 are real, 35 are false positives or already-fixed-but-not-yet-tagged.
+
+**Hour 3.** Engineer files tickets for the 12 real findings. Drafts PRs for the 4 critical ones.
+
+**Hours 4-8.** Engineer ships the 4 critical fixes. Routes the remaining 8 to relevant teams.
+
+**Day 7.** All 12 fixed or in progress. False positives tagged. Pattern library updated where the audit revealed new patterns.
+
+A monthly audit that previously consumed a week of dedicated work compresses to a focused day.
+
+## What stays human
+
+- Threat-model decisions.
+- Severity classifications for novel findings.
+- Architectural security decisions.
+- Communications with the security community on responsibly-disclosed issues.
+
+Senior security judgment. The AI handles the pattern-matching.
+
+## What we won't ship
+
+**Auto-fixing security issues** without engineer review. Even mechanical fixes get reviewed.
+
+**Auto-disclosing vulnerabilities** without coordination.
+
+**Audit reports** that obscure real issues with false-positive volume.
+
+**AI-generated security fixes** without test coverage that exercises the security boundary.
+
+## How to start
+
+Build the pattern library. Run the first sweep. Triage. Fix. Establish the monthly cadence. Within two quarters, the team's security posture is qualitatively different.
+
+## Close
+
+Code-pattern audits with Claude Code are the discipline that makes security sustainable. The AI runs the sweeps. The engineer triages and ships. The pattern library compounds. The annual scramble becomes a monthly ritual that nobody dreads.
+
+## Related reading
+
+- [Security: threat-model first draft](/blog/security-threat-model-draft) — companion role.
+- [DevOps: CI pipeline diagnosis at 2am](/blog/devops-ci-2am-diagnosis) — same pattern-matching discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening security discipline, we'd love to hear about it. [Get in touch.](/contact)*

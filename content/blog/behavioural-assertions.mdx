@@ -1,0 +1,90 @@
+---
+title: "Behavioural assertions: testing 'should-ness'"
+description: "Some behaviours can't be tested with exact-match. Behavioural assertions are the discipline."
+date: "2026-10-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Assertions"]
+series: "Testing in the age of AI"
+seriesOrder: 4
+---
+
+A team's prose-generation feature couldn't be tested with exact-match. The model produced different outputs each run; all of them were acceptable. Traditional asserts didn't apply. The team needed a new pattern: behavioural assertions.
+
+## The shouldness pattern
+
+Behavioural assertions test what the output *should be*, not what it equals:
+
+- Should contain certain key information.
+- Should not exceed a length.
+- Should be on-topic.
+- Should follow the brand voice.
+- Should cite sources.
+
+These are the qualities the team cares about. The exact wording isn't.
+
+## Implementation
+
+Two strategies:
+
+**Programmatic.** Regex, length checks, contains-checks, structural checks. Fast and reliable for narrow assertions.
+
+**LLM-as-judge.** A separate model checks against the rubric. Slower and noisier, but handles fuzzy assertions.
+
+Most teams use a mix.
+
+## Reviewer ritual
+
+Behavioural assertions get reviewed:
+
+- Did the assertion catch real issues, or false positives?
+- Are new shouldness dimensions emerging?
+- Are old assertions still relevant?
+
+## A real test set
+
+A team's customer-email-generation tests:
+
+- Programmatic: greeting present, customer name correct, length under 250 words, no profanity, contains specific keywords for the email type.
+- LLM-judge: tone matches brand voice, no factual claims without basis, professionally appropriate.
+
+Together: comprehensive coverage, no exact-match assumption.
+
+## Trade-offs
+
+Programmatic assertions:
+
+- Fast, deterministic, cheap.
+- Limited to what regex can express.
+
+LLM-as-judge:
+
+- Handles fuzzy assertions.
+- Slower, noisier, costlier.
+- Needs calibration.
+
+The right mix depends on what the team is testing.
+
+## What we won't ship
+
+**Exact-match assertions** for outputs with legitimate variance.
+
+**LLM-as-judge** without calibration.
+
+**Behavioural assertions** that don't catch what they were designed for. Useless tests are worse than no tests.
+
+**Skipping the eval-eval review.** What does the eval catch? Verify.
+
+## Close
+
+Behavioural assertions are the new pattern for testing AI outputs. Programmatic for what's testable cheaply; LLM-as-judge for what isn't. Together, they cover the shouldness without forcing exact-match. The team's tests pass when the output is good, not when it's identical.
+
+## Related reading
+
+- [Golden-set discipline](/blog/golden-set-discipline) — surrounding pattern.
+- [LLM-as-judge: when to trust it](/blog/llm-as-judge) — implementation depth.
+- [The new test pyramid](/blog/new-test-pyramid) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening behavioural assertions, we'd love to hear about it. [Get in touch.](/contact)*

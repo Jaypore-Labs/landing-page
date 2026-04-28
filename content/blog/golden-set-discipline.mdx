@@ -1,0 +1,90 @@
+---
+title: "Golden-set discipline"
+description: "200 carefully chosen examples beat 2,000 hastily collected ones. Curation is the work."
+date: "2026-10-23"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Eval Sets"]
+series: "Testing in the age of AI"
+seriesOrder: 3
+---
+
+A team had 2,400 cases in their eval set. Half were duplicates. A quarter were ambiguous (humans disagreed on the right answer). Most were happy-path; the team's actual production failures didn't appear.
+
+Golden sets aren't measured by size. They're measured by signal. A 200-case set that's curated beats a 2,400-case set that isn't.
+
+## Curation rules
+
+What earns a place in the golden set:
+
+- **Representativeness.** Reflects production traffic distribution.
+- **Diversity.** Spans the input space.
+- **Distinctness.** Each case tests something specific.
+- **Verifiability.** Humans agree on the right answer.
+
+Cases that fail any rule get out.
+
+## The 200 that earn their place
+
+A typical mature eval has:
+
+- 50-100 happy-path cases (representative of common production traffic).
+- 30-50 edge cases (boundaries, unusual but valid inputs).
+- 30-50 adversarial cases (attempts to break the system).
+- 20-30 known-regression cases (specific bugs that were fixed; should stay fixed).
+
+The set is sized to be reviewable. A 200-case set can be re-run in CI quickly. A 2,000-case set can't.
+
+## Reviewer ritual
+
+The eval set is reviewed quarterly:
+
+- Are cases still representative?
+- Are new patterns missing from the set?
+- Are stale cases retiring?
+- Is the size still right?
+
+## Coverage
+
+Coverage is measured against:
+
+- Input dimensions (the set spans the input variability).
+- Failure modes (each known failure mode has cases).
+- Edge cases (boundaries are tested).
+- Production distribution (the set roughly matches what's seen in production).
+
+## A real set
+
+A team's customer-classifier golden set:
+
+- 80 happy-path cases (representative ticket types).
+- 40 edge cases (unusual phrasings, boundary conditions).
+- 25 adversarial (prompt injection attempts).
+- 15 known-regression (bugs that were fixed).
+- Total: 160 cases.
+
+Reviewable in 30 minutes. Re-runnable in 5. The team trusts the set's signal.
+
+## What we won't ship
+
+**Eval sets without curation.**
+
+**Eval sets that only grow** (without retirement).
+
+**Eval sets** built solely from imagined cases.
+
+**Skipping the quarterly review.**
+
+## Close
+
+Golden-set discipline is the curation work that makes evals trustworthy. 200 cases that earn their place beat 2,000 that don't. The set is reviewable, representative, distinct. The team's signal is high. Skip curation and the eval becomes noise.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — start here.
+- [Counter-example mining](/blog/counter-example-mining) — eval-set growth.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're curating eval sets, we'd love to hear about it. [Get in touch.](/contact)*

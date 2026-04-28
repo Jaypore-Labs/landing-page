@@ -1,0 +1,87 @@
+---
+title: "Agents in media: news summary with a corrections workflow"
+description: "Newsrooms run on speed. Agents help — if they preserve sourcing chains and the corrections discipline that earns trust."
+date: "2026-05-25"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Media AI", "Journalism", "Production AI", "Newsroom"]
+series: "AI agents in industry"
+seriesOrder: 19
+---
+
+A newsroom leader described his constraint to us last year: "We can be wrong sometimes. We can't be wrong without knowing how." A correction is a recoverable mistake. An unrecoverable mistake is one where nobody can trace what was said, where it came from, and how to fix it.
+
+That sentence is the design specification for media agents. Agents help newsrooms move faster. They don't help if they break the sourcing chain.
+
+## Sourcing chain is the asset
+
+Every claim in a news piece traces back to a source. A wire report, an interview, a public document, a confirmed statement. The chain from claim to source is what makes news *journalism* and not blogging.
+
+A working media agent preserves this chain. Concretely:
+
+- The agent ingests source material with full metadata (publisher, date, URL, author).
+- When generating a draft, the agent ties each fact to its source.
+- The published piece includes appropriate attribution.
+- The internal record retains the *full* chain — not just attribution but raw source quotes — so corrections can be traced.
+
+Agents that hallucinate sources, conflate sources, or "summarise" sources without citation aren't journalism tools. They're liability accelerators. The newsroom that ships one without a sourcing-chain discipline ends up with a correction it can't trace.
+
+## What agents do well in newsrooms
+
+**Wire-service summary.** Five wires reporting the same event in slightly different ways. Agent reads them all, produces a synthesis with each fact attributed. Reporter reviews and writes the published piece.
+
+**Background research.** "Who is this person? What have they done? What's the context for this story?" Agent assembles a research brief from public sources with citations. Reporter uses it as a starting point.
+
+**Transcript-to-quote extraction.** Two-hour interview transcript → agent identifies the highest-quality quotes, organised by topic, with timestamps. Editor selects and verifies.
+
+**Headline and SEO variants.** Given a piece, generate headline variants and SEO-conscious alternates. Editor picks. (Headline writing is editorial judgment; agents help, don't decide.)
+
+**Topic-tagging and search.** Behind the scenes, agents tag pieces for archive search and topic clustering. This is invisible but compounding.
+
+## What agents shouldn't do
+
+**Publish without an editor.** No exceptions.
+
+**Fabricate quotes.** Even in summary form, the temptation to paraphrase a source loosely can cross a line. Quote what was said; paraphrase only with the chain intact.
+
+**Make editorial judgments.** What's news, what's not, what angle to take, who deserves a follow-up — these are human judgments. The agent surfaces options.
+
+**Cover sensitive beats without explicit guardrails.** Court reporting, medical reporting, sourcing involving anonymous sources — these need explicit care, not default agent behaviour.
+
+## The corrections workflow
+
+When something is wrong in a published piece, three things have to happen:
+
+1. **Identify the source** — which fact, traceable to which source. The agent's logging makes this fast.
+2. **Correct the live piece** with a noted correction.
+3. **Capture the failure** — what went wrong, did the agent miss it, did the editor miss it, did the source give bad information?
+
+The third item is the eval-feedback loop. Each correction enriches the eval set. Over time the agent and the workflow get sharper. Over time means quarters, not weeks. Newsrooms aren't engineering organisations and their adoption curves are different.
+
+## Editorial guardrails
+
+Three guardrails the newsroom controls:
+
+**Voice.** Each publication has a voice. The agent's drafts conform to the voice the way the marketing-agent conforms to the brand voice — eval set, paired examples, gating discipline.
+
+**Coverage.** Some topics get extra editorial review. Politics, identity, public officials, ongoing investigations. The agent's drafts on these topics route to a different reviewer track.
+
+**Speed vs. accuracy.** Different stories have different speed-accuracy tradeoffs. Breaking news can ship faster with lighter review; investigative pieces need deeper review. The agent's workflow honours these tracks.
+
+## How to start
+
+Pick one workflow — wire-service summary is the canonical starter. Build the sourcing-chain discipline. Run the agent inside the existing editorial flow for a quarter. Measure: time from wire to first draft, factual accuracy of drafts, correction rate. Expand to a second workflow only after the first has proven its discipline.
+
+## Close
+
+Media agents work in newsrooms that already have an editorial discipline. They accelerate it; they don't replace it. The sourcing chain stays intact. The editor still signs. The corrections workflow still runs. What changes is speed — wires to draft, transcripts to quotes, archives to search — measured in hours instead of days.
+
+## Related reading
+
+- [Agents in legal: contract review with receipts](/blog/agents-in-legal) — same citation discipline.
+- [Agents in pharma: literature review](/blog/agents-in-pharma) — same retrieval-first architecture.
+- [The agent maturity curve](/blog/agent-maturity-curve) — media agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a newsroom agent, we'd love to hear about it. [Get in touch.](/contact)*

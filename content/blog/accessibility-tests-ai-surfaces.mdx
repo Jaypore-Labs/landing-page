@@ -1,0 +1,84 @@
+---
+title: "Accessibility tests for AI surfaces"
+description: "AI-generated content has its own a11y challenges. Test for them."
+date: "2026-11-18"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Accessibility"]
+series: "Testing in the age of AI"
+seriesOrder: 21
+---
+
+A team's AI-generated UI was technically accessible — the components used proper ARIA, keyboard nav worked, contrast met standards. The content was inaccessible. Generated text used jargon, made dense paragraphs, lacked plain-language alternatives. Screen-reader users gave up.
+
+A11y for AI surfaces isn't just the wrapper; it's the content itself.
+
+## The a11y rule
+
+Three layers:
+
+- **Wrapper a11y.** ARIA, keyboard, contrast, focus. Standard a11y testing.
+- **Content a11y.** Reading level, plain language, structure (headings, lists), screen-reader experience.
+- **Interaction a11y.** AI-conversation flows that work without sight, with assistive technology.
+
+Each is testable.
+
+## Tooling
+
+For wrapper a11y: axe, lighthouse, pa11y. Standard tools.
+
+For content a11y:
+
+- Reading-level checks (Flesch-Kincaid, etc.).
+- Length checks (no walls of text).
+- Structure checks (headings if appropriate, lists for enumerations).
+- Plain-language eval (LLM judge or rule-based).
+
+For interaction a11y: manual testing with screen readers; this isn't automatable.
+
+## Reviewer ritual
+
+PR review for AI features:
+
+- Wrapper a11y tested.
+- Generated content sampled for readability.
+- Interaction patterns reviewed for assistive-technology compatibility.
+
+## A real test
+
+A team's customer-support agent:
+
+- Wrapper: axe scan on response display.
+- Content: reading-level threshold (no higher than 8th grade for support content).
+- Length: under 250 words for default responses.
+- Manual: monthly screen-reader testing on key flows.
+
+Combined, the agent's a11y posture is comprehensive.
+
+## Trade-offs
+
+A11y tests add CI time and require care. The trade-off is real but worth it. Inaccessible products fail real users; that's a worse cost.
+
+## What we won't ship
+
+**AI surfaces** without wrapper a11y testing.
+
+**AI content** without readability assertions.
+
+**Skipping screen-reader testing** because "the wrapper passes."
+
+**A11y as a checkbox** rather than a continuous practice.
+
+## Close
+
+A11y tests for AI surfaces span wrapper, content, and interaction. Each layer needs its own discipline. The team that takes all three seriously ships products that work for everyone. The team that doesn't excludes users without realising.
+
+## Related reading
+
+- [Frontend: a11y audits that finally get done](/blog/frontend-a11y-audits) — same discipline.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding pattern.
+- [Testing in the age of AI series](/series/testing-in-the-age-of-ai) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening a11y discipline, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,117 @@
+---
+title: "ML: feature-store query rewrites"
+description: "Feature stores accumulate gnarly queries that nobody wants to touch. AI-assisted rewrites compress the cleanup."
+date: "2026-07-29"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "ML Engineering", "Feature Store", "AI Development", "Data"]
+series: "AI for software development"
+seriesOrder: 16
+---
+
+A senior ML engineer described her feature store: "Three generations of feature definitions, each with its own naming convention, its own SQL idioms, and its own undocumented assumptions about what the upstream tables look like." Rewrites stalled because the cost of touching anything was uncertain.
+
+Claude Code makes the rewrites tractable. The AI traces the query archaeology. The engineer designs the modernised version. The migration moves through phases without breaking downstream consumers.
+
+## Query archaeology
+
+The first job: figure out what each feature actually does. Old feature definitions often:
+
+- Use SQL that depends on schema that's evolved.
+- Hardcode magic numbers whose origin is forgotten.
+- Filter on conditions that no longer hold.
+- Compute things in ways that are no longer optimal.
+
+The AI reads the query, the upstream tables (current state), and the historical versions if available. It produces:
+
+- A plain-language explanation of what the query computes.
+- The schema dependencies and which ones are stale.
+- The magic numbers and where they likely came from (referencing context).
+- The probable optimisations.
+
+The engineer reviews and corrects. The first audit pass surfaces a dozen features that are either wrong, sub-optimal, or unnecessary.
+
+## Performance pass
+
+For features that are correct but slow, the AI helps:
+
+- Identifying the bottleneck in the query plan.
+- Drafting alternative formulations that compute the same value.
+- Generating performance tests that measure before-and-after.
+
+The engineer reviews each rewrite. Verifies semantic equivalence. Profiles. Some rewrites are dramatic improvements; some are not. The data drives.
+
+## Lineage update
+
+After rewrites, the lineage map updates:
+
+- Old features deprecated with annotations.
+- New features tagged with replacement-of metadata.
+- Downstream consumers notified.
+
+The AI helps draft the deprecation comms. The engineer ships and monitors.
+
+## Reviewer loop
+
+Each feature rewrite is a PR. The PR includes:
+
+- The old query, the new query, the diff.
+- Performance comparison.
+- Schema-dependency check.
+- Backfill verification (does the new query produce the same values for historical data?).
+- Downstream-consumer notification.
+
+The reviewer asks: is this semantically equivalent, faster, cleaner? Three questions, each gated.
+
+## A real rewrite
+
+A scenario: a customer-LTV feature whose query takes 47 seconds to compute and depends on three deprecated tables.
+
+**Day 1.** AI traces the query. Finds the deprecated tables, identifies their replacements, drafts the rewrite using current schema.
+
+**Day 2.** Engineer reviews. Adjusts the rewrite to use the team's standard patterns. Profiles: 47 seconds to 2.8 seconds.
+
+**Day 3.** Backfill the rewrite for historical data. Verify values match within tolerance.
+
+**Day 4.** Ship the rewrite. Old feature deprecated with annotations.
+
+**Day 30.** Drop the old feature.
+
+A feature that nobody wanted to touch becomes 17x faster and uses current schema. Multiplied across a feature store, the cumulative gain is large.
+
+## What stays human
+
+- Decisions about which features to rewrite first (ROI judgment).
+- Tolerance decisions for value mismatches between old and new.
+- Communications with downstream model owners.
+- Architectural decisions about feature-store conventions.
+
+Senior ML and data-engineering decisions. The AI handles the typing.
+
+## What we won't ship
+
+**Rewrites without backfill verification.** Subtle differences in old vs. new can corrupt models silently.
+
+**Rewrites that change feature semantics** without explicit downstream-consumer signoff.
+
+**Auto-deprecation** of features without lineage confirmation.
+
+**Anything that breaks model reproducibility** for compliance or research purposes.
+
+## How to start
+
+Pick the slowest, gnarliest feature in the store. Run the workflow. Build a personal pattern library. Within a quarter, the team has a working rewrite cadence.
+
+## Close
+
+Feature-store rewrites with Claude Code are the archaeology compressed. The semantic equivalence is verified. The performance gains are measured. The deprecation discipline holds. Features that were untouchable for years become managed work that ships incrementally.
+
+## Related reading
+
+- [Data: SQL refactors and lineage maps](/blog/data-sql-refactor-lineage) — same archaeology pattern.
+- [ML: eval harness from a spec](/blog/ml-eval-harness-from-spec) — companion role.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising ML infrastructure, we'd love to hear about it. [Get in touch.](/contact)*

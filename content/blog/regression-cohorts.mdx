@@ -1,0 +1,87 @@
+---
+title: "Regression cohorts: catching what evals miss"
+description: "Real-world regressions appear in cohorts evals don't always cover. The discipline is mining and adding."
+date: "2026-10-30"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Regressions"]
+series: "Testing in the age of AI"
+seriesOrder: 8
+---
+
+A team's eval was at 99%. Customer complaints rose anyway. Investigation: the complaints were about a category of input the eval didn't cover. The eval was clean; the production failures were on cases the eval set didn't represent.
+
+Regression cohorts close the gap. When production produces a failure mode, that failure mode joins the eval set as a cohort. Future regressions in that area get caught.
+
+## Cohort design
+
+A cohort is a subset of eval cases focused on a known failure pattern:
+
+- Cohort: "very long inputs."
+- Cohort: "industry jargon."
+- Cohort: "ambiguous queries."
+- Cohort: "specific edge case from incident #1234."
+
+Each cohort has its own pass rate. The agent must pass all cohorts.
+
+## Trigger conditions
+
+Cohorts emerge from:
+
+- **Production incidents.** A specific bug becomes a cohort.
+- **Customer complaints.** A pattern of complaints becomes a cohort.
+- **Drift detection.** A drift pattern becomes a cohort.
+
+Each addition to the eval set is documented: why this cohort was added.
+
+## Reviewer ritual
+
+Quarterly review:
+
+- Are all cohorts still relevant?
+- Are pass rates being maintained?
+- Are any cohorts redundant?
+
+Cohorts can retire when the underlying issue is structurally fixed.
+
+## A real catch
+
+A team's customer-classifier eval was at 99%. A customer-feedback session revealed users were unhappy when the classifier handled "complaint about previous interaction" inputs. The eval didn't have these cases.
+
+The team added a cohort: 30 cases of "complaint-about-prior-interaction" inputs. The classifier failed 40% of them. The team iterated the prompt; cohort pass rate rose to 92%. Customer complaints dropped.
+
+The cohort approach surfaced the failure pattern; the eval-driven iteration fixed it.
+
+## Coverage
+
+Cohort coverage is the team's defence against blind spots:
+
+- Each known failure pattern → cohort.
+- Each high-stakes use case → cohort.
+- Each compliance-relevant scenario → cohort.
+
+The team's eval set isn't a flat list; it's a structured set of cohorts.
+
+## What we won't ship
+
+**Eval set as a flat list** without cohort structure.
+
+**Pass rate** as the only headline metric.
+
+**Adding cohorts** without retiring obsolete ones.
+
+**Skipping the post-incident cohort addition.** The post-mortem isn't done until the cohort lands.
+
+## Close
+
+Regression cohorts are the discipline of catching what evals miss. Each cohort represents a known pattern. Each addition prevents recurrence. The team's eval set evolves toward fewer blind spots. Skip cohorts and the eval is misleading.
+
+## Related reading
+
+- [Counter-example mining](/blog/counter-example-mining) — eval-set growth.
+- [SRE: postmortem first drafts](/blog/sre-postmortem-drafts) — cohort source.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening regression discipline, we'd love to hear about it. [Get in touch.](/contact)*

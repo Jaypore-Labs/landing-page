@@ -1,0 +1,83 @@
+---
+title: "Eval ownership in an org: PM, eng, or QA?"
+description: "Eval needs a named owner. The right role depends on the org."
+date: "2026-12-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Ownership", "Engineering", "Output Testing", "Org Design"]
+series: "Evals & output testing"
+seriesOrder: 23
+---
+
+A team's eval set was "everyone's responsibility." It didn't grow. It didn't get reviewed. Quality drifted.
+
+Eval needs an owner. The right role depends on the org.
+
+## The three options
+
+**Product Manager.** Owns what good means. Authors cases that reflect product intent. Reviews drift trends.
+
+**Engineering.** Owns the eval infrastructure. Adds cases mined from production. Maintains the test pipeline.
+
+**QA.** Owns the eval-as-test-suite framing. Ensures coverage. Authors edge cases.
+
+Each can work; each has trade-offs.
+
+## When each wins
+
+- **PM-owned:** when product clarity is the bottleneck.
+- **Eng-owned:** when infrastructure is immature or the eval needs deep technical investment.
+- **QA-owned:** when the team has a strong QA function and clear product specs.
+
+For early-stage startups: PM-owned often works (PM has product clarity, engineering supports). For larger orgs: dedicated eval engineer or ML-ops role.
+
+## Reviewer ritual
+
+The owner:
+
+- Drives quarterly reviews.
+- Surfaces eval-related concerns to leadership.
+- Owns eval-set growth.
+- Makes the call on threshold changes.
+
+## A real org
+
+A team we work with:
+
+- PM owns each feature's eval set.
+- Engineering owns the infrastructure (CI, dashboard, mining tooling).
+- Quarterly review attended by PM, lead eng, leadership.
+
+The split works because each role has clear accountability.
+
+## Trade-offs
+
+- **PM-owned:** product alignment, may lack technical depth.
+- **Eng-owned:** technical depth, may lack product-quality lens.
+- **QA-owned:** systematic, may lack product authority.
+
+The right choice depends on the org's maturity and which role can execute.
+
+## What we won't ship
+
+**Evals** as "everyone's responsibility."
+
+**Owners** without authority to make decisions.
+
+**Owners** without time allocated to eval work.
+
+**Skipping the org-level review** of eval health.
+
+## Close
+
+Eval ownership is org design. PM, eng, or QA. Each can work. The team picks based on capabilities and stage. Skip the ownership question and the eval atrophies.
+
+## Related reading
+
+- [What makes an eval good](/blog/what-makes-an-eval-good) — what owners protect.
+- [Building your first eval set](/blog/building-your-first-eval-set) — what owners do.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're choosing eval owners, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,129 @@
+---
+title: "Recruiting: JD writer + screening-question generator"
+description: "Most JDs are recycled from the last hire. AI employees write JDs grounded in what the role actually needs."
+date: "2026-06-18"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Recruiting AI", "AI Employees", "Talent Acquisition", "JD Writing"]
+series: "Claude Code in business"
+seriesOrder: 12
+---
+
+A talent leader we worked with had a stack of JDs that all started "We're looking for a passionate..." She told us she rewrote each one because the JDs the hiring managers gave her were unusable — too long, too generic, secretly written by accident as the JD from the last hire two years ago.
+
+The JD-writer AI employee fixes this with structure. The hiring manager fills out a short role card; the agent drafts a JD that's actually about *this* role; the recruiter has a tool that drives candidate quality up.
+
+## The shape of the role
+
+**Title.** Recruiting AI — Job Description Specialist.
+
+**Mission.** Convert a hiring manager's role card into a JD that's accurate, inclusive, and conversion-optimised.
+
+**Outcomes.** Time-from-need-to-posted-JD, applicant-pool quality, days-to-first-interview, role-card-to-JD edit volume.
+
+**Reports to.** Head of Talent or VP People.
+
+**Tools.** Role-card template, JD library, inclusive-language eval, brand-voice eval for company tone.
+
+**Boundaries.** Drafts. The hiring manager and recruiter review and edit. Doesn't post directly.
+
+## The role card
+
+The agent's input is structured. A role card includes:
+
+- **Title and team.** What the role is and where it sits.
+- **Mission.** What this role exists to accomplish.
+- **First-90-day deliverables.** What "successful first 90 days" looks like.
+- **Year-one outcomes.** What the role should have done within a year.
+- **Must-have skills.** Skills required to be effective in the first 90 days.
+- **Nice-to-have skills.** Skills that accelerate but aren't blockers.
+- **Compensation range and structure.**
+- **Location, remote/hybrid, travel expectations.**
+
+The hiring manager fills this out. 20-30 minutes of focused work. The agent does the rest.
+
+## The drafting
+
+From the role card, the agent produces:
+
+- **Opening.** A short, specific paragraph that says what the role does and why someone would want it.
+- **What you'll do.** Concrete activities — not generic responsibilities. "Lead the design and implementation of our customer-data platform" beats "lead engineering initiatives."
+- **What we're looking for.** Must-haves and nice-to-haves separated. Skills measurable through interview.
+- **Compensation.** Stated range, equity if applicable, benefits highlights.
+- **About the team.** Context that helps a candidate visualise their day-to-day.
+
+The whole JD targets ~300-500 words. Long JDs depress applicant pool size and quality.
+
+## Inclusive-language pass
+
+Before the JD reaches the recruiter, the agent runs an inclusive-language pass:
+
+- Removes gendered language, age cues, and culture-coded terms ("rockstar", "ninja").
+- Calibrates the must-have vs. nice-to-have split — research suggests women apply only when meeting nearly all listed requirements; padding "must haves" with what should be "nice to haves" suppresses applications.
+- Flags compensation-transparency gaps.
+- Surfaces unintentionally exclusionary requirements ("must work in office 5 days/week" for roles that don't actually require it).
+
+The recruiter and hiring manager review the flags. Some they accept; some they push back on. Either way, the discipline is visible.
+
+## The screening-question generator
+
+Once the JD is approved, the agent drafts screening questions tied to specific JD requirements:
+
+- For the must-have "5+ years backend with Postgres at scale" — questions that probe the depth of that experience.
+- For "experience leading cross-functional projects" — a behavioural question about a specific project they've led.
+- For "comfort working in ambiguous environments" — a scenario that tests how they think.
+
+Each question has a rubric — what a strong vs. weak answer looks like. This is the screening calibration tool that most teams skip and regret.
+
+## What this saves
+
+Before the agent:
+
+- JD drafting took 4-6 hours of recruiter time per role.
+- Hiring managers' input was inconsistent.
+- Screening questions were ad hoc per recruiter.
+
+After:
+
+- JD drafting is 30-60 minutes (recruiter editing the agent's draft).
+- Hiring managers' input is structured, captured, archived.
+- Screening questions are calibrated and tied to JD requirements.
+
+The compounding effect: candidate quality improves because the JD is honest about the role and inclusive in its framing. Time-to-first-interview drops. Time-to-hire drops.
+
+## What we won't ship
+
+**Auto-screening candidates.** Screening is a human's call. Always.
+
+**Sourcing-target inference based on demographic data.** The agent operates inside the company's privacy and compliance discipline.
+
+**Auto-posting to job boards.** Posting is a workflow that has its own approval steps.
+
+**Anything that ranks candidates without a human in the loop.** See the agents-in-HR article in series 1.
+
+## The KPIs the talent leader watches
+
+1. **Time-from-need-to-posted-JD.**
+2. **Applicant-pool quality** (recruiter's qualitative score).
+3. **Days-to-first-interview.**
+4. **Role-card-to-JD edit volume.**
+
+If the fourth metric doesn't decline, the agent's drafting isn't aligning with the team's standards. Investigate.
+
+## How to start
+
+Pick one role family — engineering, sales, or operations. Run the agent on three to five roles. Compare to JDs the team would have produced. Tune. Once aligned, expand to all role families.
+
+## Close
+
+The JD-writer AI employee is a teammate whose job is the part of recruiting nobody enjoys but everyone notices. The JD is on time. It's specific. It's inclusive. The hiring manager's input is captured. The screening rubric is ready. The candidate pool that arrives is better-qualified because the JD told them the truth about the role.
+
+## Related reading
+
+- [Recruiting: sourcing brief](/blog/claude-code-sourcing-brief) — companion role to the JD writer.
+- [Agents in HR: bias receipts](/blog/agents-in-hr-recruiting) — bias-monitoring discipline transferred.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI talent employee, we'd love to hear about it. [Get in touch.](/contact)*

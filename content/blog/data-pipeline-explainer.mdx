@@ -1,0 +1,131 @@
+---
+title: "Data: pipeline DAG explainer + drift detector"
+description: "Most data pipelines are black boxes that nobody fully understands. AI explainers make them legible — and AI drift detectors keep them honest."
+date: "2026-07-24"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Data Engineering", "Data Pipelines", "AI Development", "DAG"]
+series: "AI for software development"
+seriesOrder: 13
+---
+
+A data engineer at a logistics company described her pipeline like this: "It's a DAG of 380 tasks. The original author left in 2022. Three of us each understand a different third. The middle third nobody understands."
+
+Most data pipelines accumulate this fog. Tasks get added, dependencies grow, original assumptions get forgotten. Claude Code makes the fog tractable. The pipeline gets explained. The drift gets detected. The institutional knowledge gets reconstructed.
+
+## DAG documentation
+
+The first job is making the pipeline legible. The AI ingests:
+
+- The DAG definition (Airflow, Dagster, dbt, etc.).
+- Task code or SQL for each node.
+- Recent run logs.
+- Metadata about each table touched.
+
+It produces a per-task explainer:
+
+- What this task does, in plain language.
+- What inputs it reads.
+- What outputs it produces.
+- What conditions cause it to skip vs. run.
+- Known failure modes, based on log history.
+
+The data engineer reviews the explainers. Tightens the ones the AI got fuzzy on. The result: a documentation layer that didn't exist, generated in a few hours instead of weeks.
+
+## The dependency map
+
+A pipeline's dependency graph is its risk surface. Tasks depending on tables nobody owns. Tasks depending on tables that change schema unannounced. Tasks depending on external feeds that fail silently.
+
+The AI maps:
+
+- Internal dependencies (task A reads from table B, populated by task C).
+- External dependencies (task X reads from S3 bucket Y, populated by some other team).
+- Schema dependencies (task X assumes column Y exists; if upstream renames Y, task breaks).
+
+Each dependency is annotated with risk level and known weakness. The data engineer reviews, surfaces concerns to the relevant teams.
+
+## Drift signals
+
+Pipelines drift. Source data shape changes. Volume expectations shift. Latencies degrade. Most teams don't notice until something downstream breaks loudly.
+
+The AI's drift detection:
+
+- **Volume drift.** Daily row counts by source table; flag deviations beyond X stdev.
+- **Schema drift.** Source-table schemas compared to last run; flag added/removed columns.
+- **Latency drift.** Per-task duration compared to rolling median; flag tasks taking >2x normal time.
+- **Quality drift.** Null rates, distinct counts, value distributions for key columns; flag deviations.
+- **Freshness drift.** Time between source-table updates; flag tables falling behind their SLA.
+
+Each drift signal is a finding for the data team's weekly review. Not all are actionable; some are explained by known business changes. The team triages.
+
+## Alerting workflow
+
+Drift signals route to alerts:
+
+- **Critical.** Pipeline-blocking drift (schema breaking change). Page the on-call.
+- **High.** Quality drift on key tables. Slack the data team.
+- **Medium.** Volume or latency drift. Weekly report.
+- **Low.** Cosmetic drift. Logged but no notification.
+
+The AI helps configure the routing rules. The data engineer tunes them based on team capacity and drift patterns.
+
+## Reviewer loop
+
+The drift findings get reviewed weekly:
+
+- Confirmed drift → action (fix or document the new normal).
+- False positive → tune the threshold.
+- Real but acceptable → annotate the pipeline.
+
+Over a quarter, the drift detector becomes well-calibrated. The data team is catching issues before downstream consumers notice them.
+
+## A real pipeline
+
+A scenario: a 380-task pipeline that had been a black box.
+
+**Week 1.** AI generates explainers for all 380 tasks. Data engineer reviews 60 most-critical, tightens. Documentation layer exists for the first time.
+
+**Week 2.** AI maps dependencies. Surfaces 12 tables nobody owns and 4 external feeds without freshness SLAs. Engineer files tickets for each.
+
+**Week 3.** AI sets up drift detection. Initial run surfaces 23 findings. Engineer triages: 7 are real issues, 16 are noise to tune out.
+
+**Week 4.** Drift detection running cleanly. Weekly report becomes part of the team's standup.
+
+A pipeline that was incomprehensible is now legible, monitored, and improving.
+
+## What stays human
+
+- Decisions about which drift signals matter for the business.
+- Owner assignments for tables and feeds.
+- Triage of borderline cases.
+- Architectural decisions about pipeline structure.
+
+These are senior judgments. The AI handles the typing and the watching.
+
+## What we won't ship
+
+**Auto-fixing drift.** The fix is an engineering decision.
+
+**Auto-blocking pipelines** based on drift signals without human review.
+
+**Documentation that confidently asserts things the AI inferred but the engineer didn't verify.**
+
+**Drift alerts** for signals that nobody's going to act on. Alert fatigue compounds.
+
+## How to start
+
+Pick the most-incomprehensible pipeline. Run the explainer. Generate the documentation. Set up drift detection on the most-critical tables. Within a quarter, the team's understanding of its own pipelines is qualitatively different.
+
+## Close
+
+Data pipelines with Claude Code become legible and monitored without weeks of dedicated documentation work. The AI generates the explainers. The data engineer reviews and signs off. The drift detector catches issues before consumers notice. The fog clears.
+
+## Related reading
+
+- [Data: SQL refactors and lineage maps](/blog/data-sql-refactor-lineage) — companion role.
+- [SRE: runbook generation](/blog/sre-runbook-generation) — same documentation discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising data engineering, we'd love to hear about it. [Get in touch.](/contact)*

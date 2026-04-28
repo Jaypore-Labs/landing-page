@@ -1,0 +1,113 @@
+---
+title: "Sales: discovery summariser that keeps the human"
+description: "A discovery call deserves a real summary. AI employees produce one in 90 seconds — without flattening the conversation into bullets."
+date: "2026-06-08"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Sales AI", "AI Employees", "Discovery", "MEDDIC"]
+series: "Claude Code in business"
+seriesOrder: 4
+---
+
+A sales VP we worked with had a problem with discovery summaries. His reps wrote them. They were inconsistent — sometimes a paragraph, sometimes three pages, sometimes nothing. The downstream effects were predictable: account executives walked into demos cold, sales engineers showed up unbriefed, leadership reviewed pipeline with stale context.
+
+The discovery summariser AI employee solves the consistency problem without losing what makes a discovery call useful — the texture, the human stuff, the things between the lines that experienced reps read by ear.
+
+## The shape of the role
+
+**Title.** Sales Operations AI — Discovery Specialist.
+
+**Mission.** Convert every discovery-call recording or transcript into a structured summary in the team's chosen framework (MEDDIC, BANT, custom), within 90 seconds of call end.
+
+**Outcomes.** Summary completion rate, summary accuracy (vs. rep memory), AE/SE prep-time, deal-velocity for accounts with full summaries vs. without.
+
+**Reports to.** Head of Sales Operations.
+
+**Tools.** Call transcription, CRM read/write, sales framework templates, deal-history database.
+
+**Boundaries.** Summarises and posts to CRM. Doesn't make qualification calls. Doesn't author follow-ups.
+
+## What "doesn't flatten" means
+
+The temptation with AI summaries is to extract a checklist of facts. Discovery calls aren't checklists. The real value is in:
+
+- **What the prospect emphasised** (signal of priority).
+- **What the prospect avoided** (signal of fear or political constraint).
+- **The exact phrases the prospect used** (for use in follow-up writing).
+- **The unspoken concerns** that experienced reps notice (timing, decision-maker absence, competing initiatives).
+
+A working discovery summariser captures these. The summary has structured fields (the framework's checklist) and a free-form section that quotes specific prospect statements with timestamps.
+
+The free-form section is the difference between a summary an AE can use to prep and a summary that's just data entry.
+
+## The MEDDIC pattern
+
+For teams using MEDDIC, the agent's output:
+
+- **Metrics.** What the prospect said about their numbers — current, target, what they'd pay to move from one to the other. Quoted.
+- **Economic Buyer.** Who has signing authority. If the rep didn't ask, the agent flags it.
+- **Decision Criteria.** What the prospect explicitly listed as criteria. Quoted.
+- **Decision Process.** Steps and timeline as discussed. If not discussed, flagged.
+- **Identify Pain.** What hurts. Quoted directly.
+- **Champion.** Who in the prospect's org is helping the deal move. If unclear, flagged.
+
+Plus a free-form "tone and texture" section: how the call went, what was emphasised, what was avoided, what to follow up on.
+
+## What this saves
+
+A typical AE walks into a demo with a 15-minute prep window. Half of that is reading whatever notes the SDR wrote. With the discovery summariser:
+
+- The AE reads a complete summary in 3 minutes.
+- The remaining 12 minutes go to actual demo prep.
+- The demo is more relevant, hits the prospect's stated pain, uses their own language.
+- Demo-to-next-step conversion improves measurably.
+
+The compounding gain shows up in deal velocity. Better-prepared demos lead to faster deals. Faster deals lead to more closed business per quarter.
+
+## CRM hygiene as a side-effect
+
+The agent writes to CRM. Always. Every discovery call ends with a CRM record that includes the structured fields, the free-form section, and timestamps to the recording.
+
+Before the agent: CRM completeness was 40-60% on key fields. Reps did the typing eventually, or didn't.
+
+After: CRM completeness is 95%+ within 90 seconds of call end. This sounds like a small thing. It compounds. Pipeline reviews improve. Forecast accuracy improves. Marketing's targeting based on CRM data improves.
+
+## The reviewer loop
+
+The rep reviews the summary before the system marks it final. Edits feed the eval set. Common edits the team will see:
+
+- "The prospect said X, but the context was Y" — the agent missed nuance.
+- "The framework field was misread" — the agent classified incorrectly.
+- "This was a key quote we'll use in follow-up" — the agent didn't surface it.
+
+Each pattern improves the agent over a quarter. After two quarters, edits drop sharply.
+
+## What we won't ship
+
+**Auto-sending follow-ups.** That's the rep's voice and the rep's relationship.
+
+**Auto-qualifying leads.** Qualification is the rep's call.
+
+**Sharing the summary outside the deal team.** Discovery content is sensitive; access controls matter.
+
+**Recording without consent.** State and country laws vary; the agent's deployment respects them.
+
+## How to start
+
+One sales team, one product line. Run the agent on every discovery call for one month. Compare summaries to what reps would have written. Tune the eval set. Then expand.
+
+Most teams roll this out across the entire org day one. The ones that ship pick one team, dial it in, then expand.
+
+## Close
+
+The discovery summariser is an AI employee whose job is to make every other person on the deal team better-prepared. Not by replacing the rep's ear — by capturing what the rep heard, in a form everyone else can use. The texture of the call survives. The data entry doesn't.
+
+## Related reading
+
+- [Marketing: campaign-brief copilot](/blog/claude-code-marketing-brief) — same draft-and-review pattern.
+- [Agents in sales: SDR copilots](/blog/agents-in-sales) — the SDR-side analogue.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — the framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI sales-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

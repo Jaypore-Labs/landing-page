@@ -1,0 +1,124 @@
+---
+title: "Data: SQL refactors and lineage maps"
+description: "SQL refactors are archaeology. AI-assisted lineage maps make the dig fast — the analytics engineer keeps the judgment."
+date: "2026-07-27"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Data Engineering", "SQL", "AI Development", "Lineage"]
+series: "AI for software development"
+seriesOrder: 14
+---
+
+An analytics engineer told us the metrics dashboard had an unused column called `legacy_status_v2_old`. The column had been there for four years. Three different engineers had each tried to remove it and discovered six different downstream queries that depended on it. The fourth engineer to try the cleanup gave up and added another column, `legacy_status_v3`, that nobody could reliably explain.
+
+This is normal in data warehouses. Columns and tables accumulate. Lineage is opaque. The cost of the wrong cleanup is downstream chaos. Claude Code makes the cleanup tractable.
+
+## The query archaeology problem
+
+Most SQL refactors begin with archaeology: figuring out who reads from what. The data warehouse query history has the answer; pulling it out by hand is slow.
+
+The AI helps:
+
+- Reads the query history (filtered to recent activity).
+- Maps every read of each candidate column or table.
+- Categorises consumers (dashboards, downstream pipelines, ad-hoc queries, retired things).
+- Surfaces ownership where available.
+
+The output: for each candidate cleanup target, a list of consumers, owners, and impact assessment.
+
+## Lineage extraction
+
+The AI's lineage map for a refactor target:
+
+- **Direct readers.** Queries that reference the column/table.
+- **Indirect readers.** Queries that reference *those* queries' outputs (transitively, two levels deep usually suffices).
+- **Reverse: producers.** Queries that write to the same table; what other paths exist?
+
+For a column like `legacy_status_v2_old`:
+
+- 2 dashboards (1 active, 1 last viewed 2024).
+- 4 downstream pipelines (3 actively running).
+- 22 ad-hoc queries in the last 90 days.
+- Owner: original team disbanded; current owner is the analytics platform team.
+
+This map is what the engineer needs. Removing the column without it is gambling.
+
+## Refactor patterns
+
+Common refactor patterns:
+
+**Column rename.** Add the new column, populate from the old, switch consumers, drop the old. The AI generates the migration scripts. The engineer reviews each phase.
+
+**Table consolidation.** Multiple tables with overlapping data merged into one. The AI maps the shared columns, identifies the conflicts, drafts the consolidation plan. The engineer makes the design calls.
+
+**Deprecated column removal.** What the original engineer wanted to do four years ago. The AI confirms no recent reads, drafts the deprecation comms (Slack messages, dashboard annotations), generates the removal script. The engineer reviews and ships.
+
+**Schema modernisation.** Moving from a legacy schema to a current pattern (e.g., Type 1 SCDs to Type 2). Bigger refactor; same pattern.
+
+## Reviewer loop
+
+Each refactor PR goes through:
+
+- Engineer who authored — for accuracy of the change.
+- Domain owner — for confirmation the change doesn't break their use case.
+- Analytics platform team — for adherence to conventions.
+- Affected dashboard owners — for downstream sanity check.
+
+The AI helps draft the comms to each reviewer, tailored to their concern.
+
+## A real refactor
+
+A scenario: replacing a poorly-named column `revenue_thing` with `mrr_realised`.
+
+**Day 1.** AI maps the lineage. Surfaces 8 dashboards, 12 pipelines, 47 ad-hoc queries.
+
+**Day 2.** Engineer designs the migration: add `mrr_realised`, populate from `revenue_thing`, switch consumers in stages, deprecate `revenue_thing`, eventually drop.
+
+**Day 3.** AI drafts the migration scripts and the consumer-switching plan. Engineer reviews.
+
+**Day 4.** Phase 1: add `mrr_realised`, populate. Ship.
+
+**Days 5-15.** Phased consumer switching. Each phase: AI generates the dashboard or pipeline patch, engineer reviews and ships, monitor for issues.
+
+**Day 16.** Deprecate `revenue_thing` with annotations. Schedule removal in 90 days.
+
+**Day 105.** Drop `revenue_thing`. Verify no late breakages.
+
+The engineer never wonders if a consumer was missed. The lineage map covered it. The cleanup happens at a speed that didn't exist before.
+
+## What stays human
+
+- Naming the new schema.
+- Designing the migration phases.
+- Communicating with downstream consumers.
+- Making the call on which deprecations are worth the effort.
+
+Senior judgment. The AI handles the cataloguing, drafting, and routine work.
+
+## What we won't ship
+
+**Schema changes** without consumer confirmation.
+
+**Drops** of columns/tables until the deprecation period has elapsed and the lineage shows zero recent reads.
+
+**AI-generated SQL** running in production without engineer review.
+
+**Refactors that depart from the warehouse's modelling conventions** without architect review.
+
+## How to start
+
+Pick a known cleanup that's been deferred. Run the lineage map. Design the refactor. Ship the first phase. Within a quarter, the team has cleared a meaningful backlog of deferred cleanups.
+
+## Close
+
+SQL refactors with Claude Code are archaeology compressed. The lineage emerges in hours, not weeks. The migration scripts get drafted. The consumer comms get written. The engineer's time goes to the design and the verification. Cleanups that were deferred indefinitely become tractable projects.
+
+## Related reading
+
+- [Data: pipeline DAG explainer](/blog/data-pipeline-explainer) — companion role.
+- [Backend: database migrations without fear](/blog/backend-migrations-with-claude-code) — same migration discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising data warehouse work, we'd love to hear about it. [Get in touch.](/contact)*

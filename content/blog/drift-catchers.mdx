@@ -1,0 +1,83 @@
+---
+title: "Drift catchers: detecting style shifts"
+description: "Style drift is silent. Drift catchers make it visible before it's a customer complaint."
+date: "2026-10-14"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Drift", "Engineering", "Predictable Output", "Monitoring"]
+series: "Predictable AI output"
+seriesOrder: 21
+---
+
+A team's voice agent had been gradually getting more casual over six weeks. The change wasn't obvious in any individual call. Aggregated, the average response was now 30% more casual than the team's brand voice. A quarterly review surfaced it.
+
+Style drift is silent. Drift catchers are the engineering that surfaces it before it becomes a brand issue.
+
+## The style eval
+
+The drift catcher is an eval:
+
+- Periodically samples production outputs.
+- Scores them against a style rubric.
+- Tracks the score over time.
+- Alerts on shifts beyond threshold.
+
+The rubric is the team's voice (formality, length, warmth, specificity).
+
+## Trigger thresholds
+
+Trigger conditions:
+
+- Daily average style score moves more than X stdev from baseline.
+- Weekly average shifts beyond a threshold.
+- A specific style dimension trends.
+
+Each trigger investigates: prompt change, model change, input distribution change, eval-set drift.
+
+## Reviewer ritual
+
+When a trigger fires:
+
+- Sample of recent outputs reviewed by humans.
+- Compare to historical baseline.
+- Identify cause.
+- Fix.
+
+## A real catch
+
+A drift catcher fired on a customer-support agent: response length had grown 40% over three weeks. Investigation: a prompt update from week -3 had encouraged more thorough explanations. The change was intentional but went too far; users were complaining about wall-of-text responses.
+
+Fix: prompt adjustment that kept the thoroughness for complex queries but tightened for simple ones. Drift catcher confirmed the fix.
+
+## Recovery
+
+Each drift caught is a recovery process:
+
+- Fix the cause.
+- Re-eval to confirm.
+- Note the lesson in the team's drift-pattern library.
+- Adjust the catcher if the trigger should change.
+
+## What we won't ship
+
+**Style evaluation** done quarterly. Quarterly is too slow.
+
+**Drift catchers** without alerting.
+
+**Alerts** without an investigation playbook.
+
+**Style metrics** that aren't tracked over time.
+
+## Close
+
+Drift catchers are the discipline of catching style shifts early. The eval runs continuously. The trigger fires when shifts are real. The team investigates and fixes before customers complain. Silent drift becomes visible drift; the team stays in control.
+
+## Related reading
+
+- [Prompt evolution](/blog/prompt-evolution) — surrounding pattern.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — same discipline.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're catching drift, we'd love to hear about it. [Get in touch.](/contact)*

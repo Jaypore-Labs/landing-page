@@ -1,0 +1,73 @@
+---
+title: "Eval anti-patterns: when evals make products worse"
+description: "Five eval anti-patterns to avoid. Each can erode product quality even as eval scores rise."
+date: "2026-12-29"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Anti-patterns", "Engineering", "Output Testing", "Pitfalls"]
+series: "Evals & output testing"
+seriesOrder: 25
+---
+
+This is the closing of the eval series. After 24 articles on what good eval looks like, the closing is the anti-patterns. The patterns to avoid.
+
+## The five traps
+
+**1. Over-fitting the prompt to the eval.** The prompt scores well on the eval and poorly on production. The eval set is too small or unrepresentative. Counter: grow the eval set; mine production; rotate cases.
+
+**2. Eval-set cargo-culting.** Cases added because someone said "we should test for X" without considering whether the cases are realistic. Counter: every case has a rationale; rationale is reviewed.
+
+**3. Threshold worship.** "Eval is at 95%" becomes a target. The team optimises for the threshold, not for product quality. Counter: thresholds are minimums, not goals; production-quality is the real signal.
+
+**4. Eval-set paralysis.** The eval set never grows because each addition needs perfect rationale. Useful additions are blocked. Counter: lower the bar for addition; raise it for retirement.
+
+**5. Eval-as-theatre.** The eval runs but nobody acts on results. Counter: ownership; periodic review; consequences for failures.
+
+## Anti-pattern detection
+
+The team self-audits:
+
+- Does eval score predict production performance?
+- Are cases regularly retiring?
+- Are decisions being made from eval data?
+- Is the eval set growing with intention?
+
+If any answer is no, an anti-pattern is present.
+
+## Cleanup
+
+Cleaning up anti-patterns:
+
+- Add production-mined cases (counter-fitting).
+- Review cases for rationale (counter-culting).
+- Set quality goals beyond threshold (counter-worship).
+- Lower addition bar (counter-paralysis).
+- Establish review cadence with consequences (counter-theatre).
+
+## A real cleanup
+
+A team's eval audit revealed all five patterns to varying degrees. Cleanup:
+
+- Production-mining workflow established.
+- 30 cases retired (rationale-less).
+- Quality goal added: NPS for AI-generated outputs.
+- Eval-set expansion encouraged for product-aligned cases.
+- Quarterly review with leadership attendance.
+
+Six months later, eval scores correlated more strongly with product quality. The team's evals became a real signal.
+
+## Close
+
+This concludes the evals series. The anti-patterns are real; the discipline catches them. Eval is a tool. Used well, it's the load-bearing column under reliable AI products. Used badly, it produces false confidence.
+
+Skip the discipline at your peril. The team that takes eval seriously ships AI products that survive scale. The team that doesn't ships AI products that look good in demos and fail in production.
+
+## Related reading
+
+- [What makes an eval good](/blog/what-makes-an-eval-good) — series opener.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — framing.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're cleaning up eval anti-patterns, we'd love to hear about it. [Get in touch.](/contact)*

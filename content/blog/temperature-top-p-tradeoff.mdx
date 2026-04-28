@@ -1,0 +1,86 @@
+---
+title: "Temperature, top-p, and the production tradeoff"
+description: "Default temperature settings work. Tuning them for production tasks pays for itself in reliability."
+date: "2026-09-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Temperature", "Engineering", "Predictable Output", "Sampling"]
+series: "Predictable AI output"
+seriesOrder: 4
+---
+
+A team's classification feature had inconsistent outputs. Same input, different category about 12% of the time. The fix was almost embarrassingly simple: drop temperature from 0.7 to 0.0. Inconsistency dropped to under 1%.
+
+Temperature settings are the rare LLM lever where small changes have outsized effects. Most teams ship defaults; the teams that tune ship with measurably better reliability.
+
+## Defaults that work
+
+For most production tasks:
+
+- **Temperature 0.0-0.2.** Deterministic-ish. The right choice for classification, extraction, structured output, factual Q&A.
+- **Temperature 0.5-0.7.** Some variance. The right choice for prose generation, creative tasks, brainstorming.
+- **Temperature 1.0+.** High variance. Niche.
+
+Most teams default to provider defaults (often around 0.7 or 1.0). For structured tasks, the default is usually wrong.
+
+## Per-feature tuning
+
+The right temperature varies by feature:
+
+- Classifier: 0.0.
+- Extraction: 0.0.
+- Prose generation: 0.5-0.7.
+- Brainstorming: 0.7-1.0.
+
+A single global temperature makes one of these tasks worse. Per-feature settings let each task hit its sweet spot.
+
+## Variance accounting
+
+For temperature > 0, the eval needs to account for variance:
+
+- Run each eval case multiple times.
+- Measure success rate, not single-call correctness.
+- Threshold the rate, not the individual call.
+
+Otherwise the eval shows passing on the lucky run and failing on the unlucky run. Both are real; the eval needs to capture the distribution.
+
+## Reviewer feedback
+
+When the team encounters a "the model is being inconsistent" complaint, temperature is the first thing to check. Often the answer is "temperature is too high for this task."
+
+Temperature changes are cheap to test, fast to ship. Fine-grained per-feature tuning is one of the easier wins in LLM ops.
+
+## A real ablation
+
+A scenario: a team's structured-output feature.
+
+- Default (temp 0.7): 88% schema validity, varying outputs.
+- Tuned (temp 0.0): 99.5% schema validity, near-deterministic outputs.
+
+The trade-off (loss of "creativity" in the structured output) was nil; the schema didn't allow creative variance anyway.
+
+For the team's brainstorming feature, opposite trade-off: temp 0.0 produced repetitive outputs; temp 0.7 produced varied ones. The user wanted variety. The right setting was 0.7.
+
+## What we won't ship
+
+**Single global temperature** for diverse features.
+
+**Temperature-related changes** without eval verification.
+
+**Temperature 1.0+ in production** for tasks where reliability matters.
+
+**"Just lower temperature" as a fix** for issues that are actually prompt or model issues. Temperature is a knob, not a panacea.
+
+## Close
+
+Temperature is one of the easiest LLM levers to tune. Per-feature settings produce better results than global ones. Variance accounting in eval is required when temperature > 0. Skip the tuning and the model produces variance the team didn't ask for.
+
+## Related reading
+
+- [Self-consistency](/blog/self-consistency) — when variance is a feature.
+- [Structured output](/blog/structured-output) — companion topic.
+- [Prompt evolution](/blog/prompt-evolution) — same drift discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tuning sampling for production, we'd love to hear about it. [Get in touch.](/contact)*

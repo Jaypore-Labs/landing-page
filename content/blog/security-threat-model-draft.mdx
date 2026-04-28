@@ -1,0 +1,113 @@
+---
+title: "Security: threat-model first draft from architecture"
+description: "Threat models that get written stay flat. AI-assisted first drafts give the security engineer something concrete to react to."
+date: "2026-08-04"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Security", "Threat Modeling", "STRIDE", "AI Development"]
+series: "AI for software development"
+seriesOrder: 20
+---
+
+A security engineer told us once that the hardest part of threat modelling wasn't the analysis. It was getting started. Staring at a blank doc with "do a STRIDE pass on this architecture" felt overwhelming. Many threat-modelling exercises ended unfinished because the first hour produced nothing concrete.
+
+Claude Code changes the dynamic. The AI produces a structured first draft. The engineer reacts to something concrete. The work moves.
+
+## The architecture-as-input
+
+The agent's input: an architecture diagram or description, plus the system's data classification and trust boundaries.
+
+For each component and trust boundary, the AI runs a STRIDE pass:
+
+- **Spoofing.** Can someone pretend to be someone else?
+- **Tampering.** Can someone modify data they shouldn't?
+- **Repudiation.** Can someone deny an action they took?
+- **Information disclosure.** Can someone access data they shouldn't?
+- **Denial of service.** Can someone disrupt the system?
+- **Elevation of privilege.** Can someone gain capabilities they shouldn't have?
+
+The output is a structured table: component × threat-category × specific-threat × current-mitigation × proposed-mitigation.
+
+## Mitigation drafting
+
+For each identified threat, the AI drafts a mitigation candidate:
+
+- The control to add.
+- Where in the architecture it sits.
+- What it costs (engineering effort, latency, ops burden).
+- What residual risk remains.
+
+The engineer reviews each. Some are accepted as drafted. Some are tightened. Some are rejected because the threat is acceptable as-is.
+
+## Reviewer loop
+
+The threat model goes through:
+
+- **Security engineer review.** Gaps in the AI's analysis, missed threat patterns, organisation-specific risks.
+- **Architecture review.** Mitigation feasibility, integration with existing patterns, performance implications.
+- **Stakeholder review.** Business owners' acceptance of residual risks.
+
+Each pass adds depth. The published threat model is more rigorous than any individual would have written alone, in less calendar time.
+
+## A real model
+
+A scenario: threat-modelling a new payment-processing endpoint.
+
+**Hour 1.** AI ingests the architecture diagram. Produces STRIDE pass with 23 identified threats across 6 components.
+
+**Hour 2.** Security engineer reviews. Tightens the analysis on 8 threats. Adds 5 organisation-specific threats. Drops 3 threats that are mitigated by existing infrastructure-level controls.
+
+**Hour 3.** Engineer drafts mitigations with AI assistance. Costs and residual-risk estimates included.
+
+**Hour 4.** Architecture review. Adjustments to mitigation patterns.
+
+**Hour 5.** Stakeholder review. Residual risks accepted or escalated.
+
+A threat model produced in a day instead of a week. The model is rigorous because the discipline survived the speed.
+
+## The living document
+
+Threat models that aren't updated decay. The AI helps with the update cadence:
+
+- Weekly scan of architecture changes against the threat model.
+- Identification of components whose threats may have changed.
+- Surfaced as a queue for security review.
+
+The security engineer doesn't have to remember to revisit the threat model. The system surfaces what's drift-relevant.
+
+## What stays human
+
+- Risk-acceptance decisions.
+- Threat severity classifications.
+- Architectural mitigation choices.
+- Stakeholder communications.
+
+Senior security judgment. The AI handles the typing and the pattern-matching.
+
+## What we won't ship
+
+**Threat models that stop at the AI's first draft.** The first draft is a starting point.
+
+**Mitigations applied without security-engineer signoff.**
+
+**Architecture changes that bypass the threat-modelling process.**
+
+**Threat models that aren't versioned.** Versioning is what makes them auditable.
+
+## How to start
+
+Pick the next architectural decision that requires a threat model. Run the workflow. Compare to a manual approach. Tune. The team's threat-modelling cadence becomes sustainable.
+
+## Close
+
+Threat-modelling first drafts with Claude Code are the difference between blank-page paralysis and structured analysis. The first draft exists. The engineer reacts. The work moves. The discipline survives. The system's security posture improves measurably.
+
+## Related reading
+
+- [Security: code-pattern audits](/blog/security-code-pattern-audits) — companion role.
+- [Architect: vendor-comparison architecture doc](/blog/architect-vendor-comparison) — same draft-then-react pattern.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening threat-modelling discipline, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,89 @@
+---
+title: "Eval-driven development"
+description: "Build the eval before the prompt. The discipline that prevents over-fitting."
+date: "2026-10-29"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "EDD"]
+series: "Testing in the age of AI"
+seriesOrder: 7
+---
+
+The TDD analogue for AI: write the eval before the prompt. The eval defines what success looks like. The prompt is engineered to pass the eval. The prompt that passes the eval ships.
+
+This is eval-driven development (EDD). It feels backwards. It's the right way.
+
+## EDD vs. TDD
+
+TDD: write the test, write the code that passes, refactor.
+
+EDD: write the eval, write the prompt that passes, iterate.
+
+Same discipline, different artifacts. The eval describes what the prompt should do; the prompt is engineered to that description.
+
+## Building tests before prompts
+
+The workflow:
+
+1. Specify what the feature should do.
+2. Build the eval set covering happy path, edge cases, adversarial.
+3. Write the prompt.
+4. Run the eval. Score it.
+5. Iterate the prompt until eval passes.
+6. Ship.
+
+Step 2 is the discipline. Most teams skip it (write the prompt first, build the eval after). EDD inverts this.
+
+## Reviewer ritual
+
+PR for EDD work:
+
+- Eval set is in the PR.
+- Eval pass rate is in the PR.
+- Prompt is in the PR.
+
+Reviewer evaluates: is the eval covering what matters? does the prompt pass? do they together describe a working feature?
+
+## A real workflow
+
+A team building a categorisation feature:
+
+- Day 1: PM and engineer specify behaviour. 50 eval cases authored.
+- Day 2: Engineer writes prompt. Eval at 78%.
+- Day 3: Iteration. Eval at 89%.
+- Day 4: More iteration + prompt-engineering. Eval at 96%.
+- Day 5: Edge case work. Eval at 98%. Ships.
+
+The eval is the spec. The prompt converges to it.
+
+## What this prevents
+
+EDD prevents:
+
+- Prompts over-fit to whatever the engineer was thinking.
+- Features shipped without a clear definition of working.
+- Future-engineer confusion about what the feature is supposed to do.
+
+## What we won't ship
+
+**Features without eval sets.**
+
+**Eval sets written after the prompt.**
+
+**Eval sets** that just describe what the prompt currently does.
+
+**Pass rates** below threshold.
+
+## Close
+
+Eval-driven development is the discipline of writing the eval first. The eval defines the feature. The prompt converges. The team ships when the eval is clean. Skip EDD and you ship features whose definition is whatever the prompt happens to do.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — practical depth.
+- [Golden-set discipline](/blog/golden-set-discipline) — eval-set quality.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're adopting EDD, we'd love to hear about it. [Get in touch.](/contact)*

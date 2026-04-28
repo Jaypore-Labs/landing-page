@@ -1,0 +1,82 @@
+---
+title: "Caching deterministic prefixes"
+description: "Long, repeated prompt prefixes are the cheapest optimisation in LLM ops. Cache them."
+date: "2026-10-02"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Caching", "Engineering", "Predictable Output", "Cost"]
+series: "Predictable AI output"
+seriesOrder: 13
+---
+
+A team's customer-support agent had a 4,000-token system prompt + tool definitions + few-shot examples. Every call paid for the same 4,000 tokens of input. With prompt caching, that prefix cost dropped to 10% of the original. Latency dropped meaningfully too.
+
+Caching deterministic prefixes is the cheapest meaningful optimisation in LLM ops. Most teams could be using it and aren't.
+
+## Where caching wins
+
+The cache wins when:
+
+- The same prefix is used repeatedly.
+- The prefix is large (>1K tokens).
+- The provider supports prompt caching (Anthropic, OpenAI, others).
+- The cache TTL fits the use case.
+
+System prompts, tool definitions, document context that's reused across queries — all good candidates.
+
+## TTL design
+
+Cache TTLs are typically 5 minutes to a few hours. The trade-off:
+
+- Longer TTL: better hit rate, but cache might be stale if you change the prefix.
+- Shorter TTL: less staleness risk, lower hit rate.
+
+For most applications, 1 hour is reasonable.
+
+## Invalidation
+
+When the prefix changes (prompt update, tool update), the cache invalidates automatically (different prefix → cache miss → new cache entry). The team doesn't have to manage this explicitly.
+
+But: ensure the prefix is bit-stable. Even small variations (extra whitespace, different ordering) defeat the cache.
+
+## Reviewer ritual
+
+Cache hit rate is a metric:
+
+- Tracked per feature.
+- Reviewed weekly.
+- Investigated when it drops (might indicate prefix variations or volume changes).
+
+## A real saving
+
+A team's high-volume agent:
+
+- Pre-cache: 4,000-token prompt × 100K calls/day = $X/day in input tokens.
+- Post-cache: 90% cache hit, cached tokens at 10% cost = $0.19X/day.
+- Net saving: ~80% on input tokens for that feature.
+
+Annualised, the saving was meaningful enough to fund a quarter of engineering work.
+
+## What we won't ship
+
+**Cache enabled** without verifying the prefix is bit-stable.
+
+**Cache hit rates** that aren't monitored.
+
+**Caching across users** when the prefix legitimately differs per user (privacy or correctness issues).
+
+**Cache TTL** so long that prompt updates don't roll out.
+
+## Close
+
+Caching deterministic prefixes is high-leverage, low-effort. Most teams can adopt in an afternoon and start saving. The cache hit rate is a metric to monitor. The savings compound at scale.
+
+## Related reading
+
+- [Cost guardrails](/blog/cost-guardrails) — surrounding cost discipline.
+- [Context engineering](/blog/context-engineering) — what's in the prefix.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're optimising LLM costs, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,92 @@
+---
+title: "Prompt invariance: prompts that survive paraphrase"
+description: "Prompts that work only when phrased exactly are brittle. The paraphrase eval makes invariance measurable."
+date: "2026-09-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Prompts", "Engineering", "Predictable Output", "Robustness"]
+series: "Predictable AI output"
+seriesOrder: 8
+---
+
+A team's classifier worked perfectly on their eval set. In production, it failed on customer messages that were just paraphrases of cases it had aced. The team's prompt was over-fit to the exact phrasing of eval cases.
+
+Prompts that survive paraphrase are robust prompts. The discipline is the paraphrase eval.
+
+## The paraphrase eval
+
+For every eval case, generate N paraphrases:
+
+- Same meaning, different wording.
+- Different formality (casual vs. formal).
+- Different structure (statement vs. question).
+- Different length.
+
+Run the prompt against all paraphrases. The output should be the same (or equivalent).
+
+If the output varies across paraphrases, the prompt is brittle. Invariance is a quality dimension worth measuring.
+
+## Robustness loop
+
+The team's loop:
+
+- Eval set with paraphrases generated automatically.
+- Test prompt against all variations.
+- Flag cases where outputs vary.
+- Investigate: is the prompt over-fit, or is the case genuinely ambiguous?
+- Iterate prompt or eval set.
+
+Over time, the prompt becomes invariant on the eval. Production paraphrases handle better.
+
+## Reviewer ritual
+
+Each prompt change goes through paraphrase eval, not just literal eval. Without paraphrase eval, the team's "prompt is improving" signal is unreliable — they may be over-fitting.
+
+## A real test set
+
+A team built paraphrase invariance into their eval. Generation:
+
+- Each eval case → original phrasing.
+- LLM-generated paraphrases (3-5 per case).
+- Human-reviewed for accuracy.
+- Tagged with paraphrase relationships.
+
+Eval reports:
+
+- Accuracy on original cases.
+- Accuracy on paraphrases.
+- Variance between original and paraphrase outputs.
+
+The third metric was the team's robustness signal. Prompts that improved accuracy but increased variance got rejected.
+
+## A real fix
+
+A scenario: the team's classifier was 98% accurate on originals, 76% on paraphrases. Investigation revealed the prompt's few-shot examples shared specific phrasings. The model was matching phrasing patterns rather than meanings.
+
+Fix: replace few-shot examples with a structured rubric. Accuracy on originals dropped 2% (now 96%). Accuracy on paraphrases jumped to 93%. Variance dropped sharply.
+
+The team shipped the structured-rubric version. Production performance improved despite the slight regression on the original eval.
+
+## What we won't ship
+
+**Eval sets without paraphrase variants.**
+
+**Prompts that pass literal eval** but fail paraphrase invariance.
+
+**Few-shot examples that share** phrasing patterns the model can over-fit to.
+
+**Skipping invariance checks** because the literal eval looks good.
+
+## Close
+
+Prompt invariance is a quality dimension. Without it, the prompt is brittle. With it, the prompt survives the variation that production traffic guarantees. The paraphrase eval is the discipline. Build it once; benefit forever.
+
+## Related reading
+
+- [Few-shot drift](/blog/few-shot-drift) — companion brittleness.
+- [Counter-example mining](/blog/counter-example-mining) — finding failures.
+- [Prompts are recipes](/blog/prompts-are-recipes) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening prompt robustness, we'd love to hear about it. [Get in touch.](/contact)*

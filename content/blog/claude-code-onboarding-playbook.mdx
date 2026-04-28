@@ -1,0 +1,121 @@
+---
+title: "CS: onboarding playbook generator per customer"
+description: "The first 30 days of a new customer make or break renewal. AI employees produce account-specific playbooks the team actually follows."
+date: "2026-06-10"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Customer Success", "AI Employees", "Onboarding", "Retention"]
+series: "Claude Code in business"
+seriesOrder: 6
+---
+
+A CS leader at a SaaS company told us last quarter that her onboarding template was beautifully crafted, deeply considered, and almost never used. CSMs liked the spirit of it but ignored the specifics because every account was different. The template was generic; the work was specific. The gap was where customers churned.
+
+The onboarding-playbook AI employee closes the gap. It writes a playbook for *this* customer — their stakeholders, their use case, their history — that the CSM can actually run.
+
+## The shape of the role
+
+**Title.** Customer Success Operations AI — Onboarding Specialist.
+
+**Mission.** Within 24 hours of contract signing, produce an account-specific 30-60-90-day onboarding playbook the CSM can execute with minimal editing.
+
+**Outcomes.** Time-to-value for new customers, day-30 health score, day-90 health score, renewal rate.
+
+**Reports to.** VP of Customer Success.
+
+**Tools.** CRM read, contract terms ingest, intercom history, product-usage data, stakeholder-map template, playbook library.
+
+**Boundaries.** Drafts the plan. CSM executes and adjusts. Doesn't communicate with customers directly.
+
+## What "account-specific" means
+
+The agent reads:
+
+- The contract — what was sold, what's promised, what's in scope.
+- The CRM history — sales notes, discovery summaries, decision criteria, stated goals.
+- The stakeholder map — who matters, who signs, who's the champion, who's the risk.
+- The customer's company context — public information, recent press, organisational changes, industry context.
+
+From these, it drafts:
+
+- **Day 1-3.** Welcome sequence, kickoff agenda, stakeholder intros, technical setup checklist.
+- **Day 4-14.** Use-case-specific configuration milestones, training sessions targeted to the actual users, first-meaningful-action target.
+- **Day 15-30.** Health-check meeting with stated goals progress, expansion-conversation timing, advocacy opportunities.
+- **Day 31-60.** Adoption deepening, second use case, success-story collection.
+- **Day 61-90.** Renewal-conversation lead-up, expansion-readiness check, customer-advocacy formalised.
+
+Each item has rationale tied to the account specifics. "We're focusing on use case X first because the contract emphasises it" beats a generic "configure features" instruction.
+
+## The risk-flag pass
+
+Before handing the playbook to the CSM, the agent runs a risk-flag pass:
+
+- **Stakeholder risk.** Champion is mid-level; senior decision-maker hasn't been engaged.
+- **Goal risk.** Stated goals are not measurable; nothing in the playbook will demonstrate ROI.
+- **Technical risk.** The customer's stack lacks a prerequisite; integration will be harder than the contract assumes.
+- **Timing risk.** The customer's quarter ends in 6 weeks; key milestones won't land before they need to evaluate.
+
+Each flag includes a recommended mitigation the CSM can act on early.
+
+## What this saves
+
+A typical CSM with 30-50 accounts in onboarding cycles a year:
+
+- Spent 4-6 hours per account on playbook drafting (or skipped it).
+- Went into kickoffs without account-specific context (or extracted it on the fly).
+- Caught risk signals at day 60 instead of day 5.
+
+With the playbook generator:
+
+- Playbook drafted within hours of contract close. CSM spends 30-45 minutes editing.
+- Kickoff is account-specific from minute one.
+- Risk signals caught early; mitigations begin in week one.
+
+The compounding gain: customers who experience a tailored onboarding renew at materially higher rates than those who get a generic one. The CS leader sees this in renewal data within two quarters.
+
+## The reviewer loop
+
+The CSM reviews and edits. Edits feed the eval set. Common edits:
+
+- "This stakeholder is wrong; the actual champion is X."
+- "This goal is too ambitious for their org; let's revise."
+- "This integration timing won't work; their IT freeze starts next month."
+
+Each pattern improves the agent's drafting. Within two quarters, edits drop to minor adjustments.
+
+## What we won't ship
+
+**Auto-execution.** The CSM runs the playbook. The agent drafts.
+
+**Customer-facing communication.** The CSM is the relationship.
+
+**Health-score auto-updating based on agent inference.** The score is a CS judgment.
+
+**Anything that escalates to executives without the CSM's signoff.** Escalation is relationship management.
+
+## The KPIs the CS leader watches
+
+1. **Time-to-first-value** by account.
+2. **Day-30 health score** distribution.
+3. **Day-90 health score** distribution.
+4. **First-renewal rate** for cohorts using the agent vs. cohorts that didn't.
+
+If renewal rates don't differ between cohorts after a year, the playbook isn't moving the right things. Investigate.
+
+## How to start
+
+Pick one segment — your highest-ARR or your highest-volume new customers. Run the playbook generator for one quarter. Compare onboarding outcomes against the prior baseline. Once the metrics move, expand to a second segment.
+
+## Close
+
+The onboarding-playbook AI employee is a teammate that does the prep work nobody had time for. CSMs walk into kickoffs prepared. Risks are caught early. Renewals improve. The math works because every renewed customer is several years of CS time saved compared to acquiring a new one.
+
+## Related reading
+
+- [Sales: discovery summariser](/blog/claude-code-sales-discovery) — upstream context the playbook uses.
+- [Agents in SaaS: in-product agents](/blog/agents-in-saas) — same activation focus, different surface.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI CS-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

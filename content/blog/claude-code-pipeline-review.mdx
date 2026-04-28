@@ -1,0 +1,96 @@
+---
+title: "Sales: pipeline reviewer + forecast challenger"
+description: "Most pipeline reviews ask 'will it close?' The AI pipeline reviewer asks 'will it close, given what we actually know?'"
+date: "2026-06-09"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Sales AI", "AI Employees", "Pipeline", "Forecasting"]
+series: "Claude Code in business"
+seriesOrder: 5
+---
+
+A sales leader we worked with described his Friday pipeline review: "Reps tell me what they hope, I tell them what I hope, and on Monday we forecast." He wasn't joking. The pipeline review wasn't ground in evidence; it was a confidence-display ritual.
+
+The pipeline-reviewer AI employee doesn't replace the ritual. It feeds the ritual evidence — the hygiene state of each deal, the things missing that should be there, the contradictions in the rep's own notes, the comparable historical deals' actual outcomes. The conversation gets better.
+
+## The shape of the role
+
+**Title.** Sales Operations AI — Pipeline Specialist.
+
+**Mission.** Read the pipeline weekly, surface hygiene issues and forecast-risk signals, and prepare the manager for productive 1:1s.
+
+**Outcomes.** Forecast accuracy, pipeline-hygiene metrics, manager prep time.
+
+**Reports to.** VP of Sales or Head of Sales Operations.
+
+**Tools.** CRM read access, deal-history database, calendar/scheduling.
+
+**Boundaries.** Surfaces and challenges. Doesn't update deal stages. Doesn't override reps' calls.
+
+## The four-pass weekly review
+
+**Pass 1 — Hygiene.** Are the basic fields filled? Stage, amount, close date, decision-maker, next step? Missing fields are the first signal that a rep doesn't know the deal as well as they're presenting it. The agent surfaces these without judgment — the rep fills in or admits they don't have the data.
+
+**Pass 2 — Stage-conversion sanity.** Given a deal's amount, ICP fit, and historical conversion rates from this stage to next, what's the realistic probability? The agent flags deals where the rep's claimed probability is more than 1.5x the historical rate. This is not a "you're wrong" signal; it's a "what makes this deal special?" prompt.
+
+**Pass 3 — Velocity check.** Has the deal been at this stage longer than the historical median? Slipped close dates? Long gaps between contact? These are stall signals that compound. The agent surfaces them with the deal's history.
+
+**Pass 4 — Forecast challenge.** For the deals included in the forecast, the agent assembles a challenge: "Based on next-step language, what evidence supports this close-month? What would have to be true for it to slip?" The manager uses this as input to her 1:1 with the rep.
+
+## What changes in 1:1s
+
+Before the agent: manager asks rep "what's the latest on Acme?" Rep tells a story. Manager nods or pushes back based on her gut. Coverage of the territory varies wildly — some reps get great coaching, some get cursory check-ins.
+
+After: manager opens with the agent's prep brief on Acme. "I see we haven't had decision-maker contact in 14 days, the next step in CRM is 'follow up' which is vague, and the close date moved twice." The 1:1 is about the work, not the story.
+
+This is doing for the manager's day what the discovery summariser does for the AE's. The agent does the unsexy data work. The human does the conversation that requires judgment.
+
+## Forecast challenger
+
+The forecast challenger is the role's most underrated function. Each week, the agent produces a delta:
+
+- **Deals added to commit since last week** with the rep's stated reason.
+- **Deals removed from commit** with the rep's stated reason.
+- **Deals where the close date slipped** — total count and total dollar value.
+- **Deals in commit where the next step is "follow up" or empty** — high-risk indicators.
+
+The sales leader walks into the forecast meeting with this delta. The discussion is grounded.
+
+## CRM hygiene as compounding asset
+
+A team using the pipeline reviewer for a quarter ends up with measurably better CRM data than they had before. This compounds — better data drives better marketing targeting, better territory planning, better hiring decisions, better board reporting. The pipeline reviewer's biggest second-order benefit is the data discipline it imposes.
+
+## What we won't ship
+
+**Auto-stage updates.** Stages are the rep's call. The agent challenges; the rep moves.
+
+**Auto-removing deals from commit.** Forecast is the rep's call. The agent challenges; the rep decides.
+
+**Compensation impact based on agent-flagged hygiene.** Comp tied to CRM cleanliness produces gaming, not improvement.
+
+## The KPIs the sales leader watches
+
+1. **Forecast accuracy** — quarter-end actuals vs. forecast.
+2. **CRM completeness** on key deal fields.
+3. **Manager 1:1 quality** (manager self-report).
+4. **Velocity at each stage** quarter-over-quarter.
+
+If forecast accuracy doesn't move within two quarters, the agent is surfacing the wrong things. Investigate before scaling.
+
+## How to start
+
+One sales team. One quarter. The manager and the AI employee work together on weekly reviews. Track the four metrics. Once the manager wouldn't go back to running reviews without the agent, expand to a second team.
+
+## Close
+
+The pipeline-reviewer AI employee is a teammate whose job is to make the manager's hardest task — saying "really?" without being a jerk — easier and more grounded. The conversations get better. The forecast accuracy improves. The CRM gets cleaner. None of these are flashy. All of them compound.
+
+## Related reading
+
+- [Sales: discovery summariser](/blog/claude-code-sales-discovery) — same data-discipline upstream.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — discipline transferred.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI sales-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

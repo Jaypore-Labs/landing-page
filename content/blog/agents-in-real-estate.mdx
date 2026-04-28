@@ -1,0 +1,85 @@
+---
+title: "Agents in real estate: lead qualification at speed"
+description: "The 5-minute rule wins or loses real-estate leads. Agents help if they disqualify well, ruin pipelines if they spam."
+date: "2026-05-14"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "PropTech", "Real Estate AI", "Production AI", "Lead Generation"]
+series: "AI agents in industry"
+seriesOrder: 12
+---
+
+Real estate is a 5-minute industry. Lead arrives at 7:43 AM, agent calls back at 7:48 AM, lead converts at 12% above baseline. Agent calls back at 8:43 AM, conversion is back to baseline. The 5-minute rule has been measured for decades; nothing about AI changes it.
+
+Working real estate agents are 5-minute agents. They contact, qualify, and either route to a human agent or politely disqualify — within the window. Failure modes are mostly about over-promising and under-disqualifying.
+
+## Disqualification is the value
+
+Most real-estate leads are not buyers. They're early researchers, casual lookers, mortgage-rate browsers, and occasionally people window-shopping someone else's neighborhood. A real estate agent who spends 30 minutes on the phone with each is grinding through the lead list at 2 leads per hour. The first job of an AI agent is to cut the list.
+
+The disqualification flow is:
+
+- **Timing.** When are you looking to buy? "In a year or more" — disqualify, soft nurture.
+- **Pre-approval.** Are you pre-approved with a lender? "No, haven't started" — route to a partner lender, defer.
+- **Geographic fit.** Is the property in their target area? Many leads are spec'ing far outside their actual budget zone.
+- **Realistic budget.** Does the budget match the property tier they're inquiring on? Mismatch — politely set expectations, route to appropriate inventory.
+
+The agents that disqualify well end up handing 5-15 high-quality leads per week to a human agent who can actually close them. The agents that don't disqualify hand 50 leads per week, of which 35 are noise.
+
+## The texting-agent reality
+
+Most real-estate AI today is texting agents. Lead arrives, agent texts within 60 seconds, conversation happens in SMS. This is fast and convenient. It also has a regulatory layer most teams overlook.
+
+In the US, texting prospects has TCPA implications — consent, opt-out handling, time-of-day rules, message frequency. The agent must:
+
+- Confirm consent on the first interaction (the lead form's consent line is what gives the agent permission, but the audit log has to prove it).
+- Honor STOP/UNSUBSCRIBE immediately and forever.
+- Not text outside permissible hours (8 AM to 9 PM in the lead's timezone).
+- Track opt-outs at the phone-number level, not the lead-record level.
+
+A team that doesn't get this right faces TCPA exposure measured in $500-$1,500 per violating message. This is not theoretical. There are firms that exist to find these violations.
+
+## The CRM hygiene the agent enforces
+
+The unsexy productivity gain is CRM hygiene. The agent does what no human consistently does:
+
+- Logs every interaction, with timestamp, in the CRM.
+- Updates lead status with each interaction.
+- Sets follow-up reminders based on the conversation.
+- Notes preferences (areas, price ceilings, timing) on the lead record.
+- Flags leads where the conversation revealed a different need than the inquiry suggested.
+
+A team running a working agent for 3 months has cleaner CRM data than they've ever had. That's a compounding advantage; downstream marketing, retargeting, and brokerage analytics all work better.
+
+## What the agent shouldn't do
+
+Negotiate offers. Discuss specific homes the lead hasn't seen. Make claims about properties (square footage, school district, HOA) without citing the listing — and even then, only when the listing is the source of truth. Anything that veers into giving real estate or financial advice triggers licensing concerns.
+
+The agent stays in the qualification + scheduling lane. Anything past that is a human's job.
+
+## The four metrics that matter
+
+1. **Time-to-first-contact** (the 5-minute rule).
+2. **Lead-to-human-agent conversion rate** — quality of the handoff.
+3. **Closed-deal rate** from agent-handed-off leads vs. human-only baseline.
+4. **TCPA compliance rate** (every text logged with consent and within hours).
+
+Brokerages that watch these four ship and scale. Brokerages that watch only contact rate end up with a TCPA risk that compounds.
+
+## How to start
+
+Pick one source of leads — your highest-volume channel. Build the agent to handle qualification + scheduling. Wire TCPA compliance from day one. Run it for 60 days, watching the four metrics. Expand to a second source only after the first is generating clean numbers.
+
+## Close
+
+Real-estate agents earn their keep by being faster than humans at the early conversations and stricter than humans at disqualification. The TCPA discipline is non-negotiable. The CRM hygiene is the compounding bonus. Build for the 5-minute rule first; the rest follows.
+
+## Related reading
+
+- [Agents in sales: SDR copilots](/blog/agents-in-sales) — the same disqualification discipline.
+- [Agents in customer support](/blog/agents-in-customer-support) — escalation contract restated.
+- [The agent maturity curve](/blog/agent-maturity-curve) — real-estate agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a real-estate agent, we'd love to hear about it. [Get in touch.](/contact)*

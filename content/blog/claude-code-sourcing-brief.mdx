@@ -1,0 +1,121 @@
+---
+title: "Recruiting: sourcing brief from a single role description"
+description: "From an approved JD to a personas-and-Boolean sourcing pack in 30 minutes. Recruiters spend their time on relationships, not searches."
+date: "2026-06-19"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Recruiting AI", "AI Employees", "Sourcing", "Talent Acquisition"]
+series: "Claude Code in business"
+seriesOrder: 13
+---
+
+A senior sourcer told us once that her best recruiting day was when she found three relevant candidates in 90 minutes — not because the searching was easy, but because the *thinking-about-where-to-look* part had been done well in advance. The thinking is the leverage. The searching is the chore.
+
+The sourcing-brief AI employee does the thinking. The sourcer does the searching, the outreach, and the relationship-building. Each plays to their strength.
+
+## The shape of the role
+
+**Title.** Recruiting AI — Sourcing Specialist.
+
+**Mission.** From an approved JD, produce a sourcing brief: candidate personas, search strategies, Boolean strings, outreach drafts, pipeline-target math.
+
+**Outcomes.** Time-from-JD-approval-to-first-outreach, qualified-candidate-pool size, response rate.
+
+**Reports to.** Head of Talent or Senior Recruiter.
+
+**Tools.** JD ingest, candidate-database read, market-data integration, outreach-template library.
+
+**Boundaries.** Drafts. The recruiter sources, reaches out, and runs the relationship.
+
+## The sourcing brief
+
+For each open role, the agent produces:
+
+**Section 1 — Personas.** Three to five distinct candidate personas who could fit the role. For each: typical title, company-size context, career-stage, common backgrounds. The recruiter usually picks one or two to focus on first.
+
+**Section 2 — Where they are.** For each persona: companies and industries to target, conferences they attend, communities they participate in, content they consume.
+
+**Section 3 — Boolean strings.** LinkedIn-style search strings tuned per persona. The agent has read the JD's must-haves and nice-to-haves and translated them into searchable queries.
+
+**Section 4 — Outreach drafts.** Three to five distinct outreach openers, each tailored to a persona. Personalisation token slots flagged. The recruiter customises the slots with specific signals.
+
+**Section 5 — Pipeline-target math.** Given typical response rates and conversion rates, what's the candidate-volume target to fill the role on the desired timeline?
+
+The brief is a work-document the sourcer uses for the duration of the role's open period.
+
+## Persona generation
+
+The agent's persona generation isn't generic. It reads the JD, the company's existing team's backgrounds (where available), and the broader market context, then proposes personas grounded in evidence.
+
+Example: for a senior backend engineer role, the personas might be:
+- Persona 1: 8-12 years at one of three peer-size SaaS companies, currently a senior IC.
+- Persona 2: 5-7 years at a hyperscale company, looking for more ownership.
+- Persona 3: Returning-to-IC after a tech-lead role.
+
+Each persona has a different outreach pattern. Same role, different conversations.
+
+## Boolean strings, tuned
+
+A common recruiter complaint: Boolean strings are hard to write well, and slightly different syntax produces wildly different results. The agent generates strings tuned per persona, with documented variants:
+
+- A precision-leaning string (high specificity, smaller pool).
+- A recall-leaning string (broader, bigger pool).
+- A diversity-aware variant (broader, with care taken to avoid suppressing under-represented groups).
+
+The recruiter picks based on the open role's stage. Early in the search, run the precision string. If the pool is too small, switch to recall.
+
+## Outreach drafts
+
+The outreach drafts are starting points, not templates. The agent's drafts:
+
+- Open with a specific, candidate-grounded sentence (referencing something real from the candidate's profile or history).
+- Connect to the role with a clear reason this candidate might find it interesting.
+- Have a low-friction call-to-action (15-min chat, Calendly link).
+- Avoid the boilerplate phrases ("we're a fast-growing company", "exciting opportunity") that depress response rates.
+
+The recruiter customises before sending. The first 10 sends per persona produce response-rate data; the agent re-tunes the drafts based on what worked.
+
+## What this saves
+
+Before the agent: a sourcer spent 3-5 hours per role on prep before any outreach happened.
+
+After: prep is 30-60 minutes (sourcer reviewing and customising the agent's brief). The remaining time goes to outreach and conversation — the part that actually fills roles.
+
+A sourcer running 5-8 active roles can effectively double her conversation volume per week.
+
+## What we won't ship
+
+**Auto-sending outreach.** Each message goes from a human's name and address. No exceptions.
+
+**Cross-company candidate aggregation** that violates platform terms of service.
+
+**Anything that scrapes data the candidate didn't consent to share.**
+
+**Demographic filtering** — the bias-receipts discipline from the agents-in-HR article applies here.
+
+## The KPIs the talent leader watches
+
+1. **Time-from-JD-approved-to-first-outreach.**
+2. **Qualified-candidate-pool size** by week.
+3. **Response rate** to outreach (per persona).
+4. **Pipeline-to-hire conversion.**
+
+If the response rate doesn't move with better drafts, the JD or the role is the issue. The agent's drafts won't fix a JD problem.
+
+## How to start
+
+Pick one open role. Run the agent. Compare its brief to what the senior sourcer would have produced. Tune. Use it on the next five roles. Track which personas and strings produce the best response rates; feed that back into the agent's pattern library.
+
+## Close
+
+The sourcing-brief AI employee is a teammate whose job is the prep work that makes recruiting effective. The personas are grounded. The Boolean strings are tuned. The outreach drafts are personal. The recruiter's time goes to the conversations, which is where the hires actually happen.
+
+## Related reading
+
+- [Recruiting: JD writer](/blog/claude-code-recruiting-jd) — upstream of sourcing.
+- [Agents in HR: bias receipts](/blog/agents-in-hr-recruiting) — same bias discipline.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI sourcing employee, we'd love to hear about it. [Get in touch.](/contact)*

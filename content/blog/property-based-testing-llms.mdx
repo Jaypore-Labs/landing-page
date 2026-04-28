@@ -1,0 +1,86 @@
+---
+title: "Property-based testing for LLM features"
+description: "Properties — invariants the system should maintain — are tested across many auto-generated inputs."
+date: "2026-10-27"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Property-Based"]
+series: "Testing in the age of AI"
+seriesOrder: 5
+---
+
+Property-based testing — finding inputs that violate stated invariants — is well-established for traditional code. It applies to LLM features too, with adjustments.
+
+## The properties that work
+
+LLM-feature properties:
+
+- **Idempotence.** Running the same prompt twice gives equivalent outputs (modulo intentional variance).
+- **Monotonicity.** Larger contexts don't reduce relevance.
+- **Stability.** Small input perturbations don't produce large output changes.
+- **Refusal consistency.** Refused inputs stay refused regardless of phrasing.
+- **Output type.** Outputs always match the schema.
+
+Each is testable with auto-generated input.
+
+## Hypothesis-style
+
+Property-based testing libraries (Hypothesis in Python, fast-check in JS) generate inputs:
+
+- Structured inputs from schemas.
+- Mutations of golden inputs.
+- Random inputs within constraints.
+
+The library finds inputs that violate properties. Failures inform fixes.
+
+## Reviewer ritual
+
+Property-based test results:
+
+- Counter-examples that violated properties.
+- Edge cases auto-generated and failed.
+- Patterns of failure.
+
+These feed eval-set growth and prompt iteration.
+
+## A real test
+
+A team's classifier had a property: "Adding whitespace to the input shouldn't change the classification."
+
+Property-based test generated 1,000 mutations adding various whitespace patterns. Found 3 cases where classification changed. Investigation: the cases involved trailing whitespace that pushed the input into a slightly different prompt-template state.
+
+Fix: prompt template normalises whitespace. Property re-passes.
+
+## Coverage
+
+Property-based testing covers what golden sets miss:
+
+- Inputs the team didn't think of.
+- Mutations of known-good cases.
+- Boundary conditions.
+
+It doesn't replace golden sets. It complements them.
+
+## What we won't ship
+
+**Property tests** without clear properties.
+
+**Property tests** that take too long to run in CI.
+
+**Skipping investigation** of failures. Each failure is a finding.
+
+**Property tests** that reduce to "is this output right?" — that's an eval, not a property.
+
+## Close
+
+Property-based testing for LLM features finds inputs the team didn't imagine. The properties are stated explicitly. The library generates the inputs. The team investigates failures. The tests catch what golden sets don't.
+
+## Related reading
+
+- [Golden-set discipline](/blog/golden-set-discipline) — companion approach.
+- [Counter-example mining](/blog/counter-example-mining) — same finding-failures discipline.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're adopting property-based testing, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,95 @@
+---
+title: "Agent A/B tests: comparing without confusing your users"
+description: "Agent A/B tests are eval-style experiments with real-user complications. The cohort design is most of the work."
+date: "2026-09-09"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "A/B Testing", "Engineering", "Building Agents", "Experimentation"]
+series: "Building agents"
+seriesOrder: 21
+---
+
+A team's first agent A/B test failed quietly. Half the users got version A, half got version B. The conversion metric tied. The team concluded "no improvement." A year later, deeper analysis revealed version B was much better for power users and worse for new users — the segments had opposing effects.
+
+Agent A/B tests are experiments. The cohort design is most of the work.
+
+## Cohort design
+
+Effective cohort design considers:
+
+- **Stable assignment.** A user gets the same version across sessions.
+- **Segmentation.** Power users vs. new users; high-volume vs. low-volume; risk profile.
+- **Sample size.** Eval-set size implications for the metrics that matter.
+- **Duration.** How long does the test run? Long enough for behaviour to manifest.
+
+Random assignment without segmentation can mask real effects. Segment first; assign within segments.
+
+## Statistical power for LLM evals
+
+LLM evals have variance. Two runs of the same agent can produce slightly different outputs. Variance complicates A/B comparisons:
+
+- Effect sizes that look meaningful can be noise.
+- Subgroup analyses need adjustment for multiple comparisons.
+- The variance in output quality compounds with the variance in metric measurement.
+
+Power analysis: how big does the cohort need to be to detect the effect size you care about? Most agent A/B tests are underpowered without explicit power calculation.
+
+## Cost accounting
+
+A/B tests cost more than running one version. Both versions consume tokens. The test runs for weeks. The cost is real.
+
+Budget the test:
+
+- Estimated cost per arm.
+- Estimated total cost for the test duration.
+- Stopping criteria (if A is clearly winning, stop earlier).
+
+Without budget discipline, A/B tests can run too long, costing more than the marginal improvement they reveal.
+
+## Reviewer rituals
+
+Weekly review of A/B-test data:
+
+- Metrics by segment.
+- Confidence intervals.
+- User-level qualitative feedback.
+- Anomalies.
+
+Don't make decisions based on a single week's data. Don't ignore strong early signals. The discipline is reviewing the data even when no decision is being made.
+
+## A real experiment
+
+A scenario: testing a new prompt for a customer-support agent.
+
+- 10K active users randomly assigned to A (current) or B (new) at the user level.
+- Stable assignment: same user gets same version.
+- Test duration: 4 weeks.
+- Primary metric: ticket-resolution rate.
+- Secondary metrics: CSAT, escalation rate, time-to-first-response.
+- Subgroups: new users (week 1), regular users, power users.
+
+Week 1: noise. Week 2: B looks slightly worse. Week 3: B's improvement on regular users emerges; new users still worse with B. Week 4: clear pattern. Decision: ship B with a special-cased onboarding for new users. Eval set updated to capture the new-user segment.
+
+## What we won't ship
+
+**A/B tests without a power calculation.**
+
+**Tests with non-stable assignment.** Users see different versions across sessions = chaos.
+
+**Decisions on under-powered data.** Better to wait or extend.
+
+**Tests that ignore segments where the test does poorly.** The bad-for-some segments matter.
+
+## Close
+
+Agent A/B tests are experiments with real-user complications. The cohort design is the work. The statistical discipline is the work. The decision-making against segmented data is the work. Skip any of these and the test produces a false signal.
+
+## Related reading
+
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — eval discipline.
+- [Agent versioning](/blog/agent-versioning) — what gets compared.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping agent A/B tests, we'd love to hear about it. [Get in touch.](/contact)*

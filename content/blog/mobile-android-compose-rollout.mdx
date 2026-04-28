@@ -1,0 +1,114 @@
+---
+title: "Mobile (Android): Compose rollout audits"
+description: "A Compose rollout that survives the long tail needs theming sanity, performance regression checks, and module-level coverage. Claude Code does the audit pass; the engineer does the design."
+date: "2026-07-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Mobile", "Android", "Jetpack Compose", "AI Development"]
+series: "AI for software development"
+seriesOrder: 7
+---
+
+An Android lead at a SaaS company described his Compose adoption: "We started in 2022. We're 60% there. The remaining 40% is a graveyard of half-done modules and screens nobody's touched in a year." Compose adoption stalls because the long tail is varied, the migration cost compounds, and nobody owns the cleanup.
+
+Claude Code helps with the cleanup. An AI-assisted module audit surfaces what's left to migrate, what's broken, what's at risk. The engineer prioritises and ships.
+
+## Module audit
+
+The first job is figuring out where the work is. The AI runs a codebase audit:
+
+- **Module migration status.** Which modules are pure Compose, which are mixed, which are pure View-based.
+- **Composable hygiene.** Composables that hold state they shouldn't, composables with mutable arguments, composables doing IO.
+- **Theming consistency.** Hard-coded colours, missing dark-theme variants, theme overrides that escape the design system.
+- **Navigation patterns.** Multi-pattern navigation indicates inconsistency.
+- **Performance smells.** Recompositions that look excessive, lists without keys, expensive composables on the main thread.
+
+The audit produces a per-module report. The engineer reviews and prioritises.
+
+## Theming sanity
+
+Compose theming is a recurring pain point. Apps that started before Material 3 carry baggage. The AI's audit:
+
+- Lists components using hard-coded colors instead of theme tokens.
+- Identifies components that fork the theme inconsistently.
+- Surfaces dark-theme failures (components that look correct in light mode but break in dark).
+- Flags accessibility-contrast issues.
+
+The engineer's job is the systemic fix: define the design system clearly, migrate components to use it, write tests that prevent regression. The AI generates the migration scripts and the tests.
+
+## Performance regressions
+
+Compose recompositions are a frequent source of subtle performance issues. The AI's audit:
+
+- Lists composables that recompose more than necessary.
+- Identifies state hoisting that's wrong (state where it shouldn't be).
+- Surfaces lazy lists missing key parameters.
+- Flags expensive operations inside composables.
+
+The engineer prioritises. Some are fixed quickly; some are larger refactors.
+
+## Test coverage
+
+Compose tests are different from View tests. The AI's audit:
+
+- Identifies composables without test coverage.
+- Generates Compose-test scaffolding for the highest-priority untested composables.
+- Flags tests that have decayed (assertions that no longer match the component's behaviour).
+
+The engineer reviews the generated tests for completeness and correctness. The test coverage ramp is faster.
+
+## A migration plan
+
+The audit's output rolls up to a migration plan:
+
+- High-priority modules to finish (the ones blocking app-wide pattern improvements).
+- Theming work to do.
+- Performance fixes to ship.
+- Test gaps to close.
+
+The plan has owners and target dates. Progress is tracked in the team's project tracker. The migration moves from "we're working on it" to "here's the next sprint's commitments."
+
+## What stays human
+
+- The design-system definition. Not the AI's call.
+- Decisions about which architectural patterns to standardise on.
+- Visual review of migrated screens.
+- Accessibility verification.
+- Performance interpretation (sometimes recomposition is fine; sometimes it isn't).
+
+These are the parts where senior judgment matters. The audit and migration scripts speed up the rest.
+
+## A real cleanup
+
+A team running this audit at month one of an audit-driven migration:
+
+- Identifies 47 modules in a mixed state.
+- Surfaces 200+ theming inconsistencies.
+- Catches 12 performance regressions.
+- Closes 60 test-coverage gaps.
+
+The team ships the migration plan. Quarterly re-audits track progress. Within four quarters, the migration is genuinely complete.
+
+## What we won't ship
+
+**Auto-fixing theming issues** that affect visual identity. Those are design decisions.
+
+**Performance refactors** without before-and-after profiling.
+
+**Test additions** that don't actually exercise the relevant behaviours.
+
+**Module migrations** that touch architecture patterns without architect review.
+
+## Close
+
+A Compose rollout audit with Claude Code is the difference between "we'll get to it" and "here's where we are and what's next." The audit surfaces the work. The engineer prioritises. The migration scripts speed the cleanup. The graveyard becomes a managed project.
+
+## Related reading
+
+- [Mobile (iOS): UIKit-to-SwiftUI translation](/blog/mobile-ios-swiftui-translation) — same component-by-component pattern.
+- [Frontend: component scaffolding](/blog/frontend-component-scaffolding) — same scaffolding-vs-design split.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising Android workflows, we'd love to hear about it. [Get in touch.](/contact)*

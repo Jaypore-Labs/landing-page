@@ -1,0 +1,95 @@
+---
+title: "Auto-generated eval cases from production logs"
+description: "Production traffic is the most representative eval source. Mining it requires care."
+date: "2026-12-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Auto-generation", "Engineering", "Output Testing", "Production"]
+series: "Evals & output testing"
+seriesOrder: 10
+---
+
+A team's eval set was synthetic. The team's production traffic was full of patterns the synthetic set didn't represent. Production failures happened on cases the eval never tested.
+
+Mining production logs for eval cases is the most representative source. The discipline is doing it carefully.
+
+## The mining pattern
+
+The workflow:
+
+- Sample production traffic.
+- Filter to interesting cases (failures, low-confidence, escalations).
+- Sanitise (PII redaction).
+- Have humans label the expected outputs.
+- Add to eval set.
+
+The mining is automated; the labelling is human.
+
+## PII handling
+
+Mining production traffic involves PII:
+
+- Sanitisation pipeline (Microsoft Presidio, Google DLP, etc.).
+- Reviewer audit before adding cases.
+- Documented retention period for source logs.
+
+Without this discipline, the eval set is a privacy liability.
+
+## Reviewer ritual
+
+Mining cadence:
+
+- Weekly batch of mined cases.
+- Reviewer triage: which to add, which to discard.
+- Eval-set growth tracked.
+
+## A real workflow
+
+A team's mining:
+
+- Production logs sampled at 0.5%.
+- Sanitisation runs on each sample.
+- Cases categorised: happy path, edge case, adversarial, drift.
+- Reviewer adds 10-30 cases per week to the eval set.
+
+After 6 months: 800 cases mined from production. The eval is representative because it reflects what production actually sees.
+
+## Trade-offs
+
+Mined cases:
+
+- Most representative source.
+- Privacy-handling overhead.
+- Slower to add (each requires review and labelling).
+
+Synthetic cases:
+
+- Quick to generate.
+- May miss real complexity.
+- No privacy concerns.
+
+Most teams use both.
+
+## What we won't ship
+
+**Mining** without sanitisation.
+
+**Mined cases** without human labelling.
+
+**Mining at scales** that violate privacy commitments to users.
+
+**Skipping retention policies** for source logs.
+
+## Close
+
+Auto-generated eval cases from production are the most representative source. The mining is automated; the curation is human; the privacy is engineered. Skip the curation or the privacy and the discipline becomes a liability.
+
+## Related reading
+
+- [Counter-example mining](/blog/counter-example-mining) — same mining discipline.
+- [PII in test fixtures](/blog/pii-in-test-fixtures) — privacy.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're mining production for evals, we'd love to hear about it. [Get in touch.](/contact)*

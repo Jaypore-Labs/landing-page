@@ -1,0 +1,102 @@
+---
+title: "Context engineering: what to load, what to defer"
+description: "The context window is a budget. Spending it badly is the most common production failure mode."
+date: "2026-08-19"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Context Engineering", "Engineering", "Building Agents", "LLM"]
+series: "Building agents"
+seriesOrder: 6
+---
+
+A team's agent worked perfectly in testing and failed in production. The bug: in testing, the user's history fit easily in context. In production, with multi-turn conversations, the context grew until earlier instructions got crowded out. The agent forgot what it was supposed to do.
+
+Context windows are a budget. Spending it badly is the dominant production failure for agents. The discipline is engineering, not magic.
+
+## The context budget
+
+Every agent run has a context budget — the model's window. The budget gets spent on:
+
+- System prompt (instructions).
+- Tool definitions.
+- Conversation history.
+- Retrieved context (RAG, etc.).
+- The current user input.
+- Reasoning scratchpad.
+
+A 200K-token window seems large until the team realises 80K is going to history that's been redundant for 30 turns.
+
+## Lazy loading
+
+The pattern that scales: don't load context until it's needed.
+
+- Tool definitions are loaded once. Tool arguments are constructed at call time.
+- RAG retrieval happens per-query, not per-session.
+- History is summarised, not preserved verbatim.
+- Reference data is fetched on demand, not pre-loaded.
+
+A well-engineered agent uses dramatically less context per turn than a naive one for the same work.
+
+## Summary-first patterns
+
+For long-running agents, the conversation history needs compression:
+
+- The first N turns get summarised into a paragraph.
+- Critical decisions and outputs are preserved.
+- Mundane back-and-forth is dropped.
+- The summary updates as the conversation progresses.
+
+Without compression, the agent's context grows linearly with conversation length until it can't fit anymore. With compression, it grows logarithmically.
+
+## Compaction discipline
+
+The compaction step itself is a model call. The pattern:
+
+- Trigger compaction when context exceeds X% of the budget.
+- The compaction prompt is specific: what to preserve, what can be dropped.
+- The summary replaces the original history; the agent continues with the compressed version.
+
+Compaction is its own engineering surface. Bad compaction loses important information; good compaction preserves what the agent actually needs.
+
+## A real architecture
+
+A long-running agent we built:
+
+- 10% of context: system prompt + skills declarations.
+- 5%: tool definitions (only the tools relevant to current task).
+- 60%: conversation context (compacted).
+- 15%: retrieved context (RAG).
+- 5%: current input.
+- 5%: reasoning scratchpad.
+
+The agent runs for hours per session. Without context engineering, it would crash within 20 turns.
+
+## The cost angle
+
+Context size drives cost. A naive agent burning 80K tokens per turn at $X per million tokens is meaningfully more expensive than an engineered agent burning 20K. At scale, this is six-figure-per-year savings.
+
+The engineering work to compact context pays for itself within months.
+
+## What we won't ship
+
+**Agents without a context-monitoring mechanism.** You should know how full the context is at any moment.
+
+**Compaction without verification.** Test that the compacted summary preserves what's needed.
+
+**Pre-loading "all the context" because it's available.** Just because you can fit it doesn't mean you should.
+
+**Naive history retention** for sessions that run more than a few turns.
+
+## Close
+
+Context engineering is the difference between agents that work in demos and agents that work in production. The budget is real. The compaction is engineering. The lazy-loading is discipline. The teams that take this seriously build agents that survive long sessions; the teams that don't ship agents that crash mysteriously after lunch.
+
+## Related reading
+
+- [Long-horizon tasks](/blog/long-horizon-tasks) — context engineering at extreme scale.
+- [Prompt evolution](/blog/prompt-evolution) — system prompts also live in the context budget.
+- [Plan vs. act](/blog/plan-vs-act-loop) — the surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening context engineering, we'd love to hear about it. [Get in touch.](/contact)*

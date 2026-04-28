@@ -1,0 +1,73 @@
+---
+title: "MCP and the Claude Code workflow specifically"
+description: "Claude Code's MCP integration is the agentic-engineering pattern. Practical patterns that work."
+date: "2027-01-29"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Claude Code", "Engineering", "Agentic", "Workflow"]
+series: "MCP & AI protocols"
+seriesOrder: 23
+---
+
+Claude Code's MCP integration is one of the most practical examples of MCP in production. The patterns there generalise.
+
+## The integration
+
+Claude Code reads `~/.claude.json` (and project-level configs) for MCP servers. Each server registered becomes available to the assistant. Tools the server exposes are tools the assistant can call.
+
+## Common servers
+
+- **Filesystem.** File operations within configured paths.
+- **GitHub.** PR creation, issue management.
+- **Internal APIs.** Team-specific tooling.
+- **Web fetch.** Reading external pages.
+- **Database.** Read-only queries against analytics.
+
+Each is an MCP server. Each follows the conventions covered in this series.
+
+## A real workflow
+
+A team's developer flow:
+
+- Local Claude Code session.
+- Filesystem MCP for code editing.
+- GitHub MCP for PR creation.
+- Internal-tools MCP for ticket integration.
+
+The assistant orchestrates across these. The team's productivity scales with the MCP investment.
+
+## Patterns that work
+
+- Servers that respect the user's permissions.
+- Servers that surface what they did clearly.
+- Servers that fail gracefully.
+- Servers that compose well in agent plans.
+
+## Trade-offs
+
+- More servers = more capability, more complexity.
+- The right portfolio depends on the team's workflow.
+
+Most teams have 5-10 servers in active use. More than that becomes hard to reason about.
+
+## What we won't ship
+
+**MCP servers** in Claude Code that don't match the conventions.
+
+**Servers** without proper auth and audit.
+
+**Configurations** that aren't versioned per project.
+
+## Close
+
+MCP and Claude Code is the agentic-engineering pattern in practice. The assistant orchestrates; the MCP servers do the work. The conventions covered in this series apply directly.
+
+## Related reading
+
+- [MCP in 10 minutes](/blog/mcp-in-10-minutes) — primer.
+- [Plan vs. act: the agent loop](/blog/plan-vs-act-loop) — surrounding pattern.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — companion context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're integrating MCP with Claude Code, we'd love to hear about it. [Get in touch.](/contact)*

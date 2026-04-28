@@ -1,0 +1,113 @@
+---
+title: "Frontend: component scaffolding + state machines"
+description: "Most frontend components are 90% boilerplate around a small state machine. Claude Code makes the boilerplate disappear."
+date: "2026-07-13"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Frontend", "React", "AI Development", "State Machines"]
+series: "AI for software development"
+seriesOrder: 4
+---
+
+A senior frontend engineer at a SaaS company told us once that his actual *thinking* on a component took 15 minutes. The remaining 3 hours were typing — the rendered output, the prop types, the storybook entry, the tests, the styles. The 15 minutes were the value. The 3 hours were the tax.
+
+Claude Code with the right pattern flips the ratio. The thinking — the state machine, the responsibilities, the API surface — stays human. The scaffolding gets compressed. A 3-hour component becomes a 60-minute one without losing care.
+
+## The state-machine sketch
+
+The pattern that works: write the component's state machine first, then have AI scaffold against it.
+
+For most non-trivial components, the state machine is 4-8 states. For an upload component:
+
+- `idle`
+- `selecting`
+- `validating`
+- `uploading`
+- `complete`
+- `error`
+
+Plus the events that transition between them. Plus the data each state holds. This sketch — 5-10 minutes of work — captures the component's behaviour completely. The implementation flows from it.
+
+The AI's scaffolding from the state machine: the component, the typed state hook, the event handlers, the rendering for each state. The engineer reviews and tightens.
+
+Compared to "implement an upload component":
+
+- The state-machine-first version handles edge cases up front.
+- The implementation matches the design exactly.
+- Tests follow the state machine.
+- The engineer kept the thinking work; the AI handled the typing.
+
+## XState and its analogues
+
+For complex components, formalising the state machine in a library like XState pays off. The state machine becomes the source of truth; the rendering reads from it.
+
+The AI helps with the XState configuration:
+
+- Translating the sketched state machine into XState's syntax.
+- Generating the typed hooks the components consume.
+- Writing the visualizations for documentation.
+
+For simpler components, a typed reducer or a `useState` cluster works. The AI scaffolds that too.
+
+## Type-driven generation
+
+A pattern that avoids many bugs: define the component's TypeScript types first. Props, state, events, callbacks. Then have the AI implement.
+
+The types act as the contract. The AI's implementation is constrained by them. Bugs that violate types surface at compile time, not in user testing.
+
+This is the frontend version of the contract-first backend pattern. Same discipline, different layer.
+
+## Storybook discipline
+
+Components without Storybook entries rot. The AI generates Storybook entries from the component spec:
+
+- Default state.
+- Each non-default state with appropriate args.
+- Edge cases (empty, error, loading, max-content).
+- Light/dark theme variants.
+
+The engineer reviews the entries for visual correctness. Storybook becomes the design-system documentation it was always supposed to be.
+
+## A real feature in an afternoon
+
+A scenario: building a notification-preferences page.
+
+**Hour 1.** Sketch the state machine. Read the existing settings-page patterns in the codebase. Decide the API contract. Human work.
+
+**Hour 2.** AI scaffolds the component, the form-state hook, the API integration, the loading and error states.
+
+**Hour 3.** Engineer reviews, tightens the styles, fills in the visual polish, writes the tests for the unusual transitions.
+
+**Hour 4.** Storybook entries, Visual review, accessibility pass, ship to staging.
+
+A feature that would have been a day-and-a-half is an afternoon. The thinking time hasn't compressed; the typing time has.
+
+## Visual review
+
+The AI does not handle visual review. It can produce the markup; it can't tell whether the component looks right at every breakpoint, in every theme, with every content length. The engineer's eye is the test.
+
+This is the most underrated frontend skill in the AI era. Eyes that catch a 4-pixel misalignment, a contrast ratio that fails, a focus state that disappears, are not replaceable. The AI does the keyboard work; the engineer does the seeing work.
+
+## What we won't ship
+
+**AI-generated components without accessibility review.** A11y is human-checked.
+
+**AI-generated styles without design-system alignment.** Components that don't fit the system are worse than no components.
+
+**AI-generated components in critical user paths** without extra-careful UX review.
+
+**Components that the AI confidently produced but the engineer doesn't fully understand.** If you can't explain the component, you can't maintain it.
+
+## Close
+
+Frontend component work with Claude Code is the state-machine-first pattern paired with the engineer's eye for visual correctness. The thinking stays human. The typing speeds up. The components ship faster, with the same care as before. Visual polish, accessibility, and UX — all still human work, all still load-bearing.
+
+## Related reading
+
+- [Frontend: a11y audits that finally get done](/blog/frontend-a11y-audits) — companion to scaffolding work.
+- [Backend: API design](/blog/backend-api-design-with-claude-code) — same contract-first pattern on the back end.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising frontend workflows, we'd love to hear about it. [Get in touch.](/contact)*

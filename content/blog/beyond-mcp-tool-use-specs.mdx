@@ -1,0 +1,79 @@
+---
+title: "Beyond MCP: tool-use specs in major models"
+description: "MCP isn't the only way. Each major model has its own tool-use spec. Knowing the landscape matters."
+date: "2027-01-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Tool Use", "Engineering", "Standards", "Comparison"]
+series: "MCP & AI protocols"
+seriesOrder: 22
+---
+
+MCP is the standard, but each major model has its own tool-use spec — historically and ongoing. A team building cross-provider applications needs to know the landscape.
+
+## The state of the art
+
+**MCP.** Anthropic-originated; widely adopted. The standard for ecosystem tools.
+
+**Function calling (OpenAI).** Predates MCP; still widely used in OpenAI-specific work. Compatible patterns; different protocol.
+
+**Tool use (Anthropic API).** Anthropic's native tool-use API. MCP-compatible at the spec level.
+
+**Native function/tool calling** in other providers. Each has its own variant.
+
+## Reviewer ritual
+
+For cross-provider applications:
+
+- Document the tool-use approach per provider.
+- Plan migration if standards converge.
+- Avoid lock-in to a specific provider's spec.
+
+## A real comparison
+
+A team building tools for both Claude and ChatGPT:
+
+- Built MCP servers (the standard).
+- Wrapped MCP for ChatGPT via a translator (function-calling format).
+- Native MCP for Claude.
+
+The team's investment in MCP servers paid off. The wrapping work was straightforward.
+
+## Trade-offs
+
+- Stick to MCP: forward-looking; some translation needed for non-MCP providers.
+- Per-provider native specs: less translation; more lock-in.
+
+The industry is converging on MCP. Lean MCP.
+
+## Limits
+
+MCP doesn't yet cover:
+
+- Some edge cases other specs handle differently.
+- Multi-modal arguments (images in tool calls).
+- Some streaming patterns.
+
+These gaps are closing as MCP evolves.
+
+## What we won't ship
+
+**Cross-provider applications** without an abstraction layer.
+
+**Lock-in to a specific provider's spec** when MCP would do.
+
+**Skipping the migration plan** when standards evolve.
+
+## Close
+
+Beyond MCP, the landscape has multiple tool-use specs. MCP is the de-facto standard. Building MCP-first with provider-specific adapters where needed is the durable strategy.
+
+## Related reading
+
+- [MCP in 10 minutes](/blog/mcp-in-10-minutes) — the primer.
+- [Why we need MCP at all](/blog/why-we-need-mcp) — the history.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're navigating tool-use specs, we'd love to hear about it. [Get in touch.](/contact)*

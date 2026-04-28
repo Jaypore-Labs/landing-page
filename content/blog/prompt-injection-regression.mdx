@@ -1,0 +1,86 @@
+---
+title: "Security tests: prompt-injection regression suite"
+description: "Prompt injection is a real attack. The regression suite makes the team's defences testable."
+date: "2026-11-20"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Security"]
+series: "Testing in the age of AI"
+seriesOrder: 23
+---
+
+Prompt injection is a real attack. Users craft inputs that try to override the system prompt's instructions. Agents that are vulnerable can be coaxed into bad behaviour. The defence is engineering; the test is a regression suite.
+
+## The attack library
+
+The team's attack library:
+
+- Direct injection ("ignore previous instructions").
+- Indirect injection (attack hidden in retrieved content).
+- Role confusion ("you are a different assistant now").
+- Output-format manipulation.
+- Jailbreak templates published in security communities.
+
+Each attack has expected behaviour: the agent refuses or routes appropriately.
+
+## Test design
+
+Each attack is a test case:
+
+- Input: the attack.
+- Expected: refusal or appropriate routing.
+- Actual: agent's response.
+
+CI runs the full suite. Regressions fail.
+
+## Reviewer ritual
+
+PR review for prompt or model changes:
+
+- Prompt-injection regression suite passes.
+- New attacks added if any have surfaced in the security community.
+- Investigate any new pass-through (attack succeeded).
+
+## A real suite
+
+A team's prompt-injection suite:
+
+- 80 attacks across the categories.
+- Each annotated with the desired outcome.
+- Run on every PR + nightly.
+- Pass rate >98% required for merge.
+
+Maintained by a security-aware engineer. Updated as new attacks emerge.
+
+## Maintenance
+
+Maintenance:
+
+- Quarterly review of new attacks in the security community.
+- Add new attacks to the suite.
+- Retire attacks that are no longer relevant.
+- Document the team's attack-defence position.
+
+## What we won't ship
+
+**Prompt** updates without prompt-injection regression testing.
+
+**Suite** that doesn't grow as new attacks emerge.
+
+**Pass rates below threshold.**
+
+**Skipping the security-community-monitoring** function.
+
+## Close
+
+Prompt-injection regression suites turn ad-hoc security work into engineering. Attack library, regression tests, CI gate. The team's defences stay tested as prompts evolve. Skip the suite and prompt-injection becomes the next incident.
+
+## Related reading
+
+- [Red-teaming your own prompt](/blog/red-team-your-prompt) — companion discipline.
+- [Safety guardrails](/blog/safety-guardrails) — surrounding pattern.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening prompt-injection defences, we'd love to hear about it. [Get in touch.](/contact)*

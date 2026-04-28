@@ -1,0 +1,78 @@
+---
+title: "MCP for internal tools (Linear, Notion, Slack analogues)"
+description: "Wrapping internal tools in MCP makes them accessible to AI assistants across the team."
+date: "2027-01-20"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Internal Tools", "Engineering", "Integration", "Productivity"]
+series: "MCP & AI protocols"
+seriesOrder: 16
+---
+
+The biggest immediate value of MCP is wrapping the team's internal tools. Linear, Notion, Slack, Jira, Confluence, internal admin panels. Each becomes accessible to AI assistants when wrapped in MCP.
+
+## The integration patterns
+
+For each internal tool, the MCP server exposes:
+
+- **Read tools.** Search, list, get.
+- **Write tools.** Create, update, delete (with care).
+- **Action tools.** Trigger workflows, send notifications, escalate.
+
+The pattern is the same; the specific tools differ per service.
+
+## Reviewer ritual
+
+PR review for internal-tool MCP servers:
+
+- Read tools always available.
+- Write tools require explicit confirmation in the AI's UX.
+- Audit log for every action.
+- Rate-limited.
+
+## A real server
+
+A team's Linear MCP server:
+
+- `list_issues_by_project(project_id, status?, assignee?)`
+- `get_issue(issue_id)`
+- `create_issue(title, description, project_id, assignee?)`
+- `update_issue_status(issue_id, status)`
+- `add_comment(issue_id, body)`
+
+Used across the team's AI assistants for project management without leaving the assistant's surface.
+
+## Trade-offs
+
+- Read-only servers: safe, less capable.
+- Read-write servers: more useful, more risk.
+
+For internal tools, read-write often makes sense — but with audit and rate limits.
+
+## Limits
+
+Internal tools may have rate limits the MCP server has to respect. Pass through the upstream's limits; don't multiply by the team's user count.
+
+## What we won't ship
+
+**Internal-tool MCP servers** without auth and audit.
+
+**Write tools** without user-confirmation patterns.
+
+**Tools** that mass-mutate without explicit batch UX.
+
+**Servers** that bypass the upstream tool's rate limits.
+
+## Close
+
+MCP for internal tools is the highest-immediate-value MCP work. Linear, Notion, Slack, Jira, internal admin. Each wrapped becomes an AI surface for the team. The discipline keeps it safe.
+
+## Related reading
+
+- [MCP authorization: per-user permissions](/blog/mcp-authorization) — surrounding discipline.
+- [MCP rate limits](/blog/mcp-rate-limits) — companion topic.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're wrapping internal tools, we'd love to hear about it. [Get in touch.](/contact)*

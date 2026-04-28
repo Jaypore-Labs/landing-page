@@ -1,0 +1,100 @@
+---
+title: "Building agents that explain themselves"
+description: "An agent that can explain its reasoning is debuggable, auditable, and trustable. The reasoning trace is a product."
+date: "2026-09-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Explainability", "Engineering", "Building Agents", "Trust"]
+series: "Building agents"
+seriesOrder: 23
+---
+
+A team's regulated-industry agent passed its functional eval and failed its compliance review. The reason: regulators wanted to see how the agent reached its decisions. The team had built a black-box agent. The reasoning was inside the model and didn't surface in any output the regulator could read.
+
+Agents that explain themselves win trust faster, debug faster, and survive regulatory scrutiny. The reasoning trace is a product, not a debugging artifact.
+
+## The reasoning trace as a product
+
+For each significant decision the agent makes, the trace records:
+
+- Inputs considered.
+- Information retrieved.
+- Reasoning applied.
+- Confidence in the conclusion.
+- Alternative conclusions considered (if relevant).
+
+The trace is presentable. A reviewer can read it and follow the path. A regulator can audit it. A user can understand "why did the agent recommend this?"
+
+## Explanation eval
+
+Explanation quality has its own eval set:
+
+- For each case in the eval, is the explanation accurate?
+- Is it complete (covers the key reasoning)?
+- Is it appropriate to the audience (technical for engineers, plain-language for users)?
+- Is it the right length?
+
+Without eval discipline on explanations, they become afterthoughts. With it, they're first-class outputs.
+
+## Reviewer UX
+
+The trace is read by humans. The UX matters:
+
+- Structured display (steps, evidence, confidence per step).
+- Navigation between trace elements.
+- Quick summary at the top, detailed below.
+- Source links for retrieved evidence.
+
+A trace that's too dense to read isn't really a trace. The reviewer needs to be able to skim or deep-dive.
+
+## Privacy considerations
+
+Explanations can leak:
+
+- Information the user shouldn't see.
+- Internal company data.
+- Other users' data.
+- System internals that could be exploited.
+
+The pattern: explanation generation runs through the same access controls as the agent's outputs. Sensitive data is redacted. The reviewer sees what they're authorised to see.
+
+## A real explainer
+
+A scenario: a credit-decision agent that evaluates loan applications.
+
+For each decision:
+
+- The application data the agent considered.
+- The internal credit model's outputs.
+- The policy rules that applied.
+- The reasoning chain that led to the decision.
+- The confidence score.
+- The alternative path (what would have changed the decision).
+
+The applicant sees the explanation in plain language. The internal reviewer sees the technical trace. The auditor sees the full audit-grade record.
+
+Same underlying decision; three different presentations.
+
+## What we won't ship
+
+**Agents** without explanation capability when the use case requires audit.
+
+**Explanations that fabricate reasoning.** The trace must be true.
+
+**Explanations** that leak information the audience shouldn't have.
+
+**Skipping explanation eval.** Quality matters here as much as it does for any other output.
+
+## Close
+
+Agents that explain themselves are easier to trust, easier to debug, and easier to audit. The reasoning trace is a deliverable. The explanation eval keeps it honest. The presentation matches the audience. The privacy controls keep it safe.
+
+## Related reading
+
+- [Agent observability: traces that tell you what happened](/blog/agent-observability) — same trace discipline.
+- [Plan vs. act](/blog/plan-vs-act-loop) — what gets explained.
+- [Agents in finance: compliance with audit trail](/blog/agents-in-finance-compliance) — same audit posture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building explainable agents, we'd love to hear about it. [Get in touch.](/contact)*

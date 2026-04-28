@@ -1,0 +1,95 @@
+---
+title: "Fall-back chains: cheap → expensive → human"
+description: "When the cheap model fails, escalate to the expensive one. When that fails, escalate to a human."
+date: "2026-10-06"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Fallback", "Engineering", "Predictable Output", "Reliability"]
+series: "Predictable AI output"
+seriesOrder: 15
+---
+
+A team's classifier ran on a smaller, cheaper model. 95% of queries were handled cleanly. 5% produced low-confidence outputs. Without fallback, those 5% became silent errors. With fallback, they routed to a more capable model, and from there to humans for the cases neither model could handle.
+
+The fall-back chain is the architecture that makes cost-and-quality balance practical.
+
+## Chain design
+
+A typical chain:
+
+- **Tier 1: cheap, fast model.** Handles the bulk of queries.
+- **Tier 2: capable, expensive model.** Handles cases tier 1 isn't confident on.
+- **Tier 3: human reviewer.** Handles cases neither tier handles.
+
+Each tier has confidence thresholds. Below tier 1's threshold, escalate to tier 2. Below tier 2's threshold, escalate to tier 3.
+
+## Cost shape
+
+The chain's cost:
+
+- Tier 1: cheap × 95% of volume.
+- Tier 2: medium × 4% of volume.
+- Tier 3: human-cost × 1% of volume.
+
+Total cost is much lower than running tier 2 on everything. Quality is comparable because the cases that need tier 2's capability route there.
+
+## Latency budget
+
+Each tier adds latency. The budget:
+
+- Tier 1: under 500ms.
+- Tier 1 + tier 2: under 2s.
+- All three: tier 3 introduces human latency (minutes to hours).
+
+User-facing features need tier 1+2 inside the latency budget. Tier 3 is asynchronous.
+
+## Reviewer ritual
+
+The team reviews:
+
+- Tier 1 → tier 2 escalation rate.
+- Tier 2 → tier 3 escalation rate.
+- Quality on each tier.
+- Cost per tier.
+
+If escalation rates rise, tier 1 may be miscalibrated or the input distribution may have shifted.
+
+## A real chain
+
+A document-classification feature:
+
+- Tier 1: small model, $0.001/call. 96% accuracy on the eval.
+- Tier 2: larger model, $0.02/call. 99.5% accuracy on the eval.
+- Tier 3: human, $5/case. ~100% accuracy.
+
+Production routing:
+
+- 92% of cases handled by tier 1.
+- 7% routed to tier 2.
+- 1% routed to tier 3.
+
+Effective cost per call: ~$0.0027. Effective accuracy: ~99.9%. Both better than running tier 2 on everything (cost: $0.02/call) or tier 1 alone (accuracy: 96%).
+
+## What we won't ship
+
+**Single-tier architectures** when multi-tier would be cheaper at the same quality.
+
+**Chains** without tier-confidence thresholds.
+
+**Chains** without human-in-the-loop for the cases the model can't handle.
+
+**Chains** with no observability on per-tier metrics.
+
+## Close
+
+Fall-back chains are the architectural pattern that combines cost discipline with quality discipline. Cheap handles the bulk; expensive catches what cheap misses; humans catch what expensive misses. Skip the chain and you're paying too much, missing too much, or both.
+
+## Related reading
+
+- [Confidence calibration](/blog/confidence-calibration) — preceding discipline.
+- [Cost guardrails](/blog/cost-guardrails) — same cost engineering.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping fall-back chains, we'd love to hear about it. [Get in touch.](/contact)*

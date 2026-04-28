@@ -1,0 +1,108 @@
+---
+title: "Frontend: accessibility passes that finally get done"
+description: "A11y is the work that gets postponed. Claude Code makes the audit a Tuesday-afternoon ritual instead of an annual scramble."
+date: "2026-07-14"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Frontend", "Accessibility", "AI Development", "WCAG"]
+series: "AI for software development"
+seriesOrder: 5
+---
+
+A frontend lead admitted that her team's accessibility process was "we run axe before each release and fix the highest-severity warnings." The middle and lower severity warnings accumulated. The annual a11y review revealed dozens of issues nobody had time to address.
+
+Claude Code makes a11y a continuous discipline rather than an annual cleanup. The audit runs faster. The findings get prioritised. The fixes get scaffolded. The ritual becomes maintainable.
+
+## The combo: axe + LLM review
+
+Axe (or its analogues) catches mechanical issues — missing alt text, label-input mismatches, contrast ratios, ARIA misuse. It produces a structured report.
+
+The AI augments axe by:
+
+- Reading the codebase context for each finding.
+- Drafting a fix that respects the existing patterns.
+- Identifying *related* issues axe missed (semantic structure problems, focus management, screen-reader experience).
+- Prioritising findings by user impact, not just severity score.
+
+The combo catches issues neither alone catches. Axe alone misses semantic issues. LLM alone misses mechanical ones.
+
+## Issue triage
+
+A typical post-audit report has 50-200 findings. The AI's triage:
+
+- **Block release.** Critical issues (missing alt text on functional images, focus traps, keyboard inaccessibility).
+- **Fix this sprint.** High-impact issues (contrast failures, label issues).
+- **Fix this month.** Medium-impact issues (suboptimal heading structure, redundant ARIA).
+- **Backlog or living-with.** Low-impact issues (verbose ARIA, minor heading tweaks).
+
+The triage is reviewed by a human (a11y lead or senior engineer). Some findings get reclassified. The list becomes actionable.
+
+## Fix-recipe library
+
+Most a11y issues fall into a small number of patterns. Each pattern has a known fix. The team's fix-recipe library:
+
+- Each recipe has a name, a description of when it applies, and a concrete code example.
+- The library lives in the codebase, in a place engineers can find it.
+- The AI references the library when drafting fixes.
+
+After two quarters of building the library, a11y findings get fixed in minutes by referring to the matching recipe. New patterns get added; the library grows.
+
+## Reviewer loop
+
+Each a11y fix is a PR. The PR review:
+
+- Confirms the fix matches the recipe.
+- Tests the fix manually with keyboard and (where appropriate) a screen reader.
+- Confirms no regressions in nearby components.
+
+A11y review is a learned skill. The AI helps with the mechanical checks. The engineer's understanding is what catches the subtler issues.
+
+## A monthly a11y ritual
+
+A team that adopts the monthly ritual:
+
+- Last Tuesday of the month, the a11y agent runs a fresh audit.
+- The triaged report goes to the team's project tracker.
+- The team picks 5-10 fixes from the high-priority list to address that week.
+- Critical issues get fixed within 48 hours regardless.
+- Quarterly, the team reviews coverage and patterns.
+
+Within a year, the team's a11y posture is qualitatively different. Annual scrambles disappear. Customer complaints about accessibility decrease. The team's skill at recognising a11y issues during normal development climbs.
+
+## What the AI cannot do
+
+The AI can catch many issues. It cannot:
+
+- **Test with real assistive technology.** Screen readers behave differently across products and versions; the AI's predictions of behaviour are not authoritative.
+- **Talk to users with disabilities.** A11y is a usability concern; the test is whether real users can use the product. Synthetic testing is necessary but insufficient.
+- **Understand cultural and contextual factors** that affect a11y (cognitive load varies by language, region, education).
+
+A team relying entirely on AI for a11y is not actually accessible. The AI is the second layer; lived testing is the first.
+
+## What we won't ship
+
+**Auto-fixing a11y issues** without human review. The fix is an engineering decision.
+
+**Skipping manual screen-reader testing** for critical paths.
+
+**A11y reports without action plans.** Reports without action are theatre.
+
+**Generated alt text for functional images** without human review. The wrong alt text is worse than missing alt text.
+
+## How to start
+
+Run the audit on the existing codebase. Triage. Pick five high-priority fixes. Build the first five recipes. Establish the monthly ritual. By month three, the team has a working library and a sustainable rhythm.
+
+## Close
+
+Accessibility done well is continuous, not seasonal. The audit and triage with Claude Code make continuous practical for teams that previously couldn't sustain it. The fix-recipe library compounds over quarters. The ritual builds skill. The product becomes accessible because the discipline holds.
+
+## Related reading
+
+- [Frontend: component scaffolding](/blog/frontend-component-scaffolding) — companion to a11y work.
+- [QA: test-plan generation](/blog/qa-test-plan-from-criteria) — same audit-discipline pattern.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're elevating your team's a11y discipline, we'd love to hear about it. [Get in touch.](/contact)*

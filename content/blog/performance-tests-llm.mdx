@@ -1,0 +1,87 @@
+---
+title: "Performance tests: token budgets and latency SLAs"
+description: "Performance for AI features is token spend and latency. Both can be tested in CI."
+date: "2026-11-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Performance"]
+series: "Testing in the age of AI"
+seriesOrder: 19
+---
+
+A team's prompt update added a few sentences for clarity. Tokens per call went from 800 to 2,200. Cost tripled. Latency doubled. None of it was caught in CI because there were no performance tests.
+
+Performance for AI features is two metrics: token spend and latency. Both can be tested.
+
+## The budget contract
+
+Each feature has a budget:
+
+- Tokens per call (target and ceiling).
+- Time-to-first-token (for streaming) or total latency (for non-streaming).
+- Cost per call.
+
+The budget is documented. The CI tests against it.
+
+## Tooling
+
+Performance tests:
+
+- Run a representative set of inputs.
+- Measure tokens, latency, cost.
+- Fail if exceeding ceilings.
+- Trend over time.
+
+These are simpler than functional tests and catch a different class of regression.
+
+## Reviewer ritual
+
+PR review:
+
+- Performance test results included.
+- Budget changes documented.
+- Regressions investigated.
+
+## A real test
+
+A team's chatbot:
+
+- 50 representative queries.
+- Each measured for tokens and latency.
+- p50, p90, p99 reported.
+- CI fails if p90 latency exceeds 2s.
+- CI fails if average tokens-per-call rises >20%.
+
+The prompt-update incident from above would have been caught by this test.
+
+## Trade-offs
+
+Performance tests cost money (real LLM calls). Run on:
+
+- PR (smoke set, 10 queries) → quick perf check.
+- Nightly (full set, 50 queries) → comprehensive.
+- Pre-release → full + extended set.
+
+## What we won't ship
+
+**Features** without performance budgets.
+
+**Performance tests** without trend tracking.
+
+**Skipping the regression investigation** when performance ticks up.
+
+**Optimising performance** without re-running functional eval (sometimes performance optimisation regresses quality).
+
+## Close
+
+Performance tests for AI features catch the silent budget creep. Token spend, latency, cost — all testable. The discipline is treating these like other engineering metrics. The team's bills stay manageable; latency stays acceptable.
+
+## Related reading
+
+- [Cost tests](/blog/cost-tests) — companion topic.
+- [Cost guardrails](/blog/cost-guardrails) — surrounding pattern.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening performance discipline, we'd love to hear about it. [Get in touch.](/contact)*

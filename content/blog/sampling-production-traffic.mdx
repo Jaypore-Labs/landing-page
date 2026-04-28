@@ -1,0 +1,81 @@
+---
+title: "Sampling production traffic for eval"
+description: "Sampling for eval is sampling for representativeness. The pattern matters."
+date: "2026-12-09"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Sampling", "Engineering", "Output Testing", "Production"]
+series: "Evals & output testing"
+seriesOrder: 11
+---
+
+A team's eval was sampled from "any 100 production cases per week." The eval skewed toward the high-volume cases. The long-tail cases — where most failures lived — were under-represented.
+
+Sampling for eval is sampling for representativeness, not random uniformity.
+
+## The sampling rule
+
+The strategy depends on what you want the eval to capture:
+
+- **Representative.** Sample from the production distribution. Good for general quality.
+- **Stratified.** Sample equally from each category. Good for ensuring coverage.
+- **Targeted.** Sample from specific failure modes. Good for catching specific issues.
+
+Most teams need a mix.
+
+## Privacy
+
+Sampling involves privacy:
+
+- Sanitisation runs before storage.
+- Sampling rate balanced against privacy budget.
+- Retention period limited.
+
+## Reviewer ritual
+
+Sampling configuration reviewed:
+
+- Per-category sample rates set.
+- Distribution audited periodically.
+- Targeting adjusted as new failure modes emerge.
+
+## A real workflow
+
+A team's sampling:
+
+- 0.5% of all traffic for representative coverage.
+- Stratified: 50 cases per category per week.
+- Targeted: failures and escalations get 100% sampling (smaller absolute numbers).
+
+The eval set grows representatively.
+
+## Trade-offs
+
+- **More sampling:** more privacy exposure, more storage, more eval-set growth.
+- **Less sampling:** less privacy exposure, sparser coverage.
+
+The right balance depends on the team's privacy posture and eval needs.
+
+## What we won't ship
+
+**Sampling** without privacy sanitisation.
+
+**Random sampling alone** when stratified would give better coverage.
+
+**Sampling without retention policy.**
+
+**Sampling without periodic audit.**
+
+## Close
+
+Sampling production traffic for eval is the discipline of building a representative eval set without exposing the team to privacy issues. Stratified, sanitised, retention-bounded. The eval matures because production informs it.
+
+## Related reading
+
+- [Auto-generated eval cases from production](/blog/auto-generated-eval-cases) — companion pattern.
+- [PII in test fixtures](/blog/pii-in-test-fixtures) — privacy.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're sampling for eval, we'd love to hear about it. [Get in touch.](/contact)*

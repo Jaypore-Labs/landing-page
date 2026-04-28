@@ -1,0 +1,91 @@
+---
+title: "Judging open-ended output without a rubric"
+description: "Open-ended outputs can be judged with discipline. The rubric is the work."
+date: "2026-12-03"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Open-ended", "Engineering", "Output Testing", "Rubrics"]
+series: "Evals & output testing"
+seriesOrder: 7
+---
+
+A team's prose-generation feature produced varied outputs. They couldn't grade against a single expected answer. They needed a rubric that captured what "good" meant without exact-match.
+
+Open-ended outputs are gradable when the rubric is rigorous.
+
+## The rubric discipline
+
+A good rubric has:
+
+- Specific dimensions (clarity, accuracy, tone, etc.).
+- Clear definitions for each dimension.
+- Examples per dimension (1-5 score with anchors).
+- Scope (what's in scope; what's out).
+
+Without these, raters disagree wildly. With them, agreement climbs.
+
+## Reviewer ritual
+
+Rubric reviewed:
+
+- After each iteration of the feature.
+- When inter-rater agreement is low.
+- When the output space changes.
+
+## A real rubric
+
+For a customer-email-generation feature:
+
+| Dimension | 1 | 3 | 5 |
+| --- | --- | --- | --- |
+| Tone | Off-brand | Acceptable | On-brand |
+| Clarity | Unclear | Acceptable | Crystal clear |
+| Length | Wrong length | Acceptable | Optimal |
+| Specificity | Generic | Acceptable | Specific to context |
+| Helpfulness | Doesn't help | Helps somewhat | Directly addresses need |
+
+Each dimension has expanded definitions and examples per score.
+
+## Trade-offs
+
+Rubric design:
+
+- Slow to build initially.
+- Pays off in agreement and signal.
+- Needs maintenance as the feature evolves.
+
+The team's investment in the rubric is investment in the feature's quality.
+
+## Limits
+
+Some judgments are genuinely ambiguous. Rubrics can't fix this:
+
+- "Was this funny?" — partly subjective.
+- "Was this culturally appropriate?" — context-dependent.
+- "Was this useful?" — depends on the user.
+
+For these, the rubric provides structure but the team accepts disagreement.
+
+## What we won't ship
+
+**Open-ended evals** without rubrics.
+
+**Rubrics** without examples.
+
+**Rubrics** that don't get inter-rater agreement.
+
+**Skipping the rubric maintenance.**
+
+## Close
+
+Judging open-ended output requires rigorous rubrics. Specific dimensions, clear definitions, anchored examples. The team's evals become reliable. The feature improves measurably because the team can grade it.
+
+## Related reading
+
+- [LLM-as-judge: when to trust it](/blog/llm-as-judge) — implementation.
+- [Behavioural assertions](/blog/behavioural-assertions) — same fuzzy-quality discipline.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're rubric-grading open-ended outputs, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,88 @@
+---
+title: "CI strategy: smoke vs. full suite for LLM apps"
+description: "Run a fast smoke set on every PR, full suite less often. The cadence is the strategy."
+date: "2026-11-03"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "CI/CD"]
+series: "Testing in the age of AI"
+seriesOrder: 10
+---
+
+A team's full eval suite took 25 minutes to run. CI pipelines slowed accordingly. Engineers stopped pushing small changes to avoid the wait. The team's velocity dropped.
+
+The fix is a smoke / full suite separation. Every PR runs a fast smoke. Full suite runs less often.
+
+## The smoke contract
+
+The smoke set is:
+
+- Subset of the full eval (typically 10-20% of cases).
+- Covers the most common production paths.
+- Runs in 2-3 minutes.
+- Catches regressions on the most-likely-broken stuff.
+
+Smoke pass = "PR is safe to land."
+
+## Full-suite cadence
+
+Full suite runs:
+
+- Every push to main.
+- Nightly.
+- Before releases.
+- On demand for substantive changes.
+
+A regression caught only by full suite is identified within hours, not weeks.
+
+## Reviewer ritual
+
+PR review:
+
+- Smoke results required.
+- Full-suite results visible if available.
+- If smoke is clean and full-suite hasn't run, the merger accepts the residual risk.
+
+## A real pipeline
+
+A team's CI:
+
+- PR triggers smoke (3 min).
+- Smoke passing → PR ready for human review.
+- Merge to main triggers full suite (25 min).
+- Full suite results posted to a Slack channel.
+- Failures on main investigate-and-revert.
+
+Velocity stays high. Coverage stays comprehensive.
+
+## Cost shape
+
+Smoke + full suite costs more than smoke alone. But:
+
+- Smoke is cheap (small set).
+- Full suite runs less often.
+- Total cost is lower than running the full suite on every PR.
+
+## What we won't ship
+
+**Slow CI** that engineers route around.
+
+**Smoke that doesn't actually catch the common regressions.**
+
+**Skipping the full suite** because smoke passes.
+
+**Full-suite failures** that don't trigger investigation.
+
+## Close
+
+CI strategy for LLM apps is smoke + full suite. Smoke runs every PR. Full suite runs less often. The team's velocity stays high; the coverage stays real. Skip the strategy and CI either slows the team or misses regressions.
+
+## Related reading
+
+- [Drift vs. functional tests](/blog/drift-vs-functional-tests) — same lane discipline.
+- [Building your first eval set](/blog/building-your-first-eval-set) — what runs.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening CI strategy, we'd love to hear about it. [Get in touch.](/contact)*

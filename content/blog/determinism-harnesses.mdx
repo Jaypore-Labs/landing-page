@@ -1,0 +1,87 @@
+---
+title: "Determinism harnesses for non-deterministic systems"
+description: "Record and replay turns the LLM into a deterministic component for testing purposes."
+date: "2026-11-04"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Determinism"]
+series: "Testing in the age of AI"
+seriesOrder: 11
+---
+
+A team's integration tests called the real LLM. The tests were slow and flaky — same input, slightly different output. The team adopted a record-replay pattern: real LLM in development, recorded responses in test runs.
+
+This is the determinism harness. It makes a non-deterministic system testable.
+
+## The mock-with-record pattern
+
+The pattern:
+
+- Tests run with a mock LLM client.
+- The mock returns recorded responses for each input.
+- Recordings are versioned in the repo.
+- New tests record on first run; subsequent runs replay.
+
+For each input, the mock looks up the recording. If found, returns it. If not, calls the real LLM, records, and returns.
+
+## Replay discipline
+
+When the prompt changes:
+
+- The recordings are stale.
+- Re-record explicitly.
+- Review the new recordings for sanity.
+- Commit the new recordings.
+
+Without this, prompt changes silently mismatch with stale recordings. Tests pass but don't reflect new behaviour.
+
+## Reviewer ritual
+
+PRs that re-record include:
+
+- The new recordings in the diff.
+- A note about why recordings updated.
+- Reviewer scans the changed responses for unexpected patterns.
+
+## A real harness
+
+A team's harness:
+
+- `pytest-vcr` style: each test has a YAML recording file.
+- First run records; subsequent runs replay.
+- Recordings are sanitised (PII redacted, secrets removed).
+- Clear separation between development tests (real calls) and CI tests (recorded).
+
+## Limits
+
+The harness has limits:
+
+- It tests the integration layer. The actual LLM behaviour is frozen.
+- Behavioural eval still requires real calls (less frequently).
+- Recordings can drift from real behaviour over time.
+
+A team's strategy: integration tests use recordings (fast); behavioural eval uses real calls (slower, less frequent).
+
+## What we won't ship
+
+**Tests** that always call the real LLM (too slow, too flaky).
+
+**Tests** that always use recordings (miss real behavioural changes).
+
+**Recordings** that aren't reviewed when re-recorded.
+
+**Recordings with PII or secrets.** Always sanitise.
+
+## Close
+
+Determinism harnesses make LLM-dependent code testable cheaply. Record-replay is the pattern. Recordings stay current. Real-call evals run less often. The team's CI stays fast and comprehensive.
+
+## Related reading
+
+- [Mock LLMs in tests](/blog/mock-llms-in-tests) — companion topic.
+- [Integration tests for AI features](/blog/integration-tests-for-ai) — same testing context.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building determinism harnesses, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,93 @@
+---
+title: "Pairwise judges: A/B agreement at scale"
+description: "Pairwise comparison is more reliable than absolute scoring. The pattern works at scale."
+date: "2026-12-02"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Pairwise", "Engineering", "Output Testing", "Judges"]
+series: "Evals & output testing"
+seriesOrder: 6
+---
+
+Absolute scoring ("rate this output 1-5") is hard. Different humans calibrate differently. The same human may score differently on different days. Pairwise comparison ("which of these two is better?") sidesteps the calibration problem.
+
+For LLM-as-judge, pairwise often beats absolute.
+
+## The pairwise pattern
+
+For each comparison:
+
+- Two outputs (A and B).
+- Judge picks better one (or marks tie).
+- Optionally, with rationale.
+
+Aggregated across comparisons:
+
+- A wins X% of the time.
+- B wins Y% of the time.
+- Ties Z% of the time.
+
+This produces a reliable ranking.
+
+## Cost shape
+
+Pairwise costs more per case (two outputs to evaluate, plus the judge call). But:
+
+- Calibration is easier.
+- Agreement between judges is higher.
+- The signal is cleaner.
+
+For high-stakes evals, the cost is justified.
+
+## Reviewer ritual
+
+Pairwise eval results:
+
+- A vs. B agreement rate.
+- Confidence intervals.
+- Per-category breakdowns.
+
+A team comparing two prompt versions can clearly say "B is better X% of the time."
+
+## A real run
+
+A team comparing prompt versions:
+
+- 100 inputs.
+- Each input run through both prompts.
+- Outputs paired and judged.
+- Result: prompt B wins 67%, prompt A wins 18%, ties 15%.
+- Decision: ship prompt B.
+
+The decision is data-driven. Prompt B is clearly preferred.
+
+## Trade-offs
+
+- **Pairwise:** more reliable, more expensive.
+- **Absolute:** cheaper, noisier.
+
+Use pairwise for high-stakes decisions. Absolute for ongoing monitoring.
+
+## What we won't ship
+
+**Pairwise** without judge calibration.
+
+**Conclusions** based on small pairwise samples (need power calculation).
+
+**Skipping the rationale.** Why one wins matters.
+
+**Pairwise where absolute would do.** Don't over-engineer.
+
+## Close
+
+Pairwise judges produce more reliable signal than absolute. The cost is higher. The decisions are clearer. For consequential prompt comparisons, the pattern is worth the cost.
+
+## Related reading
+
+- [LLM-as-judge: when to trust it](/blog/llm-as-judge) — preceding pattern.
+- [Calibrating your judge](/blog/calibrating-your-judge) — quality discipline.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're using pairwise eval, we'd love to hear about it. [Get in touch.](/contact)*

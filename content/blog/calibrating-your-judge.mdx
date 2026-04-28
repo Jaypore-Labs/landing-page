@@ -1,0 +1,89 @@
+---
+title: "Calibrating your judge: meta-evals"
+description: "The judge needs its own eval. The meta-eval is the discipline."
+date: "2026-12-04"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Calibration", "Engineering", "Output Testing", "Meta-eval"]
+series: "Evals & output testing"
+seriesOrder: 8
+---
+
+The team's LLM-as-judge had been running for six months. Output quality looked stable. Then a customer complaint revealed the judge had drifted — it was now scoring outputs more leniently than humans would. The judge's own quality had degraded silently.
+
+The judge needs its own eval. Meta-evals are the discipline.
+
+## The meta-eval
+
+Quarterly:
+
+- Sample 100 cases.
+- Have humans score them.
+- Have judge score them.
+- Measure agreement.
+- If agreement is below threshold, recalibrate.
+
+This is restaurant-health-inspection-style discipline applied to the judge itself.
+
+## Cadence
+
+Most teams should meta-eval:
+
+- Quarterly (default).
+- After judge prompt updates.
+- After model bumps for the judge.
+- When output quality complaints arise.
+
+## Reviewer ritual
+
+Meta-eval results:
+
+- Agreement rate per dimension.
+- Disagreement patterns.
+- Investigation of patterns.
+
+If the judge consistently disagrees with humans on certain dimensions, the judge's prompt needs work.
+
+## A real calibration
+
+A team's quarterly meta-eval:
+
+- Q1: 84% agreement.
+- Q2: 86% (improved after rubric clarification).
+- Q3: 79% (regressed; investigated; provider model bump caused it).
+- Q3 recalibration: 85% (judge prompt adjusted for new model).
+
+Without meta-evals, the Q3 regression would have gone undetected for months.
+
+## Limits
+
+Meta-evals don't catch:
+
+- Cases where humans systematically disagree (the judge can't be more right than humans).
+- Edge cases not in the meta-eval sample.
+
+The discipline is necessary but not sufficient.
+
+## What we won't ship
+
+**Judges** without meta-eval cadence.
+
+**Meta-evals** without investigation when agreement drops.
+
+**Judges** the team trusts blindly.
+
+**Skipping the calibration after model bumps** for the judge.
+
+## Close
+
+Judges need their own evals. The meta-eval is the discipline. Quarterly checks. Investigation on disagreement. Recalibration when needed. The judge stays trustworthy because the team measures.
+
+## Related reading
+
+- [LLM-as-judge: when to trust it](/blog/llm-as-judge) — surrounding pattern.
+- [Drift catchers](/blog/drift-catchers) — same drift discipline.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're calibrating judges, we'd love to hear about it. [Get in touch.](/contact)*

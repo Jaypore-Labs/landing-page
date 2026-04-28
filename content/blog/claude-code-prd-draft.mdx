@@ -1,0 +1,122 @@
+---
+title: "Product: PRD draft from a discovery transcript"
+description: "From an hour-long customer-discovery call to a structured PRD in 30 minutes. The PM keeps the judgment work."
+date: "2026-06-24"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Product AI", "AI Employees", "PRD", "Product Discovery"]
+series: "Claude Code in business"
+seriesOrder: 16
+---
+
+A PM at a fintech company described her PRD process: "I do customer discovery, I sit with the transcript for half a day, I produce a PRD that the engineering team will edit anyway." The half-day was real time spent on a real artifact. It was also the kind of work where the marginal hour added little value past the first 90 minutes.
+
+The PRD-draft AI employee compresses the half-day. It produces a structured first draft from the transcript. The PM does the parts that need her judgment: scope decisions, prioritisation, the strategic frame.
+
+## The shape of the role
+
+**Title.** Product Operations AI — PRD Draft Specialist.
+
+**Mission.** Convert customer-discovery transcripts and source documents into structured PRD first drafts.
+
+**Outcomes.** Time-from-discovery-to-PRD-first-draft, PRD edit volume, engineering-team's clarification rate.
+
+**Reports to.** Head of Product or VP Product.
+
+**Tools.** Discovery-transcript ingest, PRD template library, prior-PRD archive, voice eval for the team's PM voice.
+
+**Boundaries.** Drafts. The PM edits, decides scope, sets priority. Doesn't write final PRDs.
+
+## What "structured" means
+
+The agent's drafts hit a consistent template:
+
+**Section 1 — Goal/Non-goal.** What this work is for, and what it's explicitly not. The non-goal section is doing more work than most teams realise; it pre-empts scope creep.
+
+**Section 2 — Customer context.** Who experiences the problem, in what situation, with what frequency. Drawn directly from the transcript with quotes.
+
+**Section 3 — Current behaviour and pain.** What the customer does today and where it breaks. Quotes from the transcript.
+
+**Section 4 — Proposed behaviour.** What we'd ship. Description, mockup placeholders, key flows.
+
+**Section 5 — Risk register.** What could go wrong. Technical risks, customer-experience risks, organisational risks.
+
+**Section 6 — Open questions.** What the PM doesn't know yet. The agent surfaces these explicitly rather than papering over them.
+
+**Section 7 — Out of scope.** What this PRD doesn't cover. Often the most-edited section by the PM.
+
+## The transcript-grounded discipline
+
+Every claim in the PRD links to a specific point in the transcript. "The customer needs to filter by date range" is followed by a transcript timestamp where they said so. This prevents the common PRD-writing failure where requirements get invented during writing rather than found during discovery.
+
+The PM can verify each claim quickly. If something's missing from the transcript, the agent says so — flagging it as an open question rather than guessing.
+
+## What the PM actually does
+
+After the agent's draft, the PM:
+
+- Reviews the goal/non-goal — adjusts to the company's strategic frame.
+- Edits the proposed behaviour based on technical constraints she knows.
+- Adds the prioritisation context — why this work, why now.
+- Refines the risk register based on her org's specific risks.
+- Decides scope — what makes the cut, what gets deferred.
+- Signs.
+
+The agent's draft removes the cognitive load of structuring the document. The PM focuses on the parts that need her.
+
+## What this saves
+
+A typical PRD with the agent:
+
+- First draft in 30 minutes (after the discovery call).
+- PM editing in 60-90 minutes.
+- Total: ~2 hours of human time, vs. 6-8 hours pre-agent.
+
+A team running 10-15 PRDs per quarter saves a working week per PM, plus produces PRDs that are more grounded (transcript-cited) and more disciplined (open questions surfaced explicitly rather than discovered later in eng review).
+
+## The reviewer loop
+
+Each PRD's edits feed the eval set. Common patterns the agent will need to learn:
+
+- "This phrasing is too marketing-flavoured; use our PRD voice."
+- "Out-of-scope items need to be more explicit about why."
+- "The risk register needs more emphasis on operational risk; we keep missing it."
+
+After two quarters, the agent's drafts converge to the PM's voice and the team's standards.
+
+## What we won't ship
+
+**Auto-publishing PRDs.** PMs sign.
+
+**Estimation.** The agent doesn't estimate engineering effort.
+
+**Roadmap-setting.** Roadmap is leadership.
+
+**Anything that takes raw customer feedback and writes a PRD without a discovery call having happened.** PRDs need discovery; the agent doesn't substitute for the conversation.
+
+## The KPIs the head of product watches
+
+1. **PRD turnaround time** from discovery to ready-for-review.
+2. **Engineering clarification rate** on PRDs (how many questions per PRD).
+3. **PRD edit volume** (should decline over a quarter).
+4. **Scope-creep events** during implementation (PRDs missing important context).
+
+If the second metric doesn't improve, the agent's PRDs are missing the engineering team's needs. Tune the template.
+
+## How to start
+
+Pick one PM. Run the agent on three to five PRDs. Compare to PRDs the PM would have produced. Tune. Once aligned, expand to other PMs.
+
+## Close
+
+The PRD-draft AI employee is a teammate whose job is the structural work of writing a PRD. The PM keeps the judgment. The grounding stays connected to the customer transcript. The team's PRD library improves in quality while the PM's calendar opens up. Both gains compound over quarters.
+
+## Related reading
+
+- [Product: feedback synthesis](/blog/claude-code-feedback-synthesis) — upstream of PRDs.
+- [Sales: discovery summariser](/blog/claude-code-sales-discovery) — same transcript-grounded discipline.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI product employee, we'd love to hear about it. [Get in touch.](/contact)*

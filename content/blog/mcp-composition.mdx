@@ -1,0 +1,85 @@
+---
+title: "MCP composition: when one server should call another"
+description: "Server-to-server composition is sometimes the right architecture. Mostly, it isn't."
+date: "2027-01-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Composition", "Engineering", "Architecture", "Scaling"]
+series: "MCP & AI protocols"
+seriesOrder: 19
+---
+
+A team built three MCP servers. Each could call the others. The result was a graph nobody could reason about.
+
+Server-to-server composition is sometimes right. Mostly, the AI assistant should be the composer.
+
+## The composition pattern
+
+When server A's tools depend on server B's data:
+
+- **AI-driven:** Assistant calls B, then A. Graph is in the assistant's plan.
+- **Server-driven:** A calls B internally. The assistant sees A's combined tool.
+
+Server-driven composition hides complexity from the AI. AI-driven composition keeps the assistant in control.
+
+## When server-driven wins
+
+- The composition is fixed (always the same).
+- Performance matters (one round-trip vs. two).
+- The combined operation is meaningful (not just two unrelated calls).
+
+## When AI-driven wins
+
+- Composition varies by context.
+- The assistant needs visibility into the steps.
+- The pattern is uncommon enough that hiding it loses value.
+
+## Reviewer ritual
+
+PR review for compositions:
+
+- Why server-driven over AI-driven?
+- What's the failure-handling for the cross-server call?
+- What's the auth pattern for the cross-server call?
+
+## A real implementation
+
+A team's MCP server for customer-research:
+
+- Internally calls the customer-data server.
+- Internally calls the public-records server.
+- Combines results into a research brief.
+- Exposes one tool to the AI assistant.
+
+The composition is fixed and performance-sensitive. Server-driven made sense.
+
+## Trade-offs
+
+- Server-driven: simpler from AI's view, more complex internally.
+- AI-driven: more complex from AI's view, simpler internally.
+
+The right choice depends on the team's priorities.
+
+## What we won't ship
+
+**Server-driven composition** that should be AI-driven.
+
+**Compositions** that hide failures from the assistant.
+
+**Compositions** without auth-flow documentation.
+
+**Compositions** that introduce circular dependencies.
+
+## Close
+
+MCP composition is an architecture decision. Sometimes server-driven; mostly AI-driven. Pick deliberately. The default should be AI-driven; server-driven is the exception.
+
+## Related reading
+
+- [Sub-agents: when 1+1 actually equals 2](/blog/sub-agents) — same composition discipline.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding pattern.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're composing MCP servers, we'd love to hear about it. [Get in touch.](/contact)*

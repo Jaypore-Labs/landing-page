@@ -1,0 +1,77 @@
+---
+title: "MCP testing: harnesses, fixtures, regressions"
+description: "MCP servers test like any service. The MCP-specific layer is testing the protocol contract."
+date: "2027-01-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Testing", "Engineering", "Quality", "Regression"]
+series: "MCP & AI protocols"
+seriesOrder: 20
+---
+
+A team's MCP server passed all its unit tests. An AI assistant connected and got malformed responses. The server was buggy at the protocol level — schemas didn't match runtime behaviour.
+
+MCP servers need testing at the protocol level, not just the implementation level.
+
+## The test plan
+
+For each MCP server:
+
+- **Unit tests.** Each tool's logic.
+- **Integration tests.** Each tool against real or stubbed dependencies.
+- **Protocol tests.** The server speaks MCP correctly.
+- **Regression tests.** Specific behaviours that have shipped before.
+
+## Protocol tests
+
+Test the MCP contract:
+
+- `list_tools` returns the expected tools.
+- Tool schemas match what the implementation expects.
+- Errors are returned in the expected format.
+- Stdio/HTTP transport handles edge cases.
+
+These catch issues that unit tests miss.
+
+## Reviewer ritual
+
+PR review:
+
+- Tests for new tools.
+- Protocol tests still pass.
+- Regression tests for fixed bugs.
+
+## A real implementation
+
+A team's MCP server testing:
+
+- pytest for unit + integration.
+- A protocol-test harness that connects to the server and exercises the contract.
+- Regression test added per fixed bug.
+- CI runs all three layers.
+
+## Trade-offs
+
+Protocol tests are slower than unit tests. They run in their own job. The trade-off is catching issues that unit tests can't.
+
+## What we won't ship
+
+**MCP servers** without protocol-level tests.
+
+**Tests** that don't exercise the actual transport.
+
+**Servers** that pass tests but fail in real assistant connections.
+
+## Close
+
+MCP testing covers all three layers — implementation, integration, protocol. The protocol layer is MCP-specific. Skip it and the server has subtle bugs that surface only in production.
+
+## Related reading
+
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding discipline.
+- [Integration tests for AI features](/blog/integration-tests-for-ai) — companion pattern.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're testing MCP servers, we'd love to hear about it. [Get in touch.](/contact)*

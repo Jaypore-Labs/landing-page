@@ -1,0 +1,98 @@
+---
+title: "Retiring an agent"
+description: "Agents that no longer earn their keep should retire. The discipline is engineering the end gracefully."
+date: "2026-09-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Retirement", "Engineering", "Building Agents", "Lifecycle"]
+series: "Building agents"
+seriesOrder: 25
+---
+
+A team's agent had been running for 18 months. The workflow it served had evolved past it. Customer behaviour had shifted. The model behind it had bumped twice. The eval set had drifted. The team had been patching for the last six months instead of replacing.
+
+Retirement is part of every agent's lifecycle. The discipline is engineering the end gracefully — not letting the agent become an orphan that haunts the codebase.
+
+## The "workflow outgrew it" signal
+
+Three signals that an agent should retire:
+
+- **Patching exceeds rebuilding.** When the next sprint's patches add up to more work than a clean rebuild, the agent's design is wrong.
+- **The KPIs aren't moving.** The agent isn't producing value; the cost-benefit math has flipped.
+- **A simpler solution exists.** Something deterministic, or a smaller agent with tighter scope, can do the same work.
+
+When two of three are present, plan the retirement.
+
+## The decommission checklist
+
+The retirement plan covers:
+
+- **What stops working when this agent goes away.** Affected workflows, users, integrations.
+- **What replaces it.** New agent, deterministic system, human workflow, or nothing.
+- **Migration timeline.** Phased shutdown, parallel running, hard cutover.
+- **Comms plan.** Who needs to know, what they need to know.
+- **Rollback path** if the retirement causes unexpected issues.
+- **Knowledge capture.** Documentation of what the agent did, how, what worked.
+
+Without a plan, retirements turn into accidents.
+
+## Knowledge capture
+
+The retired agent's knowledge isn't lost:
+
+- The skills and tools (often reusable).
+- The eval set (often reusable).
+- The lessons (always reusable).
+- The cost data (informs future budgets).
+- The user feedback (informs future design).
+
+A retiring team writes a retrospective: what worked, what didn't, what we'd do differently. The next agent in this domain inherits the wisdom.
+
+## Stakeholder comms
+
+Internal stakeholders affected by the retirement:
+
+- The agent's manager.
+- The downstream teams.
+- The compliance reviewer (if applicable).
+- The end users (if external).
+
+Each gets the version of the comms appropriate to their role. Surprises are unprofessional.
+
+## A real sunset
+
+A scenario: a customer-research agent that was acquired into a different role.
+
+- **Month -3.** Team identifies the agent's KPIs aren't moving despite patches.
+- **Month -2.** Decision made to retire.
+- **Month -1.** Replacement (a smaller, more focused tool) launched in parallel. Users migrated gradually.
+- **Month 0.** Old agent shut down.
+- **Month +1.** Retrospective published. Knowledge captured.
+
+Total elapsed time: 4 months. Calmer than the alternative — discovering at the next eval the agent had been broken for a quarter and scrambling to replace it.
+
+## What we won't ship
+
+**Retirements without comms.**
+
+**Retirements without a knowledge-capture step.**
+
+**Hard cutovers** without parallel-running validation.
+
+**Retirements where the team can't say what's replacing the work.** If nothing is, that's a decision; surface it.
+
+## Close
+
+Retiring an agent is a deliberate act, not an oversight. The plan covers what changes, what replaces, who knows, what gets captured. Skip any of these and the retirement becomes the next quarter's surprise.
+
+This article is the closing of the building-agents series. The next series — predictable AI output — covers what makes the AI underneath these agents reliable enough to build on.
+
+## Related reading
+
+- [The hand-off contract](/blog/claude-code-handoff-contract) — same lifecycle discipline.
+- [Plan vs. act](/blog/plan-vs-act-loop) — series opener.
+- [Agent rollback](/blog/agent-rollback) — what survives the retirement.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're retiring an agent gracefully, we'd love to hear about it. [Get in touch.](/contact)*

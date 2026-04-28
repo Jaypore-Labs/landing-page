@@ -1,0 +1,113 @@
+---
+title: "Backend: database migrations without fear"
+description: "Most production incidents trace to migrations. AI assistance doesn't replace caution — it makes the cautious workflow faster."
+date: "2026-07-10"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Backend", "Database Migrations", "AI Development", "Software Engineering"]
+series: "AI for software development"
+seriesOrder: 3
+---
+
+A senior engineer told us that her last data-migration was the most stressful Friday of her year. The migration was right. The pre-flight check was right. The rollback plan was right. The execution still kept her on Slack until 11 PM, watching dashboards, jumpy on every alarm.
+
+AI assistance doesn't make migrations less stressful. It makes the disciplined workflow that *prevents* migration disasters faster. The discipline is still the work; the AI handles the parts that benefit from speed.
+
+## The migration-pair pattern
+
+The pattern that survives most incidents:
+
+- **Forward migration.** What changes the schema or the data.
+- **Reverse migration.** What undoes it.
+
+Both written, tested, and rehearsed before any deploy. Both required for any change touching schema or production data.
+
+The AI helps with both. Given the forward migration, the AI produces a candidate reverse. The engineer reviews the reverse for completeness and edge cases. Most reverses the AI produces are 80-90% right; the engineer finishes the last 10-20%.
+
+Without AI: writing the reverse migration takes 30-60 minutes of careful thought. With AI: 10-15 minutes including review. Migration discipline doesn't break under deadline pressure when the rehearsal is fast.
+
+## Rollback drills
+
+A real engineering practice: before any production migration, run the rollback in staging. Apply the forward migration, exercise the new code path, apply the reverse, exercise the old code path. Confirm both directions work end-to-end.
+
+The AI helps with the test scaffolding for the drill:
+
+- Test cases that exercise the new schema with new code.
+- Test cases that exercise the new schema with *old* code (catches the cases where in-flight requests hit an unexpected schema).
+- Test cases for the reverse direction.
+
+The drill itself is human work. The setup is AI-accelerated.
+
+## Production-shadow testing
+
+A pattern that catches the cases drills miss: shadow the production traffic to a staging environment running the migrated schema, and compare results. Differences surface bugs the drill couldn't catch.
+
+The AI helps:
+
+- Drafting the shadow-traffic capture/replay tooling.
+- Writing the result-comparison logic.
+- Generating diff reports for review.
+
+This is unsexy infrastructure work. Most teams skip it. The teams that don't skip it have measurably fewer migration-related incidents.
+
+## The reviewer's checklist
+
+A migration-PR review hits a defined checklist:
+
+- Forward and reverse migrations both present.
+- Both tested.
+- Drill report attached.
+- Schema changes documented in the data-engineering sense (downstream consumers notified).
+- Performance impact assessed for large tables (online migration tools used where needed).
+- Locks held are minimal and documented.
+- The change is feature-flagged, deployable, and observable.
+
+The AI can review against this checklist as a first pass. The human reviewer confirms. PRs that don't pass don't merge.
+
+## A real migration with AI
+
+A scenario: adding a `tenant_id` column to a 50M-row events table.
+
+**Hour 1.** Plan the migration with AI assistance. Multi-phase: add the column nullable, backfill, populate via writes, eventually flip to NOT NULL.
+
+**Hour 2.** AI generates the forward migration scripts for each phase. Engineer reviews, adjusts the batching size and the indexing strategy.
+
+**Hour 3.** AI generates the reverse migrations. Engineer reviews and tightens.
+
+**Hour 4.** Drill in staging. AI helps with the test scaffolding. Drill catches one edge case (the backfill was fine, but a subtle code-path was reading `tenant_id` before it was populated). Engineer fixes the code path.
+
+**Hour 5.** Production-shadow test. AI helps assemble the diff report. No issues.
+
+**Hour 6.** Schedule the production migration window. Notify stakeholders. Engineer drafts the comms (with AI help on the templated parts).
+
+The migration ships the next day. No surprises. The 11 PM Slack vigil isn't gone, but it's calmer.
+
+## What we won't do
+
+**Run AI-generated SQL in production** without engineer review.
+
+**Skip the reverse migration** because "we won't need it."
+
+**Migrate without a drill** because the drill takes time.
+
+**Ship a migration in the same deploy as application code** that depends on the new schema.
+
+## How to think about AI in migrations
+
+The AI's contribution is speed inside discipline. The discipline is non-negotiable. If you're tempted to skip discipline because AI is making things fast, you've found the wrong gain.
+
+The right framing: discipline used to be a tax. AI lowers the tax. Pay it more often, on smaller migrations, with less procrastination.
+
+## Close
+
+Database migrations stay scary because the cost of being wrong is recoverable but expensive. AI doesn't change the cost. It changes the cost of doing the work right. The migration-pair pattern, the drill, the shadow test, the reviewer's checklist — all faster with AI. The discipline survives. Friday-night stress drops a notch because the workflow is rehearsed.
+
+## Related reading
+
+- [Backend: API design](/blog/backend-api-design-with-claude-code) — same care for production-bound work.
+- [SRE: runbook generation](/blog/sre-runbook-generation) — captures the recovery workflow.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening migration discipline, we'd love to hear about it. [Get in touch.](/contact)*

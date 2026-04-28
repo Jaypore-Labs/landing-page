@@ -1,0 +1,116 @@
+---
+title: "Architect: vendor-comparison architecture doc"
+description: "Architecture decisions live or die by the doc. AI-assisted drafting compresses the assembly so the architect spends time on the trade-offs."
+date: "2026-08-05"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Architecture", "AI Development", "ADR", "Decision Making"]
+series: "AI for software development"
+seriesOrder: 21
+---
+
+A staff architect described her job as "documenting decisions that are inherently uncertain." Each architecture doc was a trade-off matrix the team had to argue about. The arguing was the value. The writing — assembling vendor specs, normalising claims, capturing constraints — was the tax.
+
+Claude Code compresses the writing. The architect drives the arguing. The decision arrives faster, with the same rigor, with everyone on the same page.
+
+## Requirements intake
+
+The architect ingests the team's needs:
+
+- Functional requirements.
+- Non-functional requirements (performance, scale, latency, availability).
+- Compliance requirements.
+- Cost constraints.
+- Integration requirements.
+- Operational requirements.
+
+The AI structures these into a requirements doc. The architect reviews, tightens, prioritises.
+
+## Trade-off matrix
+
+For each candidate solution, the AI assembles:
+
+- How it satisfies each requirement (or doesn't).
+- Quantitative comparisons where data is available.
+- Qualitative comparisons where judgment is needed.
+- Risks and unknowns.
+
+The matrix is a structured comparison the architect can refine. Cells include source citations — where each claim came from.
+
+## Decision record
+
+The architecture doc culminates in a decision record (ADR):
+
+- The decision (which vendor / pattern / approach was selected).
+- Context (why we needed to decide).
+- Alternatives considered (and why each was not selected).
+- Consequences (what this decision means for future work).
+- Status (proposed, accepted, deprecated).
+
+The AI drafts the record from the matrix and the team's discussion notes. The architect refines.
+
+## Reviewer loop
+
+The doc goes through:
+
+- Engineering team review (technical correctness).
+- Operations review (operational implications).
+- Security review (security implications).
+- Stakeholder review (business alignment).
+
+Each pass adds depth. The published ADR has multiple reviewers' perspectives integrated.
+
+## A real doc
+
+A scenario: choosing a queue technology for a new service.
+
+**Hour 1.** Architect drafts the requirements with AI assistance. Stakeholders review and confirm.
+
+**Hour 2.** AI surveys candidates (Kafka, RabbitMQ, AWS SQS+SNS, NATS, Redis Streams). Builds the matrix.
+
+**Hour 3.** Architect reviews matrix. Eliminates options that fail deal-breakers. Tightens the analysis on the 3 finalists.
+
+**Hour 4.** Architect drafts the recommendation with AI help. Includes the trade-offs being accepted.
+
+**Hour 5.** Reviewers weigh in. Architect addresses feedback.
+
+**Hour 6.** Decision finalised. ADR published.
+
+A decision that would have been a week of part-time grinding becomes a focused day. The doc is more thorough, not less.
+
+## What stays human
+
+- The decision itself.
+- The trade-off priorities.
+- The reading of organisational context (which the AI can't fully see).
+- Stakeholder relationship management.
+
+Senior architecture judgment. The AI handles the assembly.
+
+## What we won't ship
+
+**ADRs without reviewer input.**
+
+**Recommendations the architect doesn't fully understand.**
+
+**Doc drafts that hide unknowns.** Unknowns are surfaced explicitly, not glossed over.
+
+**Anything that locks in a decision** before the team has had a chance to weigh in.
+
+## How to start
+
+Pick the next architectural decision on the queue. Run the workflow. Compare to manual. Build the team's ADR template alongside. Within three decisions, the workflow is established.
+
+## Close
+
+Architecture docs with Claude Code are the assembly compressed. The architect spends time on the trade-offs and the reasoning. The team aligns on the decision faster. The ADR library compounds — future decisions inherit prior context.
+
+## Related reading
+
+- [Operations: vendor-comparison briefs](/blog/claude-code-vendor-briefs) — same comparison discipline.
+- [Security: threat-model first draft](/blog/security-threat-model-draft) — same draft-then-react pattern.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising architecture practice, we'd love to hear about it. [Get in touch.](/contact)*

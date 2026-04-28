@@ -1,0 +1,67 @@
+---
+title: "Agents in healthcare: scribe yes, nurse no"
+description: "There's a line in healthcare AI that keeps patients safe. It runs between documentation and decision. Most pilots blur it. Don't."
+date: "2026-04-30"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Healthcare AI", "AI Scribes", "Production AI", "Clinical AI"]
+series: "AI agents in industry"
+seriesOrder: 2
+---
+
+A consulting firm walked into a regional clinic last year with a deck. The deck said the agent could *triage incoming patients, suggest treatments, and flag medication interactions*. The clinic's medical director asked one question: "Who signs the chart?" The deal didn't go forward.
+
+That question is the line. On one side is documentation. On the other is decision. Healthcare agents that respect the line ship. Ones that don't end up in a presentation about "the future of medicine" and never see a real patient.
+
+## What works: the scribe pattern
+
+The most-deployed agent pattern in healthcare today is the AI scribe. The doctor wears a small mic. The patient and doctor talk normally. The scribe captures the conversation, structures it into a SOAP note, and writes it back to the EHR. The doctor reviews and signs.
+
+The scribe doesn't decide anything. It documents. The decision-maker — the licensed clinician — stays the decision-maker. That preserves the chain of accountability, which is what makes the scribe survive a deposition, a malpractice review, an audit. It also makes the scribe a 50-minute-per-shift time-saver, which is what makes clinicians actually use it.
+
+We've built and shipped scribes into psychiatric clinics, pediatric urgent cares, and dental practices. Same pattern every time. The scribe drafts. The clinician owns.
+
+## What doesn't work: the nurse pattern
+
+Pilots that try to make an agent *act* on the medical decision side keep failing. The pattern looks innocent — "the agent suggests a medication adjustment for the doctor to approve." But the moment a clinician approves something the agent surfaced, two things happen:
+
+1. The clinician's review behavior shifts toward the suggestion. (Anchoring. Well documented.)
+2. The agent's failure becomes the clinician's signature.
+
+That's a regulatory problem. It's also a malpractice problem. And it means clinics with risk-averse counsel won't deploy the agent at all, no matter how good its medical reasoning is.
+
+The nurse pattern can probably work eventually — with FDA clearance, dedicated eval discipline, and a different liability model. But it's not the work of a Tuesday afternoon agentic pilot. Most teams treating it that way are about to have a hard conversation with the risk officer.
+
+## The four conditions for healthcare agents
+
+If you're building one for industry, four conditions are non-negotiable:
+
+**1. The licensed clinician owns the chart.** No exceptions. The agent's output is a draft. The signature is human.
+
+**2. PHI never leaves the controlled boundary.** Whether that means an on-prem inference setup, a HIPAA-compliant vendor, or a redaction layer — pick one and audit it.
+
+**3. There's a complete trail.** Every input, every output, every model version, every prompt version, every reviewer's edit — logged and retrievable for at least the period required by your jurisdiction.
+
+**4. The eval set has clinician input.** A scribe that drafts notes is graded on what *clinicians* find useful, not on what an LLM judges as well-structured. The eval discipline has to include clinical reviewers.
+
+## Where the line might move
+
+The line will move. There are categories of medical decision where agents will eventually be trusted to act — radiology assists, scheduling, prescription renewals for stable chronic conditions. The path there is not "ship a more confident pilot." It's accumulating eval data, getting regulatory clearance category-by-category, and earning trust the way every previous medical technology has — slowly, with paperwork, with skeptics.
+
+The teams that respect that timeline will own the next decade of healthcare AI. The teams that try to leapfrog it will end up writing post-mortems.
+
+## Close
+
+Healthcare agents work when they document. They fail when they decide. The scribe yes / nurse no test is unglamorous, but it's how the work survives the parts of healthcare that aren't about technology — the audits, the deps, the bedside conversations, the families.
+
+If you're building a healthcare agent, write down which side of the line every output sits on. If anything sits on the decision side, ask who signs.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — where healthcare agents live on the curve.
+- [Medieval scribes and AI scribes](/blog/medieval-scribes-ai-scribes) — the original frame for the scribe pattern.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the discipline healthcare agents have to import.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a clinical agent, we'd love to hear about it. [Get in touch.](/contact)*

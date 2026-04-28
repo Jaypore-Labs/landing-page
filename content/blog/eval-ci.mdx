@@ -1,0 +1,88 @@
+---
+title: "Eval CI: the pass/fail gate that's actually useful"
+description: "Eval in CI is only useful if it gates merge. The threshold rules matter."
+date: "2026-12-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "CI", "Engineering", "Output Testing", "Gating"]
+series: "Evals & output testing"
+seriesOrder: 16
+---
+
+A team's eval ran in CI but didn't gate merge. Engineers shipped PRs that regressed eval scores. Quality drifted gradually until the team noticed in production.
+
+Eval CI is only useful if it gates merge. The threshold rules matter.
+
+## The gate design
+
+The gate:
+
+- Eval pass rate threshold (e.g., >95%).
+- No regression on critical cases.
+- No drop greater than X% on any cohort.
+
+PRs that fail the gate get blocked from merge. Override possible only with documented reason.
+
+## Threshold rules
+
+Common patterns:
+
+- Hard gate at absolute threshold.
+- Hard gate at no-regression-from-baseline.
+- Soft gate for new features (eval-set still maturing).
+
+The right rule depends on feature maturity.
+
+## Reviewer ritual
+
+PR review:
+
+- Eval results visible in PR.
+- Threshold passes confirmed.
+- Override-with-reason flagged for senior review.
+
+## A real pipeline
+
+A team's CI:
+
+- PR triggers eval.
+- Smoke set (40 cases) runs in 3 min.
+- Hard gate: smoke pass rate >92%.
+- Hard gate: no critical-case regression.
+- Override requires senior-engineer approval.
+
+The discipline holds. Quality stays predictable.
+
+## Cost shape
+
+CI eval costs LLM calls. The cost:
+
+- Smoke set per PR: small.
+- Full eval on main: larger.
+- Quarterly model-bump evals: largest.
+
+For most teams, eval costs are 5-15% of total LLM bill. Worth it.
+
+## What we won't ship
+
+**Eval in CI** without gating.
+
+**Gates** without override discipline.
+
+**Smoke sets** that don't catch the common regressions.
+
+**Skipping eval CI for time pressure.**
+
+## Close
+
+Eval CI gates merge. The threshold is meaningful. The override is exceptional. The team's quality is enforced at PR time. Skip the gate and quality drifts in production where it costs more to fix.
+
+## Related reading
+
+- [CI strategy: smoke vs. full suite](/blog/ci-strategy-for-llm-apps) — surrounding pattern.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening eval CI, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,80 @@
+---
+title: "The red set: adversarial cases you're allowed to fail"
+description: "Adversarial cases the team accepts as out-of-scope. Tracked, not gated."
+date: "2026-12-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Adversarial", "Engineering", "Output Testing", "Safety"]
+series: "Evals & output testing"
+seriesOrder: 19
+---
+
+A team had 80 adversarial cases in their eval. The pass rate was 73%. The team treated this as a regression — they'd spent months trying to get to 95%. The reality: some of these adversarial cases were impossible to handle without crippling the agent's usefulness.
+
+The red set is the discipline of separating adversarial cases the team can fail (and tracks) from cases the team must pass.
+
+## The red-set discipline
+
+Two cohorts:
+
+- **Must-pass adversarial.** Cases where failure is a security event. PR gates here.
+- **Red set.** Cases where failure is acceptable but tracked. Trends watched.
+
+The split is made deliberately. Each red-set case has a rationale: why it's red rather than must-pass.
+
+## Reviewer ritual
+
+Quarterly review:
+
+- Are red-set cases still appropriately classified?
+- Are any moving from red to must-pass (the bar is rising)?
+- Are any moving from must-pass to red (acceptance of inability)?
+
+## A real implementation
+
+A team's adversarial eval:
+
+- 60 must-pass cases (basic injections, common jailbreaks). Pass rate 99%.
+- 20 red-set cases (sophisticated novel attacks). Pass rate 60%.
+- Trend: red-set pass rate watched.
+
+The team ships when must-pass holds. The red set is informative but not gating.
+
+## Reporting
+
+Red-set reporting:
+
+- Public-facing security posture: "we successfully defend against X classes of attack."
+- Internal tracking: "red set pass rate is N%, trending up."
+- Quarterly review: which cases need elevation to must-pass.
+
+## Trade-offs
+
+- Too few red-set cases: bar is too low; risks missed.
+- Too many red-set cases: discipline is loose.
+
+The right balance reflects the team's threat model.
+
+## What we won't ship
+
+**No distinction** between must-pass and red.
+
+**Red set** that's not tracked.
+
+**Red set** that grows without review.
+
+**Skipping the elevation review.** Red cases should periodically get promoted as defences mature.
+
+## Close
+
+The red set is the explicit acceptance that some adversarial cases are out of reach. Tracked. Reviewed. Promoted when defences improve. The team ships honestly without pretending to defend everything.
+
+## Related reading
+
+- [Red-teaming your own prompt](/blog/red-team-your-prompt) — same adversarial discipline.
+- [Safety guardrails](/blog/safety-guardrails) — surrounding pattern.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're managing adversarial sets, we'd love to hear about it. [Get in touch.](/contact)*

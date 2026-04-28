@@ -1,0 +1,103 @@
+---
+title: "Agent rollback: kill switches on day one"
+description: "Every agent ships with a kill switch. Drilling the kill switch is what makes it real."
+date: "2026-09-10"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Rollback", "Engineering", "Building Agents", "Operations"]
+series: "Building agents"
+seriesOrder: 22
+---
+
+A team had a kill switch on their agent. They'd documented it. They'd tested it once at deploy time. Six months later when they actually needed it during a live regression, it didn't work. The toggle had bit-rotted. The team's "graceful rollback" became a 90-minute emergency.
+
+Kill switches that haven't been drilled are not kill switches. They're hopes.
+
+## Switch design
+
+Each agent has multiple levels of switches:
+
+- **Per-feature.** Disable a specific agent capability without disabling the whole agent.
+- **Per-tenant.** Disable an agent for a specific customer.
+- **Per-region.** Disable an agent in a region during an issue.
+- **Global.** Disable the agent everywhere.
+
+Each switch is independently controlled. Each is auditable.
+
+## Per-feature granularity
+
+The most-used switch is per-feature:
+
+- A specific tool starts misbehaving — disable just that tool.
+- A specific skill produces bad outputs — disable just that skill.
+- A specific code path is suspect — disable that path.
+
+Without per-feature granularity, the team's only option is "all or nothing." Big switch flips are the same big-bang reverts that cause incidents.
+
+## Comms plan
+
+When a switch flips, comms run:
+
+- Affected users notified (where appropriate).
+- Internal stakeholders informed.
+- Monitoring confirms switch is having intended effect.
+- Plan for re-enable communicated.
+
+A kill switch without comms creates new confusion. A kill switch with comms is professional.
+
+## Drill cadence
+
+Quarterly drills:
+
+- Pick a switch.
+- Flip it.
+- Confirm intended effect.
+- Restore.
+- Document any issues with the drill.
+
+Drilling catches:
+
+- Switches that didn't actually disable the path they were supposed to.
+- Comms that weren't tested.
+- Restores that weren't smooth.
+
+Without drills, switches decay. With them, switches work when needed.
+
+## A real rollback
+
+A scenario: an agent's prompt update is shipped. Within 30 minutes, customer reports surface a regression. The team:
+
+- Confirms the regression with eval re-run.
+- Decides to rollback.
+- Flips the agent-version switch back.
+- Verifies via eval and customer signals.
+- Communicates internally.
+- Investigates the prompt update non-emergency.
+
+Total time from incident to rollback: 12 minutes. Total customer impact: 30 minutes.
+
+Without the drilled switch, this would have been hours.
+
+## What we won't ship
+
+**Agents without kill switches** designed in.
+
+**Switches that haven't been drilled** in the last quarter.
+
+**Rollback procedures** that depend on undocumented tribal knowledge.
+
+**Rollback** that bypasses normal change management.
+
+## Close
+
+Agent rollback is engineering work that pays off in incidents. Multiple switch levels. Quarterly drills. Comms plans. Documentation. Skip any of these and the kill switch is theatre. Drill them and the team has real safety nets.
+
+## Related reading
+
+- [Agent versioning](/blog/agent-versioning) — what gets rolled back.
+- [Cost guardrails](/blog/cost-guardrails) — same engineering-first discipline.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hardening rollback, we'd love to hear about it. [Get in touch.](/contact)*

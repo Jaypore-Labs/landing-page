@@ -1,0 +1,75 @@
+---
+title: "MCP server hosting: local, sidecar, remote"
+description: "Three hosting models; three trade-offs. The choice shapes operational requirements."
+date: "2027-01-13"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Hosting", "Engineering", "Architecture", "Deployment"]
+series: "MCP & AI protocols"
+seriesOrder: 11
+---
+
+MCP servers can run in three places. Each has different operational implications.
+
+## The three options
+
+**Local.** The server runs on the user's machine. No infrastructure. No multi-user concerns.
+
+**Sidecar.** The server runs alongside the AI assistant in a controlled environment (e.g., the same container). Shared deployment.
+
+**Remote.** The server runs on dedicated infrastructure. Multi-user.
+
+## When each wins
+
+- **Local:** developer tools, personal productivity, single-user stdio servers.
+- **Sidecar:** team deployments where the assistant and server are deployed together.
+- **Remote:** SaaS, multi-organisation, controlled-access servers.
+
+## A real choice
+
+A team's MCP servers:
+
+- Code-base navigation: local (each engineer runs it).
+- Internal analytics: sidecar (shared with the team's AI assistant deployment).
+- Customer-data lookup: remote (enterprise-grade access controls).
+
+Each placement fits the use case.
+
+## Trade-offs
+
+- **Local:** zero infra cost; user has to install/run.
+- **Sidecar:** controlled deployment; coupled to the assistant's deployment.
+- **Remote:** centralised; full ops cost.
+
+## Reviewer ritual
+
+Hosting decision documented:
+
+- Why this hosting model?
+- What's the cost shape?
+- What's the operational responsibility?
+- What's the failure mode?
+
+## What we won't ship
+
+**Local servers** in scenarios that need shared state.
+
+**Sidecar deployments** when the assistant and tool have different release cadences.
+
+**Remote servers** without proper auth and rate limiting.
+
+**Hosting decisions** without operational considerations.
+
+## Close
+
+MCP server hosting is a deployment decision. Local, sidecar, remote. Each has costs. The choice shapes what the team needs to build and operate.
+
+## Related reading
+
+- [MCP transport](/blog/mcp-transport) — companion topic.
+- [MCP authentication](/blog/mcp-authentication) — surrounding discipline.
+- [Your first MCP server](/blog/first-mcp-server-node) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're choosing hosting models, we'd love to hear about it. [Get in touch.](/contact)*

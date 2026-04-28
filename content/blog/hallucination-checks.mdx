@@ -1,0 +1,94 @@
+---
+title: "Hallucination checks: cite-or-it-didn't-happen"
+description: "The cite-or-don't pattern is the strongest defence against confident wrong answers."
+date: "2026-10-09"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Hallucination", "Engineering", "Predictable Output", "Citations"]
+series: "Predictable AI output"
+seriesOrder: 18
+---
+
+A team's customer-support agent had been confidently citing product policies that didn't exist. Customers tried to invoke the policies, escalated when the company said the policies weren't real, and the team's CSAT slipped.
+
+The fix: cite-or-don't. Every factual claim in the agent's outputs has to point to a specific source. Without a source, the claim doesn't make it through validation.
+
+## The citation contract
+
+For agents that make factual claims:
+
+- Every claim cites its source (document, URL, internal policy, knowledge-base article).
+- The citation is verifiable (the team can click through and check).
+- Validation rejects claims without citations.
+
+This converts the agent from a general-knowledge bot into a domain-grounded one.
+
+## Source linking
+
+The citations are concrete:
+
+- Internal: "policy:returns-2024" → the team's policy doc.
+- External: "url:https://..." → the verified source.
+- Conversation: "ticket:1234, message:5" → traceable.
+
+Validation checks that the citation actually exists.
+
+## Reviewer ritual
+
+Periodic audits:
+
+- Sample of outputs reviewed.
+- Citations followed up.
+- Did the citation actually support the claim?
+
+Bad citations are findings: maybe the model is citing the wrong source, or the source is being misread.
+
+## A real implementation
+
+A team's RAG-based agent:
+
+- Each output has structured claims.
+- Each claim cites a retrieved source.
+- Validation checks that the source was in the retrieval bundle.
+- Outputs without proper citations fail validation, retry, or fall back.
+
+Hallucination rate dropped from "occasional" to "near-zero." The agent occasionally said "I can't find a source for that" — which was often the right answer.
+
+## Edge cases
+
+Some claims are model knowledge that don't have a corpus citation:
+
+- General facts (water boils at 100°C).
+- Common knowledge.
+
+The grammar distinguishes:
+
+- "[Claim] (citation: [source])" for grounded claims.
+- "[Claim] (general knowledge)" for unsourced.
+- "[Claim] (uncertain — verify)" for the rest.
+
+This explicit framing helps the user calibrate trust.
+
+## What we won't ship
+
+**Agents that make factual claims** without citation discipline.
+
+**Citations** that aren't verified.
+
+**Skipping validation** of citation existence.
+
+**Outputs** that mix grounded and ungrounded claims indistinguishably.
+
+## Close
+
+The cite-or-don't pattern is the strongest defence against confident wrong answers. The citation grounds the claim. Validation enforces it. The audit trail is built in. Skip this discipline and the agent becomes a hallucination machine that destroys trust on first incident.
+
+## Related reading
+
+- [Confidence calibration](/blog/confidence-calibration) — companion discipline.
+- [RAG is a public library](/blog/rag-is-a-public-library) — citation-grounded retrieval.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hardening against hallucination, we'd love to hear about it. [Get in touch.](/contact)*

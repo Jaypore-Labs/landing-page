@@ -1,0 +1,88 @@
+---
+title: "MCP authentication: tokens, scopes, OAuth"
+description: "MCP servers need auth. The pattern depends on the deployment."
+date: "2027-01-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Authentication", "Engineering", "Security", "OAuth"]
+series: "MCP & AI protocols"
+seriesOrder: 8
+---
+
+MCP servers exposing real data need authentication. The pattern depends on whether the server is local or remote, single-user or multi-user.
+
+## The three patterns
+
+**1. Local + single-user.** No auth needed (the user already has access to the local environment). Common for stdio servers.
+
+**2. Local + multi-user.** Token-based. User configures a token; server validates.
+
+**3. Remote + multi-user.** OAuth or token-with-scopes. Standard web-auth patterns.
+
+## When each wins
+
+- **No auth (local single-user):** simplest. Most internal tools start here.
+- **Token-based:** static credentials. Easy to rotate; harder to revoke.
+- **OAuth:** dynamic credentials. Harder to set up; better for SaaS.
+
+## Reviewer ritual
+
+PR review for auth changes:
+
+- Auth strategy appropriate for the deployment.
+- Token rotation supported.
+- Revocation possible.
+- Audit-log captures who called what.
+
+## A real implementation
+
+A team's MCP server for internal use:
+
+- Token-based auth (each user has a token).
+- Tokens scoped per role (read-only vs. write).
+- Revocation via central admin UI.
+- Audit log of every tool call.
+
+Six months in: zero auth-related incidents.
+
+## OAuth integration
+
+For OAuth-flavoured MCP:
+
+- Standard OAuth 2.0 flow.
+- Refresh tokens as the persistent auth.
+- Scopes mapping to tool permissions.
+
+This is more setup than tokens but better for SaaS deployments.
+
+## Trade-offs
+
+- Local + no auth: easy to ship, only works for trusted environments.
+- Token: medium complexity, works for internal tools.
+- OAuth: more complex, works for SaaS.
+
+Pick based on deployment.
+
+## What we won't ship
+
+**MCP servers** with no auth in untrusted environments.
+
+**Token-based auth** without revocation capability.
+
+**OAuth integration** without proper scope discipline.
+
+**Auth** without an audit log.
+
+## Close
+
+MCP authentication is engineering work that has to fit the deployment. Local + no auth, token-based, or OAuth. Each has its place. The audit log is non-optional.
+
+## Related reading
+
+- [MCP authorization: per-user permissions](/blog/mcp-authorization) — companion topic.
+- [MCP and secrets management](/blog/mcp-secrets) — same security discipline.
+- [Agents in finance: compliance audit trail](/blog/agents-in-finance-compliance) — audit-trail pattern.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're securing MCP servers, we'd love to hear about it. [Get in touch.](/contact)*

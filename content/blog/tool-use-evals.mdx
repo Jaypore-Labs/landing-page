@@ -1,0 +1,91 @@
+---
+title: "Tool-use evals: right tool, right order"
+description: "Tool-use eval verifies the agent picks the right tool — and uses it correctly."
+date: "2026-12-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Tools", "Engineering", "Output Testing", "Agents"]
+series: "Evals & output testing"
+seriesOrder: 15
+---
+
+A team's agent picked the wrong tool 5% of the time. Wrong tool, sometimes-correct outcome. The eval was scoring outcomes, missing the wrong-tool cases.
+
+Tool-use eval verifies the agent picks the right tool, uses it correctly, in the right order.
+
+## The tool-call eval
+
+For each case:
+
+- Expected tool sequence.
+- Expected arguments per call.
+- Actual sequence + arguments.
+- Comparison.
+
+Strict comparison: exact match.
+
+Lenient comparison: equivalent patterns.
+
+## Reviewer ritual
+
+PR review:
+
+- Tool-use accuracy.
+- Per-tool accuracy.
+- Cohorts where tool-use is consistently wrong.
+
+## A real implementation
+
+A team's eval set for an agent with 12 tools:
+
+- 60 cases with annotated expected tool calls.
+- Tool-call accuracy reported per tool.
+- Tool-selection accuracy reported overall.
+- Argument-correctness reported per tool.
+
+Failures pinpoint where the agent's tool understanding is weak.
+
+## Cohort coverage
+
+Coverage by:
+
+- Each tool used at least 5 cases.
+- Common tool pairs covered.
+- Edge cases (no tool needed; all tools needed).
+
+## Trade-offs
+
+Tool-use eval annotation is detailed work. Authoring takes time. The eval catches what trajectory-only eval misses.
+
+## Limits
+
+Some tasks have multiple valid tool sequences. The eval needs to handle equivalence:
+
+- Either tool-A-then-B or tool-B-then-A is valid.
+- Either tool-X with these args or tool-Y with those args is valid.
+
+Without equivalence handling, the eval fails legitimately-correct agent behaviour.
+
+## What we won't ship
+
+**Agent evals** without tool-use coverage.
+
+**Strict-match-only** evals when equivalent paths exist.
+
+**Tool-use evals** with thin per-tool coverage.
+
+**Skipping argument-correctness** evaluation.
+
+## Close
+
+Tool-use evals verify the agent picks and uses the right tools. The pattern is detailed annotation; the catch is wrong-tool failures that outcome eval misses. Skip these and the agent's tool-selection issues compound.
+
+## Related reading
+
+- [Evals for agents: trajectory + outcome](/blog/evals-for-agents) — surrounding pattern.
+- [Tests for tool-using agents](/blog/tests-for-tool-using-agents) — testing context.
+- [Tool design like APIs](/blog/tool-design-like-apis) — what gets evaluated.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening tool-use evals, we'd love to hear about it. [Get in touch.](/contact)*

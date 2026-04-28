@@ -1,0 +1,87 @@
+---
+title: "UX tests for AI-generated content"
+description: "AI content quality is a UX dimension. The reviewer rubric makes it testable."
+date: "2026-11-23"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "UX"]
+series: "Testing in the age of AI"
+seriesOrder: 24
+---
+
+A team's AI-generated content was technically correct, schema-validated, and on-topic. Users disliked it. The complaints were vague — "feels off," "doesn't sound like us," "too long," "not helpful." The team's tests didn't measure any of this.
+
+UX of AI content is a quality dimension. The reviewer rubric makes it testable.
+
+## The reviewer rubric
+
+For each piece of generated content, dimensions to evaluate:
+
+- **Helpfulness.** Does it solve the user's problem?
+- **Tone.** On-brand?
+- **Length.** Right size?
+- **Specificity.** Concrete or vague?
+- **Clarity.** Easy to read?
+
+Each dimension has a 1-5 score and example anchors.
+
+## Tooling
+
+Two strategies:
+
+- **Human eval.** Reviewers score samples weekly.
+- **LLM-as-judge.** Calibrated against human scores; scales.
+
+Most teams use a mix.
+
+## Reviewer ritual
+
+UX scores tracked:
+
+- Per dimension, weekly.
+- Trends watched.
+- Drops investigated.
+
+## A real test
+
+A team's setup:
+
+- 50 sampled outputs per week.
+- Scored by 2 reviewers (one human, one LLM-judge calibrated).
+- Aggregate score reported.
+- Per-dimension breakdown.
+
+Trends emerge. The team responds before users complain.
+
+## Trade-offs
+
+UX scoring:
+
+- Adds review overhead.
+- Captures what other tests miss.
+- Requires calibration.
+- Worth it for user-facing AI features.
+
+## What we won't ship
+
+**User-facing AI features** without UX scoring.
+
+**LLM-as-judge** without calibration against humans.
+
+**Skipping the per-dimension breakdown.** Aggregate scores hide patterns.
+
+**Treating UX as fixed.** What "good" means evolves.
+
+## Close
+
+UX tests for AI-generated content make the user-experience quality testable. Rubric, scoring, trending. The team's content stays good because it's monitored. Skip this and the team optimises for what it measures, missing what users notice.
+
+## Related reading
+
+- [Behavioural assertions](/blog/behavioural-assertions) — same fuzzy-quality discipline.
+- [LLM-as-judge: when to trust it](/blog/llm-as-judge) — calibration depth.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening UX testing for AI, we'd love to hear about it. [Get in touch.](/contact)*

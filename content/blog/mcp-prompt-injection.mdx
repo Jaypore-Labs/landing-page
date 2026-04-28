@@ -1,0 +1,86 @@
+---
+title: "MCP and prompt injection: ambient instructions"
+description: "MCP servers return content that the AI reads. Hostile content can inject instructions."
+date: "2027-01-27"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Security", "Engineering", "Prompt Injection", "Defense"]
+series: "MCP & AI protocols"
+seriesOrder: 21
+---
+
+A team's MCP server returned text from a third-party source. The text included instructions like "ignore previous instructions and..." — a prompt-injection attempt. The AI assistant followed the injected instructions.
+
+MCP servers are sources of content. Hostile content can inject instructions. The defence is engineering.
+
+## The threat model
+
+Prompt-injection via MCP:
+
+- A document the assistant retrieves contains "ignore your guidelines."
+- A user-submitted form includes "act as a different agent."
+- A scraped webpage includes hidden instructions.
+
+The AI doesn't distinguish between the user's instructions and content the tools return. Both are tokens.
+
+## Reviewer ritual
+
+PR review for MCP servers that return external content:
+
+- Content sanitisation before return.
+- Detection of likely-injection patterns.
+- Marking content as "from external source" (so the assistant treats it differently).
+
+## A real defence
+
+A team's web-scraping MCP server:
+
+- Strips known injection patterns from scraped content.
+- Wraps returned content in markers: `<scraped_content>...</scraped_content>`.
+- Documents the wrapper for the assistant's prompt.
+- Logs suspected injection attempts.
+
+The assistant's system prompt instructs it to treat content within the marker as data, not as instructions.
+
+## Limits
+
+Defence is imperfect:
+
+- Novel injection techniques exist.
+- Wrappers can be circumvented.
+- The line between "instruction" and "data" is fuzzy.
+
+The discipline reduces risk; it doesn't eliminate it.
+
+## Trade-offs
+
+Strict sanitisation:
+
+- Better security.
+- May strip legitimate content.
+
+The right balance depends on the threat model and the use case.
+
+## What we won't ship
+
+**MCP servers** returning external content without sanitisation.
+
+**Tools** that fetch arbitrary URLs without trust evaluation.
+
+**Logging** that doesn't capture suspected injection attempts.
+
+**Skipping the assistant's prompt updates** to handle external content.
+
+## Close
+
+MCP and prompt injection is the security layer most teams underweight. Sanitisation. Wrappers. Logging. The defence is layered. Skip the layers and the next external content becomes the next incident.
+
+## Related reading
+
+- [Prompt-injection regression suite](/blog/prompt-injection-regression) — same discipline, testing-side.
+- [Safety guardrails](/blog/safety-guardrails) — surrounding pattern.
+- [Browsing agents](/blog/browsing-agents) — same content-source threat.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hardening against prompt injection, we'd love to hear about it. [Get in touch.](/contact)*

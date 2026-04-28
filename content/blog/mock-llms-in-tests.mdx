@@ -1,0 +1,93 @@
+---
+title: "Mock LLMs in tests: when to fake, when to call"
+description: "Mocks are fast; real calls are accurate. The right mix depends on what's being tested."
+date: "2026-11-05"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Mocking"]
+series: "Testing in the age of AI"
+seriesOrder: 12
+---
+
+A team's mock LLM in tests returned hard-coded responses. Tests were fast and stable. They also hadn't caught a single real bug in 8 months. The mock had drifted from reality without anyone noticing.
+
+Mocks are fast; real calls are accurate. The mix matters.
+
+## The faking rules
+
+Use mocks for:
+
+- Integration testing where the LLM's behaviour isn't what's being tested.
+- Tests that run on every PR (where speed matters).
+- Tests that exercise error handling (mock the error).
+- Tests that exercise specific output shapes.
+
+Use real calls for:
+
+- Behavioural eval.
+- Drift detection.
+- Production-like testing before release.
+- Periodic verification that mocks still represent reality.
+
+## Real-call cadence
+
+Real calls run:
+
+- Nightly.
+- Pre-release.
+- On significant prompt changes.
+
+The cadence is "less than every PR, more than never."
+
+## Reviewer ritual
+
+When a real-call test fails but the mocked test passes:
+
+- The mock has drifted.
+- Investigate.
+- Update the mock.
+- Add a regression test.
+
+## A real strategy
+
+A team's setup:
+
+- 200 unit/integration tests with mocks. Run on every PR. under 1 minute total.
+- 50 behavioural tests with real calls. Run nightly. ~10 minutes.
+- 30 eval cases on a quarterly schedule with diverse prompts.
+
+The team catches:
+
+- Refactoring regressions: mocked tests catch them on PR.
+- Prompt regressions: behavioural tests catch them within a day.
+- Drift: nightly runs catch trends.
+
+## Cost shape
+
+Mocked tests are essentially free. Real-call tests cost money — but the costs are bounded by cadence.
+
+Annual cost of nightly behavioural tests: a small fraction of the team's overall LLM bill. The reliability gain is worth it.
+
+## What we won't ship
+
+**Mocks** that haven't been verified against real behaviour.
+
+**Real-call tests** on every PR (too slow, too costly).
+
+**No real-call tests at all.** Drift goes undetected.
+
+**Mock responses** that are unrealistic.
+
+## Close
+
+Mocks and real calls each have their place. Mocks for speed, real calls for accuracy. The right mix is a strategy, not a default. The team that gets it right ships fast and catches regressions; the team that gets it wrong ships slow or misses regressions.
+
+## Related reading
+
+- [Determinism harnesses](/blog/determinism-harnesses) — record-replay pattern.
+- [Integration tests for AI features](/blog/integration-tests-for-ai) — companion topic.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening test mocks, we'd love to hear about it. [Get in touch.](/contact)*

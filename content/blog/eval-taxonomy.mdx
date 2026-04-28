@@ -1,0 +1,82 @@
+---
+title: "Eval taxonomy: golden, behavioural, drift, safety"
+description: "Different evals for different jobs. The taxonomy lets the team mix appropriately."
+date: "2026-11-27"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "AI Engineering", "Engineering", "Output Testing", "Taxonomy"]
+series: "Evals & output testing"
+seriesOrder: 3
+---
+
+A team's "eval set" was actually four different things mixed together: known-good cases, behaviour rubrics, snapshots, and adversarial cases. Mixing them meant pass/fail signals were ambiguous. Splitting them clarified.
+
+The eval taxonomy: golden, behavioural, drift, safety. Each has its own purpose, its own metrics, its own cadence.
+
+## The four types
+
+**Golden.** Specific input → specific expected output. High-confidence cases. Pass means the system handled this case correctly.
+
+**Behavioural.** Input → required behaviour properties. Output may vary; the properties hold. Pass means the system followed the rules.
+
+**Drift.** Input → output compared to baseline. Pass means the output hasn't changed unexpectedly.
+
+**Safety.** Adversarial input → expected refusal or routing. Pass means the system handled the attack correctly.
+
+## When each wins
+
+- Golden: classification, extraction, deterministic transformations.
+- Behavioural: prose generation, summaries, conversation.
+- Drift: anything where unexpected changes are bad.
+- Safety: anywhere with adversarial users.
+
+Most production systems need all four.
+
+## Reviewer ritual
+
+PR review:
+
+- Which eval types ran?
+- What were the results per type?
+- Are there gaps in coverage by type?
+
+## A real mix
+
+A team's customer-support agent eval:
+
+- Golden: 50 cases (FAQ-style; correct answer is known).
+- Behavioural: 30 cases (free-form conversations; rubric scores).
+- Drift: 40 reference outputs (significant patterns).
+- Safety: 60 adversarial cases (jailbreaks, injection).
+
+Total: 180 cases across four eval types. Each type has its own pass-rate threshold and CI behaviour.
+
+## How to start
+
+Most teams start with golden. They add behavioural when the feature does prose generation. They add drift when production stability matters. They add safety when adversarial users appear.
+
+The progression is normal. The team eventually has all four for any meaningful feature.
+
+## What we won't ship
+
+**One-eval-type does all.** Different jobs need different evals.
+
+**Skipping safety evals** for user-facing AI.
+
+**Drift evals** without clear baseline reference.
+
+**Behavioural evals** without calibrated rubrics.
+
+## Close
+
+Eval taxonomy is the discipline of using the right eval for the right job. Golden, behavioural, drift, safety. Each has its own purpose. The team's eval suite is comprehensive because each type catches what others miss.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — start here.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening eval taxonomy, we'd love to hear about it. [Get in touch.](/contact)*

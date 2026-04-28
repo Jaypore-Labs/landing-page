@@ -1,0 +1,94 @@
+---
+title: "Idempotency keys for LLM calls"
+description: "Deduplication on the LLM call side prevents duplicate work, duplicate costs, and duplicate outputs to users."
+date: "2026-09-30"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Idempotency", "Engineering", "Predictable Output", "Reliability"]
+series: "Predictable AI output"
+seriesOrder: 11
+---
+
+A team's customer-email-generation feature shipped with retry-on-network-failure. The first incident was an unrelated timeout that didn't actually fail upstream. The retry succeeded; the original call had also succeeded. The customer received two emails.
+
+Idempotency for LLM calls is the same pattern as idempotency for any API. The provider-side keys do most of the work. Where they don't exist, the team builds their own.
+
+## Why deduping matters
+
+Without idempotency:
+
+- Duplicate calls produce duplicate outputs.
+- Costs double.
+- User-facing systems may surface confusing duplicates.
+
+With idempotency:
+
+- Duplicate calls are deduplicated.
+- The original result is returned for retries.
+- Cost and behaviour stay correct.
+
+## Key design
+
+The idempotency key:
+
+- Uniquely identifies the logical operation.
+- Stable across retries (same key for the same logical request).
+- Long enough to avoid collisions.
+- Short-lived enough that old keys can expire.
+
+Common pattern: hash of (user_id + operation_id + timestamp_minute) or a UUID generated at the operation start.
+
+## Storage
+
+Keys live somewhere:
+
+- Provider-side (when supported by the LLM provider).
+- Team-side (a redis cache, database table).
+
+Provider-side is preferable when available. Team-side is necessary when not.
+
+## Reviewer signal
+
+Idempotency events are tracked:
+
+- Duplicate calls detected.
+- Calls returning cached results.
+- Cache hit rate.
+
+These let the team diagnose retry-related issues.
+
+## A real implementation
+
+A scenario: a team's email-generation feature.
+
+- Each request gets a UUID at receive time.
+- The UUID is the idempotency key.
+- The team's middleware checks the key before calling the LLM.
+- Duplicate keys return the cached result.
+- Cache TTL: 24 hours.
+
+Cost of implementation: a few hours. Cost saved over a year: meaningful.
+
+## What we won't ship
+
+**LLM calls with side effects** (email-send, payment-process, action-take) without idempotency keys.
+
+**Keys that collide.** Test the uniqueness.
+
+**Idempotency caches** without TTL. Stale results compound issues.
+
+**Skipping idempotency** because "we don't retry often." The retry that does happen is the one that causes the incident.
+
+## Close
+
+Idempotency keys are basic API engineering applied to LLM calls. The implementation is a half-day. The protection against duplicate work is permanent. Skip them and the next retry-related incident will explain why.
+
+## Related reading
+
+- [Tool failure modes](/blog/tool-failure-modes) — idempotency in tool context.
+- [Retry strategies](/blog/retry-strategies) — surrounding pattern.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening idempotency, we'd love to hear about it. [Get in touch.](/contact)*

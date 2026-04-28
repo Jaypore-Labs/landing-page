@@ -1,0 +1,77 @@
+---
+title: "Agents in insurance: claims processing, speed vs. accuracy"
+description: "The 70/30 split — 70% of claims are routine and benefit from agents, 30% need humans. Sorting them is the design."
+date: "2026-05-13"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Insurance AI", "Claims Processing", "Production AI", "InsurTech"]
+series: "AI agents in industry"
+seriesOrder: 11
+---
+
+A claims VP we worked with summed up the entire industry's AI strategy in one sentence: "We have 100,000 claims a year, 70% are routine, and we want our adjusters spending all their time on the other 30%." The agent's job is the sort.
+
+The agent doesn't decide claims. It separates the queue. Done well, that's already a multimillion-dollar productivity gain. Done badly — by trying to extend the agent's authority into the decision — it's a regulatory mess.
+
+## The 70/30 sort
+
+A working claims agent reads the claim documents (FNOL, photos, repair estimate, police report if relevant) and classifies along three axes:
+
+1. **Routine vs. complex.** Routine = matches a known pattern; the policy clearly covers; the dollar value is below threshold; no ambiguity in liability.
+2. **Fraud signal.** Likely-clean / needs-review / high-suspicion. Most claims are clean; the few that aren't deserve specialist attention.
+3. **Customer-experience risk.** Calm vs. emotional vs. complaint-trajectory. Some claimants need a human voice immediately.
+
+The agent then sorts: routine + clean + calm into the fast lane, anything else into the appropriate specialist queue. The sort itself is the value. Adjusters who used to triage 100 claims a day to find the 30 that needed them now spend their day on the 30, with the 70 already moving through.
+
+## What the agent drafts (but doesn't decide)
+
+Inside the fast lane, the agent drafts:
+
+- The customer-comms (acknowledgement, status, decision letter).
+- The damage-assessment summary.
+- The settlement calculation, citing the policy's relevant coverage section.
+
+The adjuster of record reviews each draft, edits as needed, and signs. Speed comes from removing the typing — not from removing the human.
+
+The decision is human. Always. For the same reasons clinical and legal agents don't sign — liability follows the signature, regulators expect a named decision-maker, and the existing complaint/appeals process assumes one.
+
+## What we won't ship
+
+**Auto-deny.** The temptation to use the agent's "high-confidence deny" output as the decision is real. Each auto-deny that turns out to be wrong is a regulator's complaint trail. Don't.
+
+**Pure-photo damage estimation as the decision.** Photos as input, with adjuster review, is fine. Photo-only decisions without a human reviewer aren't.
+
+**Fraud labelling without an investigator review.** A fraud flag is a hypothesis. The investigation is the decision.
+
+## The eval set lives forever
+
+Insurance evals don't sunset. Five years from now, when a regulator asks "what was the agent doing in March 2027?", the team needs to be able to answer with the eval set, the prompt version, the model version, and the per-claim audit log. This is similar to finance compliance and recruiting bias monitoring — the audit log is the deliverable that makes the agent defensible.
+
+The eval set should include cases for each protected class consideration. Disparate impact tests at the routing layer matter — if the agent systematically routes one demographic to the slow lane and another to the fast lane, you have a finding to investigate before a regulator finds it for you.
+
+## The four metrics that track the gain
+
+1. **Adjuster minutes per claim** — the headline number.
+2. **Cycle time** from FNOL to settlement.
+3. **CSAT** by claim type.
+4. **Re-open rate** — claims that came back because the first decision was wrong.
+
+The first three should improve. The fourth should not move. If the agent is moving claims through the fast lane that should have been complex, re-open rates will rise. That's the early-warning signal.
+
+## How to start
+
+Pick one line of business — auto first-party claims is the canonical starter. Build the sort. Run it in shadow mode for a quarter (agent classifies, adjusters work normally, you compare). When the sort matches adjuster judgment ~90% of the time, route the agreed-routine claims through the fast lane. Measure the four metrics for two more quarters before expanding to a second line of business.
+
+## Close
+
+Insurance agents are sorters disguised as automation. The decision authority stays with the adjuster. The speed comes from a better queue. The teams that respect the line ship and scale. The teams that try to extend the agent's authority into decisions either pause for compliance or end up with a complaint trail nobody wants to walk through.
+
+## Related reading
+
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — same audit-trail discipline.
+- [Agents in HR: bias receipts](/blog/agents-in-hr-recruiting) — disparate impact testing transferred to claims sorting.
+- [The agent maturity curve](/blog/agent-maturity-curve) — insurance agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a claims agent, we'd love to hear about it. [Get in touch.](/contact)*

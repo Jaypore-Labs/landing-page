@@ -1,0 +1,95 @@
+---
+title: "Red-teaming your own prompt"
+description: "An adversarial set of inputs the team explicitly tries to break. The discipline is finding the failures before users do."
+date: "2026-10-19"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Red-teaming", "Engineering", "Predictable Output", "Security"]
+series: "Predictable AI output"
+seriesOrder: 24
+---
+
+A team's customer-facing agent was attacked within a week of launch. Users probed its limits, tried prompt injection, attempted to make it say things off-brand. Some attacks succeeded. The team scrambled.
+
+Red-teaming the prompt before launch finds these failures while there's still time to fix them. The adversarial set is the discipline.
+
+## The adversarial set
+
+The team explicitly tries to break the prompt:
+
+- Prompt injection ("ignore previous instructions and...").
+- Jailbreaks (clever phrasings that bypass safety).
+- Bias-elicitation (cases that might surface model bias).
+- Off-topic abuse (asking for things the agent shouldn't help with).
+- Edge-case exploitation (very long inputs, specific characters).
+
+Each attack is documented. Each is fixed (or accepted as out-of-scope and routed appropriately).
+
+## Reviewer ritual
+
+The team red-teams quarterly:
+
+- Run the existing adversarial set against the current prompt.
+- Add new attacks based on:
+  - Recent attacks observed in production.
+  - New attacks reported in the broader LLM-security community.
+  - The team's own creativity.
+
+The set grows. The prompt's robustness grows.
+
+## A real set
+
+A customer-support agent's red-team set included:
+
+- 30 prompt-injection attempts.
+- 20 jailbreak phrasings.
+- 15 bias-elicitation prompts.
+- 25 off-topic abuse cases.
+- 10 edge-case exploits.
+
+Each had a desired outcome (refuse, route, etc.) and a tested actual outcome. Failures fed prompt updates.
+
+## Coverage
+
+Coverage of the adversarial set matters:
+
+- Prompt-injection coverage (different phrasings, different patterns).
+- Jailbreak coverage (different rhetorical strategies).
+- Bias coverage (different demographic dimensions).
+
+The set should be diverse, not just deep.
+
+## Reporting
+
+The team reports:
+
+- Adversarial set size.
+- Pass rate.
+- Categories of failure.
+- Trending: are new attacks emerging?
+
+This is part of the team's security posture for the agent.
+
+## What we won't ship
+
+**Agents to production** without red-teaming.
+
+**Adversarial sets** that don't grow.
+
+**Pass rates** below threshold for production.
+
+**Skipping the periodic review** because "the model handles it."
+
+## Close
+
+Red-teaming your prompt is the discipline of finding failures before users do. The adversarial set is the artifact. The pass rate is the metric. The team's prompt is robust because someone tried hard to break it before deploying. Skip this and production becomes the discovery process.
+
+## Related reading
+
+- [Counter-example mining](/blog/counter-example-mining) — companion eval-growth.
+- [Safety guardrails](/blog/safety-guardrails) — surrounding pattern.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're red-teaming prompts, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,85 @@
+---
+title: "Agents in logistics: route planning with a human in the loop"
+description: "The optimiser is deterministic. The agent is the exception handler. Don't let the model do the math the OR people already solved."
+date: "2026-05-12"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Logistics AI", "Supply Chain", "Production AI", "Operations Research"]
+series: "AI agents in industry"
+seriesOrder: 10
+---
+
+A regional fleet operator told us their last attempt at AI route-planning had been "an incredible improvement on a problem that already worked." The optimiser they replaced was a vehicle-routing solver from a company that had been doing this for 25 years. The new agent produced routes that cost 8% more in fuel, took 12% longer, and used 19% more driver-hours. They reverted in a month.
+
+LLMs are not better than vehicle-routing solvers at vehicle routing. They are vastly better at *exception handling* — the messy, contextual, narrative work that breaks the optimiser. Putting agents on the wrong side of this line is the most common logistics-AI mistake.
+
+## The deterministic core stays deterministic
+
+Vehicle routing, bin packing, capacity planning, network optimisation — these are well-studied operations-research problems with mature solvers. The math has been refined over decades. An LLM doing the math ad-hoc is going to be worse, slower, and more expensive than calling a solver.
+
+Working logistics agents call the solver. They don't replace it. The agent's job is to:
+
+- Translate a human request ("we need to add this delivery before noon") into the constraints the solver understands.
+- Read the solver's output back in plain language.
+- Handle the cases the solver doesn't model — driver illness, customer no-show, a road closure.
+
+The solver is the load-bearing piece. The agent is the user interface and the exception handler. Don't flip these.
+
+## Where the agent earns its keep
+
+**Disruption response.** A driver calls in sick at 6 AM. A working agent reads the day's routes, the affected stops, the available drivers, the customer commitments — and proposes a re-routing to the dispatcher. Re-runs the optimiser with the new constraints and surfaces the trade-offs. The dispatcher decides. Saves 30-45 minutes of phone calls and re-planning every time something disrupts the day.
+
+**Customer communication.** Customer calls asking when their delivery will arrive. Agent reads the route's current state, the driver's progress, and the day's traffic, and gives a real ETA. Or — for the more interesting case — when the ETA slips, the agent drafts a proactive message and the dispatcher approves it. Customer satisfaction up, dispatcher time down.
+
+**Exception classification.** A delivery can't be made (gate locked, customer not home, refused at door). Agent reads the driver's note + photo, classifies the exception, drafts the resolution path (re-attempt tomorrow, return to depot, customer call). Dispatcher confirms. The work that would have eaten 5 minutes per exception drops to 30 seconds.
+
+**Document-heavy paperwork.** Bills of lading, customs documentation, freight invoices — agents read and reconcile these against shipment records. Drafts the resolution for any mismatch. Logistics back-office work has been a paper mill forever; agents are quietly transformative here.
+
+## The escalation rule
+
+Anything safety-related goes to a human immediately. Anything time-critical (where a wrong decision can't be undone) goes to a human. Anything affecting customer commitments above a dollar threshold goes to a human. The agent handles the routine. Humans handle anything where the cost of being wrong is large and irreversible.
+
+This rule is similar to the support-agent escalation contract — the agent answers within scope, escalates outside scope, and posts context to whoever takes the handoff. Logistics is just a domain where the scope is more concretely bounded by safety and SLAs.
+
+## The data integration is the project
+
+Same as factory-floor agents, most of the project budget goes to integrations:
+
+- TMS (transportation management system) read/write.
+- WMS (warehouse management system) integration.
+- Live driver-app data.
+- Customer ETA APIs.
+- Document storage for BOLs, customs docs, etc.
+
+The model is the small piece in the middle. Teams that lead with the model and try to retrofit integrations end up with a demo. Teams that build the integration first and add the agent end up with deployment.
+
+## How to know it's working
+
+Four metrics:
+
+1. **Dispatcher minutes saved per day.** Logged via call counts and dispatcher self-report.
+2. **Customer-communication response time.** Faster proactive notifications, fewer reactive calls.
+3. **Exception resolution time.** From driver photo to resolution decision.
+4. **Re-route quality** when disruption hits. Agent's proposed re-routes accepted by dispatcher vs. dispatcher-edited rate.
+
+These four are concrete, measurable, and the dispatcher can sign off on whether they moved.
+
+## How to start
+
+Pick one workflow — disruption response, customer comms, exception classification, or back-office reconciliation. Build the agent into one dispatcher's day. Measure the four metrics. Expand to a second workflow only after the first is generating real numbers.
+
+The teams that try to do all four at once usually do none well. The teams that pick one and go deep ship something dispatchers actively use.
+
+## Close
+
+Logistics agents earn their keep on the human-readable margins of a deterministic optimisation problem. The optimiser stays the optimiser. The agent handles the messy parts. Build the integration first; the agent's value comes from being where the dispatcher is.
+
+## Related reading
+
+- [Agents on the factory floor](/blog/agents-in-manufacturing) — the same integration-first pattern.
+- [The agent maturity curve](/blog/agent-maturity-curve) — logistics agents on the curve.
+- [Agents in customer support](/blog/agents-in-customer-support) — the escalation contract restated.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a logistics agent, we'd love to hear about it. [Get in touch.](/contact)*

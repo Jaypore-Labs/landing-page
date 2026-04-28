@@ -1,0 +1,97 @@
+---
+title: "Agents in pharma: literature review with citation discipline"
+description: "Pharma's regulatory exposure makes citation discipline non-negotiable. Hallucination is a regulatory event."
+date: "2026-05-22"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Pharma AI", "Life Sciences", "Production AI", "Regulatory"]
+series: "AI agents in industry"
+seriesOrder: 18
+---
+
+A regulatory affairs lead at a pharma company told us last quarter that a hallucinated citation in a regulatory submission isn't a software bug. It's a misrepresentation. Misrepresentations in pharma submissions trigger investigations, withdrawals, and potential criminal liability. The agent's tolerance for hallucination is precisely zero.
+
+This shapes the entire architecture. Pharma agents don't generate text and then add citations. They retrieve citations and then generate text grounded in them. The order matters.
+
+## Sourcing-first architecture
+
+A working pharma agent looks like a retrieval system with an LLM as the synthesis layer. Specifically:
+
+- The query is decomposed into sub-questions.
+- Each sub-question hits a curated corpus — internal documents, peer-reviewed literature, regulatory archives.
+- The retrieval results are presented to the LLM with explicit instructions to *quote and cite* and refuse to assert anything not in the retrieved context.
+- The output includes structured citations to every claim.
+
+If the retrieval doesn't surface evidence for a claim, the agent doesn't make the claim. It says so. This is operationally different from "use the LLM and hope it cites correctly." The hope-and-pray pattern fails in pharma every time.
+
+## What gets retrieved matters more than what gets generated
+
+The corpus the agent retrieves from is the most important asset:
+
+- **Curated.** Hand-selected papers, regulatory documents, and internal records — not "everything we could find."
+- **Up-to-date.** Pharma moves; the retrieval index has to track new submissions and approvals.
+- **Versioned.** Yesterday's retrieval and today's retrieval may differ. Both have to be reproducible if a regulator asks.
+- **Provenance-tagged.** Every document has metadata about its source, peer-review status, and regulatory standing.
+
+The LLM is downstream of this corpus discipline. Most pharma-AI projects under-invest in the corpus and over-invest in the prompt. The trade-off is wrong.
+
+## What pharma agents help with
+
+**Literature review.** Given a research question, surface the relevant peer-reviewed papers, summarise their findings, and cite specifically. The medical writer reviews the synthesis and uses it as input.
+
+**Adverse-event narrative drafting.** Given a case report, draft the adverse-event narrative for safety reporting. The pharmacovigilance specialist reviews and signs.
+
+**Regulatory-document drafting.** Given a study report and the regulatory requirements, draft sections of the submission with clear traceability to source documents. The regulatory affairs specialist reviews and signs.
+
+**Internal Q&A** for medical-affairs teams who get product questions from sales and need to research the answer in compliant, citable form.
+
+In every case the agent drafts. The licensed specialist reviews and signs. Same pattern as legal and clinical agents.
+
+## What we won't ship
+
+**Anything that interacts directly with patients.** Patient-facing pharma communications are tightly regulated; they don't tolerate the variance an LLM introduces.
+
+**Promotional material drafting.** "On-label" promotional language requires legal and medical review at every step; agents don't shortcut that workflow.
+
+**Any system that auto-publishes regulatory content.** A human signs every regulatory submission. Always.
+
+## The reviewer workflow
+
+Every output from a pharma agent flows through a reviewer of record:
+
+- The reviewer sees the draft, the retrieved sources, and the model's reasoning.
+- The reviewer can accept, edit, or reject.
+- Edits and rejections feed back into the eval set.
+- The reviewer's signature attaches to the final output.
+
+This makes the agent's output defensible. It also bounds the agent's authority — nothing leaves the reviewer's desk without their signature.
+
+## The escalation tree
+
+Some queries should never be answered by the agent:
+
+- Questions about off-label use.
+- Questions about specific patients or competitors.
+- Questions that touch on legal interpretation of regulations.
+
+The agent's first job, on every query, is classification: does this query fall in the agent's scope, or does it need to escalate? Misclassification here is a regulatory event waiting to happen. The eval set focuses heavily on the boundary cases.
+
+## How to start
+
+Pick one workflow with high specialist time and clear documentation requirements. Internal Q&A for medical affairs is a good starter — high volume, lower stakes than regulatory submissions, strong existing documentation requirements.
+
+Build the curated corpus first. Build the retrieval layer. Build the citation discipline. Run the agent in shadow mode for a quarter. Only after the citation discipline is provably tight does the agent's output go directly to specialists.
+
+## Close
+
+Pharma agents work when they're retrieval engines with an LLM synthesis layer — not the other way around. The corpus is the load-bearing asset. The reviewer of record signs every output. Citation discipline is the design, not a feature. The teams that take this seriously ship something useful and defensible. The teams that lead with the LLM end up with a regulatory issue.
+
+## Related reading
+
+- [Agents in legal: contract review with receipts](/blog/agents-in-legal) — same citation discipline, different domain.
+- [Agents in healthcare: scribe yes, nurse no](/blog/agents-in-healthcare) — same human-decision boundary.
+- [RAG is a public library](/blog/rag-is-a-public-library) — the retrieval discipline pharma agents need.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a pharma agent, we'd love to hear about it. [Get in touch.](/contact)*

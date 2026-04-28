@@ -1,0 +1,114 @@
+---
+title: "Mobile (iOS): UIKit-to-SwiftUI translation"
+description: "A SwiftUI migration with Claude Code is component-by-component, snapshot-tested, and survives the long tail of edge cases."
+date: "2026-07-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Mobile", "iOS", "SwiftUI", "AI Development"]
+series: "AI for software development"
+seriesOrder: 6
+---
+
+An iOS lead at a fintech told us the team had been "halfway done" with their SwiftUI migration for two years. The strategic decision had been made. The execution kept stalling — every component was different, every translation had edge cases, the team didn't have weeks to sit with each one.
+
+Claude Code makes the component-by-component grind tractable. The AI handles the translation; the engineer handles the design decisions and the visual review. A migration that was a 12-month tail becomes a 4-month focused project.
+
+## The component-by-component approach
+
+Big-bang migrations of UIKit to SwiftUI fail. The codebase is too varied; the edge cases are too many; one team member can't hold the whole context at once.
+
+The pattern that works: pick one component at a time. Translate. Snapshot-test. Ship. Move to the next.
+
+The AI helps each step:
+
+- Reads the existing UIKit component.
+- Identifies the SwiftUI equivalent for each piece.
+- Translates the layout, the state management, the accessibility setup.
+- Surfaces decisions where SwiftUI's idioms differ enough that the engineer should choose explicitly.
+
+The engineer reviews the translation, makes the design calls, and tests.
+
+## State migration
+
+The hardest part of a UIKit-to-SwiftUI translation is state migration. UIKit's MVC and MVVM patterns translate to SwiftUI's `@State`, `@Binding`, `@StateObject`, `@ObservedObject` — but the mapping isn't 1:1.
+
+The AI's translation includes:
+
+- Identifying which UIKit state corresponds to which SwiftUI binding type.
+- Refactoring view-controller responsibilities into view + view-model split.
+- Handling cross-screen state (which used to live in delegates and protocols) via SwiftUI's environment patterns.
+
+The engineer reviews the state model. Some decisions diverge from the AI's defaults — particularly around how much state to lift and where to colocate effects.
+
+## Snapshot tests
+
+The discipline that catches regressions: snapshot tests, run before and after the migration. Identical visual output is the bar.
+
+The AI generates snapshot tests for each component:
+
+- Default state.
+- Each interactive state (focused, disabled, error).
+- Edge cases (long content, RTL languages, accessibility-large text).
+
+The engineer runs the tests on the UIKit version, captures the snapshots, then runs against the SwiftUI version. Differences surface. Each difference is reviewed: is this an intentional improvement, an unintentional regression, or a SwiftUI-rendering nuance to accept?
+
+## Performance check
+
+SwiftUI is mostly faster than UIKit, but not always. Lists with thousands of items, complex animations, and certain transition patterns can regress.
+
+The AI's translation includes:
+
+- Surfacing the components most at risk for performance regressions.
+- Profiling-script setup.
+- Performance assertions in the test suite.
+
+The engineer profiles before and after. Regressions get addressed before merging.
+
+## A screen at a time
+
+A screen — say, the account-settings screen — has 5-10 components. The migration:
+
+**Hour 1.** AI translates the screen's components. Engineer reviews state model and reorganises view-model responsibilities.
+
+**Hour 2.** Engineer runs snapshot tests. Addresses visual differences. Catches one edge case where the AI's translation missed a custom drawing pattern.
+
+**Hour 3.** Engineer runs performance test. SwiftUI version is 12% faster. Ships to staging.
+
+A screen that would have taken a sprint of focused work is a half-day. Multiplied across an app, the migration timeline collapses.
+
+## What stays human
+
+- Design decisions about whether to embrace SwiftUI idioms or preserve UIKit patterns.
+- Visual polish — animations, micro-interactions, transitions.
+- Accessibility — screen reader experience needs human verification.
+- Cross-platform decisions — code shared with watchOS or macOS targets.
+
+These are the parts where senior judgment matters. The AI does the typing.
+
+## What we won't ship
+
+**AI-translated components without snapshot tests.**
+
+**Components in production-critical user paths** without extra-careful UX review.
+
+**SwiftUI conversions of patterns the AI clearly didn't understand** (the engineer's red flag: the translation looks right but the engineer can't explain why each piece is the way it is).
+
+## How to start
+
+Pick the simplest screen in the app. Translate with AI assistance. Establish the snapshot-test pattern. Establish the performance-test pattern. Ship. Move to the next screen.
+
+Within a quarter, the team has a working pattern that scales across the app. Within two quarters, the migration is far enough along that the team's velocity on new features is using SwiftUI as the default.
+
+## Close
+
+UIKit-to-SwiftUI migration with Claude Code is component-by-component, tested, and survivable. The AI does the translation. The engineer does the design and the verification. The migration that stalled becomes a focused project. The codebase modernises in months rather than years.
+
+## Related reading
+
+- [Mobile (Android): Compose rollout audits](/blog/mobile-android-compose-rollout) — same pattern, Android side.
+- [Frontend: component scaffolding](/blog/frontend-component-scaffolding) — same component-discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising mobile workflows, we'd love to hear about it. [Get in touch.](/contact)*

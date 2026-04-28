@@ -1,0 +1,87 @@
+---
+title: "Test-data management for AI: synthetic vs. real"
+description: "Test data for AI features balances realism, privacy, and reproducibility. Hybrid approaches usually win."
+date: "2026-11-06"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Test Data"]
+series: "Testing in the age of AI"
+seriesOrder: 13
+---
+
+Test data for AI features is hard. Real production data captures real complexity but has privacy and compliance issues. Synthetic data is safe but often misses what makes production data hard.
+
+The hybrid approach usually wins.
+
+## The hybrid approach
+
+A typical mix:
+
+- **Synthetic baseline.** 60-80% of the test set. Generated cases covering happy path and basic edges.
+- **Sanitised real data.** 20-30% of the test set. Real production cases with PII redacted.
+- **Adversarial-by-hand.** 5-10%. Specific attacks the team has authored.
+
+The synthetic gives volume. The real gives realism. The adversarial closes specific gaps.
+
+## Privacy
+
+Real data in tests requires care:
+
+- PII redacted (names, emails, phones, IDs).
+- Sensitive content masked (medical, financial, legal).
+- Aggregation to prevent re-identification.
+
+The team needs a pipeline for sanitisation. Not "we'll be careful manually" — actual tooling.
+
+## Reproducibility
+
+Test data should be reproducible:
+
+- Versioned in the repo or a tracked artifact store.
+- Same data across runs.
+- Updates documented.
+
+A team that pulls fresh production data every test run has flaky tests and untraceable failures.
+
+## A real strategy
+
+A team's test-data setup:
+
+- Synthetic generator for typical inputs (regenerated quarterly).
+- Sanitised production sample (refreshed monthly with new sanitisation pass).
+- Hand-authored adversarial cases (kept in repo).
+- Total: 800 cases across the three sources.
+
+The team can re-run any test against any version of the data.
+
+## Trade-offs
+
+- **Synthetic:** safe, volume, may miss real complexity.
+- **Sanitised real:** realistic, has compliance overhead.
+- **Hand-authored:** targeted, slow to grow.
+
+Each has a place.
+
+## What we won't ship
+
+**Tests** with raw production data and PII.
+
+**Synthetic data** that doesn't reflect real complexity.
+
+**Test data** that isn't versioned.
+
+**Sanitisation** done manually without tooling.
+
+## Close
+
+Test data for AI is engineering. Synthetic for volume, sanitised real for realism, adversarial for specifics. Privacy by design. Versioning by default. The team that balances these three sources tests comprehensively without legal or operational debt.
+
+## Related reading
+
+- [PII in test fixtures](/blog/pii-in-test-fixtures) — companion topic.
+- [Golden-set discipline](/blog/golden-set-discipline) — eval-set quality.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening test-data management, we'd love to hear about it. [Get in touch.](/contact)*

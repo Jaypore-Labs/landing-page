@@ -1,0 +1,79 @@
+---
+title: "Snapshot tests: where they help, where they trap"
+description: "Snapshot tests catch obvious regressions and miss subtle ones. Use them, but don't trust them alone."
+date: "2026-10-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Snapshots"]
+series: "Testing in the age of AI"
+seriesOrder: 6
+---
+
+Snapshot tests — capture the output, compare future outputs — work for traditional code. They work less well for LLM outputs because outputs vary legitimately. But they still help, when used carefully.
+
+## The snapshot half-life
+
+Snapshots have a shelf life:
+
+- Useful when outputs are stable (deterministic via temp=0).
+- Less useful as outputs drift legitimately (intentional prompt updates).
+- Trap when teams update snapshots without thinking.
+
+The discipline is review-on-update.
+
+## Update discipline
+
+When a snapshot test fails:
+
+- Read the diff carefully.
+- Determine: is this a regression, or an intentional improvement?
+- Update the snapshot only when the change is intentional.
+- Document why the snapshot moved.
+
+The "automatically update on failure" pattern defeats the purpose.
+
+## Reviewer ritual
+
+PR review when snapshots changed:
+
+- Look at every changed snapshot.
+- Verify each is intentional.
+- Reject the PR if any look like regression.
+
+The reviewer's eye is the eval. Without it, snapshot tests become rubber stamps.
+
+## A real catch
+
+A team's snapshot test caught a subtle change in customer-email tone after a prompt update. The diff was small (one phrase changed). The reviewer noticed it didn't match brand voice. The prompt update was reverted.
+
+Without the snapshot, the change would have shipped silently.
+
+## How to avoid
+
+- Don't snapshot outputs from temperature > 0 unless variance is bounded.
+- Don't auto-accept snapshot updates.
+- Don't use snapshots as the only test layer.
+
+## What we won't ship
+
+**Snapshots auto-updated** in CI without review.
+
+**Snapshots** of unstable outputs (variance defeats them).
+
+**Sole reliance** on snapshot tests for AI features.
+
+**Snapshot reviews** that just rubber-stamp diffs.
+
+## Close
+
+Snapshot tests are useful when applied carefully. They catch regressions a reviewer would catch on a fresh look. They trap when reviews become rubber-stamping. Use them; don't auto-update them.
+
+## Related reading
+
+- [Output diffing in CI](/blog/output-diffing-in-ci) — same discipline.
+- [Behavioural assertions](/blog/behavioural-assertions) — companion pattern.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're using snapshot tests for AI, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,89 @@
+---
+title: "Agents for non-profits: donor research on a tight budget"
+description: "Non-profits don't have engineering teams. The agent has to be useful without a dedicated MLOps function."
+date: "2026-05-29"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Non-Profit Tech", "Production AI", "Fundraising", "Donor Research"]
+series: "AI agents in industry"
+seriesOrder: 23
+---
+
+A development director at a mid-sized non-profit told us the truth: "We don't have an engineering team. We don't have an MLOps team. We have me, two associates, and a Google Workspace subscription." Agents that work for non-profits have to fit that reality. The ones that need a platform team to deploy them never get deployed.
+
+The opportunity is real. Donor research, grant prospecting, communications drafting — these are exactly the workflows where small teams hit ceilings. The constraint is that the agent has to be operable without a developer on staff.
+
+## Operability is the design constraint
+
+A non-profit-friendly agent is:
+
+- **Hosted somewhere the team already pays for.** Google Workspace, Microsoft 365, Salesforce-NPSP — wherever their existing data lives.
+- **Configured by a non-technical user** through a settings UI, not a YAML file.
+- **Auditable through dashboards** the development director can read in 5 minutes.
+- **Subject to the same data-handling rules** the org's existing CRM is.
+
+If the agent requires a Slack DM with the engineer to update a prompt, the non-profit can't sustain it. If it lives where the team already works, the team can.
+
+This shapes the build-vs-buy calculus. Most non-profits should buy, not build. The build-it-yourself path needs in-house technical capacity that most non-profits don't have. The buy-it path is cheaper at the team's actual cost of operating it.
+
+## What works in development offices
+
+**Donor research briefs.** A donor's name → a research brief assembled from public sources, with citations. Saves a development associate 30-60 minutes per major-gift conversation. The brief includes giving history (from public records like 990s and giving registries), board involvement, business affiliations, and likely interest signals.
+
+**Grant prospecting.** Given the org's mission and a funder database, surface the top likely grant opportunities with a draft fit-statement for each. Director reviews, prioritises, adapts.
+
+**Donor-communication drafts.** Personalised thank-you notes, stewardship updates, ask letters. Drafts only. Signed by humans. Voice-eval-gated for the org's tone.
+
+**Annual report content drafting.** Agent reads the org's program data and stories collected through the year, drafts sections of the annual report. Comms director edits and signs.
+
+## Privacy + IRS rules
+
+Non-profits face a layered privacy environment:
+
+- **Donor privacy.** Donors' identities and giving levels are often confidential. The CRM has them; the agent must respect the same access controls.
+- **IRS compliance.** Substantiation, lobbying limits, public-charity rules — the agent's drafts shouldn't fabricate compliance language and shouldn't claim things the org can't claim.
+- **Beneficiary privacy.** Programs that serve vulnerable populations (homeless, abuse survivors, undocumented immigrants) need the agent's data handling to be especially careful. A donor brief that accidentally reveals a beneficiary's identity is a serious failure.
+
+These aren't different from for-profit concerns in kind, but the cost of a mistake hits a non-profit harder — they don't have the legal budget or the brand resilience.
+
+## What the agent shouldn't do
+
+**Solicit on behalf of the org.** Direct outreach is a relationship business. The agent drafts; humans send.
+
+**Make grant decisions.** Funder side or recipient side. Decisions are humans.
+
+**Speak for the org publicly.** Social media, press, public statements — humans.
+
+## A mid-budget pilot blueprint
+
+Phase 1 (3 months): donor research briefs. One development associate uses an off-the-shelf research agent to assemble briefs for top 50 prospects. Measure: time saved, brief quality (associate's own scoring).
+
+Phase 2 (3-6 months): grant prospecting + draft fit-statements. One development director uses an agent against a curated funder database. Measure: high-quality opportunities surfaced, conversion to applications.
+
+Phase 3 (6-12 months): donor-communications drafting. Comms team uses agent for thank-you-note and stewardship-update drafting. Measure: time saved, donor response.
+
+Total pilot cost: well under what the team already spends on a marketing intern. ROI: measurable in development-team hours redirected to higher-value relationship work.
+
+## How to evaluate vendors
+
+Three questions:
+
+1. **Where does our data live, who has access, and how do we get it back at end-of-contract?** Most non-profit-friendly vendors will answer this clearly. Avoid the ones that don't.
+2. **Can we audit what the agent does for our team this month?** A monthly export of agent activity should be a feature, not a request.
+3. **What happens when the model behind it changes?** Vendors that don't pin or version their model behaviour are taking a risk on your behalf.
+
+## Close
+
+Non-profit agents work when they fit the org's actual operating model — small team, no engineering, tight data discipline. The development office is the highest-leverage entry point. Buy more often than build. Pilot small, measure honestly, expand to where the data shows value.
+
+The most underrated thing AI can do for non-profits is give a small team the leverage of a larger one. That's worth the careful work of choosing vendors and building the discipline to operate them well.
+
+## Related reading
+
+- [Agents in marketing: brand voice](/blog/agents-in-marketing) — voice-eval discipline transferred.
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — audit-trail discipline at smaller scale.
+- [The agent maturity curve](/blog/agent-maturity-curve) — non-profit agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're a non-profit looking at AI, we'd love to hear about it. [Get in touch.](/contact)*

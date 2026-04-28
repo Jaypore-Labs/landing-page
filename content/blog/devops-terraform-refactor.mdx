@@ -1,0 +1,115 @@
+---
+title: "DevOps: Terraform refactor with a watchful copilot"
+description: "Terraform refactors are scary because state is real. Claude Code makes the rehearsal fast — the discipline still holds."
+date: "2026-07-20"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "DevOps", "Terraform", "Infrastructure", "AI Development"]
+series: "AI for software development"
+seriesOrder: 9
+---
+
+A platform engineer told us once that her last Terraform refactor took six weeks. The refactor itself was small — extract a duplicated VPC module into a shared one. The six weeks was rehearsing the state-surgery, running plans across 14 environments, and convincing each environment owner that the change was safe.
+
+Claude Code compresses the rehearsal. The state surgery still requires care. The plan-diff still gets read line by line. But the typing and the cross-checking are faster. A six-week refactor becomes a one-week one, with the same discipline.
+
+## Module extraction
+
+The most common refactor: pulling duplicated resources into a shared module. The pattern with AI:
+
+- **Step 1.** Identify the duplication. AI scans the codebase, surfaces resource patterns repeated across files.
+- **Step 2.** Design the module's interface. Variables, outputs, defaults. Human work — the API of the module is a design decision.
+- **Step 3.** AI generates the module from the existing code. Engineer reviews and tightens.
+- **Step 4.** AI generates the migration calls — replacing the duplicated resources with module instantiations. Engineer reviews each call.
+- **Step 5.** Plan-diff per environment. Engineer reads each diff carefully.
+
+The plan-diff review is the load-bearing step. The AI can help summarise, but the engineer's judgment is what catches the cases where the diff isn't actually equivalent.
+
+## State surgery
+
+When Terraform's idea of the world differs from what the new code expects, state surgery is necessary. `terraform state mv` for resources moving between modules. `terraform import` for resources that should now be tracked. `terraform state rm` for resources to be re-created.
+
+The AI helps with state-surgery scripts:
+
+- Generates the `state mv` commands from the refactor plan.
+- Drafts the `import` blocks for new tracked resources.
+- Surfaces resources that are likely to get destroyed-and-recreated as a regression.
+
+The engineer reviews the script. Runs it in a non-prod environment first. Verifies the post-state matches expectation. Then runs in prod environments one at a time.
+
+## Plan-diff discipline
+
+A Terraform refactor's safety depends on plan-diff discipline. Every environment runs `terraform plan` before any apply. The plan gets read.
+
+The AI's contribution:
+
+- Generates a structured summary of each plan: resources added, removed, modified, replaced. With counts.
+- Surfaces unexpected diffs — replacements where moves were expected, modifications where no-ops were expected.
+- Drafts the change description for the PR review.
+
+The engineer reads the summary, then reads the actual plan output for the surprising diffs. Skipping the second step is how subtle infrastructure issues ship.
+
+## Reviewer ritual
+
+Every Terraform refactor PR has a reviewer ritual:
+
+- Plan output for each affected environment, attached to the PR.
+- Engineer's narrative of what's changing and why.
+- Identified risks and the mitigation for each.
+- Rollback plan.
+
+The reviewer reads all of this before approving. AI-assisted refactors don't get a faster review than human-only ones; if anything, slower because the diff might be larger.
+
+## A real refactor
+
+A scenario: extracting a VPC module from 6 environment-specific copies.
+
+**Day 1.** AI scans, identifies duplication, drafts the module's interface. Engineer designs the variable surface.
+
+**Day 2.** AI generates the module. Engineer reviews.
+
+**Day 3.** AI generates the per-environment migration plus state surgery. Engineer reviews each.
+
+**Day 4.** Plans run against all 6 environments. Engineer reads each plan. Two environments have unexpected diffs (a security-group rule that was different in one environment than the others, accidentally). Engineer addresses.
+
+**Day 5.** Apply to non-prod environments. Verify. Apply to prod environments one at a time, with sufficient bake time between.
+
+A refactor that would have been six weeks of part-time grinding becomes a focused week.
+
+## What stays human
+
+- The module's variable surface. This is API design.
+- The migration sequencing. Which environments first, in what order.
+- Risk assessment for each environment's specifics.
+- The rollback plan.
+- The verification steps post-apply.
+
+These are senior engineering decisions. The AI handles the typing. The engineer handles the thinking.
+
+## What we won't ship
+
+**AI-generated Terraform** without `terraform plan` review per environment.
+
+**State surgery scripts** without a non-prod rehearsal.
+
+**Refactors that change resource identity** unless the engineer is fully confident in the import/move.
+
+**Anything where the AI's plan and the engineer's intent diverge** without resolution.
+
+## How to start
+
+Pick a small piece of duplication. Run the workflow. Notice where AI saved time. Build a personal pattern library. Within a few refactors, the workflow is fluent.
+
+## Close
+
+A Terraform refactor with Claude Code is the rehearsal compressed. The state surgery is still careful. The plan-diff is still read. The reviewer ritual still runs. What changes is the engineer's time per refactor — from weeks to a focused week. The infrastructure improves at a rate the team can sustain.
+
+## Related reading
+
+- [DevOps: CI pipeline diagnosis at 2am](/blog/devops-ci-2am-diagnosis) — companion role.
+- [Backend: database migrations without fear](/blog/backend-migrations-with-claude-code) — same migration-pair discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising infrastructure work, we'd love to hear about it. [Get in touch.](/contact)*

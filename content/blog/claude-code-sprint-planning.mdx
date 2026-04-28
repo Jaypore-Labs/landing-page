@@ -1,0 +1,116 @@
+---
+title: "EM: sprint-planning copilot for managers"
+description: "Most sprint-planning meetings are 50 minutes of capacity math and 10 of decisions. The copilot does the math; the EM keeps the decisions."
+date: "2026-06-25"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Engineering Management", "AI Employees", "Sprint Planning", "Agile"]
+series: "Claude Code in business"
+seriesOrder: 17
+---
+
+An engineering manager described his sprint planning to us as "an hour-long argument about capacity that ends with the same numbers we started with." The numbers were known. The argument was about who'd be around for which days, what dependencies were lurking, what the holiday week was going to do. The work was real. It was also exactly the kind of mechanical pre-work that doesn't need to happen in a meeting.
+
+The sprint-planning copilot does the pre-work. The EM walks into the meeting with capacity already computed, dependencies already surfaced, and risk callouts already drafted. The hour becomes 20 minutes of actual decision-making.
+
+## The shape of the role
+
+**Title.** Engineering Operations AI — Sprint Planning Specialist.
+
+**Mission.** Prepare sprint-planning briefings: backlog synthesis, capacity sanity, dependency surfacing, risk callouts.
+
+**Outcomes.** Sprint-planning meeting duration, sprint commitment accuracy, mid-sprint scope changes.
+
+**Reports to.** EM or Director of Engineering.
+
+**Tools.** Backlog read access, calendar read (for capacity), dependency graph (services + teams), prior-sprint history.
+
+**Boundaries.** Prepares the briefing. The EM and team make the decisions.
+
+## The four-pass briefing
+
+**Pass 1 — Backlog synthesis.** Top-of-backlog items reviewed for clarity. Items missing acceptance criteria, dependencies, or estimates are flagged. Items that should have been done last sprint and weren't are surfaced with status.
+
+**Pass 2 — Capacity sanity.** For each engineer in the sprint: planned out-of-office, on-call rotation, estimated time on operational work, time on cross-team meetings. The agent computes available story points. Compares to the team's planning capacity (typically 60-70% of theoretical max).
+
+**Pass 3 — Dependency surfacing.** Cross-team dependencies for committed items. Are the dependent teams aware? Have they committed to their pieces? Risk flagged when dependencies exist without alignment.
+
+**Pass 4 — Risk callouts.** Items with unclear scope, missing design, missing tests, or other red flags. Items the team has historically struggled to estimate well. The EM gets a heads-up before the team sees the items.
+
+## A real briefing
+
+The briefing is a one-page document. The EM reads it the morning of planning:
+
+> Sprint #84 planning brief. Capacity: 67 points (4 engineers, 7 working days each, 10% on-call hit, 1 PTO day for J., 1.5 days of cross-team meetings).
+>
+> Top of backlog: 8 items, 92 points estimated. Three over capacity if we commit them all.
+>
+> Dependencies: ITEM-441 needs API changes from Platform team. Confirmed with their EM yesterday. ITEM-447 has unspecified mobile dependency — not yet aligned.
+>
+> Risk callouts: ITEM-449 lacks acceptance criteria. ITEM-452 is in an area we've estimated wrong twice. ITEM-455 has been deferred from two prior sprints.
+>
+> Recommended approach: commit 5 items (~58 points), defer ITEM-447 until mobile alignment, redo ITEM-449's acceptance criteria before pulling in.
+
+The EM walks into planning with a starting point. The team has 30 minutes to decide instead of 90.
+
+## Why this works
+
+Most sprint planning isn't about thinking through the work. It's about discovering the constraints in real time during the meeting. Capacity, dependencies, and known risk are all knowable beforehand. The agent surfaces them before the meeting starts.
+
+The decisions left for the meeting are the real ones: which work matters most, what's the tradeoff between this and that, who's the best owner. These decisions deserve the team's full attention. Capacity arithmetic doesn't.
+
+## What this changes
+
+Engineering managers using the copilot consistently report:
+
+- Sprint-planning meetings shrink from 60-90 minutes to 20-30.
+- Sprint commitments are more accurate (the team is planning against real capacity).
+- Mid-sprint scope changes drop (because risk was surfaced upfront).
+- Cross-team dependency surprises drop dramatically.
+
+The team's perception is that planning got better, not just shorter. The EM's perception is that they're managing instead of orchestrating logistics.
+
+## The reviewer loop
+
+The EM accepts or adjusts each brief. Adjustments feed the eval. Common patterns:
+
+- "The agent didn't account for our team's tendency to under-estimate Y."
+- "The agent flagged X as risky, but actually we have a workaround."
+- "Capacity should subtract more for our on-call rotation."
+
+Each pattern improves the briefing. Within two quarters, the EM trusts the briefing as the planning starting point.
+
+## What we won't ship
+
+**Auto-committing sprints.** The team commits, not the agent.
+
+**Auto-assigning work to specific engineers.** Assignments are the EM's call.
+
+**Performance evaluation based on sprint metrics.** Sprint metrics are about throughput and predictability, not individual performance. Tying the agent's output to performance reviews creates gaming.
+
+## The KPIs the director watches
+
+1. **Sprint-planning meeting duration.**
+2. **Sprint-commitment accuracy** (% of commitments completed within the sprint).
+3. **Mid-sprint scope changes** (frequency and magnitude).
+4. **Cross-team dependency-surprise rate.**
+
+If the third metric doesn't drop, risk-callouts aren't catching the right things. Tune the agent.
+
+## How to start
+
+One team. One quarter. The EM and the agent work together on every sprint plan. After the third sprint, the EM should already prefer the briefing-first approach. After the quarter, expand to additional teams.
+
+## Close
+
+The sprint-planning copilot is a teammate whose job is the unsexy logistical layer beneath every planning meeting. Capacity math, dependencies, risks — all surfaced before the team gathers. The EM walks in prepared. The team's time goes to the decisions only humans can make.
+
+## Related reading
+
+- [EM: PR reviewer that flags scope creep](/blog/claude-code-pr-reviewer) — companion role.
+- [Product: PRD draft from a discovery transcript](/blog/claude-code-prd-draft) — upstream of sprint planning.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI engineering-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

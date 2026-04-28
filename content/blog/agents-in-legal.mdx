@@ -1,0 +1,75 @@
+---
+title: "Agents in legal: contract review with receipts"
+description: "What partners trust about contract-review agents — and what they refuse to. The clause-classifier is doing more work than the LLM."
+date: "2026-05-01"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Legal AI", "Contract Review", "Production AI", "Compliance"]
+series: "AI agents in industry"
+seriesOrder: 3
+---
+
+A general counsel told us last quarter that her firm had bought three contract-review tools in two years. None of them were in active use. The reason was always the same: when she asked "where did you get that?", the tool couldn't show her.
+
+Lawyers don't trust answers they can't trace. That's not a quirk; it's how the profession is built. A citation isn't a footnote — it's the reason the answer exists. Agents that ignore this lose the deal in the first demo.
+
+## The clause classifier is doing the work
+
+The interesting part of a working contract-review agent isn't the LLM. It's the clause classifier underneath it. The classifier reads the contract and labels each section — *governing law*, *indemnification*, *limitation of liability*, *change-of-control*, *audit rights*. Once a clause is labelled, you can:
+
+- Route it to a clause-specific reviewer prompt (which knows what to look for in *that* type of clause).
+- Compare it against the firm's playbook for *that* clause type.
+- Quote the exact span back when surfacing a finding.
+
+Without the classifier, the LLM is reading 60 pages of legalese and trying to surface "issues." With the classifier, it's checking each clause against a known rubric. The second is a reviewable artifact. The first is a vibe.
+
+Most contract-review tools that look impressive in demos and fail in deployment skip the classifier. The demo works because the LLM is lucky on a clean contract. Deployment fails because the LLM stops being lucky on the messy ones — addenda, exhibits, MSAs with conflicting clauses across documents.
+
+## What "receipts" looks like
+
+Lawyers want three things from every finding:
+
+**1. The exact text.** The agent quotes the clause it's flagging, by document and section number. No paraphrase.
+**2. The rule it's testing against.** "Per playbook §4.2.1, indemnification capped at fees paid in prior 12 months."
+**3. The reasoning chain.** "This clause caps indemnification at *fees paid in prior 6 months*, which is below playbook minimum."
+
+That third item is where most agent pipelines crumble. The LLM gives an answer; nobody can recover the path that led to it. A working pipeline logs the span, the rule, the comparison, and the model's reasoning — all retrievable, all citable.
+
+## The handoff: agent ≠ associate
+
+A senior partner reading a flagged clause is not interested in the agent's "opinion." She's interested in the agent's findings, organised so she can decide. That's the handoff.
+
+Concretely: the agent produces a markup of the document with each finding tied to a clause, severity, rule, and quote. The associate (or the partner) reviews the markup, accepts or overrides each finding, and then drafts the redline. The agent is doing the discovery work that an associate would otherwise spend a Saturday on. The judgment is human.
+
+This is the same pattern as the healthcare scribe — *the agent documents, the licensed professional decides*. It's portable across professions for a reason. Liability follows the signature. The agent doesn't sign.
+
+## What we don't recommend (yet)
+
+Negotiation agents. Counter-proposal generators. "Send this redline back automatically." The technology might handle the prose. The liability model can't handle the action. We've seen pilots try this. They get walked back to "draft only" within two months.
+
+Same goes for *advice* — anything that frames the agent's output as legal advice rather than a finding. That's a regulatory line that varies by jurisdiction, but everywhere it's drawn, it's drawn before the agent's output goes to the client.
+
+## The four-step agent pipeline that works
+
+1. **Ingest + classify.** Document → clause classifier → labelled spans.
+2. **Per-clause review.** Each span runs through a clause-specific review with the firm's playbook in context.
+3. **Citation-grounded findings.** Each finding includes the quoted span, the rule, the reasoning. No quote-less assertions.
+4. **Reviewable markup.** The output is a redline-ready document. The associate reviews; the partner signs.
+
+Skip any step and you're building a demo. Include all four and you're building a tool a firm will actually use.
+
+## Close
+
+Legal AI doesn't ship because of better LLMs. It ships because of better receipts. The teams that take the citation discipline seriously — at the cost of cleverer-looking outputs — are the ones still in deployment a year in.
+
+If you're building one, ask the partners what they need to *audit* before you ask what they want to *automate*. The answer is the design.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — where legal agents typically sit.
+- [Agents in healthcare: scribe yes, nurse no](/blog/agents-in-healthcare) — the same line, drawn for clinicians.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — citation discipline starts with prompt discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a contract-review agent, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,91 @@
+---
+title: "End-to-end tests for AI workflows: scope and survival"
+description: "E2E tests for AI are expensive and brittle. Use them sparingly; design them for survival."
+date: "2026-11-13"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "E2E"]
+series: "Testing in the age of AI"
+seriesOrder: 18
+---
+
+A team's e2e test suite for an AI workflow grew to 80 tests. It took 45 minutes to run. Half the tests flaked occasionally. The team stopped trusting the suite. Then the suite stopped catching anything because failures were assumed to be flake.
+
+E2E tests for AI are expensive and brittle. The discipline is using them sparingly and designing them for survival.
+
+## The thin-slice pattern
+
+E2E coverage is the smallest possible:
+
+- One test per critical user-flow.
+- 10-20 e2e tests for most products.
+- Each one tests the entire flow end-to-end.
+
+Most coverage lives in lower layers (unit, integration, eval). E2E catches what the layered tests can't.
+
+## Reviewer ritual
+
+PR review:
+
+- E2E flake rate is acceptable.
+- New e2e tests justified (most testing belongs lower).
+- Failed e2e tests investigated, not retried.
+
+## A real test
+
+A team's e2e test for a customer-onboarding agent:
+
+- Real user account created.
+- Real document upload.
+- Real LLM agent run.
+- Assertions on final state.
+- Cleanup at end.
+
+Run nightly + pre-release. Not on every PR (too slow, too costly).
+
+## Coverage
+
+What e2e covers:
+
+- Critical user-flows.
+- Cross-system integration (DB, queue, LLM, frontend).
+- Real-data scenarios (sanitised production samples).
+
+What e2e doesn't cover:
+
+- Most behaviours (lower layers).
+- Edge cases (use unit/integration).
+- Performance regressions (use perf tests).
+
+## Maintenance
+
+E2E maintenance:
+
+- Quarterly review.
+- Stale tests retire.
+- Flaky tests investigate-and-fix or retire.
+- New tests added when a user-flow gap is exposed by an incident.
+
+## What we won't ship
+
+**Broad e2e coverage.** Lower layers are cheaper and more reliable.
+
+**E2E tests** without flake-rate metrics.
+
+**Skipping investigation** of e2e failures.
+
+**E2E tests** that test the same thing as integration tests.
+
+## Close
+
+E2E tests for AI workflows are expensive and brittle. Use them sparingly. Design them for the user-flow that matters. Maintain them ruthlessly. The team's confidence comes from the layered tests; e2e is the final check.
+
+## Related reading
+
+- [Integration tests for AI features](/blog/integration-tests-for-ai) — companion layer.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding pattern.
+- [Testing in the age of AI series](/series/testing-in-the-age-of-ai) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening e2e tests, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,77 @@
+---
+title: "Per-feature evals vs. per-model evals"
+description: "Different scopes need different evals. The choice shapes the discipline."
+date: "2026-12-10"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Scope", "Engineering", "Output Testing", "Architecture"]
+series: "Evals & output testing"
+seriesOrder: 12
+---
+
+A team had a single eval set that covered everything. When they shipped a new feature, the eval got bigger. When they bumped the model, they ran the same eval. Neither scope was being tested cleanly.
+
+Per-feature evals catch feature-specific issues. Per-model evals catch model-specific issues. Different scopes; different evals.
+
+## The two scopes
+
+**Per-feature evals.** Focused on a specific product feature. The eval cases all exercise that feature. Used for PR review, feature-specific regression detection.
+
+**Per-model evals.** Focused on the team's general LLM capability. Cases cover varied features and use cases. Used for model-bump decisions, broad-quality monitoring.
+
+## When each wins
+
+- **Per-feature:** when changes are feature-scoped. Most PRs.
+- **Per-model:** when changes are model-scoped. Provider bumps. Major prompt overhauls.
+
+A team needs both. The CI runs feature evals on PRs. The model-bump process runs per-model evals.
+
+## Reviewer ritual
+
+PR review:
+
+- Which eval ran?
+- Was the right scope tested?
+- Are there cross-scope concerns?
+
+## A real mix
+
+A team's setup:
+
+- 8 per-feature evals (one per shipped feature).
+- 1 per-model eval (300 cases spanning use cases).
+- Per-feature run on every PR touching that feature.
+- Per-model run quarterly + on model bumps.
+
+Per-feature catches feature regressions. Per-model catches model-quality shifts.
+
+## Trade-offs
+
+- More eval suites = more maintenance.
+- Single eval = less coverage of scope-specific issues.
+
+Most teams need 5-15 per-feature evals plus a per-model eval. More than that becomes hard to maintain.
+
+## What we won't ship
+
+**Single eval suite** for diverse features.
+
+**Per-feature evals** without per-model coverage.
+
+**Per-model evals** without per-feature coverage.
+
+**Skipping the model-bump per-model eval run.**
+
+## Close
+
+Per-feature and per-model evals serve different purposes. The team needs both. Different cadences, different content. Skip either and the eval has blind spots.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — start here.
+- [Eval taxonomy](/blog/eval-taxonomy) — types in each scope.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening eval scopes, we'd love to hear about it. [Get in touch.](/contact)*

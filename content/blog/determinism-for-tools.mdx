@@ -1,0 +1,89 @@
+---
+title: "Determinism for tool calls: keys, ordering, side-effects"
+description: "Tool calls have side effects. Determinism is the engineering that makes side effects safe to retry."
+date: "2026-10-12"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Tools", "Engineering", "Predictable Output", "Determinism"]
+series: "Predictable AI output"
+seriesOrder: 19
+---
+
+A team's agent created a customer record, then crashed. The retry created a second customer record. The team's customer database had a duplicate that took hours to find.
+
+Tool calls with side effects need determinism. The pattern is engineering — keys, ordering, side-effect awareness.
+
+## The side-effect rule
+
+For each tool, classify the side-effect risk:
+
+- **No side effect.** Read operations. Safe to retry freely.
+- **Idempotent side effect.** Operations with idempotency keys. Safe to retry.
+- **Non-idempotent side effect.** Operations without keys. Retry only with care.
+
+The agent's retry policy is sensitive to this classification. Read tools retry liberally. Non-idempotent write tools retry conservatively or not at all.
+
+## Tool key design
+
+For tools that have side effects:
+
+- Each call gets a unique idempotency key.
+- The key is generated at the agent's call site, not by the tool.
+- The key is stable across retries of the same logical operation.
+
+The tool's provider deduplicates on the key. Retries are safe.
+
+## Reviewer ritual
+
+The team audits side-effect-having operations:
+
+- Are duplicates appearing in downstream systems?
+- Are idempotency keys being used correctly?
+- Are retry policies appropriate per tool?
+
+Without auditing, duplicate-creation issues compound silently.
+
+## A real tool
+
+A scenario: a customer-creation tool.
+
+```python
+@tool(
+    side_effect_class="non-idempotent",
+    requires_idempotency_key=True,
+)
+def create_customer(name: str, email: str, idempotency_key: str) -> Customer:
+    ...
+```
+
+The tool requires an idempotency key. The agent's framework provides it. The provider dedupes. Retries are safe.
+
+## Failure modes
+
+- **Missing key.** Tool refuses to run. Better than a duplicate.
+- **Stale key cache.** Older retries return outdated results. Cache TTL matters.
+- **Inconsistent key generation.** Different runs produce different keys for the same operation. Defeats deduplication. Test.
+
+## What we won't ship
+
+**Tools with side effects** that don't require idempotency keys.
+
+**Retry policies** that retry non-idempotent tools without care.
+
+**Side-effect classification** missing from tool definitions.
+
+**Skipping the audit.** Duplicates compound.
+
+## Close
+
+Determinism for tool calls is the engineering that makes retries safe. Side-effect classification. Idempotency keys. Audit discipline. The team that handles this carefully ships agents that don't accidentally double-charge customers, double-email customers, or duplicate-create records.
+
+## Related reading
+
+- [Idempotency keys for LLM calls](/blog/idempotency-keys-for-llm-calls) — companion pattern.
+- [Tool failure modes](/blog/tool-failure-modes) — surrounding engineering.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hardening tool determinism, we'd love to hear about it. [Get in touch.](/contact)*

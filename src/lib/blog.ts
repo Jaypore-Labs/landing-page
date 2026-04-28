@@ -12,6 +12,8 @@ export interface BlogPost {
   author: string;
   category: string;
   tags: string[];
+  series?: string;
+  seriesOrder?: number;
   image?: string;
   content: string;
   readingTime: string;
@@ -25,6 +27,8 @@ export interface BlogPostMeta {
   author: string;
   category: string;
   tags: string[];
+  series?: string;
+  seriesOrder?: number;
   image?: string;
   readingTime: string;
 }
@@ -58,6 +62,8 @@ export function getAllPosts(): BlogPostMeta[] {
         author: data.author || "Jaypore Labs",
         category: data.category || "General",
         tags: data.tags || [],
+        series: data.series || undefined,
+        seriesOrder: typeof data.seriesOrder === "number" ? data.seriesOrder : undefined,
         image: data.image,
         readingTime: calculateReadingTime(content),
       };
@@ -80,6 +86,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
       author: data.author || "Jaypore Labs",
       category: data.category || "General",
       tags: data.tags || [],
+      series: data.series || undefined,
+      seriesOrder: typeof data.seriesOrder === "number" ? data.seriesOrder : undefined,
       image: data.image,
       content,
       readingTime: calculateReadingTime(content),
@@ -132,4 +140,23 @@ export function getPostsByTag(tag: string): BlogPostMeta[] {
   return getAllPosts().filter((p) =>
     p.tags.some((t) => slugify(t) === slug)
   );
+}
+
+export function getAllSeries(): string[] {
+  const all = getAllPosts();
+  const set = new Set<string>();
+  for (const p of all) if (p.series) set.add(p.series);
+  return Array.from(set);
+}
+
+export function getPostsBySeries(series: string): BlogPostMeta[] {
+  const slug = slugify(series);
+  return getAllPosts()
+    .filter((p) => p.series && slugify(p.series) === slug)
+    .sort((a, b) => {
+      const ao = a.seriesOrder ?? 9999;
+      const bo = b.seriesOrder ?? 9999;
+      if (ao !== bo) return ao - bo;
+      return new Date(a.date) > new Date(b.date) ? 1 : -1;
+    });
 }

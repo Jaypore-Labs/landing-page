@@ -1,0 +1,93 @@
+---
+title: "The new test pyramid for AI products"
+description: "The classic test pyramid still applies. New layers — evals, drift, behavioural — sit alongside it."
+date: "2026-10-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Test Pyramid"]
+series: "Testing in the age of AI"
+seriesOrder: 1
+---
+
+The classic test pyramid — unit at the base, integration in the middle, end-to-end at the top — still applies to AI products. AI just adds new layers that don't fit the pyramid's existing slots.
+
+This series walks the new shape. It's not "throw out everything you knew." It's "the pyramid grew sideways."
+
+## Where unit tests still earn their keep
+
+Unit tests still pay for:
+
+- Pure functions in the codebase (formatters, validators, parsers).
+- Schema definitions.
+- Tool implementations (the deterministic logic the agent calls).
+- Helper utilities.
+
+These don't disappear because AI is added. They cover the deterministic substrate the AI sits on.
+
+## Where integration tests shift
+
+Integration tests for AI products:
+
+- Multi-step flows that combine deterministic + LLM components.
+- Tool use that spans multiple services.
+- RAG pipelines (retrieval + synthesis).
+
+These are useful but slower than unit tests. Run a smaller set on every PR; full set on main.
+
+## Where eval becomes its own layer
+
+Evals are the new layer:
+
+- Per-feature eval sets.
+- Drift evals.
+- Behavioural evals.
+- Adversarial evals.
+
+These don't fit "unit" or "integration" cleanly. They run against the LLM-powered features. They have their own discipline.
+
+## The pyramid redrawn
+
+The new shape:
+
+```
+       e2e + manual
+     ↗               ↘
+integration      eval (new)
+     ↘               ↗
+       unit
+```
+
+Unit at the base. Integration and evals as middle layers. End-to-end and manual at the top.
+
+The pyramid keeps its shape (more cheap tests at the base, fewer expensive tests at the top). Evals get their own slot at the integration level.
+
+## A real test plan
+
+For a typical AI feature:
+
+- Unit tests for the deterministic logic (validators, formatters).
+- Integration tests for the multi-component flows.
+- Eval set for the LLM-powered behaviour.
+- Adversarial eval for safety.
+- Drift eval for ongoing monitoring.
+- Manual end-to-end for visual/UX correctness.
+
+Each layer runs at appropriate cadence. Each catches what the others miss.
+
+## What this series will cover
+
+The next 24 articles walk specific testing topics: integration tests for AI features, golden-set discipline, behavioural assertions, property-based testing for LLMs, snapshot tests, eval-driven development, regression cohorts, drift tests, CI strategy, determinism harnesses, mocking, test data management, PII in fixtures, agent traces, streaming responses, retrieval pipelines, e2e tests, performance, cost tests, accessibility, privacy, prompt injection, UX, post-launch.
+
+## Close
+
+The new test pyramid integrates evals as a first-class layer alongside the classic levels. Unit at the base, integration in the middle, evals beside integration, end-to-end at the top. Skip any layer and the product has a blind spot.
+
+## Related reading
+
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — eval framing.
+- [ML: eval harness from a spec](/blog/ml-eval-harness-from-spec) — eval scaffolding.
+- [Predictable AI output series](/series/predictable-ai-output) — what the eval layer tests.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building the testing strategy for AI products, we'd love to hear about it. [Get in touch.](/contact)*

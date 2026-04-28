@@ -1,0 +1,116 @@
+---
+title: "OSS maintainer: triage + contributor-guide updates"
+description: "Open-source maintainership is mostly triage. AI-assisted triage lets a sole maintainer do it sustainably."
+date: "2026-08-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Open Source", "Maintainership", "AI Development", "Community"]
+series: "AI for software development"
+seriesOrder: 25
+---
+
+A maintainer of a popular open-source library told us once that her core skill wasn't writing code. It was triaging the 200 issues and 30 PRs in her inbox without losing her mind. The triage took half her open-source time. Most weeks the inbox grew faster than she could process.
+
+Claude Code makes the triage scale. The AI does the first-pass categorisation. The maintainer does the judgments that need her. The library's responsiveness improves without burning her out.
+
+## Triage automation
+
+For each new issue or PR, the AI runs a first pass:
+
+- **Issue type.** Bug, feature request, question, documentation, off-topic.
+- **Reproducibility.** Is there enough info to reproduce a bug? Or is it under-specified?
+- **Duplicate check.** Does this match an existing issue?
+- **Severity.** Critical (broken core feature), high (broken edge case), medium (degraded UX), low (cosmetic).
+- **Skill match.** Does this need maintainer-level judgment, or could a community contributor handle it?
+
+The AI labels and posts a comment when appropriate ("Could you provide a minimal reproduction?", "This looks like a duplicate of #1234, please re-open if it's distinct").
+
+The maintainer reviews labels and corrects. False positives feed the eval.
+
+## Contributor experience
+
+A subtle but important value: respect for the contributor. AI-driven triage that feels dismissive ("auto-closed: please follow the template") drives contributors away. Triage that feels welcoming ("Thanks for the issue! Could you add the version of X you're using? That'll help me reproduce.") brings them back.
+
+The voice eval matters. The maintainer sets the tone; the AI maintains it across the inbox.
+
+## Issue deduplication
+
+A common high-volume issue: 5 different reports of the same bug, each phrased slightly differently. The maintainer used to spend 20 minutes reading each one to figure out they were the same. The AI:
+
+- Identifies probable duplicates at issue creation.
+- Posts a "this looks similar to #..." comment.
+- Routes the new issue to the existing thread if confirmed.
+
+When the bug is fixed, all related issues get notified at once.
+
+## Reviewer loop for PRs
+
+For PRs, the AI's first pass is similar to the team-tech-lead review:
+
+- Description vs. diff.
+- Test coverage.
+- Style/convention adherence.
+- Documentation updates.
+
+For external contributors, the bar shifts toward welcoming. The AI's comments are more "could you also..." than "you must...". The maintainer reviews the substance.
+
+## Contributor-guide updates
+
+A pattern that compounds: every triage interaction reveals a doc gap. The AI surfaces:
+
+- Questions asked repeatedly that aren't in the contributor guide.
+- Issues caused by misuse that better docs would have prevented.
+- PR rejections that better contribution docs would have prevented.
+
+The maintainer updates the contributor guide periodically. Friction reduces.
+
+## A real triage day
+
+A scenario: maintainer wakes up to 12 new issues, 3 new PRs.
+
+**Minutes 0-10.** AI's overnight triage. Categorised, labelled, low-severity items closed politely with pointers to docs.
+
+**Minutes 10-30.** Maintainer reviews flagged items. 2 critical bugs need her attention. 4 medium issues routed to community contributors with starter pointers. 1 PR ready to merge after small adjustments.
+
+**Hours 1-3.** Maintainer ships fixes for the 2 critical bugs and reviews the PR.
+
+**Total maintainer time on triage: 30 minutes** (down from a typical 90).
+
+The remaining time goes to actual code work and community engagement.
+
+## What stays human
+
+- Architectural decisions.
+- Decisions about which features to accept (not every contribution fits the project's vision).
+- Difficult-conversation handling (rejecting work, addressing community conflicts).
+- Project-strategy decisions.
+
+Senior maintainer judgment. The AI handles the routine.
+
+## What we won't ship
+
+**Auto-closing issues** without thoughtful messaging. Mass auto-closure feels rude.
+
+**Auto-merging contributor PRs** without human review.
+
+**Anything that masks the project's contribution requirements.** Clear is better than welcoming-but-vague.
+
+**Decisions about project direction** based on AI inference. Direction is the maintainer's call.
+
+## How to start
+
+Wire the AI into the project's issue/PR webhook. Run for a week. Watch how triage feels for the maintainer and for contributors. Tune the voice. Tune the labelling. The project's responsiveness improves; the maintainer's load decreases.
+
+## Close
+
+OSS triage with Claude Code is the difference between burnout and sustainability for a sole maintainer. The AI handles the routine. The maintainer handles the judgment. The contributor experience improves because triage is fast and respectful. The project's velocity goes up.
+
+## Related reading
+
+- [EM: PR reviewer that flags scope creep](/blog/claude-code-pr-reviewer) — same review-discipline pattern.
+- [Tech writer: doc audits](/blog/tech-writer-doc-audits) — same gap-finding discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're maintaining open source, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,88 @@
+---
+title: "Constrained decoding: the underrated lever"
+description: "When grammars constrain the model's output token-by-token, retries become unnecessary. Where the tooling supports it, use it."
+date: "2026-09-18"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Constrained Decoding", "Engineering", "Predictable Output", "Grammars"]
+series: "Predictable AI output"
+seriesOrder: 3
+---
+
+A team's structured-output reliability sat at 96%. The 4% misses were the source of every "wait, what?" incident. The team's solution — retry-on-validation-failure — added latency and didn't always succeed. Constrained decoding raised reliability to 99.7%.
+
+When the model's output is constrained at the token level by a grammar, the validation success rate climbs to nearly 100%. The cost: more setup work, sometimes a slight quality trade-off in fluent prose.
+
+## Where grammars beat retries
+
+Constrained decoding wins when:
+
+- The output is highly structured (JSON, SQL, code in a specific language).
+- The schema is fixed and known at request time.
+- The provider supports grammar-constrained output.
+- The cost of retry is high (latency, money, user-facing).
+
+It loses when:
+
+- The output is mostly prose with structure embedded.
+- Schema varies per request.
+- Provider doesn't support it.
+- The grammar is so restrictive it cripples generation quality.
+
+## Cost shape
+
+Grammar-constrained generation:
+
+- Often slightly slower per token (overhead).
+- Eliminates retry rounds (faster overall).
+- Uses fewer tokens (no malformed output to throw away).
+
+Net: usually faster and cheaper than retry-based approaches.
+
+## Tooling state
+
+Provider support varies. Anthropic, OpenAI, and others have varying degrees of grammar/schema enforcement. Open-source frameworks (Outlines, Guidance, llguidance) provide grammar constraints over open-source models.
+
+The tooling is improving. Where it's mature, use it. Where it's not, fall back to schema + validation.
+
+## Reviewer ritual
+
+When adopting constrained decoding:
+
+- Eval the constrained version against the unconstrained baseline.
+- Check for quality regressions on tasks where the constraint is less natural.
+- Verify the cost shape matches expectations.
+- Document the constraint rules so future engineers understand them.
+
+## A real adoption
+
+A team adopted constrained decoding for their data-extraction pipeline:
+
+- Pre: 96% schema validity, 4% retries, occasional misses.
+- Post: 99.8% schema validity, near-zero retries.
+
+Quality of extracted fields was equivalent. Latency dropped (no retries). Cost dropped slightly.
+
+The team kept unconstrained mode for prose-heavy tasks. The mix matched the workload.
+
+## What we won't ship
+
+**Constrained decoding for prose-heavy tasks** without quality eval.
+
+**Adoption** without provider stability assessment (will the provider continue supporting this?).
+
+**Migration** from constrained to unconstrained without notice.
+
+## Close
+
+Constrained decoding is the underrated lever. Where supported and applicable, it nearly eliminates structured-output failures. The setup work is real. The reliability gain is large. Most teams could ship more constrained-decoding paths than they currently do.
+
+## Related reading
+
+- [Structured output](/blog/structured-output) — preceding layer.
+- [Output validation libs](/blog/output-validation-libs) — companion approach.
+- [Predictable output series](/series/predictable-ai-output) — the wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're adopting constrained decoding, we'd love to hear about it. [Get in touch.](/contact)*

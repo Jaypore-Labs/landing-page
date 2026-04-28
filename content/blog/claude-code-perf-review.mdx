@@ -1,0 +1,134 @@
+---
+title: "HR: performance-review draft assistant"
+description: "Performance reviews are real work that gets rushed. AI employees absorb the data-gathering so managers can focus on the conversation."
+date: "2026-06-30"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "HR AI", "AI Employees", "Performance Reviews", "Calibration"]
+series: "Claude Code in business"
+seriesOrder: 20
+---
+
+A People Ops director told us last year that the company's review cycle was "ninety percent panic, ten percent thoughtful work." Managers had a week to write reviews for everyone on their team. The reviews ended up generic, hedged, and biased toward whatever feedback was freshest in the manager's mind.
+
+The performance-review draft assistant solves the panic. It does the data-gathering during the review window. The manager arrives at the writing with the source material assembled, prompts about what they might be missing, and a bias-flag pass that catches the common pitfalls.
+
+## The shape of the role
+
+**Title.** People Ops AI — Performance Review Specialist.
+
+**Mission.** Assemble per-employee review-cycle source material; flag potential bias; draft starter language for the manager to edit.
+
+**Outcomes.** Manager review prep time, review quality (calibrated by HR), bias-flag accuracy.
+
+**Reports to.** Head of People or VP People Ops.
+
+**Tools.** Self-review intake, peer-feedback intake, prior-review history, performance-data integration (if applicable), bias-pattern eval.
+
+**Boundaries.** Drafts and surfaces. Manager writes the final review. Doesn't make rating decisions.
+
+## What the agent assembles
+
+For each employee under review, the agent compiles:
+
+- **The self-review** in full, with key claims highlighted.
+- **Peer feedback** organised by theme, attributed by role (peer/cross-functional/direct report).
+- **Prior reviews** from the last cycle, with stated goals and the employee's progress.
+- **Performance data** where the role lends itself to it (sales numbers, on-time delivery, customer satisfaction scores).
+- **Goals from the cycle** and evidence about progress on each.
+
+This is the source material the manager would have spent a half-day assembling for each direct report. Now it's in one place, organised consistently, ready in 5 minutes.
+
+## The bias-flag pass
+
+The agent reviews for common review-writing biases:
+
+- **Recency bias.** Manager focuses heavily on the last quarter. Agent surfaces older work that should be considered.
+- **Halo/horns.** Manager is overly positive or negative across all dimensions. Agent suggests a re-look at less-obvious dimensions.
+- **Comparison bias.** Manager compares the employee to a different report rather than the role expectations. Agent flags.
+- **Likeability bias.** Manager's feedback skews to social/personality dimensions. Agent surfaces work-substance gaps.
+- **Gendered or culture-coded language.** Common patterns ("aggressive" applied to women, "soft" applied to men) flagged.
+
+Each flag is a question for the manager, not an accusation. Manager addresses or explains.
+
+## Calibration prep
+
+Before calibration meetings (where managers align ratings across the org), the agent compiles:
+
+- The cohort of employees being calibrated.
+- The proposed rating distribution.
+- Any outliers (someone rated higher or lower than expected for their role/level).
+- Cross-cohort comparisons (people of similar seniority with different ratings — what differentiates them?).
+
+This is the prep that calibration meetings live or die on. Without it, calibration is a vibes exercise. With it, it's grounded.
+
+## What the manager actually does
+
+After the agent's prep, the manager:
+
+- Reads the assembled source material (10-15 minutes per direct report).
+- Engages with the bias-flag prompts.
+- Drafts the review using the agent's starter language as a foundation.
+- Refines based on their own observations.
+- Submits.
+
+The total time per review drops from 2-3 hours to 60-90 minutes. The review quality goes up because the data is comprehensive.
+
+## What this saves at scale
+
+A 200-person company with 25 managers, each managing 5-10 direct reports:
+
+- Pre-agent: ~50-100 manager-hours of review prep per cycle.
+- Post-agent: ~20-40 manager-hours.
+
+Plus: review quality is more even (managers don't run out of time at the end of their list), bias-flags are visible, calibration meetings are grounded. The qualitative gain is bigger than the time savings.
+
+## Receipts for review
+
+Each review's source material is archived. A year later, when the employee or HR or a regulator asks "what was the basis for this review?", the answer exists:
+
+- Self-review.
+- Peer feedback.
+- Prior goals + progress.
+- Performance data.
+- Bias-flags + how they were addressed.
+- Calibration record.
+
+This is review-as-evidence rather than review-as-narrative. It matters most when something goes wrong.
+
+## What we won't ship
+
+**Auto-rating.** Ratings are the manager's call.
+
+**Auto-firing recommendations.** Termination is HR + management.
+
+**Performance prediction** beyond what the data shows.
+
+**Anything that uses surveillance signals** the employee didn't consent to.
+
+## The KPIs the head of people watches
+
+1. **Manager review prep time.**
+2. **Review quality** (HR's qualitative score).
+3. **Bias-flag-acceptance rate** (managers acting on flags).
+4. **Cycle-completion rate on time.**
+
+If review quality drops, the agent's drafts are leading managers astray. Pull back the starter-language depth.
+
+## How to start
+
+One team. One cycle. The manager and agent work together. Compare to the manager's previous-cycle reviews. Tune. Once the manager prefers the agent-assisted process, expand to other teams.
+
+## Close
+
+The performance-review AI employee is a teammate whose job is the data-gathering layer of review writing. The manager keeps the judgment. The bias-flags catch the common pitfalls. The review quality goes up while prep time goes down. Calibration becomes grounded. The artifact is audit-ready.
+
+## Related reading
+
+- [HR: onboarding-buddy automation](/blog/claude-code-onboarding-buddy) — companion role for new hires.
+- [Agents in HR: bias receipts](/blog/agents-in-hr-recruiting) — same bias discipline, recruiting context.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI people-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

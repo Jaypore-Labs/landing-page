@@ -5,6 +5,7 @@ import {
   getAllTags,
   slugify,
 } from "@/lib/blog";
+import { series } from "@/data/series";
 import { siteConfig } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -48,7 +49,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/series`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
   ];
+
+  const seriesPages: MetadataRoute.Sitemap = series.map((s) => ({
+    url: `${baseUrl}/series/${s.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
 
   const blogPages: MetadataRoute.Sitemap = getAllPostSlugs().map((slug) => ({
     url: `${baseUrl}/blog/${slug}`,
@@ -71,5 +97,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.4,
   }));
 
-  return [...staticPages, ...blogPages, ...categoryPages, ...tagPages];
+  return [
+    ...staticPages,
+    ...seriesPages,
+    ...blogPages,
+    ...categoryPages,
+    ...tagPages,
+  ];
 }

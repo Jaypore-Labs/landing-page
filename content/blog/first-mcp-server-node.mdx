@@ -1,0 +1,121 @@
+---
+title: "Your first MCP server (Node)"
+description: "A minimal MCP server in Node, from boilerplate to deployment."
+date: "2027-01-01"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Node.js", "Engineering", "Tutorial", "Servers"]
+series: "MCP & AI protocols"
+seriesOrder: 3
+---
+
+This is the get-started article. A minimal MCP server in Node. From `npm init` to working server in under an hour.
+
+## The boilerplate
+
+```bash
+npm init -y
+npm install @modelcontextprotocol/sdk
+```
+
+A skeleton:
+
+```javascript
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
+const server = new Server(
+  { name: "my-server", version: "1.0.0" },
+  { capabilities: { tools: {} } }
+);
+
+// Tool definitions go here
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+This is a stdio server. The AI assistant runs the server as a child process and communicates over stdin/stdout.
+
+## Tool definition
+
+Add a tool:
+
+```javascript
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [{
+    name: "get_weather",
+    description: "Get current weather for a city",
+    inputSchema: {
+      type: "object",
+      properties: {
+        city: { type: "string", description: "City name" }
+      },
+      required: ["city"]
+    }
+  }]
+}));
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  if (request.params.name === "get_weather") {
+    const city = request.params.arguments.city;
+    const weather = await fetchWeather(city);
+    return {
+      content: [{ type: "text", text: weather }]
+    };
+  }
+});
+```
+
+## Reviewer ritual
+
+PR review for new MCP servers:
+
+- Tool names clear and discoverable.
+- Schemas precise.
+- Errors instructive.
+- Tests cover the tool's behaviour.
+
+## A real server
+
+A small team's MCP server for their internal API:
+
+- 3 tools: list, get, create.
+- 200 lines of Node.
+- Used across the team's AI assistants.
+
+Total time to ship: 4 hours.
+
+## How to ship
+
+The team chooses transport based on use:
+
+- stdio: local server. The assistant runs the server.
+- HTTP: shared server. Multiple users connect.
+- SSE: server-pushes events.
+
+For internal tools, stdio is often enough. For SaaS tools, HTTP or SSE.
+
+## What we won't do
+
+**MCP servers** without tool tests.
+
+**Tool descriptions** that are vague.
+
+**Skipping the schema discipline.** Tool design matters.
+
+**Servers** that don't handle errors gracefully.
+
+## Close
+
+A first MCP server in Node is a few hours of work. The boilerplate is small. The discipline is in tool design and testing. Once you have one server, the second is faster.
+
+## Related reading
+
+- [Your first MCP server (Python)](/blog/first-mcp-server-python) — Python equivalent.
+- [MCP tool naming](/blog/mcp-tool-naming) — discoverability.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building MCP servers, we'd love to hear about it. [Get in touch.](/contact)*

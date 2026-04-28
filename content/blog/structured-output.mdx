@@ -1,0 +1,95 @@
+---
+title: "Structured output: JSON mode, schemas, why one beats the other"
+description: "JSON mode and schema mode are not the same thing. The schema is what makes outputs trustworthy."
+date: "2026-09-17"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Structured Output", "Engineering", "Predictable Output", "Schemas"]
+series: "Predictable AI output"
+seriesOrder: 2
+---
+
+A team shipped a feature using "JSON mode" assuming it gave them structured output. The model returned JSON. The JSON's structure varied wildly: sometimes an array of objects, sometimes a single object, sometimes a nested wrapper. The downstream code broke on every variant.
+
+JSON mode and schema mode are not the same thing. JSON mode says "the output is valid JSON." Schema mode says "the output matches this schema." The schema is what actually makes outputs trustworthy.
+
+## The comparison
+
+**JSON mode** (provider-side): the model is constrained to produce syntactically-valid JSON. The shape is up to the model.
+
+**Schema mode** (provider-side, where supported): the model is constrained to produce JSON matching a specific schema. Both syntax and structure are guaranteed.
+
+**Pydantic/Zod validation** (client-side): the client validates the output against a schema. Outputs that don't match are rejected.
+
+The right pattern is usually schema mode + client-side validation. Belt and suspenders.
+
+## Failure modes
+
+Even with schema mode, outputs can fail:
+
+- Schema-mode supports a subset of JSON Schema; some constraints don't enforce.
+- Edge cases in the schema (recursive types, complex unions) may not constrain reliably.
+- Provider regressions introduce variance.
+
+Client-side validation catches what provider constraints miss.
+
+## Validation layer
+
+The validation layer is non-negotiable:
+
+- Every LLM output passes through it.
+- Failures are logged with full context.
+- Failures go to retry or fallback, not to the downstream system.
+
+A team without a validation layer is trusting the provider's enforcement entirely. That trust is misplaced.
+
+## A real implementation
+
+```python
+from pydantic import BaseModel, Field
+from typing import Literal
+
+class TicketClassification(BaseModel):
+    category: Literal["billing", "technical", "feature_request", "complaint"]
+    confidence: float = Field(ge=0, le=1)
+    reasoning: str = Field(min_length=20, max_length=500)
+
+# LLM call with schema
+response = call_llm(
+    prompt=...,
+    schema=TicketClassification.model_json_schema()
+)
+
+# Client-side validation
+try:
+    classified = TicketClassification.model_validate_json(response.text)
+except ValidationError as e:
+    log_failure(e, response.text)
+    classified = retry_or_fallback()
+```
+
+Provider-side schema constrains the LLM. Pydantic validates. Failures are handled.
+
+## What we won't ship
+
+**JSON mode treated as schema enforcement.**
+
+**Outputs without client-side validation.**
+
+**Retries that don't change anything.** If the first call failed validation, the second is likely to fail too unless something changes (different prompt, different model, different temperature).
+
+**Fallback paths that aren't tested.**
+
+## Close
+
+Structured output is more than JSON mode. The schema is the contract. Provider constraint helps. Client-side validation catches what provider misses. The system stays reliable because both layers do their work.
+
+## Related reading
+
+- [Probabilistic with deterministic contracts](/blog/probabilistic-with-deterministic-contracts) — surrounding pattern.
+- [Output validation: pydantic, zod, friends](/blog/output-validation-libs) — implementation depth.
+- [Constrained decoding](/blog/constrained-decoding) — the next level.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening structured output, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,97 @@
+---
+title: "MCP tool schemas: arg shapes that help"
+description: "Schemas tell the AI what arguments mean. Precision in schemas reduces wrong-arg rates."
+date: "2027-01-06"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Schemas", "Engineering", "Tool Design", "Arguments"]
+series: "MCP & AI protocols"
+seriesOrder: 6
+---
+
+A team's MCP tool took a parameter `id`. Sometimes the AI sent a customer ID; sometimes an invoice ID. The tool returned errors. The cause: the schema said `id: string` without specifying which entity.
+
+Schemas tell the AI what arguments mean. Precision matters.
+
+## The schema rules
+
+Each parameter:
+
+- Specific name (not `id` — `customer_id`).
+- Specific type (not `string` for everything — `email`, `iso_date`, `currency_amount`).
+- Description (one sentence; what it is, what's valid).
+- Required if required; optional if optional.
+- Constraints (min/max, enums) where applicable.
+
+## Reviewer ritual
+
+Schema review:
+
+- Each parameter named precisely.
+- Description present and useful.
+- Types as specific as JSON Schema allows.
+- Required-vs-optional accurate.
+
+## A real schema
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "customer_id": {
+      "type": "string",
+      "pattern": "^cust_[A-Z0-9]{12}$",
+      "description": "Customer ID, format cust_XXXXXXXXXXXX"
+    },
+    "amount_cents": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000,
+      "description": "Refund amount in cents (1 cent to $10,000)"
+    },
+    "reason": {
+      "type": "string",
+      "enum": ["duplicate", "fraud", "requested", "error"],
+      "description": "Refund reason category"
+    }
+  },
+  "required": ["customer_id", "amount_cents", "reason"]
+}
+```
+
+The AI sees this schema. It produces well-formed calls because the constraints are explicit.
+
+## Trade-offs
+
+- Tighter schemas = fewer wrong-arg errors but more schema-validation rejections.
+- Looser schemas = more flexibility but more downstream errors.
+
+Lean tight. Schema-rejected is better than runtime-error.
+
+## Limits
+
+Some arguments are inherently free-form (search queries, user prose). For these, the description does the work the schema can't.
+
+## What we won't ship
+
+**Generic types** when specific would do.
+
+**Missing descriptions.** Every parameter has one.
+
+**Missing required-vs-optional** distinction.
+
+**Schemas** that don't match what the tool actually accepts.
+
+## Close
+
+MCP tool schemas guide the AI's call construction. Precision in schemas reduces errors. Specific names, specific types, descriptions, constraints. Skip the discipline and the AI sends malformed calls.
+
+## Related reading
+
+- [MCP tool naming](/blog/mcp-tool-naming) — companion discipline.
+- [Output validation libs](/blog/output-validation-libs) — server-side enforcement.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening MCP schemas, we'd love to hear about it. [Get in touch.](/contact)*

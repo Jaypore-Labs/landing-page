@@ -1,0 +1,90 @@
+---
+title: "Few-shot drift: why golden examples poison new versions"
+description: "Few-shot examples have a half-life. The discipline is curation."
+date: "2026-09-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Few-shot", "Engineering", "Predictable Output", "Prompts"]
+series: "Predictable AI output"
+seriesOrder: 9
+---
+
+A team's prompt had 7 few-shot examples chosen carefully 18 months ago. The examples had been added in the days of an older model. They worked great then. With the current model — and the team's evolved use case — the examples were now mildly biasing outputs in unwanted directions.
+
+Few-shot examples have a half-life. They become stale. The discipline is curation, not addition.
+
+## The example half-life
+
+Few-shot examples drift because:
+
+- The model behind them changes (provider updates).
+- The use case evolves (new categories, new edge cases).
+- The team's voice shifts (style guide updates).
+- Prior good examples become representative of yesterday's preferences.
+
+What was the gold standard 18 months ago is the silver standard today.
+
+## Curation discipline
+
+The pattern that works:
+
+- Few-shot examples are versioned in the prompt's repo.
+- Each has a date added.
+- Quarterly review: still representative? still good?
+- Examples that are no longer right get removed or replaced.
+- New examples reflect current behaviour expectations.
+
+This is the same discipline as eval-set curation. Examples are an asset; they need maintenance.
+
+## Reviewer loop
+
+When evaluating a few-shot prompt:
+
+- Is each example still demonstrating what we want?
+- Are there patterns the examples are missing?
+- Is the count appropriate (3 examples for simple tasks; 5-7 for complex)?
+
+Drop, add, refine. Don't accumulate.
+
+## A real cleanup
+
+A team's classifier:
+
+- 12 few-shot examples accumulated over 2 years.
+- Audit revealed 5 were redundant (similar to others).
+- 3 were stylistically inconsistent with current voice.
+- 2 demonstrated edge cases that no longer occurred.
+
+Cleanup: 4 well-curated examples instead of 12 accumulated ones. Accuracy on eval improved 2%. Token cost per request dropped meaningfully.
+
+The intuition that "more examples is better" is wrong past a point. Curation beats accumulation.
+
+## How to avoid
+
+- Don't add examples on a whim. Each example should demonstrate something specific.
+- Don't keep examples "in case." If you're not sure they help, they probably don't.
+- Don't blend examples from different style eras. Pick a recent representative set.
+
+## What we won't ship
+
+**Few-shot prompts** without versioning.
+
+**Few-shot prompts** that have grown beyond reviewability.
+
+**Examples that demonstrate** the wrong outcome (negative examples should be explicitly tagged or omitted).
+
+**Skipping the quarterly review.** The drift compounds.
+
+## Close
+
+Few-shot drift is real. Examples age. The discipline is curation, not addition. Quarterly reviews. Versioning. Cleanup. The prompt stays sharp. The model's outputs stay aligned. Skip the curation and the prompt becomes a museum of what the team used to want.
+
+## Related reading
+
+- [Prompt invariance](/blog/prompt-invariance) — companion robustness.
+- [Prompt evolution](/blog/prompt-evolution) — drift detection.
+- [Prompts are recipes](/blog/prompts-are-recipes) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're curating few-shot prompts, we'd love to hear about it. [Get in touch.](/contact)*

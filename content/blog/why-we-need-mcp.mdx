@@ -1,0 +1,84 @@
+---
+title: "Why we need MCP at all"
+description: "The integration-drawer problem MCP solves. The problem was real before the protocol."
+date: "2026-12-31"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "AI Protocols", "Engineering", "Integration", "Standards"]
+series: "MCP & AI protocols"
+seriesOrder: 2
+---
+
+In 2023, integrating an AI assistant with the team's tooling meant writing custom code per assistant per tool. Slack-Claude, Slack-ChatGPT, Linear-Claude, Linear-ChatGPT — the matrix grew quadratically.
+
+This was the integration drawer: a place full of cables, each one specific to one device-pair, none reusable.
+
+MCP is the USB-C of AI tooling. One protocol; many assistants; many tools.
+
+## The problem before MCP
+
+A team building an AI integration faced:
+
+- Per-assistant SDK choices.
+- Per-tool authentication patterns.
+- Per-team-member configuration.
+- No standard transport.
+- No schema standard for tools.
+
+Each integration was custom work. Switching assistants meant re-doing integrations. Switching tools meant re-doing assistant configurations.
+
+## MCP's answer
+
+MCP introduces:
+
+- One protocol for tool description.
+- One schema for tool arguments.
+- Three standardised transports.
+- One pattern for auth.
+
+The team writes the integration once. Any MCP-compatible assistant can use it.
+
+## A real pain
+
+A team integrated Slack with Claude in 2023. Custom code: 800 lines.
+
+Same team integrated Slack with Claude in 2026 via MCP: 0 lines (used existing MCP server).
+
+The MCP server itself is reusable across assistants. The team's investment in MCP-compatible tooling compounds.
+
+## How MCP helps
+
+For teams:
+
+- Faster integration (use existing servers).
+- Lower lock-in (servers are portable).
+- Better tooling ecosystem (vendors target MCP).
+- Standards-based scaling.
+
+For vendors:
+
+- Build one MCP server, support many assistants.
+- Less per-assistant maintenance.
+- Wider distribution.
+
+## What we won't do
+
+**Avoid MCP because the team's AI assistant is "different."** Most major assistants now support MCP.
+
+**Build custom integrations** when an MCP server already exists.
+
+**Lock into a single AI provider** when MCP makes the choice reversible.
+
+## Close
+
+MCP solves the integration-drawer problem. Before, every integration was custom. Now, one protocol; many assistants; many tools. The team's investment scales. Skip MCP and you're rebuilding integrations every time the AI provider changes.
+
+## Related reading
+
+- [MCP in 10 minutes](/blog/mcp-in-10-minutes) — primer.
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — framing.
+- [Tool design like APIs](/blog/tool-design-like-apis) — companion discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're considering MCP, we'd love to hear about it. [Get in touch.](/contact)*

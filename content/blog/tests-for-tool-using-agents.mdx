@@ -1,0 +1,97 @@
+---
+title: "Tests for tool-using agents: trace assertions"
+description: "For agents that use tools, the trace is the artifact to assert against."
+date: "2026-11-10"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Agents", "Engineering", "Testing for AI", "Traces"]
+series: "Testing in the age of AI"
+seriesOrder: 15
+---
+
+A team's agent failed in production: it had used the wrong tool for a customer query. The team's tests checked the agent's final output, which happened to be reasonable. The wrong-tool issue went undetected. The right tool would have surfaced richer information.
+
+For tool-using agents, the trace is the artifact to assert against. Final-output assertions miss what trace assertions catch.
+
+## Trace-as-fixture
+
+Each test case has:
+
+- The input.
+- The expected trace (or trace properties).
+- The expected final output.
+
+The trace properties might be:
+
+- "Should call tool X first."
+- "Should call tool Y if X returns N results."
+- "Should not call tool Z."
+- "Should call no more than 3 tools total."
+
+These assert the agent's reasoning, not just its output.
+
+## Assertion library
+
+Common assertions:
+
+- Tool was called (with specific arguments).
+- Tool was called in a specific order.
+- Tool was not called.
+- Tool was called within a count threshold.
+- Specific reasoning step appeared in the trace.
+
+These can be tested programmatically once trace structure is consistent.
+
+## Reviewer ritual
+
+PR review for tool-using-agent tests:
+
+- Are trace properties asserted, not just outputs?
+- Does the test exercise the agent's tool-selection logic?
+- Are trace assertions stable enough to not be flaky?
+
+## A real test set
+
+A team's customer-research agent:
+
+- 50 cases asserting tool selection (the right tool was used for the input).
+- 30 cases asserting tool order (correct sequencing).
+- 20 cases asserting tool-call counts (no excess).
+- 10 cases asserting specific reasoning patterns.
+
+The agent's tool-using behaviour is comprehensively tested. Output-only tests would have missed most of it.
+
+## Coverage
+
+Trace coverage:
+
+- Happy-path tool selection.
+- Edge-case tool selection.
+- Error-condition tool handling.
+- Cost-bounded tool calling.
+
+Each dimension matters; each gets tested.
+
+## What we won't ship
+
+**Tool-using agents** without trace-based tests.
+
+**Output-only tests** for systems where the trace matters.
+
+**Trace assertions** so brittle they break on minor agent behaviour changes.
+
+**Skipping trace recording in tests.** The trace is the artifact.
+
+## Close
+
+Tests for tool-using agents assert against the trace. The trace captures the reasoning. The reasoning is what makes the agent good or bad — independent of whether the final output happened to look reasonable. Skip trace assertions and you're testing the symptom rather than the system.
+
+## Related reading
+
+- [Agent observability](/blog/agent-observability) — what the trace contains.
+- [Tool design like APIs](/blog/tool-design-like-apis) — what gets tested.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're testing tool-using agents, we'd love to hear about it. [Get in touch.](/contact)*

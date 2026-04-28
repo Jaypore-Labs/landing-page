@@ -1,0 +1,83 @@
+---
+title: "MCP server rate limits: the polite-rejection pattern"
+description: "Rate limits protect the server. The 429 response tells the AI to back off."
+date: "2027-01-18"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Rate Limits", "Engineering", "Reliability", "429"]
+series: "MCP & AI protocols"
+seriesOrder: 14
+---
+
+A team's MCP server got hammered by an AI agent in a tight loop. Server resources exhausted. All users impacted. The fix would have been rate limits.
+
+Rate limits protect the server. The polite-rejection pattern (HTTP 429 with retry guidance) tells the AI to back off.
+
+## The 429 contract
+
+When rate-limited:
+
+- Return 429 status.
+- Include `Retry-After` header.
+- Include error message explaining the limit.
+
+The AI assistant respects the limit. The server stays healthy.
+
+## Reviewer ritual
+
+Rate-limit configuration:
+
+- Per-user limits.
+- Per-tool limits.
+- Burst allowance.
+- Long-window limits.
+
+## A real implementation
+
+A team's MCP server:
+
+- 60 requests per minute per user.
+- Burst of 10 in 5 seconds.
+- 1000 requests per hour per organisation.
+- 429 response with retry-after on breach.
+
+The AI assistant respects limits. Tight-loop bugs in agents stop being server-killing.
+
+## Trade-offs
+
+- Strict limits: protect the server; some legitimate work is delayed.
+- Loose limits: more user-friendly; server can be overwhelmed.
+
+The right level depends on the server's capacity.
+
+## Edge cases
+
+- Some operations are inherently bursty (initial load).
+- Some users are heavy by role (admins).
+- Some tools are inherently slow (allow fewer concurrent).
+
+Configure per-tool, per-user where it matters.
+
+## What we won't ship
+
+**MCP servers** without rate limits.
+
+**Limits** without 429 responses.
+
+**Limits** without retry-after guidance.
+
+**Limits** that aren't tested.
+
+## Close
+
+MCP server rate limits are the politeness pattern. 429 responses with retry-after. The AI backs off. The server stays healthy. Skip the limits and the next runaway agent takes the server down.
+
+## Related reading
+
+- [Cost guardrails](/blog/cost-guardrails) — same engineering-for-runaway pattern.
+- [Tool failure modes](/blog/tool-failure-modes) — surrounding discipline.
+- [MCP server observability](/blog/mcp-server-observability) — companion topic.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening rate limits, we'd love to hear about it. [Get in touch.](/contact)*

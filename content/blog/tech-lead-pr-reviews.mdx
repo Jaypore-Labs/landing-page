@@ -1,0 +1,114 @@
+---
+title: "Tech lead: PR reviews deeper than 'lgtm'"
+description: "Senior reviewers pattern-match. AI-assisted review surfaces what the tech lead would catch on a fresh read but might miss on the third PR of the day."
+date: "2026-08-10"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Tech Lead", "Code Review", "AI Development", "Mentorship"]
+series: "AI for software development"
+seriesOrder: 24
+---
+
+A tech lead at a SaaS company told us his PR-review depth was "inverse to the time of day." First review of the morning got careful attention. Third review at 5 PM got a quick scan and an LGTM. The unsubmitted bugs were probably in the third reviews.
+
+Claude Code adds a consistent floor. The AI runs a checklist across every PR. The tech lead's attention goes to the substance — design choices, mentorship moments, novel risks. The third-review-of-the-day still gets meaningful coverage.
+
+## The review template
+
+The tech lead's mental review template, made explicit:
+
+- **Design.** Is the approach sensible? Does it fit the codebase's patterns?
+- **Risk.** What could go wrong in production? Are the risks bounded?
+- **Test coverage.** Are the right behaviours tested? Are tests asserting the right things?
+- **Observability.** Is the change observable in production?
+- **Documentation.** Are public APIs documented? Is the change discoverable?
+- **Mentorship moment.** Is there something to teach the author for next time?
+
+The AI can't do all of this. It can do the mechanical checks (test coverage, documentation) and surface candidates for the substantive review (design and risk patterns the team has seen before).
+
+## Risk surfacing
+
+The AI's risk surfacing:
+
+- **Pattern-matched.** This change touches an area where bugs have shipped before; flag for extra attention.
+- **Scope.** The change is larger than the typical PR for this kind of work; flag.
+- **Dependency.** The change introduces a new dependency; flag for security and maintenance review.
+- **Performance.** The change adds operations in a hot path; flag for profiling.
+- **Security.** The change touches auth, encryption, or secret-handling; flag for security review.
+
+The tech lead's eye goes to the flags. Without the AI, the tech lead might or might not pattern-match the same risks; depends on alertness and load.
+
+## Mentorship loop
+
+A subtler value: surfacing teaching moments. The AI flags:
+
+- **Idiomatic mismatches.** The author's code works but doesn't match the codebase's idioms.
+- **Test patterns.** The test could be more expressive.
+- **Naming.** The names work but aren't great.
+- **Generalisations.** Code that should be a helper, or a helper that should be inlined.
+
+The tech lead picks which to comment on. Mentorship isn't every PR; it's the ones where the author benefits.
+
+## Comment etiquette
+
+The AI's comments follow consistent etiquette:
+
+- Questions, not directives.
+- Specific (file, line).
+- Brief.
+- Proportional.
+
+This matters for relationship work. PR-review is one of the highest-leverage mentorship surfaces for a tech lead. Comments that respect the author's time and skill build trust; comments that don't, erode it.
+
+## A real review
+
+A scenario: tech lead reviews a PR adding a new payment-method.
+
+**AI's first pass.** Flags 3 things:
+- Adds a new dependency (Stripe SDK update); needs security review.
+- Test coverage for happy path and one error case, but no coverage for the "card declined" case that happens in production frequently.
+- API endpoint matches naming convention; payment-method types don't (snake_case vs. camelCase).
+
+**Tech lead's review.** Reads the AI flags. Adds:
+- Asks about the retry logic for declined cards.
+- Suggests a refactor that would let the same logic handle a card-on-file.
+- Approves with the test addition.
+
+The review took 12 minutes instead of 30. The depth is comparable. The mentorship moment landed.
+
+## What stays human
+
+- Design judgments.
+- Mentorship decisions.
+- Approval calls.
+- Hard conversations when the PR isn't ready.
+
+Senior judgment. The AI handles the mechanical floor.
+
+## What we won't ship
+
+**Auto-approving** PRs based on AI checks.
+
+**Comments on stylistic preferences** the linter could catch.
+
+**Surveillance metrics** on individual authors.
+
+**Anything that replaces the tech lead's read of the actual code.** The AI's first pass is the floor, not the ceiling.
+
+## How to start
+
+Wire the AI's first-pass review into the team's PR workflow. Track tech-lead time per PR for two weeks. Compare quality. The tech lead's bandwidth becomes available for what they're uniquely positioned to do.
+
+## Close
+
+PR reviews with Claude Code are the consistency floor that makes a tech lead's depth scale. The mechanical checks happen. The risk patterns surface. The tech lead's eye goes to the substance. The team's PRs get better — not because the tech lead is sharper, but because the third PR of the day gets the same care as the first.
+
+## Related reading
+
+- [EM: PR reviewer that flags scope creep](/blog/claude-code-pr-reviewer) — companion role.
+- [Tech writer: doc audits](/blog/tech-writer-doc-audits) — same checklist-discipline pattern.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising tech-lead workflows, we'd love to hear about it. [Get in touch.](/contact)*

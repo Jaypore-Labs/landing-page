@@ -1,0 +1,70 @@
+---
+title: "Agents in sales: SDR copilots that don't get you blocked"
+description: "Sales agents that work respect the ICP, never lie to personalise, and own their suppression list. Most pilots blow at least one of the three."
+date: "2026-05-06"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Sales AI", "SDR", "Production AI", "GTM"]
+series: "AI agents in industry"
+seriesOrder: 6
+---
+
+A founder told us last year that his outbound agent had hit 12% reply rates in the first week. By week six, three of the company's domains were in spam folders, two enterprise prospects had blocked the entire workspace, and the head of GTM was rewriting cold-email scripts by hand.
+
+The agent worked. The deployment didn't. There's a difference between an agent that drafts good messages and a sales motion that an agent can run safely. Most pilots conflate them.
+
+## Three rules every sales agent has to respect
+
+**1. Respect the ICP.** The agent should be ruthlessly disqualifying. The cost of an outbound message is not the few cents of LLM compute — it's the trust of the recipient and the deliverability of your domain. An agent that messages anyone vaguely matching the ICP at scale is producing thousands of low-quality touches that erode both. A working agent disqualifies aggressively. If 70% of suggested prospects don't make the cut, that's a feature.
+
+**2. Personalise without inventing.** The pattern most agents fall into: scrape a LinkedIn profile, generate a "personalised" line referencing it, send. The line reads as personal. It's the same line everyone is sending, with everyone's name swapped in. Worse, when the agent invents details — "I saw your work on the Q3 launch" when there was no Q3 launch — the prospect sees through it instantly. Working agents reference *real* signals (a published article, an open role on the job board, a press release) and cite the source in the message. The personalisation is grounded.
+
+**3. Own the suppression list.** Every domain that's bounced, every prospect that's said "remove me," every account that's been engaged in the last 30 days — these go on a suppression list. The agent reads from it before every send. Without this discipline you'll re-message a prospect who already replied to a teammate, message a domain that's already blocked, or hit the same person on three different channels in three days. Each of those is one bullet to the sales motion.
+
+## What a working SDR copilot does
+
+It does not run autonomously. It supports an SDR. The copilot:
+
+- Pre-qualifies inbound leads against the ICP and writes a one-paragraph context note for the SDR.
+- Drafts personalised first-touch emails grounded in real public signals; the SDR reviews and sends.
+- Suggests follow-up cadences; the SDR adjusts and approves.
+- Handles meeting-scheduling friction (timezone, calendar links) automatically.
+
+The SDR is the reviewer of record. Every send goes through them. The copilot makes them 3-5x more productive without making any of those touches feel automated.
+
+## Where the deployment usually fails
+
+**Vanity volume.** The temptation to send more is constant. Every increase in volume comes with a deliverability cost the agent doesn't see until reputation tanks. Sane growth is +20% volume per month while watching deliverability metrics; aggressive growth is +50%+ per month while watching nothing.
+
+**No human in the loop.** Pilots that try to fully automate outbound — agent generates, agent sends — almost always bury themselves in deliverability and brand-perception costs within 60 days.
+
+**No suppression discipline.** A surprising number of agents are deployed without the basic discipline of reading the suppression list before sending. This is also the failure mode that's hardest to recover from.
+
+## The four metrics to track
+
+Not reply rate. Not even meeting rate. Track:
+
+1. **Deliverability** (inbox vs. spam vs. blocked) by domain.
+2. **Reply quality** (positive / neutral / negative / abuse).
+3. **Suppression-list size** as a percentage of total ICP.
+4. **Sender-reputation score** across all sending domains.
+
+Reply rate is downstream of these four. Optimise the four and reply rate takes care of itself. Optimise reply rate alone and you destroy the four.
+
+## How to start
+
+Wire the copilot into one SDR's workflow. One sender. One ICP segment. Let them run for two months. Measure the four metrics weekly. Once the SDR is reliably 3x more productive without any deliverability degradation, you have a pattern that can scale to two SDRs, then four. The growth is linear in headcount because each sender's reputation matters and each ICP segment has finite trustworthy volume.
+
+## Close
+
+Sales agents are domain-reputation engines disguised as productivity tools. The SDRs who use them well end up with more relevant pipeline and less mailbox damage. The teams that try to scale past their reputation budget end up rewriting their sequences from scratch six months in.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — sales agents and the four-rung framework.
+- [Agents in support: tier-1 deflection without tier-1 backlash](/blog/agents-in-customer-support) — the same trust-budget logic, applied to inbound.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — outbound copy is recipes, not spells.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a sales agent, we'd love to hear about it. [Get in touch.](/contact)*

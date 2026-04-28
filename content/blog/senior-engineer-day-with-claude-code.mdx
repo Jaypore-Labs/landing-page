@@ -1,0 +1,89 @@
+---
+title: "A senior engineer's day with Claude Code"
+description: "Where AI coding assistants save hours, where they don't, and how to structure the day so the gains compound."
+date: "2026-07-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "AI Development", "Software Engineering", "AI Tools", "Productivity"]
+series: "AI for software development"
+seriesOrder: 1
+---
+
+A staff engineer at a fintech firm tracked her work for two weeks at our suggestion. Half the days she used Claude Code aggressively. Half the days she didn't. The data was clear: AI-assisted days produced more code, but the gain wasn't distributed evenly. Some hours saved an hour. Some saved nothing. A few saved an hour but introduced a subtle bug she caught only on review.
+
+The senior engineer's day with Claude Code isn't "use AI for everything." It's "know which work AI accelerates and which work it complicates." This series walks the day, role by role.
+
+## The shape of a productive day
+
+Most senior engineers' days break into rough phases:
+
+**Morning (deep work).** The hour or two of focus where complex problems get attention. Architecture, debugging, design.
+
+**Mid-morning (review and unblock).** PR reviews, customer issue triage, helping junior teammates.
+
+**Afternoon (build).** Coding the feature, writing the tests, integrating the pieces.
+
+**End of day (admin and prep).** Tomorrow's priorities, blockers to surface, documentation.
+
+AI coding assistants change the shape of three of these.
+
+## Where AI saves real time
+
+**Morning deep work — partial gain.** Some debugging is faster with AI (rubber-duck dialogue, log-pattern recognition). Some architecture work is faster (translating high-level decisions into scaffolding). But the actual *thinking* — the part where you understand a hard problem — isn't faster. AI accelerates the moves you already know how to make.
+
+**Mid-morning review — meaningful gain.** PR reviews go faster with the AI doing the first pass (description-vs-diff, test coverage, scope-creep). Triage goes faster when the AI summarises the issue history. Unblocking junior teammates is faster because they're often pre-resolved by AI assistance before reaching you.
+
+**Afternoon build — biggest gain.** Scaffolding new code, writing tests for existing code, refactoring well-tested code, generating boilerplate, drafting documentation. This is where the multi-hour gains compound.
+
+**End of day admin — small gain.** Drafting status updates, generating tomorrow's priority list from today's commits and meetings. Not transformative, but eliminates a 20-minute drag.
+
+## Where AI complicates the day
+
+A few patterns where AI usage costs more than it saves:
+
+**Production debugging under time pressure.** AI-suggested fixes during a fire need extra-careful review. The temptation to ship the AI's first plausible answer is real. The cost of shipping the wrong answer in production is higher than the time saved.
+
+**Decisions that depend on org context.** "Should we use library X or Y?" includes considerations the AI doesn't see (what's already in the team's stack, what skills the team has, what the operations team's preferences are). The AI's suggestion is a starting point, not the answer.
+
+**Designing the public API.** APIs that other teams will consume need careful naming, careful argument shapes, careful error semantics. The AI helps with the mechanics; the design is human.
+
+**Reviewing AI-generated code.** Sometimes faster to write it than to review the AI's version, especially for narrow, well-understood tasks.
+
+The senior engineer's skill is calibrating which work belongs in which bucket.
+
+## How to hand off context
+
+The biggest source of AI productivity loss is handing off context badly. The patterns that work:
+
+- **Lead with the goal.** "I'm trying to make X happen" before any code or files.
+- **Show the constraints.** Style guide, pinned versions, performance budgets.
+- **Surface the why.** "I picked this approach because…" — saves rework.
+- **Read the AI's plan before approving the work.** Catch misunderstandings cheap.
+
+A common failure mode is dropping a vague request and reviewing only the output. The AI does the work. The output is wrong. You re-do the work. Net: slower than if you'd done it yourself.
+
+## The end-of-day loop
+
+A practice that compounds: spend 5 minutes at end of day reviewing what AI helped with, what it didn't, and what tomorrow needs. Build a personal corpus of patterns where AI shines and patterns where it doesn't. Over a quarter, your hand-off speed and your review speed both improve sharply.
+
+This is the engineering equivalent of the eval-set discipline that AI products use. You're building your own eval set on your own AI usage.
+
+## What this series will cover
+
+The next 24 articles walk specific roles — backend, frontend, mobile (iOS and Android), full-stack, DevOps, SRE, data, ML, QA, security, architects, EMs, tech writers, tech leads, OSS maintainers — and the daily patterns where AI saves real hours, where it complicates work, and where it does neither.
+
+Each article grounds in a real workflow. Not "AI is great for backend"; specifically, "API design + endpoint scaffolding looks like this when AI is doing the heavy lift."
+
+## Close
+
+The senior engineer with Claude Code isn't a different kind of engineer. They're the same engineer with a sharper toolkit. The toolkit is most powerful in the hands of someone who already understands the work. AI doesn't make a junior engineer senior; it makes a senior engineer faster. The discipline is in knowing which work to delegate and which work to own.
+
+## Related reading
+
+- [Your AI assistant is a midwife](/blog/ai-assistant-is-a-midwife) — the right frame for the AI's authority.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — context-handoff discipline.
+- [The agent maturity curve](/blog/agent-maturity-curve) — same maturity question, applied to coding.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're optimising your engineering team's AI usage, we'd love to hear about it. [Get in touch.](/contact)*

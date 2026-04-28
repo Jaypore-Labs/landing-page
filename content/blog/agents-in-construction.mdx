@@ -1,0 +1,100 @@
+---
+title: "Agents in construction: estimator copilots in margin-thin work"
+description: "Construction runs on 3-8% margins. AI agents earn their keep on RFP intake, takeoffs, and subcontractor coordination — not on bidding decisions."
+date: "2026-05-21"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Construction Tech", "Production AI", "Estimating", "Field Tech"]
+series: "AI agents in industry"
+seriesOrder: 17
+---
+
+A general contractor we worked with last year operates at 5% margins. Their estimating team gets 60-80 RFPs a quarter. They can bid 20. The agent's job isn't to win them better bids — it's to get the bid response out the door fast enough that the estimator can spend her time on the right ones.
+
+Construction is a high-volume, low-margin industry where speed compounds. Working agents speed up the workflow without changing what's quoted. The bidding decision stays with the estimator.
+
+## RFP intake is mostly translation
+
+A typical RFP packet is 200-500 pages of architectural drawings, specifications, schedules, addenda, and contractual terms. The estimator's first job is to translate this into a tractable scope: what's being built, what materials, what timeline, what unusual requirements.
+
+A working agent does the translation:
+
+- Reads the spec sections relevant to the trades being bid.
+- Extracts quantity-bearing items (sf of drywall, lf of conduit, count of doors).
+- Surfaces unusual clauses (LD provisions, retention, payment terms).
+- Identifies key dates and dependencies.
+- Notes the risk flags (design-build, fast-track, multiple-prime).
+
+The estimator reads the agent's summary and the RFP simultaneously. Two hours of intake collapses into 20 minutes. That's the productivity win.
+
+## Quantity takeoff: assist, don't replace
+
+Quantity takeoff (counting and measuring from drawings) has had specialised software for a decade. AI agents help around the edges:
+
+- Extracting count items from spec callouts where the drawing is ambiguous.
+- Cross-checking takeoffs against schedule quantities.
+- Flagging where the spec and the drawing disagree (which they often do).
+
+What agents shouldn't do: produce final takeoffs without estimator review. Drawings are the source of truth, and they're full of subtle markup that an LLM will misread. The takeoff software remains the takeoff tool. The agent is the assistant.
+
+## Subcontractor coordination
+
+The largest under-served workflow in construction is sub coordination. A typical project has 30-60 subs who need information, RFIs answered, change orders processed, schedules adjusted. The PM spends most of the day on this.
+
+A working agent helps by:
+
+- Drafting RFI responses from contract documents (PM reviews and signs).
+- Tracking sub commitments and surfacing slips before they cascade.
+- Drafting daily logs from field reports and photos.
+- Drafting change-order requests with the contract clauses cited.
+
+The PM's day shifts from data entry to decision-making. Sub relationships improve because responses come back faster.
+
+## Field photo classification
+
+The field generates thousands of photos per day on a large project. Most are noise — empty rooms, vague views of conditions. Some are evidence — completed work, defects, safety concerns, RFI material.
+
+Agents that classify field photos turn the photo stream into something searchable. "Show me all photos of the third-floor rough plumbing from last week" becomes a query, not a 45-minute scroll through someone's phone. This is unsexy. It's also a lifeline for project documentation.
+
+## What agents shouldn't do
+
+**Submit bids.** The bid decision stays with the principal. Agents draft the response. A human signs.
+
+**Make scheduling decisions.** Schedule changes have downstream sub-cost implications that an LLM doesn't see. The PM decides, with the agent's analysis as input.
+
+**Sign change orders.** Change orders have legal weight. The PM (or principal) signs.
+
+## The pilot blueprint
+
+Phase 1: RFP intake assistance. Three estimators, two months. Measure intake time savings.
+
+Phase 2: Subcontractor RFI drafting. One PM, two months. Measure response time.
+
+Phase 3: Field photo classification + daily log drafting. One project, two months. Measure project documentation completeness.
+
+Three small pilots, sequential, with concrete metrics. Don't try to be the company's "AI strategy" — be three productivity gains stacked.
+
+## How the project margins matter
+
+In a 5% margin business, the agent has to pay for itself in measurable productivity. Not in "AI insights." The numbers that matter:
+
+1. **Estimator hours per RFP intake.**
+2. **PM hours per RFI cycle.**
+3. **Daily log completeness rate.**
+4. **Field photo retrieval time.**
+
+If these don't move measurably, the agent gets cut at the next budget review. If they do, the agent gets expanded across the company.
+
+## Close
+
+Construction agents work when they accelerate the existing workflows of estimators, PMs, and field staff. The bidding decision stays human. The takeoff stays in the takeoff tool. The schedule decisions stay with the PM. The agent is the speed multiplier in the seams.
+
+## Related reading
+
+- [Agents in logistics: route planning](/blog/agents-in-logistics) — same human-in-the-loop pattern.
+- [Agents on the factory floor](/blog/agents-in-manufacturing) — integration-first pattern transferred.
+- [The agent maturity curve](/blog/agent-maturity-curve) — construction agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a construction agent, we'd love to hear about it. [Get in touch.](/contact)*

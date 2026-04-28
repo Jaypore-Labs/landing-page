@@ -11,6 +11,7 @@ const primaryNav = [
   { name: "Services", href: "/services" },
   { name: "About", href: "/about" },
   { name: "Journal", href: "/blog" },
+  { name: "Series", href: "/series" },
   { name: "Contact", href: "/contact" },
 ];
 

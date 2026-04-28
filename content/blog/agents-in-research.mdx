@@ -1,0 +1,103 @@
+---
+title: "Agents for research synthesis"
+description: "Research agents help labs catch up on their own field. Citation chains and lab-meeting prep are the underrated workflows."
+date: "2026-06-02"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Research AI", "Academic AI", "Production AI", "Literature Review"]
+series: "AI agents in industry"
+seriesOrder: 25
+---
+
+A PI at a mid-size research lab told us that her three biggest time sinks were: (1) catching up on the literature in her field, (2) preparing for lab meetings where each student presents progress, (3) writing the literature-review section of every grant. The agent that helped with these three would, in her words, "give me back ten hours a week."
+
+Research is a synthesis-heavy job. The agents that help here aren't writing papers. They're keeping track of the field so the PI and the students can spend their attention where it counts.
+
+## Literature scanning
+
+A working research agent maintains a curated, continuously-updating literature scan:
+
+- Tracks defined queries against arXiv, biorxiv, PubMed, Google Scholar, conference proceedings.
+- Filters by relevance to the lab's specific work.
+- Surfaces new papers in a weekly digest with one-paragraph summaries and the key contribution clearly stated.
+- Flags papers that cite the lab's own work or directly compete with current projects.
+
+This is operations work, not science. The agent doesn't decide what's important; the PI and students decide. The agent's job is making sure nothing important slips by because nobody had time to read the latest issue.
+
+The discipline that matters here: the agent's summary is grounded in the paper, not extrapolated from the abstract. If the paper claims X, the summary cites X with the specific section. If the agent can't find evidence in the paper for something the abstract suggests, it says so. Hallucinating research findings is worse than missing them.
+
+## Note-taking agents
+
+Research labs accumulate notes — meeting minutes, experimental logs, project plans, drafts. A working note agent makes them retrievable:
+
+- Indexes the lab's accumulated documentation.
+- Answers retrieval queries with citations: "Where did we discuss the calibration protocol for the new spectrometer?"
+- Surfaces related notes when a new project starts.
+- Drafts meeting summaries from raw notes for review by the meeting organiser.
+
+This is the unsexy compounding work. A lab six months into using a note-taking agent has institutional memory that survives student turnover. A lab without one has knowledge that walks out the door every graduation.
+
+## Citation-chain assistance
+
+The literature-review section of a grant or thesis is a citation-chain problem. Every claim needs to be backed by the right paper, and the right paper isn't always the most recent — sometimes the foundational paper from 1992 is the right cite.
+
+A working agent helps assemble citation chains:
+
+- Given a claim, suggest candidate citations from the lab's reference library and the broader literature.
+- Surface earlier work that the proposed citations themselves cite (the citation-chain back to foundational work).
+- Flag claims that don't have a clear citation chain.
+
+The PI or student decides what to cite. The agent makes the candidate set tractable.
+
+## Lab-meeting preparation
+
+A typical lab meeting has each student presenting progress. The PI prepares by reading recent updates, recalling prior context, and thinking about each student's project trajectory.
+
+A working agent helps:
+
+- Assembles the week's updates from each student's notes and code commits.
+- Drafts likely questions per student based on their project status.
+- Surfaces the comparable prior work (theirs and others') that's relevant to where each student is.
+
+The PI's lab-meeting prep collapses from 90 minutes to 15. The meeting itself improves because the questions are better.
+
+## What we won't ship
+
+**Anything that fabricates citations.** Hallucinated citations in research are a career hazard.
+
+**Anything that auto-publishes.** Submissions, social media, blog posts about the lab's work — all human.
+
+**Anything that auto-runs experiments without supervision.** Some labs have automated experimental systems; those are not LLM agents and have their own validation regime.
+
+**Anything that ranks students or peers.** Research is small and political; agents that score humans cause problems out of scale with their value.
+
+## The corpus discipline
+
+Research agents are retrieval-first systems. The corpus matters more than the model. The corpus is:
+
+- The lab's full literature database.
+- The lab's accumulated notes and drafts.
+- The lab's PIs' published work.
+- The graph of citations.
+
+Build the corpus first. Build the retrieval. Build the citation discipline. The model is the smallest piece of the project.
+
+## How to start
+
+Pick one workflow — literature scanning is the highest-impact starter. Build a curated set of queries with the PI. Run weekly digests for a quarter. Get the PI's feedback on relevance and accuracy. Once it's tuned, expand to note-taking. Then citation-chain assistance.
+
+The PI is the user. The students are downstream beneficiaries. Build for the PI's day; the rest follows.
+
+## Close
+
+Research agents earn keep by handling the synthesis work that surrounds the science. They scan, summarise, retrieve, and prepare — without making any of the decisions about what's actually important. The PI's attention is the scarcest resource in a lab. The agent buys it back.
+
+## Related reading
+
+- [Agents in pharma: literature review](/blog/agents-in-pharma) — same retrieval-first architecture in industry.
+- [Agents in media: news summary with corrections](/blog/agents-in-media) — citation discipline transferred.
+- [The agent maturity curve](/blog/agent-maturity-curve) — research agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a research-lab agent, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,95 @@
+---
+title: "Long-horizon tasks: keeping an agent on rails for hours"
+description: "Hour-long agent tasks need checkpointing, plan revision, and recovery patterns. None of these come for free."
+date: "2026-08-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Long-horizon", "Engineering", "Building Agents", "Architecture"]
+series: "Building agents"
+seriesOrder: 10
+---
+
+A team's agent was supposed to migrate 40,000 records from an old system to a new one. Three hours into the run, the agent had migrated 12,000 records, hit an unexpected schema variant, and gotten confused. By hour four, it had repaired some records, corrupted others, and lost track of which were which. The team spent three days untangling.
+
+Long-horizon agent work — anything that runs for hours — is a different engineering problem than short tasks. Without checkpointing, plan revision, and recovery, long runs accumulate failure modes that compound.
+
+## Checkpointing
+
+The discipline: periodically write the agent's state to durable storage.
+
+A checkpoint includes:
+
+- Current step in the plan.
+- What's been done (with results).
+- What's pending.
+- Context state.
+
+Frequency: after every meaningful unit of work. For a 40,000-record migration, after every 100-record batch. The cost is low; the recovery value is high.
+
+If the agent crashes mid-run, the next run resumes from the last checkpoint. Without this, every crash is a full restart. With it, an 8-hour task that crashes at hour 6 resumes at hour 6, not hour 0.
+
+## Plan revision
+
+Long tasks reveal information the initial plan didn't anticipate. The agent should revise:
+
+- After each checkpoint, re-evaluate the plan against current state.
+- If the plan still applies, continue.
+- If the plan needs revision (new edge case discovered, scope change, dependency added), revise explicitly.
+- If revision is significant, surface to the user.
+
+Without explicit revision, the agent forces every observed reality into the original plan. Some realities don't fit. The agent makes wrong choices.
+
+## Cost ceilings
+
+A long task has a cost ceiling — both in tokens and in time:
+
+- The agent tracks cumulative token spend.
+- If spend approaches the ceiling, agent surfaces and asks before continuing.
+- Same for elapsed time.
+
+Without ceilings, an agent can burn through a budget without noticing. With them, the budget is respected and the user has visibility.
+
+## Recovery patterns
+
+Recovery from a checkpoint:
+
+- Validate the checkpoint state matches the world (the records the checkpoint says were migrated — are they actually in the new system?).
+- Resolve any inconsistencies before continuing.
+- Re-establish context (re-read the plan, re-load the relevant tools).
+- Continue.
+
+Without validation, recovery can compound errors. With it, the agent picks up where it left off coherently.
+
+## A real long-runner
+
+A scenario: an agent migrating 100K customer records.
+
+- **Plan.** Migrate in batches of 200. Checkpoint after each batch. Revise plan after every 10 batches.
+- **Cost ceiling.** $50 in tokens, 6 hours. Surface before exceeding.
+- **Recovery.** On crash, validate the last checkpoint matches actual database state, resume from there.
+
+The agent ran. At record 23,400 it discovered a new schema variant. The plan revision step caught it; the agent surfaced to the user. User confirmed how to handle the variant. Agent resumed with updated plan. Migration completed at hour 5, $42 spent, all records correctly migrated.
+
+## What we won't ship
+
+**Long-running agents without checkpointing.** Crashes are inevitable; recovery has to be built in.
+
+**Agents without cost ceilings.** Budget overruns happen silently otherwise.
+
+**Plan revision that changes scope** without user awareness.
+
+**Anything that "powers through" failures** without surfacing.
+
+## Close
+
+Long-horizon agent work is engineering, not magic. Checkpointing makes failures recoverable. Plan revision keeps the agent honest. Cost ceilings prevent runaway spending. Recovery patterns make resumption coherent. Skip any of these and the long task becomes a long incident.
+
+## Related reading
+
+- [Plan vs. act](/blog/plan-vs-act-loop) — short-task version of the discipline.
+- [Cost guardrails](/blog/cost-guardrails) — runaway-prevention deep-dive.
+- [Tool failure modes](/blog/tool-failure-modes) — recovery building blocks.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping long-horizon agents, we'd love to hear about it. [Get in touch.](/contact)*

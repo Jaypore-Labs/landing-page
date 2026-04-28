@@ -1,0 +1,107 @@
+---
+title: "Skills files: recipes the model can call"
+description: "Skills files are reusable, named workflows the agent invokes. The discipline turns one-off prompts into composable assets."
+date: "2026-08-14"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Skills", "Building Agents", "Engineering", "Prompts"]
+series: "Building agents"
+seriesOrder: 3
+---
+
+A team we work with kept rewriting the same code-review prompt every other week. Each version drifted from the last. The team's outputs varied by who copy-pasted which prompt where. The fix wasn't a better prompt. It was capturing the prompt as a *skill* — a versioned, named, reviewable artifact the agent invokes by name.
+
+Skills files turn workflow knowledge from oral tradition into engineering assets.
+
+## What a skill is
+
+A skill is:
+
+- A named workflow the agent can invoke.
+- With a triggering condition (when this skill applies).
+- A defined input shape (what context it needs).
+- A defined output shape (what it produces).
+- A versioned prompt + tool list.
+- An evaluation set.
+
+The agent reads "review this PR" and the skill `pr-review` triggers. The skill's prompt and tools are loaded; the work happens; the output is structured.
+
+## Trigger conditions
+
+A good trigger is precise. "User wants help" is vague. "User asks 'review this PR' or pastes a URL containing /pull/" is precise. The trigger is what makes the skill activate or not.
+
+For complex agents with many skills, trigger discipline matters. Conflicting triggers produce unpredictable behaviour. Crisp triggers produce reliable activation.
+
+## Reviewer loop
+
+Skills, like any engineering asset, need review:
+
+- Quarterly: read each skill, ask "is this still right?"
+- After an incident where the skill produced a bad output: investigate, update.
+- When the underlying tools change: update the skill to use the new tools.
+
+Without a review cadence, skills decay. With one, they compound.
+
+## Versioning
+
+Skills are source code. They live in a repo. They have version history. Changes go through review. Rollback is supported.
+
+This is the discipline that distinguishes skills from "the prompt I keep in a Notion doc." The Notion doc rots. The repo doesn't.
+
+## Composition
+
+A complex agent's value comes from skills composing:
+
+- The user asks for "this week's customer feedback synthesis."
+- The agent triggers `feedback-collection` (gathers feedback from sources).
+- Then `feedback-clustering` (groups into themes).
+- Then `theme-summary` (writes the report).
+
+Each skill is reusable across agents. The agent that does the synthesis can also do other things; the skills it composes are the building blocks.
+
+## A real skill
+
+A `code-review` skill for a team:
+
+- **Trigger.** PR URL or paste of diff.
+- **Inputs.** Diff, PR description, related-ticket context.
+- **Tools.** Codebase grep, test runner (read-only).
+- **Prompt.** Reviewer template with team-specific style.
+- **Output.** Structured comments per file/line, plus an overall verdict.
+- **Eval set.** 30 reviewed PRs with desired outputs.
+
+Anyone on the team can invoke the skill. It produces consistent reviews because the workflow is captured. New team members get up to speed on the team's review culture by reading the skill.
+
+## Where skills should live
+
+In the repo. Versioned. With CI:
+
+- Tests that exercise the eval set.
+- Lint that catches schema regressions.
+- Review process for changes.
+
+A team that keeps skills in someone's Notion doc has one person's tribal knowledge. A team that keeps skills in the repo has shared assets.
+
+## What we won't ship
+
+**Skills without eval sets.** Untested skills are wishes.
+
+**Skills with vague triggers.** Vague triggers produce inconsistent activation.
+
+**Anonymous skills.** Each skill has a named owner.
+
+**Skills that bypass the team's existing review processes.** Skills that ship code go through the same review as humans shipping code.
+
+## Close
+
+Skills files are the discipline that makes prompts engineering assets. The repository is the source of truth. The eval is the test. The owner is the maintainer. Versioning is non-negotiable. The compounding effect — agents whose behaviour improves over time — depends on skills being treated like first-class code.
+
+## Related reading
+
+- [Tool design: write tools the way you write APIs](/blog/tool-design-like-apis) — composable building blocks.
+- [Plan vs. act: the agent loop](/blog/plan-vs-act-loop) — the architecture skills compose into.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — the framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're operationalising agent skills, we'd love to hear about it. [Get in touch.](/contact)*

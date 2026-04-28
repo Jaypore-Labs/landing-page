@@ -1,13 +1,27 @@
 ---
 name: daily-article
-description: Generate a full daily content package for Jaypore Labs — blog article, Instagram carousel, LinkedIn post, and X thread — built around the "elephant on a bicycle" philosophy (familiar technical concept + unusual frame = memorable). Use when the user says "write today's article", "daily post", "new carousel", "draft this week's blog", or asks for a connected content drop across channels.
+description: Generate a full daily content package for Jaypore Labs — blog article, Instagram carousel, LinkedIn post, and X thread. Pulls the next pending article from the 200-article curriculum at docs/blog-ideas.md, organized across 8 series (AI agents in industry, Claude Code in business, AI for software development, Building agents, Predictable AI output, Testing in the age of AI, Evals & output testing, MCP & AI protocols). Use when the user says "write today's article", "daily post", "new carousel", "draft this week's blog", or asks for a connected content drop across channels.
 ---
 
 # daily-article
 
 Run this when the user wants to publish a new article across jayporelabs.com + socials.
 
-## The philosophy
+## The curriculum
+
+Topics are organised into 8 series of 25 articles each, defined in `docs/blog-ideas.md`. Each row has a slug, title, hook, and outline beats. The curriculum is the queue.
+
+Per-article workflow:
+
+1. Pick the next pending row from any series (rows not prefixed with `✅`).
+2. Generate the MDX article at `content/blog/<slug>.mdx` with frontmatter:
+   - `title`, `description`, `date`, `author`, `category`, `tags`
+   - `series:` (the human-readable series title, e.g. `"Building agents"`)
+   - `seriesOrder:` (the # column from the curriculum)
+3. Generate the carousel + caption + LinkedIn + X thread.
+4. After confirming the package, update `docs/blog-ideas.md` to prefix the row with `✅` and the publish date.
+
+## The original philosophy (still applies)
 
 > *A bicycle is not interesting. An elephant is not interesting. An elephant on a bicycle is impressive.*
 
@@ -49,17 +63,17 @@ For every article, five files:
 
 ### 1. Get the topic
 
-Read the user's request. If they named a concept or topic, work from it. If they said "pick one" or left it open:
+Read the user's request. Two paths:
 
-- Propose **three** pairings aligned with a Jaypore Labs capability (AI scribes, copilots, agents, RAG, voice, MCP, evals, healthcare, legal, SaaS, desktop, compliance).
-- Present them as: `<technical topic>` × `<unusual frame>` — one-line hook.
-- Wait for the user to pick, or interpret silence as "pick the first".
+**A) User specifies a topic.** Match it to a row in `docs/blog-ideas.md` if possible. If no clean match, treat as a free-form topic.
 
-Example proposal:
+**B) User says "next" or leaves it open.** Open `docs/blog-ideas.md`. Propose **three** pending rows from across the 8 series — pick rows that span different series for variety. Present each as:
 
-> 1. **RAG pipelines × public libraries** — *Dewey was right. Your retrieval system is a library with no card catalog.*
-> 2. **LLM evals × restaurant health inspections** — *Why your evals should be a periodic, visible, non-negotiable routine.*
-> 3. **AI copilots × jazz rhythm sections** — *The best copilots have tight defaults and room to improvise.*
+> **Series 0X · #YY · `slug`** — *Hook from the curriculum*
+
+Wait for the user to pick or interpret silence as "pick the first".
+
+The curriculum already has the hook + outline beats. Don't re-pitch metaphors — use what's there.
 
 ### 2. Decide the slug
 

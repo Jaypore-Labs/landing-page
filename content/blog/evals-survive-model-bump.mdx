@@ -1,0 +1,90 @@
+---
+title: "Evals that survive a model bump"
+description: "Provider model upgrades break evals if the eval depends on specific model behaviour. The discipline is decoupling."
+date: "2026-12-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Model Bump", "Engineering", "Output Testing", "Migration"]
+series: "Evals & output testing"
+seriesOrder: 24
+---
+
+A team's eval scored at 96% on model X. Provider released model Y. Same eval scored at 78%. The team panicked. Investigation revealed: the eval was over-fit to model X's specific phrasings. Model Y was producing different but equally valid outputs.
+
+Evals that survive a model bump are decoupled from specific model behaviours.
+
+## The migration discipline
+
+When a model bumps:
+
+- Run eval on new model.
+- If significant regression, investigate.
+- Distinguish: is this real regression, or is the eval over-fit?
+- Adjust eval if over-fit; adjust prompt if real regression.
+
+The investigation is the discipline. Skipping it leads to either rolling back unnecessarily or hiding real regressions.
+
+## Reviewer ritual
+
+Pre-bump:
+
+- Eval against new model on a branch.
+- Compare to current model.
+- Identify cohorts that moved.
+- Decide: bump, adjust, defer.
+
+Post-bump:
+
+- Monitor production traffic.
+- Watch for issues eval didn't catch.
+- Be ready to roll back.
+
+## A real migration
+
+A team's bump from Opus 4.6 to Opus 4.7:
+
+- Pre-bump eval: 96% on 4.6, 91% on 4.7.
+- Investigation: 4.7 was more concise, eval cases expecting longer responses regressed.
+- Decision: update eval to accept varied lengths (real improvement, not regression).
+- Post-update eval: 96% on 4.6, 95% on 4.7.
+- Bump shipped.
+
+The migration was three days of work. Without the investigation, the team would have rolled back and missed a quality improvement.
+
+## Decoupling
+
+Evals decouple from specific model behaviours by:
+
+- Behavioural rather than exact-match assertions.
+- Multiple acceptable outputs per case.
+- Rubric-based scoring.
+
+These survive model variance. Exact-match against specific phrasing doesn't.
+
+## Limits
+
+Some evals have to be exact (classification, structured extraction). For these, the migration involves prompt adjustment.
+
+## What we won't ship
+
+**Evals** that are purely exact-match for tasks where variance is OK.
+
+**Migrations** without eval re-run.
+
+**Bumps** without investigation when scores move.
+
+**Skipping the post-bump production monitoring.**
+
+## Close
+
+Evals survive model bumps when decoupled from specific model behaviour. Behavioural assertions, multiple acceptable outputs, rubric scoring. The team's eval keeps signal across migrations. Skip the discipline and every model bump becomes a fire drill.
+
+## Related reading
+
+- [Pinning model versions](/blog/pinning-model-versions) — surrounding pattern.
+- [Versioning model + prompt as a unit](/blog/versioning-model-and-prompt) — bundle discipline.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're managing model migrations, we'd love to hear about it. [Get in touch.](/contact)*

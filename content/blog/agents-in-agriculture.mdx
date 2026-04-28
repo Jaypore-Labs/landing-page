@@ -1,0 +1,81 @@
+---
+title: "Agents in agriculture: yield prediction with weather data"
+description: "Agriculture agents earn keep through multimodal inputs and edge deployment. The weather-data integration is the project."
+date: "2026-05-28"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "AgTech", "Agriculture AI", "Production AI", "Edge AI"]
+series: "AI agents in industry"
+seriesOrder: 22
+---
+
+A regional agronomist explained the work to us once: "I look at a field and try to see the next 90 days." The job is reading current state — soil, water, leaf condition, weather patterns — and projecting forward. Agriculture agents earn their keep when they can do *part* of that reading-and-projecting at scale, with input from sources humans can't physically be at every day.
+
+The hard part isn't the model. It's the multimodal data plumbing — satellite imagery, ground sensors, weather feeds, drone overflights, farm records. Get the data flowing and the model becomes a workable assistant. Skip the data work and the agent becomes a slide.
+
+## What multimodal actually means
+
+Agricultural agents combine inputs that don't naturally live together:
+
+- **Satellite imagery** — multi-band, multi-temporal, NDVI and beyond.
+- **Ground sensor data** — soil moisture, EC, temperature.
+- **Weather forecasts** — short-term and seasonal.
+- **Drone overflights** — high-resolution, spot-checked.
+- **Farm records** — what was planted when, what was sprayed, what's been harvested.
+- **Market data** — for the produce-side decisions.
+
+A model that takes a question ("how is field 3B doing?") and surfaces a synthesis across these sources is doing real work. A model that only looks at one source is a thin layer over an existing tool.
+
+## Edge deployment is real
+
+Connectivity at a working farm is not a given. A model that requires a stable internet connection to give an agronomist a field assessment will be unusable on half the farms it's designed for. Working agricultural agents are increasingly hybrid:
+
+- Run inference on edge hardware (a tablet, a tractor's onboard system, a barn server).
+- Sync with cloud-stored data when connectivity is available.
+- Cache enough recent context to be useful offline for a day.
+
+This is not a software trend; it's a practical requirement. Anyone building an ag-AI product without thinking about edge deployment is leaving most of the addressable market on the table.
+
+## The agronomist's day, with an agent
+
+What working agricultural agents help with:
+
+**Field assessment.** Agronomist arrives at a field, opens a tablet. Agent has assembled the latest imagery, sensor readings, weather, and recent-history context. Agronomist's diagnostic time drops from "look around for 20 minutes" to "look around for 5 minutes with context already loaded."
+
+**Treatment decisions.** Agronomist sees an issue. Agent retrieves prior-treatment outcomes for similar issues on similar fields, surfaces options with expected outcomes. Agronomist picks. Treatment quality improves over time as the data set grows.
+
+**Yield projections.** Agent rolls up field-level state into farm-level yield projections, updated weekly. Farmer plans logistics and storage with better visibility.
+
+**Compliance documentation.** Spraying records, irrigation logs, and worker-safety records that used to take 30 minutes per week to maintain are drafted by the agent from operational data. Farmer reviews and signs.
+
+## Where the agent shouldn't act
+
+The agent doesn't decide treatments. It surfaces options. The agronomist or farmer decides. The reasons are familiar from other domains: liability follows the decision, the agent has not been validated for autonomous action in a domain where wrong answers cost a season, and the regulatory frameworks for autonomous ag are unclear.
+
+There's also a subtler reason. The farmer's tacit knowledge of their land matters. An agent that overrides this knowledge in favour of model averages will be wrong in specific, learnable ways that the farmer already knows. The agent supports, doesn't replace.
+
+## Insurance-data partnerships
+
+A meaningful path to ROI for agricultural agents is parametric crop insurance — policies that pay out based on objective measures (rainfall, temperature) rather than claim-by-claim adjustment. Agents that can produce farm-level data feeding into these policies create commercial flow that subsidises the data infrastructure.
+
+Privacy and ownership matter here. The farm's data is the farm's. The agent's vendor doesn't own it. The insurance carrier sees what it needs and not more. Get the data-rights conversation right at contract; renegotiating later is hard.
+
+## How to start
+
+Pick one farm, one crop, one growing season. Wire the data sources. Build the field-assessment workflow. Run with one agronomist for a season. Measure: assessment time, treatment quality, yield projection accuracy, compliance documentation completeness.
+
+Expand to a second farm only after a full season of clean data on the first. Agricultural seasons are slow. The pilot timeline is slow. Build for the pace.
+
+## Close
+
+Agricultural agents work when they integrate the data sources humans can't physically watch every day, deploy to edge hardware that works at the farm's connectivity, and respect the agronomist's and farmer's judgment. The data plumbing is the project. The model is the easy part. Build for the agronomist's day, not for a slide.
+
+## Related reading
+
+- [Agents on the factory floor](/blog/agents-in-manufacturing) — same integration-first pattern.
+- [Agents in energy: grid monitoring](/blog/agents-in-energy) — same human-decision boundary.
+- [The agent maturity curve](/blog/agent-maturity-curve) — agricultural agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping an agricultural agent, we'd love to hear about it. [Get in touch.](/contact)*

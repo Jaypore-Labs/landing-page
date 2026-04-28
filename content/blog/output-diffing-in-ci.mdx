@@ -1,0 +1,86 @@
+---
+title: "Output diffing in CI"
+description: "Diffing the model's output against expected catches regressions early. The diff is the eval."
+date: "2026-10-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Diffing", "Engineering", "Predictable Output", "CI"]
+series: "Predictable AI output"
+seriesOrder: 22
+---
+
+A team's prompt change passed the eval. They merged. Two weeks later, customer complaints surfaced about a category of behaviour the eval hadn't covered. The team realised: the eval had checked accuracy, not output. Output had drifted on cases the eval didn't flag.
+
+Output diffing is the practice of comparing model outputs to a reference. The diff is the eval. It catches more regressions than accuracy checks alone.
+
+## The diff-as-eval pattern
+
+For each eval case:
+
+- The expected output (or expected output structure).
+- The actual output.
+- A diff comparing them.
+
+For exact-match cases (classification): diff is identity.
+
+For approximate cases (prose): diff uses similarity metrics or LLM-as-judge.
+
+For structured cases: diff is per-field.
+
+## Tooling
+
+The CI runs:
+
+- Each PR triggers eval-set re-run.
+- Each output is diffed against the reference.
+- Significant diffs flagged.
+- Reviewer reads the flagged diffs.
+
+A meaningful diff blocks merge. A trivial diff (whitespace) doesn't.
+
+## Reviewer ritual
+
+PR review includes:
+
+- Aggregate eval score (did accuracy hold?).
+- Specific diff list (what changed?).
+- Diff acceptance per case (intentional or regression?).
+
+Each diff is approved or rejected. Approved diffs become the new reference.
+
+## A real catch
+
+A team's eval set had 200 cases. A prompt change passed all 200 (each output was acceptable). Diff-based review showed 8 cases had different (still-acceptable) outputs. The team accepted 6 as improvements; 2 were edge regressions in style. They tightened the prompt before merging.
+
+Pure accuracy eval would have approved the change. Diff-based review caught the style regressions.
+
+## How to roll out
+
+- Add diff support to the existing eval framework.
+- Establish reference outputs for the existing eval set.
+- Make diff review part of PR process.
+- Iterate based on what gets caught.
+
+## What we won't ship
+
+**Eval frameworks** that score accuracy without diffing outputs.
+
+**PR processes** that approve based on aggregate score only.
+
+**Reference outputs** that aren't versioned alongside the prompt.
+
+**Skipping diff review for time pressure.** The diff is the most informative artifact.
+
+## Close
+
+Output diffing in CI catches regressions accuracy alone misses. The diff is informative. The reviewer's eye on diffs is what catches subtle drift. Skip diffing and the eval lets through changes the team would have rejected if they'd seen them.
+
+## Related reading
+
+- [Drift catchers](/blog/drift-catchers) — companion monitoring.
+- [Versioning model + prompt as a unit](/blog/versioning-model-and-prompt) — surrounding pattern.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening CI for LLMs, we'd love to hear about it. [Get in touch.](/contact)*

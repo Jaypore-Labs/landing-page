@@ -1,0 +1,100 @@
+---
+title: "Prompt evolution: how agents get worse without you noticing"
+description: "Prompts drift. Models shift. Eval gaps compound. The agent that worked last quarter may not be the agent shipping today."
+date: "2026-08-27"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Prompts", "Engineering", "Building Agents", "Prompt Engineering"]
+series: "Building agents"
+seriesOrder: 12
+---
+
+A team's agent had been working well for six months. Then customer complaints started rising — subtle, intermittent, hard to reproduce. The team assumed it was customer expectations shifting. It wasn't. The provider had bumped the underlying model. The agent's prompt no longer produced the same outputs as before. Nobody had noticed because the eval set was the same as the day they shipped.
+
+Prompts evolve because their environment evolves. The discipline is engineering for that evolution explicitly.
+
+## Sources of drift
+
+Three classes:
+
+**1. Model drift.** The provider changes the underlying model. Same prompt, different output. Often subtle.
+
+**2. Prompt drift.** The team patches the prompt over time. Each patch makes sense locally; the cumulative prompt becomes incoherent.
+
+**3. Eval drift.** The eval set ages. Cases that used to be representative are no longer. The eval passes; production fails.
+
+All three compound. The agent quietly degrades.
+
+## Eval triggers
+
+The discipline that catches drift:
+
+- Run the eval suite on every prompt change.
+- Run the eval suite on every model-version change (whether you initiated or the provider did).
+- Run the eval suite on a schedule (weekly, daily for high-stakes agents).
+
+If the eval doesn't move, the change is safe. If it does, investigate before continuing.
+
+This is restaurant-health-inspection-level discipline. Periodic, visible, non-negotiable.
+
+## Revert patterns
+
+When the eval shows regression:
+
+- Revert the prompt change.
+- File a ticket to investigate properly.
+- Don't ship the patch.
+
+This is hard culturally. Teams under pressure want to ship the patch and "fix the eval later." That decision compounds. Many production agent failures trace to that pattern.
+
+## Reviewer ritual
+
+Every prompt change is a PR. The PR review:
+
+- Eval results before and after.
+- Description of what's changing and why.
+- Evidence the change is needed.
+- Awareness of risks.
+
+Prompt PRs that don't include eval results don't merge. This is a hard rule.
+
+## A real regression
+
+A scenario: customer complaint volume rising. Investigation:
+
+- The provider bumped the model two weeks ago.
+- The team's eval suite runs nightly but trends weren't reviewed.
+- Re-running the eval against pre-bump and post-bump model versions: 4-point drop in correctness.
+
+The team's response:
+
+- Pin the model version (where supported).
+- Adjust the prompt to compensate for the new model's tendencies.
+- Re-run eval until parity restored.
+- Add eval-trend monitoring to the team's dashboard.
+
+The fix was three days. The investigation, started earlier, would have caught the drift in a week instead of months.
+
+## What we won't ship
+
+**Prompt changes without eval evidence.**
+
+**Model upgrades without eval evidence.**
+
+**Skipping the eval review** because "the change is small."
+
+**Patching the eval to make it pass** rather than investigating the regression.
+
+## Close
+
+Prompt evolution is real. Agents that worked last quarter may not be working today. The eval suite is the only honest signal. Keeping the eval suite fresh and acting on its trends is the discipline that prevents silent degradation.
+
+## Related reading
+
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — same discipline.
+- [Drift catchers](/blog/drift-catchers) — automated drift detection.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening prompt evolution discipline, we'd love to hear about it. [Get in touch.](/contact)*

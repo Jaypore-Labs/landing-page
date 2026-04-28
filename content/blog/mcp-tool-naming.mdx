@@ -1,0 +1,83 @@
+---
+title: "MCP tool naming: making tools discoverable"
+description: "Tool names are the first thing the AI assistant sees. Naming matters more than most teams realise."
+date: "2027-01-05"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Tool Design", "Engineering", "Naming", "Discoverability"]
+series: "MCP & AI protocols"
+seriesOrder: 5
+---
+
+A team's MCP server had 12 tools. Names like `do_thing`, `process`, `helper`. The AI assistant called the wrong tool 30% of the time.
+
+The fix: rename. Tools became `extract_invoice_line_items`, `summarise_meeting_notes`, `find_customer_by_email`. Wrong-tool rate dropped to under 5%.
+
+Tool names are the first thing the AI assistant sees. Naming matters.
+
+## The naming rules
+
+Each tool name should:
+
+- Start with a verb (extract, summarise, find, send).
+- Specify the object (invoice line items, meeting notes, customer).
+- Be unique enough that the AI doesn't confuse it with siblings.
+- Avoid abbreviations the AI may not parse correctly.
+
+## Reviewer ritual
+
+PR review for new tools:
+
+- Name passes the rules.
+- Name doesn't conflict with sibling tools.
+- Name reads naturally to someone who hasn't seen the tool before.
+
+## A real naming guide
+
+A team's MCP server naming standards:
+
+- `verb_object_qualifier` pattern.
+- Examples: `get_customer_by_id`, `list_invoices_for_customer`, `send_notification_to_user`.
+- Avoid: `process_*`, `handle_*`, `*_thing`.
+
+## Trade-offs
+
+Long names vs. short names:
+
+- Long: more discoverable, more to type in tests.
+- Short: faster but ambiguous.
+
+Lean long. The AI assistant cares about clarity, not character count.
+
+## Limits
+
+Some operations don't fit cleanly:
+
+- "Search across multiple tables" — what's the object?
+- "Multi-step workflows" — better as multiple tools.
+
+When in doubt, split.
+
+## What we won't ship
+
+**Tool names** that don't follow the rules.
+
+**Tools** with names that conflict.
+
+**Tools** named for engineering convenience rather than AI clarity.
+
+**Renames** without coordinated migration plans.
+
+## Close
+
+MCP tool naming is the simplest discipline that produces measurable wins. Verb + object + qualifier. Unique, clear, descriptive. Skip the discipline and the AI guesses.
+
+## Related reading
+
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+- [MCP tool schemas](/blog/mcp-tool-schemas) — companion topic.
+- [Your first MCP server](/blog/first-mcp-server-node) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening tool naming, we'd love to hear about it. [Get in touch.](/contact)*

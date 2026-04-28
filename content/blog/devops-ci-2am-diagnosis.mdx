@@ -1,0 +1,121 @@
+---
+title: "DevOps: CI pipeline diagnosis at 2am"
+description: "When CI breaks at 2am the first job is to diagnose, not panic. AI-assisted log triage gets the engineer to the right place faster."
+date: "2026-07-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "DevOps", "CI", "Incident Response", "AI Development"]
+series: "AI for software development"
+seriesOrder: 10
+---
+
+Most CI breakages at 2am aren't actually code issues. They're flaky integration tests, expired credentials, infrastructure rate-limits, third-party service hiccups. The diagnostic work — figuring out which one — used to mean grinding through logs. With Claude Code, the grind compresses to minutes.
+
+## Log triage at 2am
+
+The pattern: paste the failing build's logs into the AI with the recent-changes context. Ask for a triage summary.
+
+Within seconds:
+
+- The likely cause (with confidence).
+- The relevant log lines, quoted.
+- The recent changes that might be related.
+- Suggested next steps.
+
+The engineer reviews. Either the cause is what the AI surfaced, or it isn't. Either way, the engineer's diagnostic minutes drop.
+
+## Common patterns the AI catches fast
+
+- **Expired credentials.** Test failures with auth-rejection patterns; the AI surfaces the credential and the rotation cadence.
+- **Flaky tests.** The AI compares this build's failure to recent build history; if the same test fails intermittently, surfaces the pattern.
+- **Infrastructure issues.** AWS rate-limits, GitHub Actions runner slowness, third-party API failures — patterns recognisable from log signatures.
+- **Dependency issues.** New version pulled in via lockfile drift, transient registry failures, peer-dep conflicts.
+- **Environment drift.** Tests passing locally but failing in CI because the environment differs.
+
+Each has a known signature. The AI matches signatures to known patterns and surfaces the match.
+
+## Root-cause first-draft
+
+For non-flake breakages, the AI drafts a root-cause analysis:
+
+- What broke (the symptom).
+- Why it broke (the cause, with evidence).
+- What changed recently that's likely related.
+- The fix (concrete, actionable).
+- The prevention (test, lint, doc that would have caught this).
+
+The engineer reviews, applies the fix, and addresses the prevention work. The 2am work is shorter; the next-morning prevention work is real.
+
+## Fix-and-document loop
+
+For real bugs (not flakes), the engineer's discipline is fix + document:
+
+- The fix in code, with tests that wouldn't have passed before.
+- A note in the team's "things we learned" log.
+- An update to the runbook for similar future failures.
+- If the cause is structural (a category of bug, not a one-off), an architecture note.
+
+The AI helps with each — drafts the runbook entry, drafts the architecture note, suggests test cases. The engineer reviews and signs off.
+
+## Monitoring follow-up
+
+A 2am incident often surfaces a monitoring gap. The team didn't know about the issue until CI failed. The remediation includes:
+
+- A new alert that catches this category of issue earlier.
+- A new dashboard view that surfaces the relevant metric.
+- An update to the on-call runbook.
+
+The AI helps draft the alert configurations, the dashboards, the runbook updates. The on-call engineer reviews.
+
+## A real incident
+
+A scenario: CI fails at 2:30 AM. Engineer wakes, checks pager.
+
+**Minutes 0-5.** Engineer pastes failing logs into AI. AI surfaces: "Looks like an OOM kill in the integration-test container. Memory limit was raised in PR #1834 — possible regression."
+
+**Minutes 5-15.** Engineer reviews PR #1834. Confirms the AI's hypothesis. Reverts the PR. CI starts to recover.
+
+**Minutes 15-30.** Engineer drafts the root-cause analysis with AI assistance. Schedules a follow-up sprint task to add OOM-resistance to the affected service.
+
+**Minutes 30-45.** Engineer adds a memory-usage alert that would have caught this earlier. Tests it.
+
+**Minutes 45-60.** Engineer back to bed.
+
+What used to be a 3-hour 2am session compresses to under an hour. The fix is correct. The prevention is real. The runbook is updated.
+
+## What stays human
+
+- The decision to revert vs. roll forward.
+- The customer-comms call (if the issue affects production).
+- The escalation decision if the incident is severe.
+- The post-mortem ownership.
+
+These are senior decisions. The AI helps with the data, not the judgment.
+
+## What we won't ship
+
+**AI-suggested fixes applied without engineer review.** Even at 2am.
+
+**Logs containing PII** pasted into the AI without redaction.
+
+**Reverts of PRs** in critical paths without verifying the revert is safe.
+
+**Anything that masks the underlying issue** instead of fixing it.
+
+## How to start
+
+Build the runbook entries with AI assistance during a calm period. Establish the log-triage workflow. The first 2am incident with the workflow in place will feel calmer than the prior ones.
+
+## Close
+
+CI diagnosis at 2am with Claude Code is the diagnostic compressed. The engineer gets to the cause faster. The fix gets shipped sooner. The prevention work gets captured. The next morning's standup includes the lesson, written up while it's fresh.
+
+## Related reading
+
+- [DevOps: Terraform refactor](/blog/devops-terraform-refactor) — companion role.
+- [SRE: postmortem first drafts](/blog/sre-postmortem-drafts) — same fix-and-document discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising on-call workflows, we'd love to hear about it. [Get in touch.](/contact)*

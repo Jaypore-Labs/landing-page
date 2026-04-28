@@ -1,0 +1,84 @@
+---
+title: "Agents in energy: grid monitoring with a safety case"
+description: "The grid is too consequential for LLMs to act on. Agents earn their keep summarising anomalies, not dispatching them."
+date: "2026-05-20"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Energy AI", "Grid Operations", "Production AI", "Safety"]
+series: "AI agents in industry"
+seriesOrder: 16
+---
+
+A grid operator we spoke with last quarter put it bluntly: "If your AI is going to dispatch power, I want to see ten years of safety data." The current technology can't show ten years of anything. So the agent's role on the grid stays in the seat where it can earn its keep — turning operator-facing data into operator-facing summaries.
+
+Energy is a multi-year arc for AI. The teams that respect the timeline ship something useful at every step. The teams that try to leapfrog get stuck at proof-of-concept.
+
+## The dispatcher's day
+
+A power dispatcher's day is alarms, weather data, demand forecasts, generation schedules, transmission constraints, and phone calls. Most of it routine; some of it consequential. The dispatcher's job is to keep the grid stable. AI agents help with the routine. Humans handle the consequential.
+
+What "help with the routine" looks like:
+
+**Alarm summarisation.** A windstorm causes 47 alarms across a region. A working agent reads the alarm sequence, the affected substations, the recent weather, and produces a one-paragraph operator brief: "Likely cause: high winds in [region]. Affected: 12 substations, mostly distribution-level. Recommended monitoring: lines [X, Y]. No transmission-level impact yet."
+
+**Forecasting context.** Tomorrow's demand forecast is high. Agent reads recent forecasts, weather, scheduled generation, and surfaces the dispatcher's likely choke points before the day starts. Operator decides on actions.
+
+**Outage communication.** An outage occurs. Agent drafts the customer-comms message and the regulator-notification message. Operator reviews both and approves.
+
+**Maintenance scheduling.** Agent reads maintenance backlogs, weather, and demand forecasts to suggest the best window for planned outages. Operator decides.
+
+In all four, the agent reads, summarises, drafts. The dispatcher acts.
+
+## Why dispatch is off the table
+
+Dispatching power on a grid is a real-time decision with cascading consequences. A wrong dispatch can:
+
+- Trip a line that was already loaded.
+- Cause a frequency excursion that propagates regionally.
+- Damage equipment.
+- Cause a blackout that takes hours to recover from.
+
+The model behind today's agents has not been validated for this kind of decision-making. There's no safety case, no certification, no regulatory framework that would permit it. Anyone building an AI dispatcher today is building a presentation slide.
+
+This will change over time. Slowly. With ML systems that are bounded, trained on decades of grid data, and integrated with the existing protective relaying. By then they won't really be "AI agents" in the LLM sense — they'll be specialised ML systems with a particular role.
+
+## What can act, eventually
+
+The earliest places where AI will be trusted to act on the grid are *narrow* and *bounded*:
+
+- Volt-VAR optimisation in distribution networks (already happening, mostly with non-LLM ML).
+- Bidding behaviour in wholesale markets (already happening).
+- Customer-side demand response.
+
+LLM-based agents won't be the dispatchers. They'll be the explainers — the layer that helps humans understand what the bounded ML systems are doing.
+
+## The eval set looks unusual
+
+Energy agent evals don't look like other domains'. They include:
+
+- Alarm-summary accuracy (does the summary capture what the operator needs?).
+- False-positive rate on anomaly flags (because alarm fatigue is a real safety hazard).
+- Latency (the operator can't wait 30 seconds for a summary during a real event).
+- Reproducibility (same input → same output, every time, with full audit).
+
+Eval cases come from real historical events. The team writes scenarios from the operator's perspective: "given this incident sequence, what should the agent have shown the operator?" The reviewer is an operator. This is one of the few domains where the model doesn't get to be the judge.
+
+## How to start
+
+Pick one operator workflow with high cognitive load and low decision authority. Alarm summarisation in a control room is the canonical entry point. Build for that one workflow. Run it in shadow mode (operator gets the summary alongside the raw data, you compare what they did) for a quarter.
+
+After a quarter of clean shadow data, route summaries directly to the operator's screen. Don't expand to a second workflow until the first is generating real numbers.
+
+## Close
+
+Energy agents earn their keep by reducing operator cognitive load, not by acting on the grid. The decision authority stays human. The safety case isn't a hurdle — it's the entire game. Build for the operator's day, not for a future where AI dispatches. That future will come; today's agent is the bridge.
+
+## Related reading
+
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — same audit-trail rigor.
+- [Agents on the factory floor](/blog/agents-in-manufacturing) — same integration-first pattern.
+- [The agent maturity curve](/blog/agent-maturity-curve) — energy agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a grid operations agent, we'd love to hear about it. [Get in touch.](/contact)*

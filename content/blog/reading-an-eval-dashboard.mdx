@@ -1,0 +1,80 @@
+---
+title: "Reading an eval dashboard"
+description: "Four panels matter. The rest is noise."
+date: "2026-12-24"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Dashboards", "Engineering", "Output Testing", "Operations"]
+series: "Evals & output testing"
+seriesOrder: 22
+---
+
+A team's eval dashboard had 30 panels. Nobody read it. Important signals were lost in noise.
+
+A useful eval dashboard has four panels. Anything beyond that needs justification.
+
+## The four panels
+
+**1. Aggregate pass rate.** The headline number. Trending over time.
+
+**2. Per-cohort pass rate.** Where coverage is strong and weak.
+
+**3. Failures.** Recent failures with context. The team's actionable list.
+
+**4. Regression alerts.** Red flags requiring attention.
+
+These four cover the team's needs.
+
+## Reviewer ritual
+
+Dashboard reviewed weekly:
+
+- Aggregate pass rate trending.
+- Cohort hot-spots.
+- Recent failures triaged.
+- Alerts cleared or escalated.
+
+## A real dashboard
+
+A team's setup:
+
+- Aggregate: line chart, last 90 days.
+- Cohort breakdown: bar chart per cohort.
+- Failures: table with input, expected, actual, version.
+- Alerts: red banners for threshold breaches.
+
+That's it. No more. Anything additional must clearly earn its panel.
+
+## Trade-offs
+
+- Simple dashboards get read.
+- Complex dashboards don't.
+- The team's eyes are scarce.
+
+## Limits
+
+The dashboard tells you something is wrong, not why. Investigation happens elsewhere (logs, traces, eval result storage).
+
+## What we won't ship
+
+**Dashboards** with vanity panels nobody reads.
+
+**Aggregate-only dashboards.** Cohort breakdown is essential.
+
+**No alerting.** Trends without alerts get missed.
+
+**Dashboards** that aren't reviewed.
+
+## Close
+
+Reading an eval dashboard is a discipline of focus. Four panels. Each earns its place. The team's attention isn't squandered. Skip this and the dashboard becomes wallpaper.
+
+## Related reading
+
+- [Trend vs. threshold evals](/blog/trend-vs-threshold-evals) — what trends to watch.
+- [Eval result storage](/blog/eval-result-storage) — data behind the dashboard.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're improving eval dashboards, we'd love to hear about it. [Get in touch.](/contact)*

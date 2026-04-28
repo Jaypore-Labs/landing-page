@@ -1,0 +1,93 @@
+---
+title: "Deploying agents in CI: scoped, audited, repeatable"
+description: "Agents in CI need scope discipline. Open-ended access in CI is a security event waiting."
+date: "2026-09-07"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "CI/CD", "Engineering", "Building Agents", "Security"]
+series: "Building agents"
+seriesOrder: 19
+---
+
+A team gave their CI agent broad credentials so it could do useful things across the codebase. Within a month, an unrelated bug caused the agent to attempt to push directly to main. Caught by a branch-protection rule. Could have been worse.
+
+Agents in CI are powerful. Open-ended access in CI is a security event waiting. The discipline is scope.
+
+## Scoped tokens
+
+Each agent in CI gets credentials scoped to what it actually does:
+
+- Read-only where possible.
+- Write access scoped to specific paths or branches.
+- No access to secrets it doesn't need.
+- Tokens that expire frequently.
+
+The agent's identity is auditable. The blast radius is bounded.
+
+## Audit logs
+
+Every agent action in CI is logged:
+
+- What the agent did.
+- What credentials it used.
+- What outputs it produced.
+- What artifacts were affected.
+
+These logs survive for the team's standard audit period (typically 1+ years). Required for compliance, useful for debugging.
+
+## Reproducibility
+
+CI agents need to be reproducible:
+
+- Pinned model versions.
+- Pinned prompt versions.
+- Pinned tool versions.
+- Pinned input data.
+
+Without pinning, the same CI run produces different outputs on different days. With pinning, "did this PR pass the agent's review?" is a deterministic question.
+
+## Review gates
+
+Agent outputs in CI go through review:
+
+- Status checks (the agent's review is a check, not a merge gate).
+- The merge gate is human approval.
+- Disagreement between agent and human goes to the human.
+
+The agent informs; the human decides. Always.
+
+## A real pipeline
+
+A scenario: an agent that runs as part of CI, doing first-pass review on every PR.
+
+- Triggered on PR open.
+- Runs in a sandboxed runner with read-only access to the codebase.
+- Posts comments to the PR.
+- The merge gate is human approval; agent comments are advisory.
+- All actions logged.
+
+A year of operation: tens of thousands of PRs reviewed, zero security incidents, agent's catch rate visible in the team's metrics dashboards.
+
+## What we won't ship
+
+**Agents in CI with broad write access.**
+
+**Agents in CI without audit logs.**
+
+**Agents that gate merges** without human-override capability.
+
+**Agents in CI** without reproducibility (model + prompt + tool pinning).
+
+## Close
+
+Agents in CI are valuable when scoped, audited, repeatable. The scope keeps blast radius small. The audit makes the agent accountable. The repeatability makes the agent debuggable. Skip any of these and the agent eventually creates a security incident or a non-reproducible mess.
+
+## Related reading
+
+- [Tool failure modes](/blog/tool-failure-modes) — same engineering discipline.
+- [Agent versioning](/blog/agent-versioning) — pinning discipline.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're deploying agents in CI, we'd love to hear about it. [Get in touch.](/contact)*

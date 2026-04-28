@@ -1,0 +1,96 @@
+---
+title: "The post-launch test plan: what runs forever"
+description: "Some tests run only at launch; others run forever. The plan is the difference."
+date: "2026-11-24"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Operations"]
+series: "Testing in the age of AI"
+seriesOrder: 25
+---
+
+Some testing happens at launch. Other testing should never stop. The team that conflates these has either too much CI or too much production exposure.
+
+This is the closing of the testing series. The post-launch test plan is what runs forever.
+
+## The forever suite
+
+These tests run in production indefinitely:
+
+- **Drift detection.** Style, accuracy, quality dimensions monitored.
+- **Performance monitoring.** Latency and cost tracked.
+- **Cost guardrails.** Budgets enforced.
+- **PII detection.** Outputs scanned for leaks.
+- **Prompt-injection monitoring.** Production traffic sampled for attack patterns.
+- **Eval cadence.** Periodic eval-suite runs.
+
+Each runs continuously. Each has alerting on regression.
+
+## Cadence
+
+Different tests run at different cadences:
+
+- Real-time: cost guardrails, PII detection, prompt-injection detection.
+- Daily: drift detection trends, eval-suite smoke runs.
+- Weekly: full eval-suite runs.
+- Monthly: comprehensive review of trends.
+
+The cadence matches the cost of detection delay for each issue type.
+
+## Reviewer ritual
+
+Trends reviewed weekly:
+
+- Drift indicators.
+- Performance metrics.
+- Cost per call.
+- Failure patterns.
+
+Significant moves investigate-and-respond.
+
+## A real plan
+
+A team's forever-running test plan:
+
+- Production sampling: 1% of traffic gets re-evaluated against gold standard.
+- Cost monitoring: per-feature, daily, alerts on >10% week-over-week movement.
+- PII scanner: every output, real-time.
+- Drift catcher: weekly style-eval against the team's voice rubric.
+- Quarterly eval refresh: golden set updated based on production patterns.
+
+The plan runs without engineering bandwidth. Alerts route to the team. Issues surface fast.
+
+## Trade-offs
+
+Forever-running tests cost money and operational attention. The trade-off:
+
+- Without them: the team learns about issues from customer complaints (slow, embarrassing).
+- With them: the team learns from monitoring (fast, professional).
+
+For any feature meaningful to the business, with them is the right choice.
+
+## What we won't ship
+
+**Features into production** without a forever-running test plan.
+
+**Test plans** that aren't reviewed.
+
+**Alerts** that nobody acts on.
+
+**Static eval sets** that don't grow with production patterns.
+
+## Close
+
+The post-launch test plan is what makes AI features durable. The plan covers drift, performance, cost, PII, security, eval. Each runs continuously. The team learns about issues fast. The product survives in production over years.
+
+This concludes the testing series. The next series — evals & output testing — covers the eval discipline that powers most of these tests.
+
+## Related reading
+
+- [The new test pyramid](/blog/new-test-pyramid) — series opener.
+- [Drift catchers](/blog/drift-catchers) — surrounding pattern.
+- [Evals & output testing series](/series/evals-and-output-testing) — next series.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building post-launch test plans, we'd love to hear about it. [Get in touch.](/contact)*

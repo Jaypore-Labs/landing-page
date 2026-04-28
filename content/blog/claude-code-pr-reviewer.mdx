@@ -1,0 +1,116 @@
+---
+title: "EM: PR reviewer that flags scope creep"
+description: "An AI employee that reads every PR for scope creep, breaks-with-spec, and reviewer-respect issues. The senior reviewer's time goes to the actual code."
+date: "2026-06-26"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Engineering Management", "AI Employees", "Code Review", "Pull Request"]
+series: "Claude Code in business"
+seriesOrder: 18
+---
+
+A senior engineer told us once that her PR reviews fell into two buckets: "stuff that requires me looking at the code carefully" and "stuff that's basically reading what the description says vs. what the diff does." The second bucket was 60% of her time.
+
+The PR-reviewer AI employee absorbs the second bucket. It checks the description vs. the diff, surfaces scope-creep, flags missing tests, and notes reviewer-respect issues. The senior engineer reviews the code that needs her judgment.
+
+## The shape of the role
+
+**Title.** Engineering Operations AI — PR Review Specialist.
+
+**Mission.** First-pass review of every PR: scope match, test coverage, reviewer-respect issues. Surface for senior review.
+
+**Outcomes.** Time-from-PR-open-to-first-review, reviewer time per PR, scope-creep frequency.
+
+**Reports to.** EM or Tech Lead.
+
+**Tools.** PR diff read access, related-PR history, codebase context, test framework awareness.
+
+**Boundaries.** Comments and surfaces. Doesn't approve. Doesn't merge.
+
+## What gets reviewed automatically
+
+The agent runs four checks on every opened PR:
+
+**Check 1 — Description vs. diff.** Does the PR description accurately describe what the diff does? Missing changes (the diff includes things the description doesn't mention)? Phantom changes (the description claims things that aren't in the diff)?
+
+**Check 2 — Scope creep.** Does the diff include changes outside the stated scope? The agent reads the linked ticket or PRD and compares to the diff. "This PR is for the export feature, but it also touches the auth middleware. Was that intentional?"
+
+**Check 3 — Test coverage.** Does the change have corresponding tests? Are the tests asserting the right behaviour, or are they coverage-padding? Are existing tests being deleted without replacement?
+
+**Check 4 — Reviewer respect.** Is the PR sized for reviewability (typically under 400 lines of meaningful change)? Are commits structured? Is the PR description complete enough that a reviewer doesn't have to reverse-engineer the intent?
+
+For each check, the agent leaves a comment on the PR — phrased as a question or observation, not as a directive. The author addresses or explains. The senior reviewer sees the agent's pre-pass.
+
+## The diff-vs-spec discipline
+
+The single highest-value check is description vs. diff. The pattern that's hardest to catch in human reviews is "I went in to fix X and found Y, so I fixed it too." Y might be fine. Y might also be a separate bug introduction that nobody noticed because the reviewer was focused on X.
+
+The agent surfaces Y explicitly. The author either splits the PR ("good catch, let me make Y a separate PR") or notes the rationale ("Y was a bug related to X; fixing both is intentional"). Either way, the change is intentional.
+
+## Reviewer comment etiquette
+
+The agent's comments follow a consistent etiquette:
+
+- **Questions, not directives.** "Was the auth middleware change intentional?" not "Don't change auth in this PR."
+- **Specific.** Reference the file and line range.
+- **Brief.** One sentence, occasionally two.
+- **Proportional.** Surface real issues; don't comment on stylistic preferences the linter could catch.
+
+This matters because PR-review is a relationship space. Agents that comment heavy-handedly create friction. Agents that comment with the etiquette of a thoughtful reviewer add value.
+
+## What the senior reviewer does
+
+After the agent's first pass, the senior reviewer:
+
+- Reads the agent's comments and sees the author's responses.
+- Focuses on the actual code logic, design choices, and edge cases.
+- Approves or requests changes based on the substance.
+
+The senior's time per PR drops from ~25 minutes to ~10 minutes on average. Not because they're cutting corners — because the mechanical checks are done. The 10 minutes is all on the parts that benefit from senior judgment.
+
+## Weekly metric review
+
+The team's tech lead reviews the agent's metrics weekly:
+
+- PRs flagged for scope creep — pattern emerging?
+- PRs missing tests — which kinds of changes consistently arrive without tests?
+- PRs over the size threshold — pattern of one engineer producing big PRs?
+
+These patterns inform team conventions. Sometimes a process change is needed. Sometimes a single conversation. Either way, the data is visible.
+
+## What we won't ship
+
+**Auto-merging.** Approval and merge are human.
+
+**Code-quality scoring** in performance reviews. Same gaming risk as sprint metrics.
+
+**Public shaming** of authors with frequent issues. Coaching is private; the agent's comments are signal, not blame.
+
+**Anything that replaces a senior reviewer's read of the actual code.** The agent does the first pass, not the only pass.
+
+## The KPIs the EM watches
+
+1. **Time-from-PR-open-to-first-review.**
+2. **Senior-reviewer time per PR.**
+3. **Scope-creep frequency.**
+4. **Bugs introduced per PR** (tracked over a long horizon).
+
+If bug rates rise, the agent's checks may have lulled reviewers into a false sense of security. Adjust.
+
+## How to start
+
+One team. Wire the agent into the team's PR workflow. Run for a quarter. Track the four metrics. Once the team trusts the agent's pre-pass, expand to a second team.
+
+## Close
+
+The PR-reviewer AI employee is a teammate whose job is the mechanical first-pass review. The senior engineer's time goes to the substance. The author gets faster feedback. The team's PR throughput improves without the review quality dropping. The compounding effect — fewer scope-creep bugs, better-documented PRs — shows up over quarters.
+
+## Related reading
+
+- [EM: sprint-planning copilot](/blog/claude-code-sprint-planning) — companion role.
+- [Building agents: tool design](/blog/tool-design-like-apis) — same care for human-facing interfaces.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI engineering-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

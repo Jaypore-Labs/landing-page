@@ -1,0 +1,87 @@
+---
+title: "Tests for streaming responses"
+description: "Streaming responses have their own contract. The tests verify the stream, not just the final text."
+date: "2026-11-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Streaming"]
+series: "Testing in the age of AI"
+seriesOrder: 16
+---
+
+A team's streaming endpoint returned text that was eventually correct but arrived in chunks that broke their UI. The tests checked the assembled final text — clean. The stream itself — broken. Users saw partial words, missing punctuation, jarring transitions.
+
+Streaming has its own contract. The tests verify the stream, not just the destination.
+
+## The streaming contract
+
+Things to assert about streams:
+
+- **Token boundaries.** Tokens shouldn't break in the middle of words (when consumer cares about word boundaries).
+- **Latency.** First token by X ms; subsequent tokens at acceptable cadence.
+- **Order.** Tokens arrive in order.
+- **Completeness.** All tokens arrive; the stream completes.
+- **Recoverability.** If the stream drops, it can resume or restart.
+
+## Assertion patterns
+
+Common streaming-test assertions:
+
+- Time-to-first-token under threshold.
+- Total stream duration under threshold.
+- Final assembled text matches expected.
+- Stream has no premature termination.
+- Stream chunks parse correctly (for structured streaming).
+
+## Reviewer ritual
+
+PR review for streaming changes:
+
+- Streaming tests included.
+- Latency assertions verified.
+- Edge cases tested (slow consumers, dropped connections).
+
+## A real test
+
+A team's streaming-test suite:
+
+- 20 cases asserting time-to-first-token.
+- 10 cases asserting completion.
+- 10 cases asserting structured-stream parsing (tokens that need to be valid JSON when assembled).
+- 5 cases asserting recovery from disconnects.
+
+These ran on every PR for the streaming feature. Caught issues that final-output tests missed.
+
+## Coverage
+
+Streaming coverage:
+
+- Happy path (typical responses).
+- Long responses (sustained streaming).
+- Quick responses (latency edge).
+- Error mid-stream.
+- Disconnection mid-stream.
+
+## What we won't ship
+
+**Streaming endpoints** tested only by final-text comparison.
+
+**Latency assertions** missing.
+
+**Streams that don't recover gracefully** from interruptions.
+
+**Tests** that rely on real-time behaviour without timing assertions.
+
+## Close
+
+Tests for streaming responses verify the stream itself, not just the assembled output. Latency, order, completion, recovery — each gets asserted. Skip these and the user-facing stream is broken in ways the team didn't catch.
+
+## Related reading
+
+- [Voice-first agents](/blog/voice-first-agents) — same latency discipline.
+- [Performance tests](/blog/performance-tests-llm) — companion topic.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're testing streaming, we'd love to hear about it. [Get in touch.](/contact)*

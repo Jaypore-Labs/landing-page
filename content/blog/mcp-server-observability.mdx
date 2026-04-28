@@ -1,0 +1,86 @@
+---
+title: "MCP server observability"
+description: "Three pillars: logs, traces, metrics. MCP servers need them like any production service."
+date: "2027-01-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Observability", "Engineering", "Architecture", "Monitoring"]
+series: "MCP & AI protocols"
+seriesOrder: 13
+---
+
+A team's MCP server occasionally returned wrong results. Without observability, debugging meant trying to reproduce locally. Reproducing was hard; debugging was slow.
+
+MCP servers are production services. Observability isn't optional.
+
+## The three pillars
+
+**Logs.** Each tool call logged with input, output, duration, error if any.
+
+**Traces.** Distributed tracing across the server's downstream calls.
+
+**Metrics.** Latency, throughput, error rate per tool.
+
+These three combine to debug production issues.
+
+## Reviewer ritual
+
+PR review:
+
+- Observability for new tools.
+- PII redaction in logs.
+- Metrics that flow to the team's monitoring stack.
+
+## A real implementation
+
+A team's MCP server:
+
+- Structured logs (JSON) per tool call.
+- OpenTelemetry traces for downstream calls.
+- Prometheus metrics: per-tool count, p50/p95/p99 latency, error rate.
+- Grafana dashboards.
+
+When an issue surfaces, the team has the evidence to debug.
+
+## Trade-offs
+
+Observability adds:
+
+- Slight per-call latency.
+- Storage cost.
+- Engineering setup.
+
+The trade-off is worth it for any production server.
+
+## Limits
+
+Observability captures what happened. It doesn't:
+
+- Predict failures.
+- Fix bugs automatically.
+
+It's input to the team's debugging, not a substitute for it.
+
+## What we won't ship
+
+**MCP servers** in production without the three pillars.
+
+**Logs** with unredacted PII.
+
+**Metrics** that don't flow to dashboards.
+
+**Observability** that nobody reads.
+
+## Close
+
+MCP server observability is the production discipline. Logs, traces, metrics. Each captures different signal. Together, they make debugging tractable.
+
+## Related reading
+
+- [Agent observability: traces that tell you what happened](/blog/agent-observability) — same discipline.
+- [SRE: postmortem first drafts](/blog/sre-postmortem-drafts) — what observability supports.
+- [MCP server hosting](/blog/mcp-server-hosting) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're improving MCP observability, we'd love to hear about it. [Get in touch.](/contact)*

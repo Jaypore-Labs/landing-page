@@ -1,0 +1,94 @@
+---
+title: "Why probabilistic systems still need deterministic contracts"
+description: "LLMs are probabilistic; the systems they live in are not. The contract is the bridge."
+date: "2026-09-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Engineering", "Predictable Output", "Contracts"]
+series: "Predictable AI output"
+seriesOrder: 1
+---
+
+A team shipped an LLM-powered feature that worked 92% of the time and broke production code 8% of the time. The 8% wasn't random — it was the LLM occasionally returning JSON with a trailing comma, an extra field, or a slight schema variance. The team's downstream code didn't tolerate variance. Each variance was a paged incident.
+
+LLMs are probabilistic. The systems they live in are not. Bridging the two is engineering work, and it starts with explicit contracts.
+
+## The contract pattern
+
+The pattern: every LLM output that crosses a system boundary has a contract.
+
+- **Schema-defined.** Structured output, validated at the boundary.
+- **Tolerance-bounded.** The system specifies what acceptable variance looks like (e.g., extra whitespace, case-insensitivity).
+- **Failure-handled.** What happens when the output doesn't match the contract? Retry, fallback, escalate.
+
+Without contracts, every LLM call is a gamble against the downstream system's tolerance.
+
+## Schema-first design
+
+The contract is designed first:
+
+- The downstream consumer's needs.
+- The schema that satisfies them.
+- The validation layer.
+- The failure path.
+
+The LLM prompt comes after. The prompt is engineered to produce the schema-shaped output. Reverse the order and the system inherits whatever the LLM happens to produce.
+
+## Tolerance bands
+
+Some variance is acceptable. The contract specifies:
+
+- Whitespace tolerated.
+- Case tolerated where appropriate.
+- Optional fields with defaults.
+- Numeric precision bounds.
+
+Tolerance bands are explicit. Implicit tolerance gets the team into trouble.
+
+## Reviewer loop
+
+When the LLM violates the contract, three options:
+
+- **Retry.** Sometimes the next attempt works.
+- **Fallback.** A simpler, deterministic path.
+- **Escalate.** A human handles this case.
+
+The choice depends on the use case. Critical paths escalate. Best-effort paths fall back.
+
+## A real contract
+
+A scenario: an LLM that classifies support tickets into categories.
+
+Contract:
+- Output is JSON: `{"category": str, "confidence": float, "reasoning": str}`.
+- `category` must be one of a fixed set of 12 values.
+- `confidence` is in [0, 1].
+- `reasoning` is 1-3 sentences.
+
+Validation: pydantic schema at the boundary. Failures get logged and retried once. Persistent failures route to a human.
+
+The LLM is reliable at producing this output 99%+ of the time. The validation catches the rare misses. The downstream code never sees a malformed response.
+
+## What we won't ship
+
+**LLM outputs crossing system boundaries** without contract validation.
+
+**Tolerance bands** that are implicit rather than specified.
+
+**Failure paths** that aren't tested (the failure path runs as often as the LLM is wrong; if it's broken, the wrong-day surfaces it).
+
+**Skipping retry budgets.** Open-ended retries are a cost and reliability hazard.
+
+## Close
+
+Probabilistic systems live inside deterministic ones. The contract is the bridge. Schema first. Tolerance specified. Failures handled. Skip any of these and the system inherits the LLM's variance, which compounds into incidents.
+
+## Related reading
+
+- [Structured output: JSON mode, schemas](/blog/structured-output) — the next layer.
+- [Output validation: pydantic, zod, friends](/blog/output-validation-libs) — implementation.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening LLM contracts, we'd love to hear about it. [Get in touch.](/contact)*

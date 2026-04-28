@@ -1,0 +1,91 @@
+---
+title: "Building your first eval set from scratch"
+description: "Start with 30-50 cases. Curate carefully. Grow over time. The first eval set is the foundation."
+date: "2026-11-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "AI Engineering", "Engineering", "Output Testing", "Curation"]
+series: "Evals & output testing"
+seriesOrder: 2
+---
+
+The hardest part of starting evals is starting. Teams stall at "we should have an eval set." The discipline is starting small and growing.
+
+## The 30-50 case start
+
+Day 1, the eval set is small:
+
+- 10-15 happy-path cases.
+- 5-10 edge cases.
+- 5-10 known-difficult cases.
+- 5-10 adversarial cases.
+
+Total: 30-50 cases. Reviewable in an hour. Run-able in minutes.
+
+This is enough to start measuring. More cases come over time.
+
+## Curation
+
+For each case:
+
+- Input.
+- Expected output (or expected behaviour).
+- Why this case (rationale).
+- Difficulty tier.
+
+The rationale matters. Future engineers will read it.
+
+## Reviewer ritual
+
+Eval-set growth happens through:
+
+- Production-failure mining (counter-example mining).
+- Hand-authored adversarial work (red-teaming).
+- Periodic review of representative-ness.
+
+Cases that no longer earn their place retire.
+
+## A real first set
+
+A team's first eval for a customer-classifier:
+
+- Day 1: 35 cases authored from team experience.
+- Week 2: 20 added from the team's brainstorm of edge cases.
+- Month 2: 30 added from production-failure analysis.
+- Month 6: 40 added from adversarial work.
+- Total at month 6: 125 cases.
+
+The set grew with intention. Each case had a purpose.
+
+## How to grow it
+
+- Add when production reveals failure.
+- Add when the team identifies a gap.
+- Add when a stakeholder requests coverage of a case.
+- Retire when cases are obsolete.
+
+The set matures with the product.
+
+## What we won't ship
+
+**Eval sets** that grow without curation.
+
+**Cases without rationale.** Future-you needs to understand why each case is there.
+
+**Stale cases** that don't reflect current behaviour expectations.
+
+**Skipping the review cadence.** Cases age; review them.
+
+## Close
+
+Building your first eval set is the first step. Start with 30-50 carefully chosen cases. Grow with intention. The set becomes the team's most valuable asset over months.
+
+## Related reading
+
+- [Golden-set discipline](/blog/golden-set-discipline) — quality maintenance.
+- [Counter-example mining](/blog/counter-example-mining) — growth source.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building your first eval set, we'd love to hear about it. [Get in touch.](/contact)*

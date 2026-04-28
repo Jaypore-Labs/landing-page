@@ -1,0 +1,91 @@
+---
+title: "MCP authorization: per-user permissions"
+description: "Authentication is who; authorization is what. Per-user permissions on shared tools matter."
+date: "2027-01-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Authorization", "Engineering", "Security", "Permissions"]
+series: "MCP & AI protocols"
+seriesOrder: 9
+---
+
+A team's MCP server let any authenticated user do anything. The server was used internally; "we trust each other." Six months in, an entry-level user accidentally deleted production records via the AI assistant's call. The fix would have been per-user permissions.
+
+Authentication is who; authorization is what. Per-user permissions on shared tools matter.
+
+## The permission model
+
+For each user, the model defines:
+
+- Which tools they can call.
+- Which arguments they can pass (e.g., specific resource IDs).
+- Which actions they can take (read vs. write).
+
+Permissions enforced server-side. Client (the AI assistant) doesn't decide; the server checks every call.
+
+## Reviewer ritual
+
+PR review for permission changes:
+
+- Permission model documented.
+- Default permissions are restrictive.
+- Elevation requires explicit grant.
+- Audit log captures permission decisions.
+
+## A real implementation
+
+A team's MCP server for sales data:
+
+- Read-only by default for everyone.
+- Write permissions per role (account-owner, manager, admin).
+- Per-account access controls (sales reps see their accounts; managers see their teams').
+
+The AI assistant calls the same tools; the server filters per user.
+
+## Edge cases
+
+- **Cross-user data.** When the AI is helping user A but needs user B's data — server denies.
+- **Aggregate access.** Some users have access to aggregated data without individual records — server filters.
+- **Time-bounded access.** Some permissions expire — server checks.
+
+## Trade-offs
+
+Per-user permissions add complexity:
+
+- More code paths.
+- More test surface.
+- More configuration.
+
+The complexity is worth it. Without permissions, the security incident is when, not if.
+
+## Limits
+
+Permission models can become tangled:
+
+- Hundreds of fine-grained permissions become hard to reason about.
+- Lean toward coarse-grained roles where possible.
+- Document the model.
+
+## What we won't ship
+
+**MCP servers** without per-user permissions in multi-user deployments.
+
+**Permission models** that aren't documented.
+
+**Default-allow** patterns. Default-deny is safer.
+
+**Permissions** without audit logging.
+
+## Close
+
+MCP authorization keeps shared servers safe. Per-user permissions on tools, arguments, actions. Default-deny. Audit log. Skip these and the next data incident is mostly a question of when.
+
+## Related reading
+
+- [MCP authentication](/blog/mcp-authentication) — preceding layer.
+- [MCP server observability](/blog/mcp-server-observability) — companion discipline.
+- [Agents in finance: compliance audit trail](/blog/agents-in-finance-compliance) — same discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening MCP authorization, we'd love to hear about it. [Get in touch.](/contact)*

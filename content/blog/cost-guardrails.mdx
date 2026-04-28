@@ -1,0 +1,103 @@
+---
+title: "Cost guardrails: stop runaway agents before billing does"
+description: "An agent without cost ceilings is a billing surprise waiting to happen. Engineer the guardrails before you need them."
+date: "2026-08-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Cost Management", "Engineering", "Building Agents", "Operations"]
+series: "Building agents"
+seriesOrder: 13
+---
+
+A team got a $14,000 surprise bill in a single weekend. An agent had entered a loop — calling a tool, getting back results, re-calling the tool with slightly different arguments, getting back similar results, ad infinitum. The cost monitoring caught it Monday morning. The damage was done.
+
+Cost guardrails are the engineering work that prevents this. The agent that has them is bounded. The agent that doesn't is a future incident.
+
+## Per-task ceilings
+
+Every agent task has a budget:
+
+- Token budget (max tokens consumed per task).
+- Wall-time budget (max minutes per task).
+- Tool-call budget (max calls per task).
+
+When any budget is approached, the agent surfaces and asks. When any is exceeded, the agent stops.
+
+Without these, agents can spiral. With them, the spiral has a known stopping point.
+
+## Org budgets
+
+Per-task ceilings prevent individual incidents. Per-org budgets prevent compound incidents:
+
+- Daily token budget per organisation.
+- Monthly cost budget per agent.
+- Per-tenant budgets in multi-tenant systems.
+
+Alerts fire as budgets approach. Hard stops kick in at the budget. The team can adjust if the budget is wrong, but the system doesn't accidentally exceed.
+
+## Alerting
+
+Cost alerts are first-class. The team gets notified when:
+
+- Daily spend on track to exceed the day's budget.
+- Per-task spend is unusually high.
+- A specific tool is being called more than usual.
+- Token consumption is trending up week-over-week.
+
+These aren't hypothetical alerts; they're real cost-tracking dashboards the team checks.
+
+## Kill-switch defaults
+
+Every agent ships with a kill switch. The team can:
+
+- Stop a specific running task.
+- Pause all tasks in a workflow.
+- Disable the agent globally for a tenant.
+- Disable the agent globally.
+
+Multiple levels of granularity. Multiple authorisation paths (engineering for the granular, leadership for the global).
+
+The kill switch is tested. Drilled. Documented in the runbook. Otherwise, when it's needed, it doesn't work.
+
+## A real overrun
+
+A scenario: an agent's prompt was patched, and the new prompt induced a verbose-reasoning pattern. The agent started using 4× more tokens per task.
+
+Without guardrails: this would have shown up as a billing spike at month-end.
+
+With guardrails: the daily-spend alert fired within hours. The team investigated, identified the prompt change, reverted, and re-ran. Total damage: $200 instead of $14,000.
+
+## Cost as a first-class feature
+
+Cost is treated as a feature, not a side effect:
+
+- Each agent's cost-per-task is a published metric.
+- Cost regressions are eval failures.
+- Cost dashboards are reviewed weekly.
+- Cost optimization is dedicated engineering work.
+
+This is the discipline that scales. Agents that aren't cost-managed don't survive scale economics.
+
+## What we won't ship
+
+**Agents without per-task ceilings.**
+
+**Agents without org-level budgets.**
+
+**Cost dashboards no one reads.** If the team doesn't check, the dashboard doesn't help.
+
+**Cost optimisation that breaks correctness.** Cheap and wrong is worse than expensive and right.
+
+## Close
+
+Cost guardrails are the engineering work that turns agents from a billing risk into a managed line item. Per-task ceilings. Org budgets. Alerts. Kill switches. The discipline pays for itself within the first month of agent operation.
+
+## Related reading
+
+- [Tool failure modes](/blog/tool-failure-modes) — same engineering-for-failure discipline.
+- [Long-horizon tasks](/blog/long-horizon-tasks) — cost is part of the budget.
+- [Agent observability](/blog/agent-observability) — uses cost-trace data.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping agents at scale, we'd love to hear about it. [Get in touch.](/contact)*

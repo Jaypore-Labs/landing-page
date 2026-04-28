@@ -12,6 +12,7 @@ const navigation = [
   { name: "Services", href: "/services" },
   { name: "About", href: "/about" },
   { name: "Journal", href: "/blog" },
+  { name: "Series", href: "/series" },
 ];
 
 function useClock() {

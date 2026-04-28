@@ -1,0 +1,80 @@
+---
+title: "MCP for actioning tools (PR creator, ticket closer)"
+description: "Action tools have side effects. The contract is care."
+date: "2027-01-22"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Actions", "Engineering", "Side Effects", "Confirmation"]
+series: "MCP & AI protocols"
+seriesOrder: 18
+---
+
+Action tools take real actions. Create PRs, close tickets, send notifications, charge customers. The AI assistant can do real things via these tools. The discipline is making sure it does them only when intended.
+
+## The action contract
+
+For each action tool:
+
+- Idempotency key required.
+- Side-effect class documented.
+- Reversibility documented.
+- Audit log non-optional.
+- Confirmation pattern in the AI's UX.
+
+The AI doesn't unilaterally take consequential actions. The user confirms.
+
+## Reviewer ritual
+
+PR review for action tools:
+
+- Side-effect class explicit.
+- Idempotency key required.
+- Audit log captures who, what, when.
+- Confirmation pattern documented.
+
+## A real server
+
+A team's GitHub MCP server:
+
+- `create_pull_request(title, description, branch, base)` — requires confirmation.
+- `merge_pull_request(pr_number)` — requires confirmation.
+- `close_issue(issue_number, reason)` — requires confirmation.
+
+The AI proposes. The user confirms. The action happens.
+
+## Trade-offs
+
+- Strict confirmation: slower; safer.
+- Loose confirmation: faster; risk of unintended action.
+
+For actions with consequences, lean strict.
+
+## Edge cases
+
+- Some actions are inherently batchable. The batch needs confirmation, not each item.
+- Some actions are inherently low-risk (sending a notification). Lighter confirmation acceptable.
+- Some actions require additional auth (production deploys). Multiple-step confirmation.
+
+## What we won't ship
+
+**Action tools** without idempotency.
+
+**Action tools** without audit logs.
+
+**Confirmation patterns** that nobody reads.
+
+**Tools** with side effects in non-side-effect classes.
+
+## Close
+
+MCP for actioning tools is the discipline of making real-world side effects safe. Confirmation. Audit. Idempotency. Skip these and the AI takes actions the user didn't intend.
+
+## Related reading
+
+- [Determinism for tool calls](/blog/determinism-for-tools) — same discipline.
+- [Tool failure modes](/blog/tool-failure-modes) — surrounding discipline.
+- [Building agents that explain](/blog/agents-that-explain) — companion pattern.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping action tools, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,72 @@
+---
+title: "Agents in marketing: campaign agents and the brand-voice problem"
+description: "Brand voice is a constraint, not a vibe. Marketing agents that ship treat the style guide like an eval set, not a wall hanging."
+date: "2026-05-07"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Marketing AI", "Brand", "Production AI", "Content"]
+series: "AI agents in industry"
+seriesOrder: 7
+---
+
+Every CMO we've talked to about AI eventually says the same thing: "It can write, but it doesn't sound like us." Agents *can* sound like a brand. Most don't because nobody has done the work of converting the style guide from a Notion page into a constraint the model can be measured against.
+
+Brand voice as a feeling is unmeasurable. Brand voice as an eval set is operational. The shift is the design.
+
+## Style guide → eval set
+
+A typical style guide reads like this: *"Our voice is confident but not cocky. Direct but not blunt. We use everyday language. We avoid jargon."* Beautiful prose. Useless to a model.
+
+The translation looks like this. For each style rule, build a small set of paired examples — *good* and *bad* — that demonstrate the rule. *"We avoid jargon"* becomes 20 pairs of (jargon-laden sentence, plain-English rewrite). *"Direct but not blunt"* becomes 30 pairs of (direct, too-blunt). The eval is "given a draft, does it match the *good* side of the pairs more than the *bad* side?"
+
+This is not LLM-as-judge dressed up. It's a concrete, measurable, repeatable check. The style guide becomes something the marketing team can hold the agent's output to. New campaign, run the draft through the eval, see whether it passes.
+
+## The four-stage campaign agent
+
+Most working campaign agents fit a four-stage shape:
+
+**1. Brief intake.** The agent reads a campaign brief — goal, audience, channels, deadlines, constraints — and produces a structured plan: angles, channels, asset list, dependencies. The marketer reviews and edits.
+
+**2. Draft generation.** For each asset (long-form, ad copy, social, email subject lines), the agent generates 2-3 variants, *each one passing the brand-voice eval*. Drafts that fail the eval don't get presented.
+
+**3. Reviewer loop.** The marketer reviews variants. Edits become eval feedback — every edit pair (original → edit) is added to the brand-voice eval set. The agent gets sharper over time, with the team's edits as the training signal.
+
+**4. Approval and ship.** Final asset goes through formal approval (legal, brand, exec). The agent never publishes; it produces ready-to-publish drafts.
+
+## The brand-voice eval gates the work
+
+Most campaign agents fail because there's no gate. The agent generates whatever it generates, the marketer rewrites half of it, the cycle repeats indefinitely. With a brand-voice eval gate, drafts that wouldn't survive review never reach the marketer. The marketer reviews drafts that are already ~80% of the way there. The remaining 20% is the editorial work humans should be doing — not rewriting "our cutting-edge solution" to "our product."
+
+The eval can be small to start. 30 paired examples per voice dimension. Add to it weekly from the team's edits. Within a quarter, the eval is doing more enforcement work than the team realises.
+
+## Where campaign agents shouldn't run
+
+**Crisis comms.** Anything time-sensitive and reputation-loaded needs human-first thinking, not agent drafts. The agent can be a sounding board after the human has the angle. Not a generator.
+
+**Anything legally regulated.** Health claims, financial promises, regulated industries — the eval includes a regulator-language check, but final approval is always human.
+
+**First-draft for brand-defining moments.** Brand-defining campaigns deserve human-first creative, then the agent for variants and channel adaptations. Reverse the order and you end up with derivative work optimised for engagement instead of meaning.
+
+## Measuring the gain
+
+The metric is not "drafts produced per week." It's "time from brief to approved campaign." Working campaign agents cut that by 50-70% on routine campaigns. They don't move it on the brand-defining ones. That's the right shape — agents handle the routine, humans handle what matters.
+
+The other metric is "edits per draft" — should drop steadily over the first quarter as the eval gets sharper. If it's flat or increasing, your eval feedback loop is broken.
+
+## How to start
+
+Pick one campaign type. Email nurture, social posts, blog drafts — anything routine and high-volume. Build a brand-voice eval set with 30-50 paired examples. Wire the agent into the team's workflow with the eval as a hard gate. Let edits feed the eval set weekly. Expand to a second campaign type only after the first one has been running for two months.
+
+## Close
+
+Marketing agents work when the brand voice is operational — measurable, gated, growing with the team's edits. They fail when the voice stays a vibe. The translation work isn't glamorous, but it's what turns "AI can write" into "AI can write *for us*."
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — marketing agents on the curve.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the discipline campaign agents have to import.
+- [Agents in customer support](/blog/agents-in-customer-support) — voice as a feature, restated for support.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a marketing agent, we'd love to hear about it. [Get in touch.](/contact)*

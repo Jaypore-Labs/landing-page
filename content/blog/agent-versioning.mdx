@@ -1,0 +1,98 @@
+---
+title: "Versioning agent behaviour: prompts as source code"
+description: "Prompts and tool definitions are source code. Versioning them is the discipline that makes agents reproducible."
+date: "2026-09-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Versioning", "Engineering", "Building Agents", "Reproducibility"]
+series: "Building agents"
+seriesOrder: 20
+---
+
+A team's agent suddenly stopped producing useful output. Investigation: someone had patched the prompt to fix a specific case, the patch had unintended consequences for other cases, and there was no way to roll back without losing the original patch's intent.
+
+Prompts are source code. Tool definitions are source code. Skills are source code. Versioning them is the discipline that makes agents debuggable, rollback-able, and trustworthy.
+
+## Repo layout
+
+The agent's full behaviour-defining content lives in a repo:
+
+- System prompt.
+- Skills files.
+- Tool definitions.
+- Eval set.
+- Documentation about each.
+
+Changes go through pull requests. Reviews. CI runs. Just like other code.
+
+## Review process
+
+Agent-behaviour PRs get reviewed for:
+
+- Eval impact (does this regress any cases?).
+- Reasoning (does the change make sense?).
+- Side effects (does this affect other agents using the same skills/tools?).
+- Risk (is this a high-stakes change?).
+
+Reviewers might be different from the team's normal code reviewers — sometimes a senior eng who understands the agent space, sometimes a domain expert. The review happens.
+
+## Release notes
+
+Each version has notes:
+
+- What changed.
+- Why it changed.
+- Eval results before and after.
+- Known risks.
+- Rollback instructions.
+
+These notes serve future investigations. "Why did the agent's behaviour change in November?" gets a real answer because the release notes exist.
+
+## Rollback
+
+Rollback is supported:
+
+- Each version is tagged.
+- Production can be pinned to a specific version.
+- Rollback is a single command (or PR).
+- Verify rollback restored prior behaviour via eval.
+
+Without rollback, every change is a one-way door. With rollback, changes are tractable.
+
+## A real release flow
+
+A team we work with:
+
+- Prompt changes go to the agent-prompts repo.
+- PR review by senior eng + domain expert.
+- CI runs the eval suite.
+- Merge requires eval pass.
+- Release tag v1.x.y.
+- Production deploys with the version pinned.
+- Rollback is a config change.
+
+A regression caught in week 3 of v1.4.0: rolled back to v1.3.7 in 5 minutes. Investigation continued at non-emergency pace.
+
+## What we won't ship
+
+**Prompts in scattered docs.** Source of truth is the repo.
+
+**Changes to production agent behaviour** without PR review.
+
+**Versions without release notes.**
+
+**Rollback that hasn't been drilled.** Drill rollback at least once per quarter.
+
+## Close
+
+Agent versioning is the engineering discipline that turns prompts from invisible runtime config into reviewable, deployable, rollback-able artifacts. The repo holds the source. The PRs provide the discipline. The release notes preserve the context. The rollback provides the safety net.
+
+## Related reading
+
+- [Skills files: recipes the model can call](/blog/skills-files-recipes) — same versioning discipline.
+- [Agent rollback: kill switches on day one](/blog/agent-rollback) — companion piece.
+- [Prompt evolution](/blog/prompt-evolution) — drift detection.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening agent-version discipline, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,105 @@
+---
+title: "Agent memory: what to write down, what to forget"
+description: "Memory is a feature, not a default. The discipline is choosing what to remember and what to actively forget."
+date: "2026-08-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Agent Memory", "Engineering", "Building Agents", "Architecture"]
+series: "Building agents"
+seriesOrder: 8
+---
+
+A team built an agent with persistent memory. Within three months it was an awkward time capsule of the user's last 90 days — including the Tuesday in week three when the user had been venting about a coworker, which the agent kept referencing. The user stopped using the product.
+
+Memory is a feature, not a default. Building an agent with memory means engineering both the writing and the forgetting. Most teams build the writing and skip the forgetting.
+
+## The memory contract
+
+Before any memory is written, define:
+
+- **What kinds of things are memorable.** Stated preferences, completed actions, recurring patterns. Not every utterance.
+- **What kinds of things are explicitly not memorable.** Emotional venting, sensitive personal context, anything the user might want forgotten.
+- **How long memory persists.** Forever? Until session ends? Until contradicted?
+- **What the user can do with their memory.** View, edit, delete, opt out.
+
+Without this contract, the agent's memory becomes a privacy and UX liability.
+
+## Writeback discipline
+
+A working agent's writeback:
+
+- Triggers explicitly (the agent decides "this is worth remembering").
+- Categorises the memory (preference, fact, decision).
+- Tags with confidence (definite vs. inferred).
+- Records the source (the conversation turn, the user statement).
+
+The agent doesn't pour everything into memory. It writes intentionally, with discipline.
+
+## Forgetting on purpose
+
+The forgetting is engineered:
+
+- **Time-based.** Memories older than X are summarised or dropped.
+- **Confidence-based.** Low-confidence inferences fade unless reinforced.
+- **Topic-based.** Some categories never persist.
+- **User-initiated.** The user can ask the agent to forget specifically.
+
+A memory system without forgetting is a memory system that gets creepy. Engineer the forgetting from day one.
+
+## Privacy boundary
+
+The agent's memory is the user's data:
+
+- Stored in the user's account, not aggregated across users.
+- Encrypted at rest.
+- Exportable.
+- Deletable.
+- Not used for training without explicit consent.
+
+These are baseline expectations. Failing them is a regulatory event.
+
+## A real architecture
+
+A consumer-facing agent we built:
+
+- Memory categorised: preferences (high persistence), past-actions (medium), inferences (low, decay quickly).
+- User can view all memory in a settings UI.
+- User can delete categories or specific memories.
+- Memory older than 6 months gets compacted into a summary.
+- Sensitive topics (relationships, health, money disclosed once) are never written.
+
+The agent feels useful because it remembers what's helpful. It feels respectful because it doesn't remember what's awkward.
+
+## Memory as context-management
+
+For long-running agents, memory is a context-engineering tool:
+
+- The agent doesn't have to re-establish facts every session.
+- The agent recognises returning users and adjusts.
+- The agent's responses get sharper over time as memory accumulates.
+
+But — important caveat — without forgetting, memory accumulation becomes context bloat. Every session loads the entire memory; eventually the memory is bigger than the conversation.
+
+## What we won't ship
+
+**Persistent memory** without an explicit contract.
+
+**Memory** without user-controlled forgetting.
+
+**Cross-user memory aggregation** without explicit consent and clear use cases.
+
+**Memory that influences responses** without being explainable to the user.
+
+## Close
+
+Memory is engineering, not magic. The contract defines what's remembered and what isn't. The forgetting is as important as the remembering. The user controls their data. The agent is useful because memory is curated, not because it's complete.
+
+## Related reading
+
+- [Context engineering](/blog/context-engineering) — memory lives in the context budget.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+- [Agents that explain themselves](/blog/agents-that-explain) — memory transparency.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're designing agent memory, we'd love to hear about it. [Get in touch.](/contact)*

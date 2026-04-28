@@ -1,0 +1,102 @@
+---
+title: "Managed agents: when to reach for them"
+description: "Managed agent platforms shorten time-to-prototype. The trade-offs come due in production."
+date: "2026-08-17"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Managed Agents", "Engineering", "Building Agents", "Anthropic"]
+series: "Building agents"
+seriesOrder: 4
+---
+
+Managed agent platforms — Anthropic's managed agents, similar offerings from other providers — give you 80% of an agent in a day. The remaining 20% is the part that determines whether the agent survives production. Choosing managed vs. building it yourself is one of the highest-stakes decisions in the early stages of an agent project.
+
+## The build-vs-buy table
+
+The honest comparison:
+
+| Dimension | Managed | Build it yourself |
+| --- | --- | --- |
+| Time to first working agent | Hours | Weeks |
+| Customisation depth | Limited to the platform's surface | Unlimited |
+| Cost (early) | Lower | Higher |
+| Cost (at scale) | Higher | Lower |
+| Lock-in | High | Low |
+| Observability | What the platform exposes | What you build |
+| Eval discipline | What the platform supports | What you build |
+| Tool integration | What the platform integrates | Anything |
+
+Most teams should start managed. Most teams should plan to migrate off managed for production.
+
+## Where managed shines
+
+- **Prototyping.** Rapid iteration on agent design without infrastructure work.
+- **Internal tools.** Agents serving an internal team where the platform's surface is enough.
+- **Constraints unclear.** Early-stage where the team doesn't yet know what they need.
+
+If you don't know what your agent should be, building all the infrastructure first is premature. Managed lets you discover the requirements.
+
+## Where managed strains
+
+- **Custom evaluation pipelines.** The platform's eval surface may not match what you need.
+- **Strict cost ceilings.** At scale, managed pricing exceeds what you'd pay for direct API + your own infrastructure.
+- **Custom integrations.** Tools the platform doesn't support, or tools that need response patterns the platform doesn't provide.
+- **Audit and compliance.** Some regulated industries can't accept the platform's logging defaults.
+- **Latency-critical applications.** Voice, real-time, sub-second-response agents.
+
+## Migration path
+
+Going from managed to self-built is doable but not free:
+
+- Tool definitions translate (mostly).
+- Prompts and skills carry over.
+- Eval sets carry over.
+- Observability and traceability have to be rebuilt.
+- Cost models change.
+
+Plan the migration before you need it. Knowing the off-ramp keeps the team honest about platform lock-in.
+
+## Where they shine
+
+For one specific kind of work — agents tightly coupled to a single LLM provider's tooling — managed agents are the right answer indefinitely. The platform's quality is high. The integration cost is low. The trade-offs that matter for cross-provider work don't apply.
+
+## A real adoption
+
+A team we worked with started with managed agents for a sales-research agent. Three weeks in, they had a working prototype and real user feedback. Six months in, they migrated off because:
+
+- Their eval needs exceeded what the platform provided.
+- Their cost grew faster than expected.
+- They wanted multi-model fallbacks the platform didn't support.
+
+The migration took two weeks. The team's understanding of what they needed had matured during the managed phase. The build-it phase was efficient because the requirements were clear.
+
+If they'd built from scratch on day one, they would have built the wrong thing.
+
+## What we recommend
+
+- For prototypes: managed.
+- For internal tools serving a small team: managed.
+- For external products: managed for v1, build by v2.
+- For mission-critical agents: build, with managed as a fallback for prototyping new features.
+
+## What we won't ship
+
+**Managed agents without a migration plan**, beyond v1.
+
+**Managed agents in regulated industries** without confirming the platform's compliance posture.
+
+**Build-it-yourself for a feature the team doesn't yet have requirements for.** Premature.
+
+## Close
+
+Managed agents are a tool. They're the right tool early. They're the wrong tool eventually. Most teams underestimate the early gain and underestimate the eventual cost. Plan accordingly.
+
+## Related reading
+
+- [Plan vs. act: the agent loop](/blog/plan-vs-act-loop) — the architecture independent of platform.
+- [Tool design](/blog/tool-design-like-apis) — discipline that survives migration.
+- [The agent maturity curve](/blog/agent-maturity-curve) — where managed agents typically sit.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're choosing between managed and built, we'd love to hear about it. [Get in touch.](/contact)*

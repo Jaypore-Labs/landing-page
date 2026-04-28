@@ -1,0 +1,96 @@
+---
+title: "Code-writing agents: the test-first discipline"
+description: "Code-writing agents that survive run inside test-first workflows. The tests are the spec the agent has to pass."
+date: "2026-09-04"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Code Generation", "Engineering", "Building Agents", "Test-First"]
+series: "Building agents"
+seriesOrder: 18
+---
+
+A code-writing agent we audited produced impressive demos and shaky production. The demos passed because the team eyeballed the output. Production was failing because nobody was systematically verifying that the generated code was correct in every case the team cared about.
+
+The fix is not "trust the agent more." The fix is making tests the spec the agent has to pass.
+
+## Tests-as-spec
+
+The pattern that works:
+
+- Engineer writes the tests first.
+- Tests describe the behaviour expected.
+- Agent generates code targeting those tests.
+- Tests pass = agent is done.
+- Tests fail = agent iterates.
+
+This shifts the engineer's effort from "did this code do what I wanted?" (hard to verify) to "do these tests describe what I wanted?" (easier).
+
+## Diff review
+
+Even with tests passing, the engineer reviews the diff:
+
+- Code style matches conventions.
+- No unintended changes.
+- Test coverage actually exercises what matters.
+- No subtle introductions of bugs the tests don't catch.
+
+This review is faster than reviewing untested generated code, but it's not skipped. The agent's tests-passing is necessary, not sufficient.
+
+## Sandbox runs
+
+The agent runs the tests in a sandbox:
+
+- Each iteration runs the tests.
+- Failure feedback drives the next iteration.
+- Once tests pass, the iteration stops.
+- The engineer reviews the final state.
+
+The sandbox is where iteration happens cheaply. The engineer's review is where quality gets verified.
+
+## Human gate
+
+For any non-trivial change, the human gate is:
+
+- Test set is appropriate for the change (tests cover what matters).
+- Diff is sensible (no surprises).
+- Style matches.
+- No unintended scope.
+
+Failure of the human gate is rare but always significant. Engineers building this pipeline who skip the human gate eventually ship something they regret.
+
+## A real generation loop
+
+A scenario: adding a new endpoint to an existing service.
+
+- Engineer writes the tests: happy path, validation errors, auth failures.
+- Engineer drafts the contract (request and response shapes).
+- Agent runs: generates handler, validators, OpenAPI annotations.
+- Tests pass after one iteration.
+- Engineer reviews diff. One adjustment to error-message phrasing. Approves.
+- PR ships.
+
+Generation time: 8 minutes. Review time: 4 minutes. Total: 12 minutes for an endpoint that would have been 90 minutes by hand.
+
+## What we won't ship
+
+**Code-writing agents without test scaffolding.**
+
+**"Generated code looks right"** as the entire review.
+
+**Agents that bypass the team's existing review process.**
+
+**Generated code that the engineer can't fully explain.** If you can't explain it, you can't maintain it.
+
+## Close
+
+Code-writing agents are most powerful inside test-first workflows. The tests become the spec. The agent iterates against the tests. The engineer reviews the diff. The result ships at human-engineering quality at agent-engineering speed.
+
+## Related reading
+
+- [Backend: API design with Claude Code](/blog/backend-api-design-with-claude-code) — same test-first pattern.
+- [QA: test-plan generation](/blog/qa-test-plan-from-criteria) — test-set discipline.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping code-writing agents, we'd love to hear about it. [Get in touch.](/contact)*

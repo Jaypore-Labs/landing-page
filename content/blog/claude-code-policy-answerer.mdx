@@ -1,0 +1,129 @@
+---
+title: "Legal-ops: internal policy answerer with citation discipline"
+description: "Most policy questions are repeats. AI employees handle the repeats — citing the policy section every time — so the legal team can answer the new ones."
+date: "2026-06-22"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Legal Ops", "AI Employees", "Internal Policy", "Compliance"]
+series: "Claude Code in business"
+seriesOrder: 14
+---
+
+A general counsel at a 1,000-person company told us that her team answered the same policy questions every week: how do I get a contract reviewed, what's the IP-assignment policy, can I post on LinkedIn about our customer, what's the data-handling rule for this vendor. The questions were good. Most of them had answers in the policy library. The legal team became the world's most expensive search interface.
+
+The internal-policy-answerer AI employee handles the repeats. It cites the policy section every time. Employees get faster answers. The legal team's time goes to the questions that actually need lawyers.
+
+## The shape of the role
+
+**Title.** Legal Operations AI — Internal Policy Specialist.
+
+**Mission.** Answer employee policy questions with citations to the source policy. Escalate ambiguous or novel questions to the legal team.
+
+**Outcomes.** Question-answer time, accuracy of cited answers, escalation rate, employee satisfaction.
+
+**Reports to.** General Counsel or Head of Legal Operations.
+
+**Tools.** Policy library ingest, employee directory (for permissions context), Slack/Teams integration, escalation routing.
+
+**Boundaries.** Cites and routes. Doesn't interpret beyond what's documented. Doesn't give legal advice.
+
+## The corpus is the asset
+
+The agent's quality depends entirely on the corpus it reads from:
+
+- **Policy documents.** Up-to-date, versioned, source-of-truth.
+- **Approval matrices.** Who signs what, at what threshold.
+- **Process documentation.** How to request things (legal review, contract signing, vendor onboarding).
+- **Glossary.** Internal terms with definitions.
+
+Most companies don't have this. They have policies in seven different SharePoint folders, three Notion pages, two PDFs, and the GC's head. Step one of building this AI employee is building the corpus discipline.
+
+This is hard work. It's also work the company benefits from regardless of whether the AI employee succeeds. Even if the agent never goes live, the corpus is now ready for whoever reads it.
+
+## Cite-or-don't
+
+The agent's answers are citation-grounded. Every claim links to a specific policy section. If the agent can't find a clear citation, it doesn't make up an answer. It says: "I can't find a clear policy on this question. I'll route it to legal."
+
+This discipline is the difference between a useful internal AI and a liability accelerator. An agent that confidently asserts "the policy is X" when the policy is actually Y is creating a legal exposure for the company.
+
+## Question logging
+
+Every interaction is logged:
+
+- The question, exactly as asked.
+- The agent's answer.
+- The cited policy section.
+- The user's reaction (helpful, not helpful, escalated).
+
+The log is read weekly by legal ops. They use it to:
+
+- Spot policy gaps (questions the agent can't answer mean the policy library has a hole).
+- Identify confused topics (questions framed in many different ways that reduce to the same underlying ask — the policy needs a clearer statement).
+- Surface compliance risk (employees asking the same questionable questions repeatedly may indicate a process problem).
+
+The log is the most valuable artifact. Even more than the answers themselves.
+
+## Escalation routing
+
+When the agent doesn't have a confident citation, it escalates:
+
+- **Contract-related questions** → contract review queue.
+- **Employment questions** → HR + employment counsel.
+- **Compliance questions** → compliance officer.
+- **Data-handling questions** → DPO or privacy counsel.
+- **Anything novel** → general counsel for triage.
+
+Escalations include the question, the relevant policy sections the agent considered, and why it wasn't confident enough to answer.
+
+## Audit posture
+
+Every query and answer is auditable. If a regulator asks "how does your company handle policy X?", the legal team can show:
+
+- The policy itself, versioned.
+- The agent's answers to questions about that policy, dated.
+- Any escalations and their resolutions.
+
+This is similar to the audit-trail discipline in finance compliance and recruiting bias monitoring. The discipline is the deliverable.
+
+## A help-channel substitute
+
+A common deployment: the AI employee lives in the company's #ask-legal Slack channel. Employees ask freely. The agent responds with citations. Legal ops reviews any escalations.
+
+The channel becomes searchable. New employees find their answers in the channel history before asking. The volume of new questions to legal drops over time as the institutional knowledge accumulates.
+
+## What we won't ship
+
+**Legal advice.** The agent cites policy. It doesn't advise.
+
+**Predictions about how legal would rule on something.** Out of scope.
+
+**Changes to policies based on agent inference.** Policy changes go through legal review.
+
+**Auto-approval of anything.** Approvals go through human reviewers.
+
+## The KPIs the GC watches
+
+1. **Median time-to-answer** for policy questions.
+2. **Citation accuracy** (audit a sample weekly).
+3. **Escalation rate** — should stabilise after an initial spike (the spike is during corpus-completion).
+4. **Employee NPS for legal-team interactions.**
+
+If citation accuracy slips, the corpus has stale content. Re-version.
+
+## How to start
+
+Audit the existing policy library. Fix what's stale. Run the agent against the cleaned corpus on three to five common question types. Compare the agent's answers to what a legal-ops associate would have said. Tune. Once aligned, deploy in the help channel and watch the question log for the first month.
+
+## Close
+
+The internal-policy-answerer AI employee is a teammate whose job is the institutional-memory work that legal teams currently bear. The corpus discipline is the project. The citation discipline is the design. Employees get faster answers. The legal team gets back the time they were spending on policy lookups. Everyone wins, with the audit trail to prove it.
+
+## Related reading
+
+- [Agents in legal: contract review](/blog/agents-in-legal) — same citation discipline, external-facing.
+- [Agents in pharma: literature review](/blog/agents-in-pharma) — retrieval-first architecture transferred.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI legal-ops employee, we'd love to hear about it. [Get in touch.](/contact)*

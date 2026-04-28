@@ -1,0 +1,82 @@
+---
+title: "MCP for data tools (Postgres, BigQuery, S3)"
+description: "Database and storage MCP servers turn AI assistants into data analysts. Read-only is the default."
+date: "2027-01-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Data Tools", "Engineering", "Database", "SQL"]
+series: "MCP & AI protocols"
+seriesOrder: 17
+---
+
+Database MCP servers let AI assistants query the team's data warehouse. Done well, the team's AI becomes a competent analyst. Done badly, the AI starts dropping tables.
+
+Read-only is the default for data tools. Write access is explicit, scoped, audited.
+
+## The data integration
+
+A typical data MCP server exposes:
+
+- `list_tables(schema?)`
+- `describe_table(table_name)`
+- `run_query(sql)` (read-only)
+- `sample_table(table_name, limit=10)`
+
+The AI can explore and query. It can't modify.
+
+## Reviewer ritual
+
+PR review:
+
+- Read-only by default.
+- Write access (if any) requires explicit role.
+- Query timeout enforced.
+- Audit log for every query.
+
+## A real server
+
+A team's Postgres MCP server for analytics:
+
+- Read-only connection.
+- Query timeout: 30 seconds.
+- Result-size cap: 10,000 rows.
+- Audit log to a separate table.
+
+The AI runs queries. The team reviews the queries via audit. Slow queries are caught.
+
+## Trade-offs
+
+- Read-only safe; less capable.
+- Read-write more capable; more risk.
+
+For analytics, read-only is enough.
+
+## Limits
+
+- Some queries are inherently slow; the AI may need guidance.
+- Some data is sensitive; access controls must be tight.
+- Some tables are large; sampling matters.
+
+## What we won't ship
+
+**Database MCP servers** with broad write access.
+
+**Servers** without query timeouts.
+
+**Servers** without per-user query limits.
+
+**Servers** without audit logging.
+
+## Close
+
+MCP for data tools turns AI assistants into analysts. Read-only by default. Audited. Bounded. The team's data is accessible without being at risk.
+
+## Related reading
+
+- [MCP authorization](/blog/mcp-authorization) — surrounding discipline.
+- [MCP rate limits](/blog/mcp-rate-limits) — companion topic.
+- [Data: SQL refactors and lineage](/blog/data-sql-refactor-lineage) — same data discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping data MCP, we'd love to hear about it. [Get in touch.](/contact)*

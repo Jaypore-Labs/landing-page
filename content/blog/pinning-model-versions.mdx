@@ -1,0 +1,72 @@
+---
+title: "Pinning model versions through provider migrations"
+description: "Provider model bumps are silent. Pinning is how teams stay in control."
+date: "2026-10-13"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Pinning", "Engineering", "Predictable Output", "Versioning"]
+series: "Predictable AI output"
+seriesOrder: 20
+---
+
+A team woke up to a customer-quality regression they couldn't explain. The cause: the provider had bumped the underlying model two days prior. The team had used the latest-version alias. Same code, different model, different outputs.
+
+Pinning model versions is the discipline that keeps the team in control.
+
+## Version pinning
+
+Where the provider supports it:
+
+- Specify the exact model version (e.g., `claude-opus-4-7-20260315` rather than `claude-opus-latest`).
+- Update the version explicitly when the team is ready.
+- Run the eval before bumping.
+
+Most major providers support this. Use it.
+
+## Migration drills
+
+Periodically — quarterly or as the provider's lifecycle requires:
+
+- Test the next model version against the team's eval.
+- Compare results.
+- Decide: bump now, bump later, stay pinned.
+
+Without drills, the team faces forced migrations under deadline pressure. With drills, migrations are managed.
+
+## A real migration
+
+A team's pinning workflow:
+
+- v1.0: pinned to specific model version.
+- Provider releases new version.
+- Team's CI runs eval against new version on a separate branch.
+- Eval shows minor regression on 3 case categories.
+- Team adjusts prompt against new version.
+- Eval passes.
+- Branch merged; v1.1 pinned to new model version.
+
+The migration was quarterly, not emergency. The team's outputs stayed consistent for users throughout.
+
+## What we won't ship
+
+**Production agents** using `latest` aliases.
+
+**Migration** without eval-based decision.
+
+**"Just bump the model"** without prompt adjustment when needed.
+
+**Skipping the drill schedule.** Migrations under pressure are worse than scheduled migrations.
+
+## Close
+
+Pinning model versions is the discipline that puts the team in control of their LLM stack. The bump is intentional. The eval is the gate. The migration is managed. Skip pinning and the provider's release calendar dictates the team's operational quality.
+
+## Related reading
+
+- [Versioning model + prompt as a unit](/blog/versioning-model-and-prompt) — surrounding pattern.
+- [Prompt evolution](/blog/prompt-evolution) — drift detection.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening version control, we'd love to hear about it. [Get in touch.](/contact)*

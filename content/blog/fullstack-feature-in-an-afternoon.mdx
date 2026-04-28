@@ -1,0 +1,123 @@
+---
+title: "Full-stack: a real feature in an afternoon"
+description: "A vertical slice — backend, frontend, deploy, review — used to be a sprint. With Claude Code it's an afternoon, with the same discipline."
+date: "2026-07-17"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Full-Stack", "AI Development", "Software Engineering", "Productivity"]
+series: "AI for software development"
+seriesOrder: 8
+---
+
+A full-stack engineer at a startup told us last quarter that her product manager asked her, on a Wednesday afternoon, "could you ship the export feature by tomorrow?" Two months earlier, the answer would have been "lol no." With Claude Code in her workflow, the answer was "probably."
+
+The feature shipped at 5 PM Thursday. Backend, frontend, tests, docs, deploy preview, PR merged, production deploy. Same care as before. Compressed timeline.
+
+## The vertical slice pattern
+
+The pattern that works: build the entire feature thin first. One endpoint, one screen, one happy path. Get it end-to-end working before adding edge cases.
+
+The AI helps each layer:
+
+- **Hour 1.** Sketch the contract. Define the API endpoint, the response shape, the frontend state model. Human work, with AI as a thinking partner.
+- **Hour 2.** Backend. AI scaffolds endpoint, handler, tests. Engineer reviews, tightens.
+- **Hour 3.** Frontend. AI scaffolds component, state, integration. Engineer reviews, tightens.
+- **Hour 4.** Wire-up. Local dev environment running the slice end-to-end. Engineer tests manually. AI helps with adjustments.
+- **Hour 5.** Edge cases. Empty state, error state, loading state, accessibility. AI scaffolds; engineer reviews.
+- **Hour 6.** Tests for the cases. AI drafts; engineer extends to cover what's missed.
+
+The slice is shippable.
+
+## Test-first scaffold
+
+The discipline that prevents bugs: write the tests before the implementation, even when AI is generating both.
+
+Practically, this looks like:
+
+- Engineer writes a few key acceptance criteria.
+- AI generates a test scaffold from the criteria.
+- Engineer reviews the tests. Adjusts.
+- AI generates the implementation against the tests.
+
+The reverse pattern — implementation first, tests second — produces tests that mirror the implementation rather than verifying the spec. Bugs the implementation has, the tests have too.
+
+## Deploy preview discipline
+
+Every feature ships with a deploy preview. The PR's first reviewer is the engineer who wrote the feature, walking through the deploy preview manually.
+
+This is where many AI-generated implementations fail their first review. The code looks right. The behaviour is wrong in some specific case. The deploy preview catches it before the human reviewer does.
+
+The AI helps generate a manual-test plan for the deploy preview:
+
+- Happy path with default state.
+- Each known edge case.
+- Each error condition.
+- Accessibility quick check.
+
+The engineer runs through the plan in 15 minutes. Issues get fixed before the PR goes to the team for review.
+
+## Reviewer loop
+
+The team's PR-review pattern still applies. The AI's output is a PR like any other. Reviewer reads the diff, comments on substance.
+
+For full-stack PRs, the reviewer asks:
+
+- Is the API contract sensible?
+- Is the frontend behaviour aligned with the design intent?
+- Are the edge cases handled?
+- Is there appropriate error reporting and observability?
+- Does it fit the team's conventions?
+
+These are senior questions. The AI doesn't answer them. The engineer does.
+
+## The next-morning cleanup
+
+A pattern senior engineers adopt: don't merge AI-assisted PRs same-day for non-trivial features. Sleep on them. Re-read in the morning. Catch the things you missed.
+
+The morning pass catches:
+
+- Naming choices that seemed fine yesterday but feel off today.
+- Patterns that don't quite fit the codebase's idioms.
+- Edge cases the deploy preview missed.
+- Documentation gaps.
+
+15 minutes of next-morning work prevents an afternoon of debugging next quarter.
+
+## What this enables
+
+A team's velocity changes shape:
+
+- Features that used to be a sprint compress to a day.
+- Features that used to be a day compress to an afternoon.
+- The "maybe next quarter" backlog becomes "this sprint" reachable.
+- The team's frustration with missed commitments decreases.
+
+The compounding effect: customer feedback gets converted to shipped improvements faster. The product moves quicker. The market response improves.
+
+## What we won't ship
+
+**AI-generated full-stack features without the deploy-preview test pass.**
+
+**Features in critical user paths** without extra-careful reviewer attention.
+
+**Features with disputed UX decisions left unresolved.** Resolve before shipping.
+
+**Anything where the engineer can't explain what each part does.**
+
+## How to start
+
+Pick a small feature on the backlog. Run the workflow. Notice where AI saved time and where it didn't. Adjust the pattern. Within three or four features, the workflow is intuitive.
+
+## Close
+
+A full-stack feature in an afternoon with Claude Code is the vertical-slice pattern, paired with deploy-preview discipline and the next-morning cleanup. The thinking stays human. The typing speeds up. The product moves faster, with the same care as before.
+
+## Related reading
+
+- [Backend: API design](/blog/backend-api-design-with-claude-code) — backend half of the slice.
+- [Frontend: component scaffolding](/blog/frontend-component-scaffolding) — frontend half of the slice.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising your team's velocity, we'd love to hear about it. [Get in touch.](/contact)*

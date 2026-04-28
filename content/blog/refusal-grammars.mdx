@@ -1,0 +1,95 @@
+---
+title: "Refusal grammars: predictable, not surprising"
+description: "Refusals should be predictable. The grammar makes them so."
+date: "2026-10-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Refusals", "Engineering", "Predictable Output", "Safety"]
+series: "Predictable AI output"
+seriesOrder: 17
+---
+
+A team's agent had refusals that varied wildly. Some were terse ("Cannot do that."). Some were verbose paragraphs explaining why. Some were apologetic; some were robotic. Users were confused; the team couldn't predict refusal behaviour.
+
+The fix: a refusal grammar. A defined vocabulary of refusal patterns the model is trained (via prompting and eval) to use consistently.
+
+## The refusal vocabulary
+
+The grammar defines:
+
+- **Tone.** Polite, neutral, helpful.
+- **Reason.** Brief explanation of why.
+- **Routing.** Where to go instead.
+- **Length.** 1-2 sentences typically.
+
+Every refusal looks like: "I can't [thing] because [reason]. You could try [alternative]."
+
+Not "I'm sorry, I can't do that." Not "ERROR: scope violation." A consistent, helpful, brief refusal.
+
+## Routing rules
+
+Routing matters as much as the refusal itself:
+
+- Account changes → "Contact your admin at..."
+- Legal advice → "We have a legal team; reach them at..."
+- Medical advice → "We have clinicians; here's how to reach them..."
+- Technical issues outside scope → "Support team handles this; here's how..."
+
+The routing is part of the grammar. Refusals that don't route are refusals that drop the user.
+
+## Reviewer ritual
+
+Refusals are sampled and reviewed:
+
+- Did the refusal use the grammar?
+- Was the reason accurate?
+- Was the routing correct?
+- Was the tone right?
+
+Patterns inform updates. New refusal categories get added; old ones get refined.
+
+## A real refusal library
+
+A team's customer-support agent's refusal library:
+
+- 12 reasons the agent might refuse (account changes, legal, medical, scope, etc.).
+- Each with a templated refusal that uses the grammar.
+- Each with a routing destination.
+- Each with eval coverage.
+
+The library is reviewable, versioned, and tested.
+
+## The user's experience
+
+Users encountering a refusal experience:
+
+- A clear "I can't help with that" without bluntness.
+- A reason they can understand.
+- A clear next step.
+- Confidence that the agent is honest about its limits.
+
+Compared to a vague refusal, this experience builds trust rather than eroding it.
+
+## What we won't ship
+
+**Refusals without routing.**
+
+**Refusals** with random tone variations.
+
+**Refusals** that don't fit the grammar (custom one-offs that introduce inconsistency).
+
+**Refusals** that aren't audited periodically.
+
+## Close
+
+Refusal grammars make refusals a feature instead of a failure. The vocabulary is defined. The routing is built in. The user experience is consistent. Skip the grammar and refusals become unpredictable, which means users don't know what to expect when the agent says no.
+
+## Related reading
+
+- [Safety guardrails](/blog/safety-guardrails) — preceding pattern.
+- [Confidence calibration](/blog/confidence-calibration) — companion discipline.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening refusal patterns, we'd love to hear about it. [Get in touch.](/contact)*

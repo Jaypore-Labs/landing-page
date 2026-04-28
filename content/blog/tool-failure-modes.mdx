@@ -1,0 +1,98 @@
+---
+title: "Tool failure modes: timeouts, retries, idempotency"
+description: "Tools fail in known ways. The discipline is engineering for the failure, not pretending it won't happen."
+date: "2026-08-24"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Tool Design", "Engineering", "Building Agents", "Reliability"]
+series: "Building agents"
+seriesOrder: 9
+---
+
+A team's agent triggered a duplicate-charge incident. The agent had called the payment-processing tool, the tool had timed out, the agent had retried, the tool had succeeded both times. The customer saw two charges. The team saw a Saturday on the phone with a regulator.
+
+Tools fail in known ways. The agent's reliability depends on engineering for the failure, not pretending it won't happen.
+
+## The classic four
+
+Every agent's tools face four classic failure modes:
+
+**1. Timeout.** The tool didn't return in time. Did the work happen? Unclear without further information.
+
+**2. Network failure.** The connection dropped. Same uncertainty.
+
+**3. Rate limit.** The tool's provider rejected the call. Retry might or might not work.
+
+**4. Validation failure.** The tool rejected the arguments. Retry won't work without changing the arguments.
+
+Each has a known engineering pattern.
+
+## Idempotency keys
+
+For tools that have side effects (create, update, delete, charge, notify), idempotency keys are the discipline:
+
+- The agent generates a unique key per logical operation.
+- The tool's provider deduplicates on the key.
+- Retries with the same key are safe; the second call returns the first call's result.
+
+Without idempotency, retry-on-failure is a trap. With it, the agent can retry confidently.
+
+Stripe, payment APIs, modern message queues, and well-designed APIs support this pattern. Older APIs may not. For tools without idempotency support, the agent's retry policy must be conservative — single retry, with a backoff, after a failure type that suggests no side effect occurred.
+
+## Retry budgets
+
+The agent's retry policy:
+
+- Per-tool retry budget (how many retries allowed for this tool).
+- Per-task retry budget (across all tools, how many retries before giving up).
+- Backoff (exponential with jitter, typically).
+- Failure type classification (some failures are non-retryable).
+
+Without a retry budget, an agent can spiral — retrying indefinitely, generating cost, and not making progress. With a budget, failures surface to the user or human reviewer at a known threshold.
+
+## Reviewer signal
+
+When a tool fails repeatedly, the agent should escalate:
+
+- Stop the current task.
+- Save context for a human reviewer.
+- Surface the failure with context.
+- Wait for human direction.
+
+Agents that try to "be helpful" by working around persistent failures often make things worse. The escalation is the right move.
+
+## A real outage
+
+A scenario: a partner API the agent depends on is having an outage. The agent's behaviour with proper failure-mode design:
+
+- First tool call fails. Agent retries with backoff.
+- Second call fails. Agent retries.
+- Third call fails. Agent stops, surfaces the issue.
+
+User sees: "I'm having trouble reaching the partner system. The last attempt failed at 14:23 with a 502 error. I've stopped here so I don't make things worse. Want me to retry, or check the partner system status, or proceed without that data?"
+
+The agent surfaced the failure with context. The user can decide. The agent didn't loop, didn't waste tokens, didn't make a mess.
+
+## What we won't ship
+
+**Agents without retry budgets.** Open-ended retries are a cost and reliability hazard.
+
+**Tools with side effects** without idempotency keys.
+
+**Failure handling** that hides the failure from the user. Transparency wins trust.
+
+**Agents that "guess" past tool failures.** The right move is to surface, not to fabricate.
+
+## Close
+
+Tool failure modes are engineering challenges with known patterns. The patterns work when the team applies them deliberately. They fail when teams hope failures won't happen. Engineer for the failure modes; the agent's reliability follows.
+
+## Related reading
+
+- [Tool design like APIs](/blog/tool-design-like-apis) — preventing some failure modes through design.
+- [Cost guardrails](/blog/cost-guardrails) — same engineering discipline applied to cost.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hardening agent reliability, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,118 @@
+---
+title: "Operations: the SOP writer that updates itself"
+description: "Standard operating procedures rot. AI employees keep them in sync with how the work actually gets done."
+date: "2026-06-12"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Operations AI", "AI Employees", "SOPs", "Process"]
+series: "Claude Code in business"
+seriesOrder: 8
+---
+
+A COO we worked with had a wall of standard operating procedures, written carefully, last updated two years ago. The team had moved on. New tools, new flows, new vendors. The SOPs were a museum of how the company used to work. Anyone trying to follow them produced wrong results.
+
+Static SOPs decay. The SOP-writer AI employee keeps them alive — drafting, updating, version-controlling, and surfacing where the documented process diverges from the lived one.
+
+## The shape of the role
+
+**Title.** Operations AI — Process Documentation Specialist.
+
+**Mission.** Maintain a living library of SOPs that match how the team actually works, with versioning and approver workflow.
+
+**Outcomes.** SOP coverage (% of processes documented), freshness (median age since last update), team trust (self-reported).
+
+**Reports to.** COO or Head of Operations.
+
+**Tools.** Process-observation data (Slack/email/meeting transcripts where appropriate), existing SOP library, version control, approver workflow.
+
+**Boundaries.** Drafts and surfaces drift. Doesn't change live processes. Doesn't require team members to follow SOPs to the letter.
+
+## Drafting from observation
+
+Most SOPs are written from memory by someone who hasn't done the work in a while. The result is aspirational, not factual. The agent's drafting is grounded in observation:
+
+- **Recurring meeting notes** — what's discussed when this process runs.
+- **Slack threads** — how the team coordinates around the process.
+- **Tool-use patterns** — what systems get touched in what order.
+- **Approval chains** — who signs off on what.
+
+The draft is "here's what the process actually looks like, based on the last six instances of it running." The team reviews and edits. The draft becomes the SOP.
+
+This is more accurate than memory-based drafting and faster than committee-based drafting. The trade-off: it requires the agent to have access to the data sources where work is observable. That's a privacy and governance question that has to be answered first.
+
+## Drift detection
+
+Once an SOP exists, the agent watches for drift. When the team starts running the process differently — using a new tool, adding a step, skipping a step — the agent surfaces:
+
+- **What's changed.** The specific step that's diverging.
+- **How widespread.** Is one person doing it differently, or has the whole team shifted?
+- **Whether it should be in the SOP.** The agent doesn't decide, but it surfaces the choice.
+
+The COO reviews drift reports monthly. Decides what to update. The SOP gets a new version with a changelog.
+
+## Versioning matters
+
+SOPs without version control are usually wrong. SOPs with version control survive:
+
+- Changes to who has authority.
+- Changes to compliance requirements.
+- Changes to vendor relationships.
+- Changes to internal tooling.
+
+Each version of the SOP has a date, an approver, a changelog, and the prior version archived. When a regulator asks "what was your process in March 2026?", the answer exists.
+
+## Approver workflow
+
+The agent doesn't ship SOPs to the team's living library on its own. Each draft and update goes through an approval flow:
+
+- The process owner (the team member or manager who runs the process).
+- The compliance reviewer (where applicable).
+- The COO or Head of Operations.
+
+The approval is fast (most updates are minor) but explicit. This is the discipline that keeps the library trustworthy.
+
+## A team's living library
+
+A team using the SOP writer for two quarters ends up with:
+
+- 80-90% process coverage (vs. 20-40% with static SOPs).
+- Median SOP age under 90 days (vs. multiple years).
+- Approval discipline that maps to compliance requirements.
+- A new-hire onboarding asset that actually works.
+
+This last item is underrated. New hires read SOPs to figure out how the company works. SOPs that don't match reality teach new hires that documentation can't be trusted, which compounds.
+
+## What we won't ship
+
+**Auto-publishing SOPs.** Approval is human.
+
+**Surveillance of individual employees' work patterns.** The agent observes process, not people.
+
+**Enforcement.** The SOP describes how the work should be done. People still have judgment.
+
+## The KPIs the COO watches
+
+1. **SOP coverage** quarter-over-quarter.
+2. **SOP freshness** distribution.
+3. **Drift report volume** — should rise, then stabilise as the library catches up to reality.
+4. **Onboarding velocity** for new hires.
+
+If onboarding velocity doesn't move with better SOPs, ask why. Sometimes the gap was somewhere else.
+
+## How to start
+
+Pick five high-volume processes — onboarding, customer onboarding, AP, AR, hiring. Get the agent to draft updates from observation. Run the approval workflow once. Schedule monthly drift reviews. Expand to additional processes once the cadence is working.
+
+## Close
+
+The SOP-writer AI employee is a teammate whose job is the part of operations everyone knows is important and nobody has time for. The library stays alive. The drift is visible. The compliance posture is ready for an audit. None of these are flashy. All of them save the kind of pain that surfaces at exactly the wrong time.
+
+## Related reading
+
+- [Marketing: SEO audits as a Claude Code workflow](/blog/claude-code-seo-audits) — same recurring-cadence pattern.
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — audit-readiness transferred to operations.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI ops employee, we'd love to hear about it. [Get in touch.](/contact)*

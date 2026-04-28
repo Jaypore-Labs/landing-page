@@ -1,0 +1,82 @@
+---
+title: "Eval result storage and versioning"
+description: "Eval results are artifacts. Storing them properly enables retrospective analysis."
+date: "2026-12-23"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Storage", "Engineering", "Output Testing", "Versioning"]
+series: "Evals & output testing"
+seriesOrder: 21
+---
+
+A team chasing a regression couldn't find the eval results from before the regression. They'd been stored in CI logs that had aged out. The team had to re-run history to compare; multi-day work.
+
+Eval results are artifacts. Store them properly. Version them. Future-you will need them.
+
+## The artifact pattern
+
+Each eval run produces:
+
+- Per-case results.
+- Aggregate metrics.
+- Model + prompt versions.
+- Eval-set version.
+- Timestamp.
+
+Stored in a queryable artifact store. Retained per the team's analysis needs (typically 6-12 months).
+
+## Reviewer ritual
+
+Storage reviewed:
+
+- Are results retrievable for the retention period?
+- Can the team query trends over time?
+- Are results size-budgeted?
+
+## A real storage
+
+A team's setup:
+
+- Eval results stored in Postgres.
+- Per-run summary + per-case details.
+- 6-month retention.
+- Web UI for browsing.
+
+When investigating a regression, the team queries for the specific version-pair and compares.
+
+## Trade-offs
+
+- Storage costs money (small for typical eval volumes).
+- Retention requires policy.
+- Querying needs tooling.
+
+Most teams under-invest in this. Re-running historical evals to investigate regressions is more expensive than storing them in the first place.
+
+## Limits
+
+- Stored results capture what was tested. They don't capture what wasn't.
+- Eval-set drift makes historical comparisons less valid over time.
+
+## What we won't ship
+
+**Eval results** stored only in CI logs that age out.
+
+**Storage** without retention policy.
+
+**No tooling** to query historical results.
+
+**Skipping the eval-set-version tracking.** Without it, comparisons across versions are broken.
+
+## Close
+
+Eval result storage is the engineering that makes retrospective analysis possible. The artifact store. The retention policy. The query tooling. The team's debugging is faster because evidence persists.
+
+## Related reading
+
+- [Versioning model + prompt as a unit](/blog/versioning-model-and-prompt) — what to version.
+- [Reading an eval dashboard](/blog/reading-an-eval-dashboard) — companion topic.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're improving eval-result storage, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,104 @@
+---
+title: "Safety guardrails: refusal patterns that don't make agents useless"
+description: "Refusing the wrong thing is necessary. Refusing the right thing is annoying. The pattern is precision."
+date: "2026-08-31"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Safety", "Engineering", "Building Agents", "Refusals"]
+series: "Building agents"
+seriesOrder: 14
+---
+
+A team's agent refused to help users about half the time. The refusals were broad, vague, and often wrong. Users started routing around the agent — opening support tickets, calling the team directly. The agent's safety features had made it useless.
+
+Safety guardrails are necessary. Crude guardrails are worse than no guardrails. The discipline is precision.
+
+## The refuse-then-route pattern
+
+The pattern that works:
+
+- The agent identifies a request that's outside its scope.
+- The agent refuses *for that specific request*, not in general.
+- The agent routes to the right channel ("This needs a human; let me get you to the support team").
+- The user knows what to do next.
+
+Compare to vague refusals: "I can't help with that." User confused. User leaves.
+
+The specific refusal preserves trust. The generic refusal destroys it.
+
+## Reason transparency
+
+The agent explains why:
+
+- "I can't change account-level settings — that needs your account admin."
+- "I can't make legal advice — let me connect you with the team."
+- "I'm not able to access that data — here's how you can get it."
+
+Reason transparency converts refusal from a brick wall into a useful redirect. Users understand the boundary; they don't feel rejected.
+
+## Auditing
+
+Refusals get audited:
+
+- Sample of refusals reviewed weekly.
+- "Was this the right refusal?" — yes/no.
+- Patterns of wrong refusals investigated.
+- Patterns of missed refusals investigated.
+
+Without auditing, the refusal patterns drift. With it, the agent stays calibrated.
+
+## Reviewer flags
+
+The agent's audit log surfaces patterns:
+
+- Topics the agent refuses most frequently.
+- Refusals followed by user frustration (re-asks, complaints).
+- Refusals where the user reformulated and got an answer.
+
+Each pattern is a tuning opportunity. Sometimes the refusal was right but the framing was wrong; sometimes the refusal was wrong entirely.
+
+## A real refusal library
+
+A working customer-support agent's refusal library:
+
+- **Account changes I can't make.** Specific list of changes that require human auth.
+- **Information I can't share.** What's accessible, what isn't, why.
+- **Decisions I can't make.** Refunds beyond a threshold, contract changes, exceptions.
+- **Topics outside my scope.** Legal advice, medical advice, anything regulated.
+
+For each, the refusal text and the routing destination. Users get a clear "no" and a clear "yes" for what to do instead.
+
+## The discipline holds across agents
+
+This pattern transfers across domains:
+
+- Healthcare scribe agents refuse to make clinical decisions.
+- Legal-ops policy agents refuse to give legal advice.
+- Sales agents refuse to negotiate prices.
+- Pharma research agents refuse to discuss off-label use.
+
+Same pattern, different specifics. The discipline is portable.
+
+## What we won't ship
+
+**Agents that refuse without explaining.**
+
+**Agents that refuse and don't route.**
+
+**Refusal libraries** that aren't audited.
+
+**Refusal patterns** the team doesn't review periodically.
+
+## Close
+
+Safety guardrails are the discipline of refusing precisely. The right refusal preserves utility while preventing harm. The vague refusal destroys utility while creating frustration. Build the refusal library. Audit it. Update it. The agent's safety posture and its usefulness are not in tension; they're both products of careful engineering.
+
+## Related reading
+
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+- [Refusal grammars](/blog/refusal-grammars) — predictable refusal patterns.
+- [Agents in customer support](/blog/agents-in-customer-support) — escalation contract restated.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening safety guardrails, we'd love to hear about it. [Get in touch.](/contact)*

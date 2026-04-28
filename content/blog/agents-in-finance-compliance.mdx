@@ -1,0 +1,80 @@
+---
+title: "Agents in finance: compliance with an audit trail"
+description: "Finance compliance agents survive audits when the evidence trail is the product, not a side-effect. The reviewer-of-record pattern is doing the work."
+date: "2026-05-04"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Finance AI", "Compliance", "Production AI", "RegTech"]
+series: "AI agents in industry"
+seriesOrder: 4
+---
+
+A compliance officer at a mid-market bank described her job to us once: "I don't decide whether something is compliant. I produce evidence that we considered whether it was." That sentence reframes how to build agents in finance.
+
+The output of a finance compliance agent isn't a yes/no. It's a packet of evidence. The model's reasoning, the data sources it touched, the rules it tested against, the reviewer who signed. Build for the packet, not for the answer.
+
+## The reviewer-of-record pattern
+
+Every regulated decision in finance has a reviewer of record — a human whose name attaches to the decision in the audit log. Compliance agents that work treat the reviewer of record as a first-class concept:
+
+- The agent prepares the evidence packet.
+- The reviewer of record reads it, edits the conclusion if needed, and signs.
+- The signature, the agent's draft, the reviewer's edits, and the inputs — all stored together, retrievable for the regulator's lookback period.
+
+This is structurally the same pattern as a clinical scribe or a contract-review agent. The agent does the gather-and-draft work. The licensed human does the decide-and-sign work. The combination is auditable. Either piece alone isn't.
+
+## Where agents earn their keep in finance
+
+**KYC and AML alerts.** An analyst who used to spend an hour per alert cross-referencing screens, watchlists, and transaction patterns can be assisted by an agent that pulls all the relevant context into one packet. The analyst's review time drops to ~15 minutes. The packet is the audit artifact.
+
+**Trade-surveillance triage.** Most surveillance alerts are false positives. An agent that reads the trade context, labels likely-benign vs. likely-needs-review, and prioritises the queue lets surveillance teams cover more ground without lowering bar. The agent doesn't dismiss alerts — it prioritises them.
+
+**Transaction-monitoring narratives.** Suspicious-activity reports require written narratives. An agent can draft from the underlying data; the analyst reviews, edits, and signs. Same pattern.
+
+**Vendor-risk assessments.** Annual vendor risk reviews are mostly cross-referencing. Agent drafts the assessment from the vendor's questionnaire and external signals; the risk officer reviews and signs.
+
+## The four columns every audit log needs
+
+If you're building a compliance agent, every action it takes should produce a row with at least these columns:
+
+1. **Inputs** — what the agent saw (data sources, document IDs, timestamps).
+2. **Outputs** — what the agent produced (draft, recommendation, evidence summary).
+3. **Reasoning** — the model's chain of reasoning, captured in a way the reviewer and the regulator can read.
+4. **Versioning** — which model, which prompt version, which rule set, which playbook revision.
+
+Without those four columns, the agent's output is opinion. With them, it's evidence.
+
+## What regulators actually ask for
+
+Regulators don't ask "did your AI make the right call?" They ask "show me your process." A process they can follow — inputs in, evidence considered, decision recorded, reviewer named — is a process they can certify. A process they can't follow is a process they have to assume failed.
+
+This shapes the deployment posture. Compliance agents go live with audit-trail tooling first, model accuracy improvements second. Most teams flip that order and hit a wall in the first regulatory exam.
+
+## Don't put agents on the decision-making line
+
+Two patterns we won't ship:
+
+- **Auto-clear** of low-risk alerts without human review. The savings are real; the regulatory exposure is also real.
+- **Auto-block** of transactions based on agent classification. False positives become false-negatives the moment a regulator examines a complaint trail.
+
+Either pattern can probably work in a future regulatory regime. Today's regime expects a named reviewer.
+
+## How to start
+
+Pick one workflow with high analyst time and low decision authority. KYC enrichment, suspicious-activity narratives, or vendor-risk pre-fills are all good candidates. Build the audit-trail tooling first. Wire the agent into the workflow as a draft producer, not a decision maker. Run it for one quarter with full reviewer oversight. Use the eval data from that quarter to define what "good enough to scale" looks like.
+
+The teams that grow from one workflow to five usually do it in 12-18 months. The teams that try to launch five at once usually pause for an audit and don't restart.
+
+## Close
+
+Finance compliance agents are evidence engines. The model is downstream of the audit trail, not upstream. Build the trail first; the agent earns its keep faster than you'd expect.
+
+## Related reading
+
+- [Agents in legal: contract review with receipts](/blog/agents-in-legal) — citation discipline, transferred to finance.
+- [The agent maturity curve](/blog/agent-maturity-curve) — where compliance agents sit.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the discipline that catches drift before regulators do.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a compliance agent, we'd love to hear about it. [Get in touch.](/contact)*

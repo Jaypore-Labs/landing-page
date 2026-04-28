@@ -1,0 +1,78 @@
+---
+title: "Cost tests: catching the prompt that doubled spend"
+description: "Cost regressions are silent until billing. CI cost tests catch them at PR time."
+date: "2026-11-17"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Cost"]
+series: "Testing in the age of AI"
+seriesOrder: 20
+---
+
+Cost tests are performance tests' specific cousin: they measure cost-per-call and fail when it rises beyond threshold. The regression that costs an extra $5,000/month is the regression nobody catches until billing arrives.
+
+## The cost-as-test pattern
+
+For each feature:
+
+- Measure cost-per-call across a representative input set.
+- Threshold: regression beyond X% fails CI.
+- Trend: rising cost over time triggers review even within threshold.
+
+## Threshold design
+
+Common patterns:
+
+- Per-PR: fail if cost-per-call regresses >20% on the test set.
+- Trend: alert if 7-day average rises >10%.
+- Absolute: alert if cost-per-call exceeds budget ceiling.
+
+The thresholds depend on the team's tolerance and feature criticality.
+
+## Reviewer ritual
+
+When cost regression flagged:
+
+- Investigate why (longer prompt, more retries, model bump).
+- Decide: accept the cost (intentional improvement) or revert.
+- Update the budget if the new cost is intentional and approved.
+
+## A real catch
+
+A team's CI flagged a 35% cost regression on a PR. Investigation: the engineer had added few-shot examples to improve accuracy. Accuracy gain: 1%. Cost gain: 35%. Trade-off was wrong.
+
+The PR was reworked. A more efficient prompt change captured most of the accuracy gain at 8% cost increase. Shipped.
+
+Without the cost test, the original would have shipped and the team would have noticed at month-end.
+
+## How to roll out
+
+- Add cost measurement to existing performance tests.
+- Establish baseline.
+- Set thresholds.
+- Fail CI on regressions.
+- Iterate based on what gets caught.
+
+## What we won't ship
+
+**Features** without cost budgets.
+
+**Cost tests** without trend monitoring.
+
+**Skipping the cost-vs-quality trade-off** discussion when both shift.
+
+**Cost optimisation** that regresses quality without explicit acceptance.
+
+## Close
+
+Cost tests catch the regressions that would otherwise show up in next month's bill. Run them in CI. Threshold them. Investigate failures. The team's cost stays predictable; surprises don't compound.
+
+## Related reading
+
+- [Performance tests](/blog/performance-tests-llm) — surrounding pattern.
+- [Cost guardrails](/blog/cost-guardrails) — production-side discipline.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening cost discipline, we'd love to hear about it. [Get in touch.](/contact)*

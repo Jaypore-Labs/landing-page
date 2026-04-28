@@ -1,0 +1,90 @@
+---
+title: "LLM-as-judge: when to trust it, when not"
+description: "LLM judges are useful and limited. The discipline is calibration."
+date: "2026-12-01"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "LLM-as-judge", "Engineering", "Output Testing", "Calibration"]
+series: "Evals & output testing"
+seriesOrder: 5
+---
+
+LLM-as-judge is the eval pattern where a model grades another model's output. It's powerful — it scales eval to dimensions humans can't easily encode. It's limited — judges have their own biases.
+
+## The judge contract
+
+A well-designed judge:
+
+- Has a specific rubric (not "is this good?").
+- Returns a structured score (1-5, with rationale).
+- Is calibrated against human scores.
+- Is audited periodically.
+
+Without these, the judge is unreliable.
+
+## Calibration
+
+The calibration:
+
+- Sample 100 cases.
+- Have humans score them.
+- Have judge score them.
+- Measure agreement.
+- Iterate the judge prompt until agreement is acceptable (typically 80%+).
+
+A judge whose agreement with humans is poor isn't ready.
+
+## Reviewer ritual
+
+Judge outputs reviewed periodically:
+
+- Sample of judge scores re-reviewed by humans.
+- Disagreements investigated.
+- Judge prompt iterated.
+
+## Where judges shine
+
+- Open-ended outputs (prose, summaries).
+- Multi-dimensional rubrics (tone, completeness, accuracy).
+- High-volume cases where human eval doesn't scale.
+
+## Where judges fail
+
+- Tasks requiring domain expertise the judge lacks.
+- Tasks where the judge shares the agent's training biases.
+- Tasks where the rubric is genuinely ambiguous.
+
+## A real implementation
+
+A team's voice-rubric judge:
+
+- Calibrated against 200 human-scored examples.
+- Agreement rate: 84%.
+- Used for eval scoring on 500+ cases per run.
+- Re-calibrated quarterly.
+
+The judge handles volume the team couldn't manage with humans alone. The calibration discipline keeps it trustworthy.
+
+## What we won't ship
+
+**Judges** without calibration.
+
+**Judges** with vague rubrics.
+
+**Skipping the periodic audit.** Judges drift.
+
+**Trusting judges in domains** where they share the agent's biases.
+
+## Close
+
+LLM-as-judge is a powerful eval pattern when calibrated. The rubric is specific. The agreement rate is measured. The audit cadence holds. Skip the calibration and the judge produces noise dressed as signal.
+
+## Related reading
+
+- [The judge pattern: agents that grade other agents](/blog/judge-pattern) — same pattern, agent context.
+- [Calibrating your judge](/blog/calibrating-your-judge) — depth.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're calibrating LLM judges, we'd love to hear about it. [Get in touch.](/contact)*

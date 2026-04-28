@@ -1,0 +1,85 @@
+---
+title: "Eval cost management"
+description: "Eval costs scale with eval-set size. The team needs to manage spend like any engineering cost."
+date: "2026-12-22"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Cost", "Engineering", "Output Testing", "Operations"]
+series: "Evals & output testing"
+seriesOrder: 20
+---
+
+A team's eval-set grew to 800 cases. Running it cost $50 per CI run. With 30 PRs per week, eval cost $6K/month. It was a meaningful line item the team hadn't budgeted for.
+
+Eval cost management is the discipline that keeps the eval suite affordable as it grows.
+
+## The sampling pattern
+
+Most eval doesn't need to run on every PR:
+
+- Smoke: 10-20% of cases per PR. Cheap, fast.
+- Full: nightly + on significant changes. More expensive.
+- Comprehensive: weekly or quarterly. Most expensive.
+
+Per-PR cost drops dramatically when smoke is the default.
+
+## Caching
+
+Where the eval involves repeated prompts:
+
+- Prefix caching reduces token cost.
+- Response caching for deterministic eval cases.
+
+The cache lives between runs.
+
+## Reviewer ritual
+
+Eval cost reviewed monthly:
+
+- Total spend.
+- Cost per run.
+- Cost per case.
+- Trend.
+
+Significant moves investigated. Often a runaway is a flaky case re-running, or a stale model that's been bumped to higher pricing.
+
+## A real saving
+
+A team's eval optimisation:
+
+- Pre-optimisation: $6K/month, 800-case full set per PR.
+- Post-optimisation: $1K/month, 100-case smoke per PR + nightly full.
+- Quality picture: equivalent (smoke catches the common regressions).
+
+A single afternoon's work saved $5K/month.
+
+## Trade-offs
+
+- Smaller per-PR eval = faster CI but slower regression detection.
+- Smoke set quality matters; design carefully.
+
+Most teams over-eval per PR. Smoke + full is more economical and equally protective.
+
+## What we won't ship
+
+**Full eval on every PR** without justification.
+
+**Eval costs** that aren't budgeted.
+
+**Skipping the monthly cost review.**
+
+**Caching** that doesn't get invalidated when prompts change.
+
+## Close
+
+Eval cost management is the engineering of running evals affordably. Smoke + full strategy. Caching. Monthly cost review. The team's eval suite scales without becoming a cost crisis.
+
+## Related reading
+
+- [CI strategy: smoke vs. full suite](/blog/ci-strategy-for-llm-apps) — surrounding pattern.
+- [Caching deterministic prefixes](/blog/caching-deterministic-prefixes) — caching depth.
+- [Cost guardrails](/blog/cost-guardrails) — production-side discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're optimising eval costs, we'd love to hear about it. [Get in touch.](/contact)*

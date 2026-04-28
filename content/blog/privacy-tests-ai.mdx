@@ -1,0 +1,86 @@
+---
+title: "Privacy tests: PII redaction assertions"
+description: "PII detection and redaction is testable. The CI gate prevents leaks."
+date: "2026-11-19"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Privacy"]
+series: "Testing in the age of AI"
+seriesOrder: 22
+---
+
+PII in AI outputs is a regulatory event. The agent surfaces a customer's email in a public-facing response; the team's incident response begins. Privacy tests catch this in CI before it ships.
+
+## The redaction contract
+
+For each AI feature, the contract:
+
+- PII types that may not appear in output.
+- Detection patterns for each.
+- Redaction or rejection if detected.
+- Test cases for each redaction rule.
+
+## Tooling
+
+PII detection libraries:
+
+- Microsoft Presidio.
+- Custom patterns for industry-specific PII (medical record numbers, SSNs).
+- LLM-based detection (slower but flexible).
+
+Redaction patterns:
+
+- Replace with token (`[NAME]`, `[EMAIL]`).
+- Reject the output (force the model to retry).
+- Escalate to human review.
+
+## Reviewer ritual
+
+PR review:
+
+- New PII patterns added if relevant to the feature.
+- Test cases for each PII rule.
+- Integration with the redaction layer verified.
+
+## A real test
+
+A team's PII test set:
+
+- 50 cases with PII embedded in expected outputs.
+- Each tested for proper redaction.
+- 20 cases asserting no false-positive redactions (legitimate text not redacted).
+- Daily run; failures alert.
+
+Caught one regression where a model update started leaking customer first names. Fixed before shipping.
+
+## Compliance
+
+These tests are part of the team's compliance posture:
+
+- Regulators expect provable PII discipline.
+- Insurance carriers may require testing evidence.
+- Customers (especially enterprise) ask for this.
+
+## What we won't ship
+
+**AI features** without PII redaction.
+
+**Redaction layers** without test coverage.
+
+**Skipping the false-positive check.** Over-redaction makes products useless.
+
+**Anything that logs PII without redaction.**
+
+## Close
+
+Privacy tests for AI features verify the redaction layer works. PII never reaches users. The compliance posture survives audit. Skip these and the next regulatory inquiry catches what your team didn't.
+
+## Related reading
+
+- [PII in test fixtures](/blog/pii-in-test-fixtures) — same discipline, different surface.
+- [Test-data management](/blog/test-data-management-ai) — surrounding pattern.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening privacy testing, we'd love to hear about it. [Get in touch.](/contact)*

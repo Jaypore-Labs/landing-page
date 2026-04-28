@@ -1,0 +1,93 @@
+---
+title: "The judge pattern for confidence"
+description: "Pay double for confidence when the cost of being wrong is higher than the cost of two model calls."
+date: "2026-09-23"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Judges", "Engineering", "Predictable Output", "Quality"]
+series: "Predictable AI output"
+seriesOrder: 6
+---
+
+Most teams' first LLM feature has one model call per request. The team ships, accuracy is 92%, the 8% misses cause occasional incidents. Adding a judge — a second model call that grades the first — bumps reliability to 98%+. The cost: double the inference. The trade-off: usually worth it for stakes-bearing features.
+
+## Pay double for certainty
+
+The judge pattern is "second model call confirms the first." When does it earn?
+
+- High-stakes outputs (legal, financial, medical, customer-facing).
+- High-cost-of-error scenarios (a mistake costs more than the doubled call).
+- Tight quality bars (eval target is >95% and the base model is ~92%).
+
+When does it not earn?
+
+- Latency-critical features (voice, real-time).
+- Cost-critical, high-volume features.
+- Cases where the base model's accuracy is acceptable.
+
+## Calibration
+
+The judge needs an eval:
+
+- Sample 100 known-good and known-bad outputs.
+- Measure judge agreement with humans.
+- Iterate the judge prompt until agreement is high.
+
+A judge that's biased (always agrees, always disagrees, or systematically wrong on a subset) is worse than no judge. Calibration is non-optional.
+
+## Cost accounting
+
+For each call requiring confidence:
+
+- Original call cost.
+- Judge call cost.
+- Total cost per request.
+- Latency cost.
+
+For sample-based judging (judge runs on a fraction of calls), the cost is lower but coverage is partial.
+
+## Reviewer ritual
+
+The team reviews judge outputs weekly:
+
+- Agreement rate with the original output.
+- Cases where judge disagreed and was right.
+- Cases where judge disagreed and was wrong.
+
+The judge's behaviour drifts; weekly review catches it.
+
+## A real shipping decision
+
+A team building a contract-extraction feature:
+
+- Base model: 91% accuracy on the eval.
+- Target: 98%.
+- Tried prompt engineering: 93%.
+- Tried better prompts plus retry-on-low-confidence: 95%.
+- Added judge: 98.4%. Doubled cost.
+
+The team shipped with the judge. The customer's compliance team accepted; without the judge they wouldn't have. The double cost was justified by the deal size.
+
+## What we won't ship
+
+**Judges without calibration.**
+
+**Judges with vague rubrics.** "Is this good?" is not a rubric.
+
+**Judges in latency-critical paths** without confirming latency budget.
+
+**Skipping the judge for time pressure.** If the judge mattered, time pressure shouldn't remove it.
+
+## Close
+
+The judge pattern is the discipline of paying for confidence where confidence is worth paying for. Calibrate. Audit. Track. Don't skip under pressure. The reliability gain is real and the cost is the price of stakes-bearing AI.
+
+## Related reading
+
+- [Judge pattern: agents that grade other agents](/blog/judge-pattern) — agent-context version.
+- [LLM-as-judge: when to trust it](/blog/llm-as-judge) — calibration deep-dive.
+- [Calibrating your judge](/blog/calibrating-your-judge) — meta-eval discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping judges, we'd love to hear about it. [Get in touch.](/contact)*

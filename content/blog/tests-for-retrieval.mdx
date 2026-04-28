@@ -1,0 +1,84 @@
+---
+title: "Tests for retrieval pipelines"
+description: "Precision and recall are the metrics; the tests are how you keep them honest."
+date: "2026-11-12"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "RAG"]
+series: "Testing in the age of AI"
+seriesOrder: 17
+---
+
+A team's RAG pipeline was failing in unexpected ways. Some queries returned wrong documents. Some queries returned no documents that should have. The team's tests checked end-to-end accuracy. They didn't separate retrieval failures from synthesis failures.
+
+For retrieval pipelines, separate the layers. Test retrieval with retrieval metrics. Test synthesis with synthesis metrics.
+
+## Precision/recall in CI
+
+Retrieval metrics:
+
+- **Recall@k.** Of the relevant documents, how many are in the top-k?
+- **Precision@k.** Of the top-k, how many are relevant?
+- **MRR (mean reciprocal rank).** How high is the first relevant document?
+
+Each has a target. The CI runs them. Regressions surface.
+
+## Reviewer ritual
+
+PR review for retrieval changes:
+
+- Retrieval metrics included.
+- Per-query-type metrics where relevant.
+- Edge cases (empty corpus, very specific queries) covered.
+
+## A real test set
+
+A team's retrieval test set:
+
+- 200 query-document pairs (the relevant document for each query is annotated).
+- Recall@5, Recall@10, MRR computed.
+- Per-category metrics (some query types have different baselines).
+
+Changes to embedding model, chunking strategy, or retrieval logic show up as metric movements.
+
+## Trade-offs
+
+Retrieval metrics aren't enough alone:
+
+- A query returning the right document but the wrong span fails synthesis.
+- A query returning relevant documents in wrong order may fail at the synthesis step.
+
+Tests cover both layers; the metrics catch retrieval issues independently.
+
+## Coverage
+
+What gets tested:
+
+- Common queries.
+- Edge-case queries (very long, very short, non-English).
+- Domain-specific queries.
+- Adversarial queries (trying to manipulate retrieval).
+
+## What we won't ship
+
+**RAG features** without separate retrieval and synthesis tests.
+
+**End-to-end-only testing.** Misses where the failure is.
+
+**Retrieval metrics** without target thresholds.
+
+**Skipping the per-category breakdown** when query types differ in difficulty.
+
+## Close
+
+Tests for retrieval pipelines separate the layers. Retrieval metrics catch retrieval issues. Synthesis tests catch synthesis issues. End-to-end tests catch what the layered tests miss. The team's debugging is targeted.
+
+## Related reading
+
+- [RAG is a public library](/blog/rag-is-a-public-library) — surrounding pattern.
+- [Evals for retrieval](/blog/evals-for-retrieval) — eval depth.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're testing retrieval, we'd love to hear about it. [Get in touch.](/contact)*

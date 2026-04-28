@@ -1,0 +1,89 @@
+---
+title: "Agents in telecom: diagnostics that route faster than tier-1"
+description: "Modem-log triage, ticket NLP, and field-tech preparation. Telecom agents earn keep upstream of tier-1, not as tier-1."
+date: "2026-06-01"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Telecom AI", "Production AI", "Customer Operations", "Network"]
+series: "AI agents in industry"
+seriesOrder: 24
+---
+
+A telecom operations leader told us once: "Tier-1 is the most expensive translator in our org. Customer calls in describing a problem; tier-1 figures out what the customer means and what tools to use; tier-2 actually fixes it." The agent's leverage point isn't replacing tier-1. It's making tier-1's translation faster — and routing more issues directly to the right tool without tier-1's involvement at all.
+
+## The diagnostic burden
+
+Most telecom support tickets reduce to a small number of root causes: line issues, modem state, account/billing, plan misunderstanding, equipment failure. The diagnostic burden is figuring out which one — and that diagnostic burden is currently borne by tier-1, often with a 5-10 minute call that ends with "I'll need to schedule a tech."
+
+A working diagnostic agent reads the customer's complaint plus the live data:
+
+- Modem and ONT state, including recent reboots and signal levels.
+- Recent line-quality measurements.
+- Account state — billing, plan, recent changes.
+- Outage data for the customer's neighbourhood.
+- Recent ticket history for this customer and similar ones.
+
+It produces a diagnosis with confidence score and recommended action: self-help, remote reboot, schedule a tech, account adjustment. For high-confidence diagnoses, action happens automatically (with notification, not as a surprise). For lower-confidence cases, it routes to tier-1 with the diagnosis as a starting point, not a blank slate.
+
+## NLP over support tickets
+
+A separate but related agent reads the org's ticket history and surfaces patterns:
+
+- Recurring issue types tied to specific modem firmware versions.
+- Geographic clusters of similar complaints (often a leading indicator of an emerging outage).
+- Common drift in customer language for the same underlying issue (which informs intent classifiers).
+
+This is not a customer-facing agent. It's an operations-intelligence agent. It earns its keep by making the network engineering team faster at finding emerging problems before they cascade.
+
+## Field-tech preparation
+
+Field techs spend a meaningful share of their day driving to a job and discovering the job needs different equipment than dispatch sent. A working agent reads the diagnostic data plus the customer's address profile and assembles a job brief for the tech:
+
+- Most likely root cause based on the data.
+- Equipment and tools to bring.
+- Customer-context notes (preferences, prior interactions, access details).
+- Estimated job duration.
+
+The tech can override the recommendation, but the default is informed. Trip-back rates drop. Customer satisfaction climbs.
+
+## What we won't ship
+
+**Anything that auto-changes service plans.** That's the customer's decision and a contract change.
+
+**Anything that auto-disconnects.** Disconnections have legal and customer implications that need a human in the loop.
+
+**Anything that auto-credits beyond a small threshold.** Credits are accounting events; large ones need human approval.
+
+## Reroute decisions
+
+A subtle place where the agent earns keep: routing decisions in the contact-centre. Same call, different routing depending on inferred intent and customer state. A long-tenured high-value customer with a billing complaint goes to a senior rep. A new customer with a setup question goes to an onboarding specialist. The agent's classification quality is what makes this possible.
+
+The eval set for the routing layer is the most important asset. False routes are expensive — the customer hits the wrong queue, gets re-routed, and the experience compounds the original problem. Build the eval set with a senior contact-centre lead. Update it weekly from edge cases.
+
+## CSAT effects
+
+Telecom CSAT is sensitive to:
+
+- **First-call resolution.** Did the customer get their problem solved without a callback?
+- **Hold time.** Both initial and during transfers.
+- **Repeat-contact rate.** Same customer, same issue, second contact within 7 days.
+
+A working diagnostic agent moves the first two directly and the third indirectly (because resolutions are higher quality). The fourth metric — and the early-warning signal — is repeat contacts. If they rise, the agent is mis-classifying or under-resolving. Investigate before expanding scope.
+
+## How to start
+
+Pick one ticket type with high volume, low complexity, and clear data signals. Modem reboot/connectivity issues are the canonical starter. Build the diagnostic agent for that one type. Run it as a tier-1-assist tool first (tier-1 sees the diagnosis alongside the call). Once the assist accuracy is high, route directly for the highest-confidence cases.
+
+## Close
+
+Telecom agents earn keep upstream of tier-1 and as a tier-1 productivity tool. The diagnostic burden is the leverage point. Build the data integrations, build the diagnosis, then build the routing. The CSAT lift comes from first-call resolution improving, which depends on the diagnosis being right.
+
+## Related reading
+
+- [Agents in customer support](/blog/agents-in-customer-support) — escalation contract restated.
+- [Agents in logistics: route planning](/blog/agents-in-logistics) — disruption response transferred.
+- [The agent maturity curve](/blog/agent-maturity-curve) — telecom agents on the curve.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a telecom diagnostic agent, we'd love to hear about it. [Get in touch.](/contact)*

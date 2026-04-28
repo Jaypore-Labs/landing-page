@@ -1,0 +1,103 @@
+---
+title: "Sub-agents: when 1+1 actually equals 2"
+description: "Sub-agents work when boundaries are clean. Without boundaries, they multiply confusion."
+date: "2026-08-18"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Sub-agents", "Engineering", "Building Agents", "Architecture"]
+series: "Building agents"
+seriesOrder: 5
+---
+
+A team we worked with had built an agent with five sub-agents. Each one had its own prompt, its own tools, its own context. The team's hypothesis was that each specialist would do its part well. The reality: the sub-agents stepped on each other's work, the parent agent struggled to merge their outputs, and the system was 3x slower than a single-agent baseline with no quality gain.
+
+Sub-agents are an architecture choice. They work when their boundaries are crisp. They fail when boundaries are fuzzy.
+
+## When boundaries are crisp
+
+Sub-agents shine when:
+
+- **The work is genuinely separable.** Not "do related work together" but "this is a different task with different context."
+- **The parent agent can specify clear interfaces.** Each sub-agent gets a defined input shape and produces a defined output shape.
+- **Failure isolation matters.** A sub-agent's failure should not corrupt other sub-agents' work.
+- **Context isolation helps.** Specifically: the sub-agent's context shouldn't pollute the parent's, and vice versa.
+
+If all four are true, sub-agents earn their keep.
+
+## When boundaries are fuzzy
+
+Sub-agents fail when:
+
+- The work overlaps. Multiple sub-agents trying to do related parts of the same task.
+- The interfaces aren't defined. Sub-agents return free-form text that the parent has to reinterpret.
+- One sub-agent's success depends on another's specifics. Coupling defeats the architecture.
+- The cost (in latency, model calls, token spend) outweighs the benefit.
+
+Most teams' first sub-agent design hits these patterns. Iterate or revert.
+
+## Result-merging
+
+A common failure point: the parent agent has to merge sub-agent outputs. This is hard. Strategies:
+
+- **Structured outputs.** Sub-agents return JSON or typed data. Parent merges programmatically.
+- **Sequential composition.** Sub-agent A's output is sub-agent B's input. No merging needed.
+- **Vote and select.** Multiple sub-agents produce candidate answers; parent picks the best.
+
+Free-text merging is the failure mode. Sub-agents that return prose require the parent to do work the sub-agents should have structured.
+
+## Failure isolation
+
+When a sub-agent fails, the system should:
+
+- Detect the failure.
+- Decide whether to retry, fallback, or surface the failure.
+- Continue the rest of the work.
+
+Without isolation, a sub-agent failure can deadlock or corrupt the entire run. The architecture pays this cost upfront — explicit timeouts, error handling, fallback paths.
+
+## A real composition
+
+A scenario: an agent that produces customer-facing reports.
+
+- **Sub-agent 1: data fetcher.** Pulls metrics from various sources. Returns structured data.
+- **Sub-agent 2: insight generator.** Reads the data, identifies notable patterns. Returns structured insights.
+- **Sub-agent 3: prose writer.** Reads insights, drafts the report. Returns prose with citations.
+- **Parent agent: orchestrator + reviewer.** Sequences the three, validates outputs, presents to user.
+
+This works because each sub-agent has clear scope, structured I/O, and isolated failure modes. The parent's role is orchestration, not micro-management.
+
+The same task as a single agent would be slower (sequential calls vs. an integrated reasoning flow) but more reliable. Trade-off the architecture makes deliberately.
+
+## Cost accounting
+
+Sub-agents multiply token spend. Three sub-agents with 5K-token contexts each is 15K tokens per run, before the parent's overhead. The cost has to justify the reliability gain.
+
+Cost-aware design:
+
+- Sub-agents use cheaper models for narrow tasks; parent uses the strong model for orchestration.
+- Sub-agent contexts are minimised (only what they need, not the full request).
+- Caching repeated sub-agent calls.
+
+## What we won't ship
+
+**Sub-agents whose boundaries the team can't articulate.**
+
+**Sub-agents that return free text** to the parent.
+
+**Sub-agent composition without failure-isolation testing.**
+
+**More sub-agents than the team has eval discipline to validate.**
+
+## Close
+
+Sub-agents are an architecture, not a default. They earn their keep when boundaries are crisp, interfaces are structured, and failure isolation is real. They cost more than single agents — both in tokens and in operational complexity. Use them when the gain justifies the cost.
+
+## Related reading
+
+- [Plan vs. act: the agent loop](/blog/plan-vs-act-loop) — single-agent architecture.
+- [Multi-agent orchestration](/blog/multi-agent-orchestration) — when sub-agents become a true orchestra.
+- [Tool design like APIs](/blog/tool-design-like-apis) — same interface discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're designing sub-agent compositions, we'd love to hear about it. [Get in touch.](/contact)*

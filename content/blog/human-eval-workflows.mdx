@@ -1,0 +1,88 @@
+---
+title: "Human eval workflows: instructions that don't vary"
+description: "Human evaluators need instructions clear enough that different humans agree. The workflow is the discipline."
+date: "2026-12-07"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Human Eval", "Engineering", "Output Testing", "Workflow"]
+series: "Evals & output testing"
+seriesOrder: 9
+---
+
+A team's human-eval workflow had reviewers scoring outputs from 1-5 across multiple dimensions. Inter-rater agreement was poor. Same output, different scores. The reviewers were operating without clear instructions.
+
+Human evaluators need instructions clear enough that different humans agree. The workflow is the discipline.
+
+## The reviewer's brief
+
+For each eval task:
+
+- Specific dimensions to score.
+- Clear definitions.
+- Anchored examples.
+- What to do in edge cases.
+- Time per case (typical).
+
+Without these, reviewers improvise. Improvisation is variance.
+
+## Onboarding
+
+New reviewers go through:
+
+- Reading the brief.
+- Practice cases with feedback.
+- Calibration session with experienced reviewers.
+- First independent batch with audit.
+
+Skipping onboarding produces inconsistent reviews from day one.
+
+## Reviewer ritual
+
+Periodic:
+
+- Inter-rater agreement audits.
+- Brief updates as new edge cases emerge.
+- Reviewer feedback sessions.
+
+## A real workflow
+
+A team's human-eval setup:
+
+- 5 reviewers trained.
+- Each case scored by 2 reviewers.
+- Disagreements escalate to the lead.
+- Quarterly inter-rater agreement audit.
+- Brief updated based on patterns.
+
+Inter-rater agreement: 87%. Workable signal.
+
+## Trade-offs
+
+- **Strict workflow:** higher agreement, slower onboarding, less reviewer judgment.
+- **Loose workflow:** faster onboarding, more reviewer judgment, lower agreement.
+
+Most teams should err strict. Loose feels good but produces noise.
+
+## What we won't ship
+
+**Human-eval workflows** without explicit instructions.
+
+**Reviewers** without onboarding.
+
+**Single-reviewer scoring** for high-stakes evals.
+
+**Skipping the inter-rater agreement audit.**
+
+## Close
+
+Human eval requires discipline. The brief is the spec. Onboarding is non-optional. Agreement is measured. The workflow stays consistent because the team invests in it. Skip these and human eval produces noise.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — companion topic.
+- [Judging open-ended output](/blog/judging-open-ended) — rubric discipline.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're improving human-eval workflows, we'd love to hear about it. [Get in touch.](/contact)*

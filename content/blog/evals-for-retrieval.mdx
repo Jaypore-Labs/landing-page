@@ -1,0 +1,90 @@
+---
+title: "Evals for retrieval: separating retrieval from synthesis"
+description: "RAG eval needs two layers — retrieval-only and full-pipeline. Separating them clarifies failures."
+date: "2026-12-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "RAG", "Engineering", "Output Testing", "Retrieval"]
+series: "Evals & output testing"
+seriesOrder: 13
+---
+
+A team's RAG eval was end-to-end. When it failed, the team didn't know whether retrieval was wrong or synthesis was wrong. They'd spend hours digging.
+
+Separating retrieval from synthesis in eval reveals what's failing.
+
+## The two-stage eval
+
+**Stage 1 — Retrieval eval.**
+
+- Input: query.
+- Output: retrieved documents.
+- Metric: precision@k, recall@k, MRR.
+- Pass criterion: relevant docs in top-k.
+
+**Stage 2 — Synthesis eval.**
+
+- Input: query + retrieved documents.
+- Output: synthesised answer.
+- Metric: accuracy, citation correctness, completeness.
+- Pass criterion: answer matches expected.
+
+Each stage tests one thing. End-to-end eval combines both but doesn't isolate.
+
+## Tooling
+
+- Retrieval eval: vector-DB tooling provides precision/recall metrics.
+- Synthesis eval: the team's standard LLM-eval tooling.
+
+The two-stage approach uses two different evaluators.
+
+## Reviewer ritual
+
+PR review for RAG changes:
+
+- Retrieval metrics.
+- Synthesis metrics.
+- Combined-pipeline metrics.
+
+The team can pinpoint regressions to a stage.
+
+## A real implementation
+
+A team's RAG eval:
+
+- 200 query-document-pairs annotated for retrieval.
+- 200 query-answer pairs for synthesis.
+- Combined: end-to-end test.
+
+Each stage has its own thresholds. The team's debugging gets faster because the failures are localised.
+
+## Trade-offs
+
+- More evals = more maintenance.
+- Cleaner debugging compensates.
+
+For RAG features, the two-stage approach is worth the maintenance cost.
+
+## What we won't ship
+
+**RAG features** without retrieval-specific eval.
+
+**End-to-end-only eval** for RAG.
+
+**Skipping the citation-correctness check** in synthesis eval.
+
+**Synthesis eval** that doesn't account for retrieval quality.
+
+## Close
+
+Evals for retrieval separate the layers. Retrieval has its own metrics; synthesis has its own. End-to-end combines them. The team's debugging is targeted; quality improvements are measurable.
+
+## Related reading
+
+- [Tests for retrieval pipelines](/blog/tests-for-retrieval) — testing context.
+- [RAG is a public library](/blog/rag-is-a-public-library) — surrounding pattern.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening RAG evals, we'd love to hear about it. [Get in touch.](/contact)*

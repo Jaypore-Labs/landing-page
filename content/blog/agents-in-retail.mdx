@@ -1,0 +1,82 @@
+---
+title: "Agents in retail: shoppers that don't feel creepy"
+description: "Recommend without surveilling. Retail agents earn trust by knowing inventory and forgetting browsing history."
+date: "2026-05-19"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Retail AI", "E-commerce", "Production AI", "Personalisation"]
+series: "AI agents in industry"
+seriesOrder: 15
+---
+
+A retail VP told us last year that her team had A/B tested two recommendation agents. Agent A used the customer's full browsing and purchase history. Agent B used only the current session. Agent A had a 4% lift in click-through rate. Agent B had a 7% lift in *conversion* — and a 22% improvement in customer feedback scores.
+
+The 22% number explained the conversion lift. People felt comfortable engaging with Agent B. Agent A was technically smarter. Agent B was respected.
+
+## The retail privacy distinction
+
+Retail data has two flavors:
+
+- **First-party data** — what the customer is doing right now, in this session, on this device. They volunteered it by being on your site.
+- **Aggregated history** — what they did six months ago, what they searched for last year, what they clicked on a different device.
+
+Agents that work mostly within first-party data feel like helpful assistants. Agents that draw heavily on aggregated history feel like surveillance. The technical lift from history is real. The trust cost is also real and harder to measure.
+
+The discipline for the next few years: lean toward first-party data. Use aggregated history only where the customer has clearly opted in (a saved wish list, a stated preference, a reorder pattern). Don't build agents that say "I noticed you searched for X three weeks ago." Even when it's true. Especially when it's true.
+
+## What inventory-aware actually means
+
+The most underrated retail-agent feature is *not recommending things you don't have*. This sounds trivial. It is not.
+
+Most recommendation systems are trained on aggregate behaviour and make recommendations independently of inventory. The customer asks for "a navy raincoat in medium," the agent surfaces six matches, four of which are out of stock or backordered six weeks. Customer leaves.
+
+Inventory-aware agents check stock at recommendation time. If the inventory is low, they surface that proactively ("only 2 left in your size") which converts. If the requested item is out of stock, they offer alternatives that *are* in stock and similar enough to convert. This is unsexy plumbing — but it's a 5-15% conversion improvement on its own.
+
+## The chat surface vs. the page
+
+Most retail-agent thinking focuses on a chat surface — a chatbot in a corner. The opportunity is bigger. Agents can:
+
+- Power a smart search that understands "thing for camping that fits in my backpack."
+- Power a personal-shopper page that builds a shoppable look from a customer's existing wardrobe (uploaded by the customer, not scraped).
+- Drive cart-abandonment recovery emails that are actually personalised to *what was in the cart*, not just "we miss you."
+- Run post-purchase support — "what's wrong with what I just got?"
+
+A chat surface is one place the agent shows up. The agent's intelligence should be applied across the whole funnel.
+
+## What retail agents shouldn't do
+
+**Track-anything-anywhere personalisation.** Cross-device, cross-site, cross-time tracking is technically capable, ethically gross, and increasingly regulated. Don't.
+
+**Pricing manipulation per customer.** Showing different customers different prices for the same item — "personalised pricing" — is a regulatory and reputation tripwire. Avoid.
+
+**Synthetic urgency.** "3 people are looking at this right now" when there aren't, or false low-stock warnings, will erode trust quickly. Don't fabricate signals.
+
+## The eval set is brand-shaped
+
+Retail eval sets have to capture brand voice. A luxury brand's recommendations should not feel like a discount-aggregator's. The voice eval is doing similar work to the marketing-agent voice eval — paired examples (good/bad) for each brand dimension, run on every output.
+
+For a retailer with multiple brands, this matters even more. The same agent infrastructure can serve different brand voices, but only if the eval set per brand is real.
+
+## Returns as a UX
+
+The most underrated retail-agent surface is returns. A customer initiating a return is in a high-emotion, high-friction moment. An agent that handles returns smoothly — confirms eligibility, prints the label, sets reasonable expectations on refund timing, offers an alternative — is what turns a frustrated customer into a repeat one.
+
+Returns agents earn their keep by being patient, accurate, and not pushing alternative products that don't fit the actual reason for the return.
+
+## How to start
+
+Pick one customer touchpoint — search, recommendations on a category page, cart-abandonment, post-purchase, or returns. Build the agent with strict first-party-data discipline. Run inventory-aware recommendations. Measure conversion *and* customer feedback. Expand to a second touchpoint only after the first is generating real numbers without trust degradation.
+
+## Close
+
+Retail agents work when they respect the customer's privacy expectations and know your inventory. They fail when they leverage history aggressively or recommend what you can't ship. The trust cost is what most teams underprice. Build for the customer's comfort, not the algorithm's flex.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — retail agents on the curve.
+- [Agents in marketing: brand voice](/blog/agents-in-marketing) — the voice eval, restated.
+- [Agents in customer support](/blog/agents-in-customer-support) — escalation contract restated.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a retail agent, we'd love to hear about it. [Get in touch.](/contact)*

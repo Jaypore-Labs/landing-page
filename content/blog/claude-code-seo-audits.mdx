@@ -1,0 +1,114 @@
+---
+title: "Marketing: SEO audits as a Claude Code workflow"
+description: "Quarterly SEO audits used to mean two weeks of one person's time. Run by an AI employee, they become a Tuesday-afternoon ritual."
+date: "2026-06-05"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Marketing AI", "SEO", "Content Operations", "AI Adoption"]
+series: "Claude Code in business"
+seriesOrder: 3
+---
+
+A content lead at a mid-size SaaS company told us she did an SEO audit "every quarter, in theory." In reality, she did it the week before the QBR. The audit was 20-30 hours of work that happened once a year. Most quarters, it slipped.
+
+This is exactly the kind of routine that an AI employee absorbs cleanly. SEO audits are repetitive, structured, data-heavy, and bottlenecked on the time of one human. Convert them into a Tuesday-afternoon ritual run by an AI, and the company gets four real audits a year instead of one.
+
+## The shape of the role
+
+**Title.** Marketing Operations AI — SEO Audit Specialist.
+
+**Mission.** Run quarterly SEO audits, surface findings, and draft corrective actions for the content team.
+
+**Outcomes.** On-time audit completion, finding-to-action conversion rate, organic-traffic trend.
+
+**Reports to.** Head of Content or Director of Marketing.
+
+**Tools.** Site crawl, Google Search Console, GA4, internal CMS read access, keyword research API, brand-voice eval, audit-template library.
+
+**Boundaries.** Audits and recommends. Doesn't change content. Doesn't make business decisions about what to keep/sunset.
+
+## The audit checklist
+
+The agent's audit hits a defined checklist:
+
+**Technical SEO.** Crawl errors, indexability, sitemap health, robots.txt discipline, Core Web Vitals, structured data validity, canonicalisation issues.
+
+**Content gaps.** Topics the team has high search-intent demand for but no content; topics with thin or outdated content; topics where competitors rank and the team doesn't.
+
+**Internal linking.** Pages with strong external authority but weak internal-link inflow; orphaned pages; cross-linking opportunities for topic clusters.
+
+**Performance.** Pages that lost ranking quarter-over-quarter; pages that gained; query patterns.
+
+**On-page issues.** Title-tag and meta-description gaps; thin H1s; duplicate descriptions across pages.
+
+**Brand-voice consistency.** Drafts identified as off-brand by the voice eval.
+
+Each finding includes the URL, the issue, severity (high/medium/low), and a proposed action. The output is a Notion page or doc the content team can work through directly.
+
+## The schedule
+
+The agent runs the audit on a defined cadence:
+
+- **Weekly mini-audit.** Technical-only. Crawl errors, broken links, indexability changes. 5 minutes of human review.
+- **Monthly content-gap audit.** New topics that surfaced in search trends; new competitor content. 30 minutes of human review.
+- **Quarterly full audit.** All sections. Half-day of human review and prioritisation.
+
+Annualised, the team gets ~12 mini audits, ~12 monthly audits, and 4 full audits — vs. one full audit per year before. The marginal volume of work that can actually be improved climbs dramatically.
+
+## The action loop
+
+Findings only matter if they're acted on. The agent's reports include a prioritised action list:
+
+- High-severity findings: triaged into next sprint.
+- Medium-severity findings: queued for the content team's monthly cleanup ritual.
+- Low-severity findings: documented but not actioned unless they cluster.
+
+The content team's content-cleanup ritual is the unsexy compounding force. A team that doesn't have one will produce findings forever and act on none of them. A team that has one — even a 90-minute monthly meeting — will reduce the backlog quarter-over-quarter.
+
+## Re-running on a schedule
+
+The agent's outputs are versioned. Quarter-over-quarter, the team can see:
+
+- Which findings were closed.
+- Which were re-found (action didn't actually fix them).
+- Which are new.
+
+Re-finding the same issue twice is signal. Either the action wasn't right, or there's a process upstream that keeps recreating the issue. Either way, the team learns something they wouldn't have learnt without the recurring audit.
+
+## What we won't ship
+
+**Auto-publishing optimisations.** The agent suggests title changes, meta description rewrites, internal-link additions. The content team approves each one.
+
+**Auto-redirecting low-traffic content.** Sunsets are business decisions that need human judgment.
+
+**Anything that buys backlinks or pursues low-quality SEO tactics.** The agent's job is on-site discipline, not playing the off-site game.
+
+## A real audit, week one
+
+Run the agent on a real client site. Common findings on first audit:
+
+- 200-400 thin pages (under 200 words) that should be merged or expanded.
+- 30-50 pages with duplicate or missing meta descriptions.
+- 10-20 pages with strong external authority and weak internal-link inflow (unlock by adding 2-3 internal links).
+- 5-10 topic clusters with content-gap opportunities.
+- 2-5 technical issues (often canonicalisation or indexability).
+
+Each finding has an obvious next step. The team picks the top 20% to address in the next month, then re-audits.
+
+## How to start
+
+Pick the audit. Run it once manually as a calibration. Then run it through the agent and compare outputs. Once the agent's first audit matches what a human auditor would have produced, schedule the cadence and let the agent handle it. Reserve human time for the action loop, not the audit itself.
+
+## Close
+
+SEO audits are exactly the kind of work that benefits from being routinised by an AI employee. The audit gets done four times a year. The content team's work becomes prioritised, not reactive. The compounding gain — better organic traffic — shows up in the third or fourth quarter, not the first.
+
+## Related reading
+
+- [Marketing: campaign-brief copilot](/blog/claude-code-marketing-brief) — same role-design pattern.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the discipline transferred to SEO audits.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — the framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're running SEO at scale, we'd love to hear about it. [Get in touch.](/contact)*

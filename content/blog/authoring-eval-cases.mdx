@@ -1,0 +1,89 @@
+---
+title: "Authoring eval cases"
+description: "Eval cases require care: the question, the answer, the rationale."
+date: "2026-11-30"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "AI Engineering", "Engineering", "Output Testing", "Authoring"]
+series: "Evals & output testing"
+seriesOrder: 4
+---
+
+Authoring eval cases is harder than it looks. The team's first dozen cases probably need rework. The patterns become clear after a few hundred.
+
+## The question-and-answer discipline
+
+For each case:
+
+- **The input.** Specific, realistic, well-formed.
+- **The expected output.** What "good" looks like.
+- **The rationale.** Why this case matters.
+- **The category.** Happy path, edge, adversarial.
+- **The difficulty.** Easy, medium, hard.
+
+The discipline: write each piece consciously. The rationale matters most.
+
+## Reviewer ritual
+
+New eval cases get reviewed:
+
+- Is the input realistic?
+- Is the expected output unambiguous?
+- Is the rationale meaningful?
+- Does this case belong in the set, or is it redundant?
+
+## A real case-study
+
+A team authoring cases for a tone-classification feature:
+
+```yaml
+case_id: 042
+input: "I'd appreciate a quick update on my order"
+expected_tone: "polite"
+rationale: "Soft request without demand language; tests recognition of polite tone in conversational language"
+category: "happy_path"
+difficulty: "easy"
+```
+
+Compared to a poorly-authored case:
+
+```yaml
+case_id: 043
+input: "Where is my stuff?"
+expected_tone: "neutral"
+```
+
+The second is ambiguous. Different annotators might call it "neutral" or "frustrated." Without context, the case is noise.
+
+## Trade-offs
+
+Authoring is slow:
+
+- 5-10 minutes per case for the rationale-rich format.
+- 30 seconds for the bare-minimum format.
+
+The slow format produces cases that endure. The fast format produces noise.
+
+## What we won't ship
+
+**Cases** without rationale.
+
+**Cases** with ambiguous expected outputs.
+
+**Cases** that are duplicates of existing ones.
+
+**Cases** the author can't justify.
+
+## Close
+
+Authoring eval cases is the discipline of writing each one consciously. The input. The expected output. The rationale. Skip any and the case becomes noise. Include all three and the case earns its place.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — surrounding pattern.
+- [Golden-set discipline](/blog/golden-set-discipline) — curation.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening eval-case authoring, we'd love to hear about it. [Get in touch.](/contact)*

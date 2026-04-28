@@ -1,0 +1,78 @@
+---
+title: "MCP in 10 minutes"
+description: "What MCP is, why it exists, and where it fits. The primer for engineers who haven't built one yet."
+date: "2026-12-30"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "AI Protocols", "Engineering", "Tools", "Standards"]
+series: "MCP & AI protocols"
+seriesOrder: 1
+---
+
+Model Context Protocol (MCP) is a standard for connecting AI assistants to external tools and data. Released by Anthropic in late 2024, adopted across the industry by 2026, it's now the default integration pattern for production AI systems.
+
+This is the primer. Ten minutes; what you need to start.
+
+## What MCP is
+
+MCP defines:
+
+- A protocol for AI assistants to call external tools.
+- A schema for tool definitions.
+- A transport layer (stdio, HTTP, SSE).
+- A pattern for resources (read-only data the assistant can access).
+- A pattern for prompts (reusable prompt templates).
+
+A server speaks MCP and exposes tools. A client (the AI assistant) calls the tools.
+
+## Why it exists
+
+Before MCP, every AI integration was bespoke:
+
+- Custom tool-calling formats per assistant.
+- Custom transports per tool.
+- Custom auth per tool.
+
+MCP standardises. One server speaks MCP. Many AI assistants can call it.
+
+## Where it fits
+
+MCP fits between AI assistants and the tools they need:
+
+- Slack, Linear, Notion, GitHub all expose MCP servers.
+- The AI assistant (Claude, ChatGPT, etc.) connects to the server.
+- The assistant can then call the tools.
+
+Same server, multiple assistants, no custom integration per assistant.
+
+## A real example
+
+A simple MCP server exposes one tool: `get_weather(city: str)`. The server speaks MCP via stdio. Any MCP-compatible AI assistant can connect, see the tool, and call it.
+
+The team that built the server: 30 lines of Node or Python. The integration with the AI assistant: zero code. Just a config entry pointing at the server.
+
+## How to start
+
+Most teams start with an existing MCP server (Slack, GitHub, Postgres). Connect it to the team's AI assistant. Use the tools.
+
+Building your own MCP server is the next step. Articles 3-4 of this series cover that.
+
+## What this series covers
+
+24 more articles on MCP: server building, tool naming, schemas, errors, auth, transports, hosting, versioning, observability, rate limits, secrets, common server categories, composition, testing, prompt injection, future of MCP.
+
+## Close
+
+MCP is the protocol that's quietly rewiring how AI assistants connect to everything else. It's the USB-C moment for AI tooling. Standards take time to land; this one has landed.
+
+If you're building or integrating AI tooling, MCP is the protocol to learn first.
+
+## Related reading
+
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — the framing piece.
+- [Why we need MCP at all](/blog/why-we-need-mcp) — depth on the integration-drawer problem.
+- [Tool design like APIs](/blog/tool-design-like-apis) — what good tools look like.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're starting with MCP, we'd love to hear about it. [Get in touch.](/contact)*

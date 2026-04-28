@@ -1,0 +1,124 @@
+---
+title: "ML: eval harness from a spec"
+description: "Eval harnesses are the load-bearing piece of any ML or LLM project. AI-assisted scaffolding makes the harness real on day one."
+date: "2026-07-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "ML Engineering", "LLM", "Evals", "AI Development"]
+series: "AI for software development"
+seriesOrder: 15
+---
+
+A senior ML engineer told us the harshest truth: most ML projects have no eval harness for the first six months. The team prototypes, demos, debates, but the question "is the model actually getting better?" has no rigorous answer until someone, eventually, builds the harness from scratch.
+
+Claude Code makes the harness real on day one. The engineer specs what they want; the AI scaffolds; the engineer iterates. Within a day the project has a real eval harness instead of an aspiration.
+
+## The spec-first pattern
+
+The pattern that works: write the eval spec before any code.
+
+The spec includes:
+
+- **What's being evaluated.** The model, the prompt, the system, or the agent.
+- **What "good" means.** Specific metrics with target ranges.
+- **The eval set's shape.** Number of cases, types of cases, how cases are generated/curated.
+- **The judge.** Human, automated, LLM-judge, mixed.
+- **The cadence.** How often does the harness run, in what environments.
+- **The reporting surface.** Where do results land; who reads them.
+
+The spec is 1-2 pages. It's a design document. The AI helps with the typing; the engineer makes the design choices.
+
+## Test-case generation
+
+From the spec, the AI generates test-case scaffolding:
+
+- Cases that exercise the happy path.
+- Cases that exercise known edge cases.
+- Adversarial cases (where the model is likely to fail).
+- Cases generated from production logs (sampled, anonymised).
+
+The engineer reviews each category. Adds cases the AI missed. Removes cases that don't represent real usage.
+
+A first-week harness has 30-100 cases. By month three, 200-500 well-curated cases. By year one, the eval set is the team's most valuable asset.
+
+## CI integration
+
+The harness has to run in CI on every change. The AI scaffolds:
+
+- The CI config to run the harness.
+- The result-reporting layer (numbers, trend charts, regression alerts).
+- The pass-fail gate (PRs that regress past the threshold get flagged).
+
+The engineer reviews and tightens. The CI pipeline now has a real quality gate.
+
+## Reviewer loop
+
+Eval cases get reviewed periodically:
+
+- Cases that no longer represent production usage.
+- New edge cases discovered through customer feedback or incidents.
+- Adjustments to thresholds based on what's actually achievable.
+
+The AI flags candidates for review (cases that consistently pass might be losing their bite; cases that consistently fail might need rethinking). The engineer makes the call.
+
+## A real harness
+
+A scenario: an LLM-powered support-ticket classifier.
+
+**Hour 1.** Engineer writes the spec. What's being evaluated, what good means, what the cadence is.
+
+**Hour 2.** AI scaffolds the harness directory structure, the case format, the runner, the reporting layer.
+
+**Hour 3.** AI generates 50 starter cases from the spec. Engineer reviews and tightens. Adds 20 more cases from recent production tickets.
+
+**Hour 4.** AI integrates the harness into CI. PRs that touch the classifier now run the harness automatically.
+
+**Hour 5.** Engineer runs the harness. First baseline: 87% accuracy on the curated set. Files improvements as backlog items.
+
+A real eval harness in a day. Compared to teams that build harness work into "next quarter's roadmap" indefinitely, this is transformative.
+
+## What stays human
+
+- Definitions of what "good" means for the system.
+- Curation of the eval set.
+- Threshold-setting decisions.
+- Interpretation of results (numbers without context can mislead).
+
+These are senior ML decisions. The AI handles the scaffolding, the typing, the routine.
+
+## What we won't ship
+
+**Auto-generating eval cases** without human curation. Cases that haven't been verified are noise.
+
+**Auto-tuning thresholds** based on what the current model achieves. Thresholds reflect product requirements, not model capability.
+
+**Skipping LLM-judge calibration.** Judges drift; calibration matters.
+
+**Eval-as-judge for the core suite** unless the judge has been calibrated against humans on the same cases.
+
+## The KPIs the ML lead watches
+
+1. **Eval-set size** and growth.
+2. **Eval-set freshness** (% of cases reviewed in last quarter).
+3. **CI gate effectiveness** (regressions caught before merge).
+4. **Production correlation** (does eval performance predict production performance?).
+
+If the fourth metric is poor, the eval set isn't representative. Adjust.
+
+## How to start
+
+Pick the most-mature ML feature in the codebase. Build the harness for it first. Establish the CI pattern. Build the curation discipline. Expand to other features.
+
+## Close
+
+ML eval harnesses with Claude Code are real on day one rather than aspirational on day 180. The spec drives the scaffolding. The engineer curates the cases. The CI gate catches regressions. The model gets measurably better quarter over quarter.
+
+## Related reading
+
+- [Evals & output testing series](/series/evals-and-output-testing) — deeper dive on eval discipline.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — framing.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening ML eval discipline, we'd love to hear about it. [Get in touch.](/contact)*

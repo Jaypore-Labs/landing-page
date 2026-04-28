@@ -1,0 +1,99 @@
+---
+title: "MCP error handling: tell the model what went wrong"
+description: "Good error messages let the AI self-correct. Bad ones leave it stuck."
+date: "2027-01-07"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Error Handling", "Engineering", "Tool Design", "Recovery"]
+series: "MCP & AI protocols"
+seriesOrder: 7
+---
+
+A team's MCP tool returned `Error: Bad request` for everything. The AI couldn't recover. Same call, same error, no progress.
+
+Errors are instructions to the AI. Specific errors enable recovery. Generic errors stall.
+
+## The error contract
+
+Each error includes:
+
+- What went wrong (specific).
+- Why it went wrong (where helpful).
+- What to do next (concrete suggestion).
+
+Compare:
+
+Bad: `Error: Invalid input`
+
+Good: `Error: customer_id 'foo' is not a valid customer ID. Use the result of list_customers() or provide an ID matching the pattern cust_XXXXXXXXXXXX`.
+
+The good version tells the AI how to recover. The bad version doesn't.
+
+## Reviewer ritual
+
+PR review for new tools:
+
+- Errors are specific.
+- Errors guide recovery.
+- Common error categories covered.
+- Errors don't leak sensitive data.
+
+## A real implementation
+
+A team's standard error format:
+
+```json
+{
+  "error": {
+    "code": "INVALID_CUSTOMER_ID",
+    "message": "customer_id 'foo' is not valid. Customer IDs match cust_XXXXXXXXXXXX. Try list_customers() to find valid IDs.",
+    "details": {
+      "provided": "foo",
+      "expected_pattern": "^cust_[A-Z0-9]{12}$"
+    }
+  }
+}
+```
+
+The structured detail helps both the AI (who reads the message) and the tool's developer (who debugs from logs).
+
+## Trade-offs
+
+- Detailed errors leak internal structure (sometimes a security concern).
+- Generic errors hide the internal structure (and prevent recovery).
+
+Lean detailed but redact secrets. Lots of internal info is fine to share with the AI; passwords aren't.
+
+## Limits
+
+Some errors are not the AI's fault and not recoverable:
+
+- Tool unavailable.
+- Permission denied.
+- Resource not found permanently.
+
+For these, "this isn't going to work; try something else" is the right error.
+
+## What we won't ship
+
+**Generic "Error" messages.**
+
+**Errors that leak secrets.**
+
+**Errors** that don't categorise.
+
+**Tools** without error testing.
+
+## Close
+
+MCP error handling is the discipline of writing errors as recovery instructions. Specific. Helpful. Recovery-oriented. Skip the discipline and the AI gets stuck on every error.
+
+## Related reading
+
+- [Tool failure modes](/blog/tool-failure-modes) — surrounding pattern.
+- [MCP tool schemas](/blog/mcp-tool-schemas) — preceding layer.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're improving MCP errors, we'd love to hear about it. [Get in touch.](/contact)*

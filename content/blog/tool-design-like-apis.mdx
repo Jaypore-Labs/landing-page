@@ -1,0 +1,110 @@
+---
+title: "Tool design: write tools the way you write APIs"
+description: "Tools you give to agents are APIs the model has to use. The same design discipline applies."
+date: "2026-08-13"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Tool Design", "Engineering", "Building Agents", "API Design"]
+series: "Building agents"
+seriesOrder: 2
+---
+
+A team we worked with had built 12 agent tools in three weeks. The agent could call any of them. None of the tools worked reliably. The team blamed the model.
+
+The model wasn't the problem. The tools were named inconsistently, took differently-shaped arguments for similar concepts, returned errors in three different formats, and had docstrings that read like internal jokes. The agent was guessing. The model was being asked to do API design at runtime.
+
+Tools you give to agents are APIs. The same design discipline applies — and matters more, because the agent can't ask clarifying questions.
+
+## Names matter more than you think
+
+The tool's name is the first thing the model sees. A name that says what it does is half the battle. Compare:
+
+- `process_data` (vague — what kind, what processing?)
+- `extract_invoice_line_items` (specific — clear what it does)
+
+The model picks the right tool when the names are clear. It picks wrong when they aren't. Cheap improvement; large effect.
+
+## Argument shapes
+
+Argument shapes are the contract. Two principles:
+
+**Be consistent across tools.** If one tool takes `customer_id`, all tools should call it `customer_id`. Not `customerId`, not `cust`, not `id`. The model picks up patterns and uses them.
+
+**Be specific about types.** `dates` should be ISO-8601 strings. `prices` should be tagged with currency. `IDs` should specify which entity. The model hallucinates loose types more often than it hallucinates tight ones.
+
+The same lessons every API designer has learned. They apply 10x more strongly when the consumer is an LLM.
+
+## Errors as instructions
+
+Errors are the agent's recovery signal. A good error tells the agent what to do next:
+
+- Bad: `Error: Invalid input.`
+- Good: `Error: customer_id 'foo' is not a valid integer. Use the result of customer_lookup or provide an integer ID.`
+
+The agent reads errors. Errors that explain the failure mode let the agent self-correct. Errors that don't, leave the agent stuck.
+
+## Discoverability
+
+The agent learns about tools at the start of each session. The list of tool names + descriptions is the first context. Make it count:
+
+- Sort related tools together (alphabet doesn't help; group by concept).
+- Brief descriptions; one sentence each.
+- Note when a tool is preferred over a similar one.
+
+If your tool list is 47 items long, the agent will struggle. If it's a curated 12 with clear names, the agent will mostly pick correctly.
+
+## Versioning
+
+Tools change. The pattern that survives:
+
+- Add new tools alongside old ones.
+- Deprecate old tools with explicit "use NEW_TOOL instead" messaging.
+- Sunset old tools on a calendar.
+
+Agents in production are built around specific tools. Breaking them silently produces silent regressions.
+
+## A tool review checklist
+
+When adding a tool, ask:
+
+- Does the name say what it does?
+- Are arguments consistent with other tools?
+- Are error messages instructive?
+- Does the description help the model decide when to use this vs. other tools?
+- Is there a unit test that exercises a typical agent's call pattern?
+
+Every tool that fails this checklist is a future debugging session.
+
+## A real tool
+
+Consider this evolution:
+
+**Initial.** `lookup(name, value)` — fully generic.
+
+**Better.** `lookup_customer_by_email(email)` — specific.
+
+**Best.** `lookup_customer_by_email(email: str) -> Customer | None` with docstring noting it returns `None` for unknown emails and suggesting `create_customer` for new ones.
+
+The third version is the one that works in production.
+
+## What we won't ship
+
+**Tools that take "natural language" arguments.** Agents have models; tools don't need them.
+
+**Tools that return paragraphs of prose.** Return structured data; let the agent narrate.
+
+**Tools without unit tests.** Tools the team can't test, the agent shouldn't trust.
+
+## Close
+
+Tool design is API design. The discipline of clear names, consistent arguments, instructive errors, and curated lists pays for itself within the first week of agent operation. Skip the discipline and the model will be asked to design APIs at runtime — which it does poorly, expensively, and unpredictably.
+
+## Related reading
+
+- [Plan vs. act: the agent loop](/blog/plan-vs-act-loop) — the surrounding architecture.
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — the next layer down.
+- [Skills files: recipes the model can call](/blog/skills-files-recipes) — composing tools.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building agent tools, we'd love to hear about it. [Get in touch.](/contact)*

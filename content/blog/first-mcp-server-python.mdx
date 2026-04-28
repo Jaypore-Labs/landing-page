@@ -1,0 +1,116 @@
+---
+title: "Your first MCP server (Python)"
+description: "A minimal MCP server in Python — the same pattern, different language."
+date: "2027-01-04"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Python", "Engineering", "Tutorial", "Servers"]
+series: "MCP & AI protocols"
+seriesOrder: 4
+---
+
+The Python MCP server is the equivalent of the Node version. Same pattern; different language.
+
+## The boilerplate
+
+```bash
+pip install mcp
+```
+
+A skeleton:
+
+```python
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+
+app = Server("my-server")
+
+# Tool definitions
+
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(read_stream, write_stream, app.create_initialization_options())
+```
+
+## Tool definition
+
+```python
+from mcp.types import Tool, TextContent
+
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    return [
+        Tool(
+            name="get_weather",
+            description="Get current weather for a city",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string"}
+                },
+                "required": ["city"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict):
+    if name == "get_weather":
+        weather = await fetch_weather(arguments["city"])
+        return [TextContent(type="text", text=weather)]
+```
+
+## Reviewer ritual
+
+Same discipline as the Node version:
+
+- Tool naming.
+- Schema precision.
+- Error handling.
+- Tests.
+
+## When Python wins
+
+Python over Node when:
+
+- Existing tooling is in Python (data science, ML, scripting).
+- Server logic involves heavy data processing.
+- Integration with Python-native services (numpy, pandas, etc.).
+
+## Trade-offs
+
+- Python: more verbose, ecosystem advantage in some domains.
+- Node: lighter weight, faster cold start, ecosystem advantage in other domains.
+
+The choice often comes down to team familiarity.
+
+## A real server
+
+A team's analytics MCP server in Python:
+
+- Tools for querying internal data warehouse.
+- Schema validation via pydantic.
+- Tests via pytest.
+- 400 lines.
+
+Used by the team's AI assistants for ad-hoc analytics queries.
+
+## What we won't do
+
+**Default to Node** when the team is Python-native (or vice versa).
+
+**Skipping the schema validation** in either language.
+
+## Close
+
+The Python MCP server is the Node server's equivalent. Same protocol; same disciplines. The choice is language preference; the engineering is the same.
+
+## Related reading
+
+- [Your first MCP server (Node)](/blog/first-mcp-server-node) — Node equivalent.
+- [MCP tool schemas](/blog/mcp-tool-schemas) — schema discipline.
+- [Tool design like APIs](/blog/tool-design-like-apis) — surrounding discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're building MCP servers in Python, we'd love to hear about it. [Get in touch.](/contact)*

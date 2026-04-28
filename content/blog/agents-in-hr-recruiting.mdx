@@ -1,0 +1,84 @@
+---
+title: "Agents in HR: recruiting agents and the bias receipts they leave behind"
+description: "The audit log is the deliverable. Recruiting agents that ship treat bias monitoring as a feature, not a feature request."
+date: "2026-05-08"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "HR Tech", "Recruiting AI", "Production AI", "Compliance"]
+series: "AI agents in industry"
+seriesOrder: 8
+---
+
+A talent leader at a 2,000-person company told us last quarter that her team was instructed to "use AI to screen faster." Six months later, after a complaint and an internal review, the same team was told to "stop using AI in screening." Neither instruction came with the resources to do the actual work — building, monitoring, and auditing a system that didn't quietly bake bias into hiring decisions.
+
+The wrong question is "should we use agents in recruiting?" The right one is "are we willing to build the audit infrastructure that makes their use defensible?" If the answer is no, don't. If yes, the audit infrastructure is the project.
+
+## Two kinds of recruiting agents
+
+**Screening agents** decide which candidates move forward. **Ranking agents** order candidates for human review. The legal exposure on the two is wildly different. In most jurisdictions and most company sizes, a fully autonomous screening agent — one that rejects candidates without human review — is a liability you don't want to underwrite. A ranking agent that orders candidates for a human screener to evaluate is far easier to defend, *if* you can show the ranking isn't systematically disadvantaging protected classes.
+
+The "if" is the project. Without bias monitoring, even the ranking agent is a problem.
+
+## What bias monitoring looks like
+
+Three things, all running continuously:
+
+**1. Disparate impact tests.** For every protected class your jurisdiction recognises (gender, race, age, disability, etc.), measure the agent's pass-through rates across groups. If the rates differ by more than the four-fifths rule allows, you have a finding to investigate. This is the same arithmetic the EEOC has used for fifty years.
+
+**2. Decision-explainer audits.** For a sample of decisions, record the agent's reasoning chain. Periodically have a human reviewer audit the chains for proxies — features that correlate with protected class. (ZIP code, college, hobbies that track demographic patterns.) Findings here tighten the agent's input set.
+
+**3. Outcome reconciliation.** When a hire happens, reconcile the agent's score against the eventual outcome (performance review, retention, promotion). If high-scored candidates don't out-perform low-scored ones, the agent is measuring something other than job fit.
+
+These three together produce the bias receipts. They're not optional. They're the deliverable that makes the agent defensible.
+
+## What we've seen ship
+
+A working recruiting agent for a mid-market client we shipped to last year does this:
+
+- Reads job description, recruiter notes on must-haves vs. nice-to-haves.
+- Reads each candidate's application materials.
+- Produces a ranked list with a 2-paragraph explanation per candidate.
+- Surfaces specific evidence (work samples, role fit, skill match) cited from application materials.
+- Logs every decision with model version, prompt version, and inputs for the four-year period the company's legal counsel asked for.
+
+The recruiter reviews top 20-30 from the ranked list, makes screening decisions herself, and the recruiter's decisions feed back into the eval set. The agent's job is to surface the candidates worth a real review, not to make the screening call.
+
+## What we won't ship
+
+Anything that auto-rejects. Anything that uses video, photos, or voice tone as input — these are too prone to disparate impact and not defensible in current US/EU regulatory regimes for hiring. Anything that ranks candidates based on signals the candidate didn't volunteer (social media scraping, public-records inference).
+
+These pilots can probably work in some regulatory regime someday. They don't work today.
+
+## The legal/compliance dance
+
+Three conversations to have before the agent ships:
+
+1. With your employment counsel: which jurisdictions are we hiring in, and what does each one require for AI-assisted screening?
+2. With your DEI or people-analytics team: what's our baseline disparate-impact data without the agent? You need this to know whether the agent helps or hurts.
+3. With your engineering team: what's our retention period for decision logs, and how do we make them retrievable for a regulator's request?
+
+Skip any of these and you'll have them eventually under worse conditions.
+
+## How to start
+
+- Pick one role family — the one with highest applicant volume and clearest skill criteria.
+- Build the ranking agent (not screening).
+- Build the bias monitoring before you flip the agent on.
+- Run the agent in shadow mode for one quarter — recruiter screens normally, agent ranks in parallel, you compare.
+- Only after the shadow data shows the agent's rankings correlate with the recruiter's decisions and don't show disparate impact, route candidates through the agent for production ranking.
+
+The teams that try to compress this timeline end up with public-perception problems. The teams that take the discipline seriously end up with a faster, more defensible recruiting motion.
+
+## Close
+
+Recruiting agents work when the bias monitoring is the deliverable. The model is downstream of the audit log. Build the log, build the monitoring, then build the agent. Skip the order and you're shipping liability.
+
+## Related reading
+
+- [The agent maturity curve](/blog/agent-maturity-curve) — recruiting agents on the curve.
+- [Agents in finance: compliance with an audit trail](/blog/agents-in-finance-compliance) — the audit-trail discipline, transferred.
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — the periodic eval discipline that catches drift.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping a recruiting agent, we'd love to hear about it. [Get in touch.](/contact)*

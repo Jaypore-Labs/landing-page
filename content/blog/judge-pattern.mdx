@@ -1,0 +1,97 @@
+---
+title: "The judge pattern: agents that grade other agents"
+description: "Two model calls beat one when correctness matters more than latency. The judge pattern is the discipline."
+date: "2026-08-20"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "LLM Evals", "Engineering", "Building Agents", "Quality"]
+series: "Building agents"
+seriesOrder: 7
+---
+
+A team's customer-facing agent had been hallucinating product features. The eval set caught most of it but production traffic surfaced new patterns the eval didn't cover. The fix: a judge model that runs on every output before it goes to the customer.
+
+Two model calls beat one when correctness matters more than latency. The judge pattern earns its keep on production agents in stakes-bearing scenarios.
+
+## When the judge earns its cost
+
+The judge pattern doubles inference cost. It's worth it when:
+
+- The cost of a wrong output exceeds the cost of two model calls (high in customer-facing, regulated, financial, healthcare).
+- The base model's correctness on the task is high but not high enough.
+- The judge has a clear, narrow rubric to apply.
+
+It's not worth it when:
+
+- Output quality at base-model levels is acceptable.
+- Latency budget is tight (voice agents, real-time interactions).
+- The judge's rubric is fuzzy enough that the judge produces inconsistent decisions.
+
+## Calibrating the judge
+
+The judge needs an eval too. Most teams skip this step and discover their judge is biased, lenient, or harsh in ways they hadn't measured.
+
+Calibration:
+
+- Sample 100 agent outputs across known-good and known-bad cases.
+- Have humans grade them.
+- Have the judge grade them.
+- Measure agreement.
+- Iterate the judge's prompt until agreement is high.
+
+A miscalibrated judge is worse than no judge. It introduces variance without catching anything reliable.
+
+## Cost accounting
+
+Two-call architectures need cost accounting:
+
+- Per-request cost roughly doubles (slightly less, judges typically use cheaper models or smaller contexts).
+- Total cost scales with request volume.
+- The cost has to be in the agent's budget.
+
+For agents at the right end of the cost spectrum (low-volume, high-stakes), the judge pattern is cheap insurance. For high-volume, low-stakes agents, the math is different — sample-based judging may be more appropriate than judging every output.
+
+## Failure modes
+
+Three judge failure modes to watch:
+
+- **Judge alignment.** The judge agrees with the agent more than it should because they share training data and biases.
+- **Judge drift.** The judge's behaviour changes after a model bump and the eval doesn't catch it.
+- **Judge prompt rot.** The judge's prompt accumulates patches over time, becoming less coherent.
+
+Each has a known mitigation. Use a different model family for the judge if possible. Track judge behaviour over time. Refactor the judge's prompt periodically.
+
+## A real deployment
+
+A finance-related agent we worked with uses a judge for every customer-facing output:
+
+- Agent generates the response.
+- Judge model checks for: factual claims (need citation), promises (forbidden), regulated language (specific patterns).
+- Judge accepts or rejects with reason.
+- Rejection routes to a human reviewer.
+
+The judge's catch rate (cases the agent got wrong, judge caught) was 4% in the first quarter. Over time as the agent improved, catch rate dropped to 1.5% — but the team kept the judge because the cost of letting the 1.5% through was high.
+
+## What we won't ship
+
+**Judges without calibration.**
+
+**Judges with vague rubrics.** "Is this good?" is not a rubric.
+
+**Judges that haven't been audited** for their own bias patterns.
+
+**Skipping the judge for time pressure.** If correctness mattered enough to add the judge, time pressure shouldn't remove it.
+
+## Close
+
+The judge pattern is the discipline of paying double for confidence. It's the right call when the cost of being wrong is high. It's the wrong call when latency or cost matters more than incremental quality. Calibrate the judge. Audit it. Track it. Don't skip it under pressure.
+
+## Related reading
+
+- [LLM evals are restaurant health inspections](/blog/llm-evals-restaurant-inspections) — same discipline.
+- [Calibrating your judge: meta-evals](/blog/calibrating-your-judge) — the calibration deep-dive.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're deploying judges, we'd love to hear about it. [Get in touch.](/contact)*

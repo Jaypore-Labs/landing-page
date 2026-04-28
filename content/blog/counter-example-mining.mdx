@@ -1,0 +1,95 @@
+---
+title: "Counter-example mining"
+description: "Finding the cases your prompt fails on is the highest-leverage eval-improvement work."
+date: "2026-10-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Eval", "Engineering", "Predictable Output", "Counter-examples"]
+series: "Predictable AI output"
+seriesOrder: 23
+---
+
+A team's prompt was at 95% accuracy on the eval and stuck there. Iterating the prompt didn't help. Iterating the eval set — adding cases the prompt was likely to fail on — did. Within a quarter, accuracy was at 98%.
+
+Finding the cases your prompt fails on is the highest-leverage eval-improvement work. Counter-example mining is the discipline.
+
+## Where prompts fail
+
+Common patterns:
+
+- **Edge cases.** Inputs the prompt's writer didn't anticipate.
+- **Ambiguity.** Inputs that could be interpreted multiple ways.
+- **Boundary conditions.** Maximum/minimum values, empty inputs, exotic characters.
+- **Compositional.** Complex inputs combining edge cases.
+- **Real-world variation.** Inputs that look different in production than in eval.
+
+Each pattern is a category to mine.
+
+## Mining workflow
+
+The discipline:
+
+- Sample production traffic.
+- Filter to cases the model was uncertain about (low confidence, retry, escalation).
+- Have humans review.
+- Add the failures to the eval set.
+- Iterate the prompt.
+
+Production failures are the gold standard for eval-set growth.
+
+## Reviewer ritual
+
+Periodic — weekly for high-stakes agents:
+
+- Sample of model failures from production.
+- Reviewer triages.
+- New eval cases authored.
+- Old eval cases that no longer represent the workload retired.
+
+## A real mining
+
+A team's classifier had 95% accuracy. Mining surfaced:
+
+- 12 cases where users used industry jargon the prompt didn't handle.
+- 8 cases where the input was ambiguous.
+- 5 cases of boundary conditions (very short, very long).
+- 3 cases of compositional complexity.
+
+Adding these 28 cases to the eval and iterating the prompt: 98% accuracy.
+
+The mined cases were also signals about prompt evolution. The prompt was updated to handle the patterns.
+
+## Coverage
+
+Coverage isn't just count. It's diversity:
+
+- Edge cases per input dimension.
+- Distribution of input types.
+- Real-world distribution match.
+- Adversarial cases.
+
+A 1000-case eval that's mostly happy path covers less than a 200-case eval that spans diversity.
+
+## What we won't ship
+
+**Eval sets** that aren't growing.
+
+**Eval sets** assembled only from imagined cases.
+
+**Iteration cycles** that don't include eval-set growth.
+
+**Counter-example mining** that doesn't influence the prompt.
+
+## Close
+
+Counter-example mining is the eval discipline that makes prompts robust. Production failures inform the eval set. The eval set drives prompt iteration. The prompt improves on the cases that actually fail in production. Skip the mining and the prompt over-fits to the imagined eval.
+
+## Related reading
+
+- [Red-teaming your own prompt](/blog/red-team-your-prompt) — companion discipline.
+- [Building your first eval set](/blog/building-your-first-eval-set) — eval foundation.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening eval discipline, we'd love to hear about it. [Get in touch.](/contact)*

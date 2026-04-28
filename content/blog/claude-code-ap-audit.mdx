@@ -1,0 +1,136 @@
+---
+title: "Finance: AP-invoice auditor on a small ops team"
+description: "Three-way matching is exactly the unsexy, repetitive, high-volume work an AI employee absorbs without complaint."
+date: "2026-06-16"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Finance AI", "AI Employees", "Accounts Payable", "Audit"]
+series: "Claude Code in business"
+seriesOrder: 10
+---
+
+A finance lead at a 200-person company described her AP process as "I trust about 60% of our invoices on the first pass." The other 40% went to a junior accountant who spent her week chasing PO mismatches, duplicate billings, and price drifts. The work was important. It was also a thankless slog that nobody wanted as a career.
+
+The AP-invoice auditor AI employee absorbs the slog. The junior accountant spends her time on the cases the agent flags — the ones that actually need human judgment. The work gets done faster and the people doing it have a better job.
+
+## The shape of the role
+
+**Title.** Finance Operations AI — AP Audit Specialist.
+
+**Mission.** Audit every incoming invoice against the corresponding PO and receiving record. Surface mismatches with reasoning.
+
+**Outcomes.** Time-to-payment, mismatch-detection rate, missed-mismatch rate, payment-error rate.
+
+**Reports to.** Controller or Head of Finance Ops.
+
+**Tools.** AP system read access, ERP read access (for PO and GR data), vendor master data, contract terms.
+
+**Boundaries.** Audits and flags. Doesn't approve payment. Doesn't pay invoices.
+
+## The three-way match
+
+Standard AP audit is the three-way match:
+
+1. **Purchase order** — what was ordered, at what price, with what terms.
+2. **Goods receipt** — what was actually received, when.
+3. **Invoice** — what's being billed.
+
+When all three line up, the invoice gets approved. When they don't, someone has to figure out why.
+
+The agent runs the match for every invoice. For matches: pass through to the approval queue. For mismatches: flag with reasoning.
+
+## The mismatch reasoning
+
+Mismatches have a small number of causes. The agent classifies:
+
+- **Quantity discrepancy.** Invoice says 100 units; receipt says 95.
+- **Price discrepancy.** Invoice price differs from PO price.
+- **Duplicate invoice.** The same invoice (or a near-duplicate) was already submitted.
+- **No PO** — invoice arrived without a corresponding PO.
+- **Vendor mismatch.** Invoice vendor doesn't match PO vendor (often a subsidiary issue).
+- **Date discrepancy.** Invoice dates predate the PO, or post-date the contract end.
+- **Terms drift.** Net-30 invoice for a vendor with net-45 contract terms.
+
+For each, the agent surfaces the specific data points. The accountant sees what's wrong without re-running the analysis.
+
+## The anomaly pass
+
+Beyond pure matching, the agent flags anomalies:
+
+- **Invoice amount unusual** for this vendor (e.g., 3x the rolling average).
+- **Invoice cadence unusual** (this vendor invoices monthly, this is a second invoice in a week).
+- **Payment terms drift** over time (vendor's recent invoices have shorter terms than older ones).
+- **Round numbers** (often a sign of an estimate rather than an actual invoice).
+
+These aren't deal-breakers, but they merit a human glance. The accountant approves or asks for more info.
+
+## Approver routing
+
+The agent routes flagged invoices to the right approver:
+
+- **Operating expense** — to the budget owner.
+- **CapEx** — to the asset-owner plus controller.
+- **Material discrepancy** — to the controller.
+- **Suspected duplicate or fraud** — to the controller plus AP manager.
+- **Standard pass-through** — to the AP queue for routine approval.
+
+Routing is rule-based and audit-trail logged. The agent doesn't decide approval; it gets the right human's eyes on the right invoice fast.
+
+## The audit trail
+
+Every invoice has a complete audit trail:
+
+- When it was received.
+- The agent's classification and flags.
+- Who reviewed it.
+- What edits or overrides were made.
+- When it was approved or rejected.
+- When it was paid.
+
+For the auditors who eventually visit, this is the record. It looks the way auditors want it to look.
+
+## What this saves
+
+A team running the AP auditor:
+
+- Time-to-payment drops from a 14-day median to 5-day median.
+- Late-payment penalties drop materially.
+- Missed-discount opportunities drop (early-pay discounts get captured).
+- Duplicate-payment errors drop sharply.
+
+The junior accountant's day shifts from data entry to investigation. The job becomes more interesting and the throughput goes up.
+
+## What we won't ship
+
+**Auto-payment.** Approval is human. Always.
+
+**Auto-rejection.** Mismatches go to humans for resolution.
+
+**Anything that signs checks** or initiates wires without explicit approval.
+
+## The KPIs the controller watches
+
+1. **Time-to-payment** distribution.
+2. **Match rate** (% of invoices passing through without flag).
+3. **Flag accuracy** (% of flagged invoices that actually had an issue).
+4. **Missed-mismatch rate** (issues caught downstream after the agent passed them).
+
+The fourth is the agent's eval. If it stays low, the agent's earning its keep.
+
+## How to start
+
+One vendor type — utilities or office supplies are easy starters. Run the agent in shadow mode for a month. Compare its flags against the AP team's manual review. Tune. Once flags are accurate, route flagged invoices through the agent's queue. Expand to additional vendor types quarterly.
+
+## Close
+
+The AP-auditor AI employee is a teammate whose job is the work that gets done because it has to, not because anyone enjoys it. The match runs. The mismatches surface. The team focuses on the cases that need human judgment. The audit trail is ready for whoever eventually asks for it.
+
+## Related reading
+
+- [Agents in finance: compliance with audit trail](/blog/agents-in-finance-compliance) — same audit-trail discipline.
+- [Operations: vendor-comparison briefs](/blog/claude-code-vendor-briefs) — upstream of AP.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI finance employee, we'd love to hear about it. [Get in touch.](/contact)*

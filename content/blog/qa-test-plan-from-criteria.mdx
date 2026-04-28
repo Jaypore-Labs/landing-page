@@ -1,0 +1,132 @@
+---
+title: "QA: test-plan generation from acceptance criteria"
+description: "Most test plans miss what users will actually do. AI-assisted test-plan generation produces a coverage matrix the team can argue about."
+date: "2026-07-30"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "QA", "Testing", "AI Development", "Acceptance Criteria"]
+series: "AI for software development"
+seriesOrder: 17
+---
+
+A QA lead at a mid-size product company told us the team's testing was "mostly the happy path, occasionally the obvious edge case, rarely what users actually do." She knew this was a problem. She didn't have time to write better test plans against every story; the engineering team shipped faster than her plan-writing capacity.
+
+Claude Code closes the gap. Acceptance criteria go in; a structured test plan with edge cases comes out. The QA lead reviews and tightens. Coverage gets noticeably better without doubling her hours.
+
+## Criteria intake
+
+The agent reads the story's acceptance criteria. For each criterion, it produces:
+
+- The happy-path test case.
+- 2-3 edge cases (empty inputs, max inputs, unusual but valid inputs).
+- 1-2 error cases (invalid inputs, system errors mid-flow).
+- 1 performance/scale case where applicable.
+- 1 accessibility case for UI work.
+- 1 security case for sensitive operations.
+
+The output is a test-plan matrix: criterion × case-type × priority.
+
+## Edge-case mining
+
+The hardest part of test planning is the cases the spec doesn't mention. The AI mines:
+
+- Patterns from prior bugs in similar features (the bug tracker is a corpus).
+- Patterns from the team's flake history.
+- Common categories the team has historically been weak on.
+- Domain-specific edge cases (date boundaries, currency handling, timezone, locale).
+
+Each surfaced case has a rationale. The QA lead picks which to include.
+
+## The coverage matrix
+
+The test plan's output is a matrix the team can argue about productively:
+
+- Criterion 1: covered by 3 happy-path tests, 2 edge tests, 1 error test, 1 a11y test.
+- Criterion 2: covered by 2 happy-path tests, 1 edge test (note: should we add a performance test?).
+- ...
+
+The argument has substance. "We're missing performance coverage on Criterion 2" is a concrete conversation. "The test plan is too thin" is not.
+
+## Reviewer loop
+
+The QA lead reviews. Common edits:
+
+- Removes cases that aren't worth the maintenance burden.
+- Adds cases the AI didn't surface (often domain-specific).
+- Adjusts priorities.
+- Routes cases to the right testing layer (unit, integration, end-to-end, manual).
+
+Each review feeds the eval. Within two quarters, the AI's drafts hit closer to what the team would have produced manually.
+
+## A real test plan
+
+A scenario: a story to add bulk-edit functionality to a list view.
+
+Acceptance criteria:
+1. User can select 1-N rows.
+2. User can apply a bulk action to selected rows.
+3. Bulk action has a confirmation dialog with a summary.
+4. Bulk action has progress feedback.
+5. Bulk action has rollback for partial failure.
+
+The AI's plan:
+
+> **Criterion 1.** Select 1 row, select N rows (with N=2, 50, 1000), select all, deselect all, select-then-filter (does selection persist?), select-then-paginate.
+>
+> **Criterion 2.** Each available bulk action exercised. Action with all selected rows in valid state. Action with one row in invalid state.
+>
+> **Criterion 3.** Confirmation shows accurate count. Confirmation shows preview of changes. Cancel returns to selection. Confirm proceeds.
+>
+> **Criterion 4.** Progress shows real progress (not just spinner). Progress is cancellable. Progress survives page navigation (or is documented not to).
+>
+> **Criterion 5.** Partial failure: 50% succeed, 50% fail. Verify rollback. Verify error reporting. Verify state-after-rollback matches state-before-action.
+
+That's 25 cases drafted in 30 seconds. The QA lead would have written maybe 12. The remaining 13 — including some real bugs that would have shipped — get caught.
+
+## Routing to the right layer
+
+The AI suggests layer for each test:
+
+- Unit tests for stateless logic.
+- Integration tests for cross-module behaviour.
+- End-to-end tests for user-flow correctness.
+- Manual tests for visual or UX-judgment cases.
+
+The engineer or QA reviews. Some cases are hard to automate; those go to manual. Some are over-tested at multiple layers; those get rationalised.
+
+## What stays human
+
+- Priority decisions (which cases ship, which defer).
+- Domain-knowledge edge cases the AI didn't have context for.
+- Decisions about test stability (flaky tests are worse than missing tests).
+- Decisions about manual vs. automated.
+
+Senior QA judgment. The AI handles the cataloguing.
+
+## What we won't ship
+
+**Auto-implementing tests** that don't actually exercise the relevant behaviour.
+
+**Test plans without engineer or QA review.** Plans without review are theatre.
+
+**Tests for cases the team has explicitly decided not to support.** Resist scope creep.
+
+**Tests that test the AI's hallucinations** rather than real behaviour.
+
+## How to start
+
+Pick the next story going to QA. Generate the plan. Compare to what you'd write manually. Tune. Within five stories, the team's pattern is established.
+
+## Close
+
+Test-plan generation with Claude Code is the QA lead's drafting work compressed. Coverage improves measurably. Edge cases surface that wouldn't have. The team's testing matures faster than headcount allows. Quality goes up; QA-lead burnout drops.
+
+## Related reading
+
+- [QA: flaky test triage](/blog/qa-flaky-test-triage) — companion role.
+- [ML: eval harness from a spec](/blog/ml-eval-harness-from-spec) — same spec-driven scaffolding.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening QA workflows, we'd love to hear about it. [Get in touch.](/contact)*

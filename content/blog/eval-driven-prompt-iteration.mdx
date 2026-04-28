@@ -1,0 +1,88 @@
+---
+title: "Eval-driven prompt iteration"
+description: "The eval is the spec. Prompt iteration converges to it."
+date: "2026-12-18"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Prompt Engineering", "Engineering", "Output Testing", "Iteration"]
+series: "Evals & output testing"
+seriesOrder: 18
+---
+
+Prompt iteration without an eval is vibes. Prompt iteration with an eval is engineering.
+
+The eval defines the target. Each prompt change is measured against it. The prompt converges to the spec.
+
+## The loop
+
+1. Eval set authored (or borrowed).
+2. Initial prompt drafted.
+3. Eval run. Score baseline.
+4. Iterate prompt. Re-eval.
+5. If score improves, keep. If not, revert.
+6. Repeat until threshold met.
+7. Ship.
+
+Each iteration is data-driven. The team's intuition guides; the eval gates.
+
+## Reviewer ritual
+
+PR for prompt change:
+
+- Before/after eval scores.
+- Per-cohort breakdowns.
+- Justification for the change.
+
+If the score regressed but the engineer thinks it's an improvement (eval set is wrong), they argue with eval-set updates, not with subjective preference.
+
+## A real workflow
+
+A team's classifier improvement:
+
+- Day 1: 91% baseline.
+- Day 2: prompt change → 88% (revert).
+- Day 3: different prompt change → 93% (keep).
+- Day 4: refinement → 94% (keep).
+- Day 5: refinement → 94% (keep, no change).
+- Day 6: ship.
+
+Six days; data-driven; converged.
+
+Without the eval, this would have been "engineer thought it was better; shipped; eventually noticed regression."
+
+## Trade-offs
+
+- Slow: each iteration costs time + eval-run cost.
+- Reliable: changes that pass are real improvements.
+
+The slowness is the discipline. Skipping the discipline accumulates regressions.
+
+## Limits
+
+- Eval set must be representative. Otherwise the prompt over-fits the eval.
+- Eval set must grow. Otherwise it becomes stale.
+- Some improvements are visible only at production scale.
+
+## What we won't ship
+
+**Prompt changes** without eval evidence.
+
+**Eval scores** that don't convince the team the change is real.
+
+**Iteration** that targets eval set without considering production traffic.
+
+**Prompts** that pass eval and fail production.
+
+## Close
+
+Eval-driven prompt iteration is the discipline of engineered prompt-engineering. The eval is the spec. Each change is measured. Convergence is data-driven. Skip the discipline and prompts evolve by vibes.
+
+## Related reading
+
+- [Eval-driven development](/blog/eval-driven-development) — surrounding pattern.
+- [Counter-example mining](/blog/counter-example-mining) — eval-set growth.
+- [Prompt evolution](/blog/prompt-evolution) — drift detection.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening prompt iteration, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,86 @@
+---
+title: "Confidence calibration: when 'I don't know' is the answer"
+description: "An honest IDK is more useful than a confident wrong answer. The threshold tuning is the engineering."
+date: "2026-10-05"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Confidence", "Engineering", "Predictable Output", "Calibration"]
+series: "Predictable AI output"
+seriesOrder: 14
+---
+
+A team's customer-support agent had been confidently wrong about a niche feature, 3 customers had been told the wrong thing, and the team's CSAT had dipped. Investigation: the model was confidently producing the wrong answer because the right answer required information not in its training data. The model didn't know it didn't know.
+
+Confidence calibration is the discipline of making the model say "I don't know" when it doesn't. The output is more useful, not less.
+
+## The IDK pattern
+
+The pattern: the agent is allowed to say "I don't know" or "I need to escalate":
+
+- The prompt instructs the model to express uncertainty.
+- The model's confidence score is tracked.
+- Below threshold, the response is "I'm not sure; let me get a human."
+- Above threshold, the response is the answer.
+
+This requires the model to introspect its own confidence. Modern models do this reasonably; older ones don't.
+
+## Threshold tuning
+
+The threshold is tuned per use case:
+
+- High-stakes (legal, medical): high threshold; more "let me check" responses.
+- Customer support: medium threshold; tries to answer, escalates if uncertain.
+- Brainstorming: low threshold; outputs are advisory anyway.
+
+The right threshold is the team's decision. The wrong threshold is one set without thought.
+
+## Reviewer ritual
+
+The team reviews IDK responses weekly:
+
+- Was the IDK appropriate?
+- Was the answer eventually known by the human handler?
+- Does the IDK escalation rate match expectations?
+
+A rising IDK rate may signal the prompt is over-cautious or the model is stretched. A falling rate may signal over-confidence creeping in.
+
+## The honest UX
+
+Users prefer honest IDK to confident wrong:
+
+- "I'm not sure about that; let me get someone who knows."
+- vs. "[wrong answer]"
+
+The first builds trust. The second destroys it (when the user discovers the wrongness).
+
+## A real shipping decision
+
+A team shipped IDK with a 0.7 confidence threshold. Initial month: 12% of queries got IDK. Customer feedback was positive — they appreciated the transparency.
+
+The team's customer-success team picked up the IDK queries. Patterns emerged about what the model didn't know. The team's prompt-engineering work was directed by this signal: each pattern became an improvement to the corpus or prompt.
+
+By month six, IDK rate had dropped to 4%. The remaining IDKs were genuinely outside the agent's scope.
+
+## What we won't ship
+
+**Models** that can't express uncertainty (older models that default to "always answer").
+
+**Thresholds** set without eval.
+
+**"Confident wrong"** as the default failure mode.
+
+**IDK responses** that don't route or escalate. Saying IDK without a next step is dropping the user.
+
+## Close
+
+Confidence calibration is the discipline of saying IDK when appropriate. The threshold is tuned. The escalation routes correctly. The user gets honest information. Trust builds. Skip this and the model's confidence becomes the team's liability.
+
+## Related reading
+
+- [Hallucination checks](/blog/hallucination-checks) — companion discipline.
+- [Refusal grammars](/blog/refusal-grammars) — same UX pattern.
+- [Predictable output series](/series/predictable-ai-output) — wider context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening confidence calibration, we'd love to hear about it. [Get in touch.](/contact)*

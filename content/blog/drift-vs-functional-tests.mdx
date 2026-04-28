@@ -1,0 +1,93 @@
+---
+title: "Drift tests vs. functional tests: separate lanes"
+description: "Drift tests check for change; functional tests check for correctness. Don't conflate."
+date: "2026-11-02"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "Drift"]
+series: "Testing in the age of AI"
+seriesOrder: 9
+---
+
+A team's CI ran 200 tests. About 30 of them were drift tests — checking that outputs hadn't changed unexpectedly. The other 170 were functional tests — checking that outputs were correct. The team kept failing in confusion: was this drift, or a real regression?
+
+The fix is separating the lanes. Drift tests live in one suite, functional in another. Each fails for different reasons; each gets handled differently.
+
+## The lane separation
+
+Functional tests:
+
+- Check correctness.
+- Pass: the output is right.
+- Fail: the output is wrong; investigate, fix.
+
+Drift tests:
+
+- Check change.
+- Pass: the output matches the snapshot/baseline.
+- Fail: the output changed; investigate, decide if intentional.
+
+These are different signals. Conflating them confuses the team.
+
+## Pipeline design
+
+In CI:
+
+- Functional tests run on every PR; failures block merge.
+- Drift tests run on every PR; failures generate review comments but may not block merge.
+- Drift tests on main run on a schedule; failures generate alerts for investigation.
+
+## Reviewer ritual
+
+When functional tests fail: investigate the regression, fix.
+
+When drift tests fail: investigate the change. Either accept it (update baselines) or reject it (revert).
+
+These are different decisions. The reviewer should know which they're making.
+
+## A real workflow
+
+A team's setup:
+
+- Functional eval: 150 cases. Pass rate >95% required.
+- Drift snapshots: 50 reference outputs. Diffs flagged in PRs.
+
+PR review:
+
+- "Functional eval passed at 96%; drift detected on 3 cases."
+- Reviewer reads the 3 drifts. Decides if intentional.
+- Accepts or asks for changes.
+
+Without the lane separation, this would be "lots of tests failed; what's happening?"
+
+## Trade-offs
+
+Lane separation costs:
+
+- Two test suites instead of one.
+- Two failure modes the team needs to understand.
+- Two lanes of CI.
+
+The alternative — confusion under failure — costs more.
+
+## What we won't ship
+
+**Conflated suites** where drift and functional failures look the same.
+
+**Drift tests** as merge blockers without thoughtful policy.
+
+**Skipping the post-failure decision.** Each drift fail is a decision.
+
+## Close
+
+Drift tests and functional tests serve different purposes. Separate the lanes. Different failures, different responses. The team handles each correctly.
+
+## Related reading
+
+- [Output diffing in CI](/blog/output-diffing-in-ci) — drift implementation.
+- [Drift catchers](/blog/drift-catchers) — same drift discipline.
+- [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening test lanes, we'd love to hear about it. [Get in touch.](/contact)*

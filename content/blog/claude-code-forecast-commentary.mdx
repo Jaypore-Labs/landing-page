@@ -1,0 +1,123 @@
+---
+title: "Finance: variance commentary that reads like the CFO wrote it"
+description: "Variance commentary is judgment work — but most of it is templated. The AI employee handles the templated parts so the CFO can do the actual analysis."
+date: "2026-06-17"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Finance AI", "AI Employees", "FP&A", "Forecasting"]
+series: "Claude Code in business"
+seriesOrder: 11
+---
+
+A CFO at a 500-person SaaS company said monthly close had three painful days. The numbers came together by day 5. The commentary was due day 8. The middle three days were a slog of writing variance explanations she'd written 30 times before in slightly different forms.
+
+The variance-commentary AI employee writes the templated paragraphs. The CFO writes the parts that need her judgment. Close compresses by two days, and the commentary that goes to the board is more incisive because the CFO had time to think.
+
+## The shape of the role
+
+**Title.** Finance AI — Variance Commentary Specialist.
+
+**Mission.** For each monthly close, draft variance commentary explaining material differences between actual, budget, and prior period.
+
+**Outcomes.** Time from numbers-final to commentary-final, commentary completeness, CFO edit volume.
+
+**Reports to.** CFO or VP Finance.
+
+**Tools.** Financial system read access, prior-period commentary archive, variance threshold rules, voice eval for "CFO voice."
+
+**Boundaries.** Drafts. The CFO reviews, edits, and signs. Doesn't make accounting judgments.
+
+## What templated commentary looks like
+
+Most variance commentary is structured. The agent's drafting hits each line item where variance exceeds materiality threshold:
+
+- **Revenue lines.** Compare actual vs. budget vs. prior period. Identify the biggest contributors. Surface the prior-period commentary on these lines for context. Generate a draft explanation grounded in the supporting data (deal close-velocity, churn rate, expansion).
+
+- **COGS.** Margin shifts, cost-per-unit changes, mix effects.
+
+- **OpEx by department.** Headcount changes, planned vs. actual. Vendor cost changes. One-time vs. recurring.
+
+- **Below-the-line items.** Tax, interest, FX. Mostly mechanical.
+
+- **Cash flow.** Operating, investing, financing changes with material drivers identified.
+
+For each, the agent produces a paragraph: "Q2 revenue exceeded budget by $1.2M (+8%), driven primarily by faster-than-expected expansion ARR from the Q1 cohort..." with specific numbers traced to source.
+
+The CFO reads, edits where the explanation needs more nuance or judgment, and approves. Most paragraphs survive with light edits. Some get rewritten because the agent's framing didn't capture what really happened.
+
+## Source linking
+
+Every claim in the commentary links to its source. "Driven primarily by faster-than-expected expansion ARR from the Q1 cohort" links to the cohort-revenue analysis. The CFO can click through to verify. The audit trail is complete.
+
+This matters because:
+
+- The CFO can verify the agent's claim quickly.
+- The auditors who eventually look at the commentary can trace assertions to data.
+- When someone in three months asks "where did this come from?", the answer is in the document.
+
+## The voice eval
+
+CFOs have voices. They don't write the way the AI was trained to write by default. The voice eval captures the specific CFO's voice with paired examples (their own recent commentary vs. counterfactual). Drafts that don't pass the voice eval don't reach the CFO.
+
+This is especially important for board commentary. The board reads the CFO's voice; commentary that sounds like generic FP&A writing erodes the board's confidence in the CFO. A voice eval that's tight produces commentary the board doesn't notice — which is exactly what the CFO wants.
+
+## What the CFO actually does
+
+After the agent's draft, the CFO:
+
+- Reads through the commentary.
+- Edits paragraphs where the framing is wrong or insufficient.
+- Adds the parts only she could write — strategic context, decisions taken, what to expect next month, what the metrics imply for the business.
+- Signs.
+
+This is the work the CFO is paid for. The templated paragraph-by-paragraph factual commentary is not. The agent absorbs the latter so the former gets more attention.
+
+## What this saves
+
+Before the agent: the CFO spent 2-3 days each close on commentary, often delegating partial drafts to the FP&A team, then re-writing.
+
+After: the agent's draft lands within hours of numbers-final. The CFO spends half a day editing and adding the parts she's uniquely positioned to write.
+
+The board sees:
+- Commentary that arrives on time.
+- Commentary that's grounded in data with traceable references.
+- Commentary that captures the CFO's voice and judgment.
+
+## What we won't ship
+
+**Auto-publishing to the board.** The CFO signs every report.
+
+**Forecasting based on agent inference.** The agent describes what happened. The CFO and FP&A team forecast.
+
+**Anything that touches the GL.** The agent reads. The accounting team posts.
+
+**External reporting** (10-Q/10-K equivalents) without the same approval discipline plus legal review.
+
+## The KPIs the CFO watches
+
+1. **Time from numbers-final to commentary-final.**
+2. **Commentary edit volume** (should decline as voice eval sharpens).
+3. **Board-meeting prep time.**
+4. **Audit-comment volume** related to commentary clarity.
+
+If the second metric doesn't decline, the voice eval needs more pairs.
+
+## How to start
+
+Run the agent on next month's close in parallel with the existing process. The CFO compares the agent's draft to what she would have produced. Tune the voice eval. After two cycles, switch to the agent as the primary draft producer.
+
+Most CFOs are skeptical until they see the third draft. By the third draft, the agent's voice has converged.
+
+## Close
+
+The variance-commentary AI employee is a teammate whose job is the templated middle of monthly close. The agent's draft is the starting point. The CFO's edits are the value. Two days come back per close. Multiplied across the year, that's a quarter of the CFO's time recovered for actual analysis.
+
+## Related reading
+
+- [Finance: AP-invoice auditor](/blog/claude-code-ap-audit) — same audit-trail discipline.
+- [Founder ops: investor-update auto-drafter](/blog/claude-code-investor-update) — analogue for non-public-company communication.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI finance employee, we'd love to hear about it. [Get in touch.](/contact)*

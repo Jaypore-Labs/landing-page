@@ -1,0 +1,132 @@
+---
+title: "SRE: postmortem first drafts that don't blame"
+description: "The first draft sets the tone. AI-assisted drafts surface the timeline and the contributing factors without shading toward blame."
+date: "2026-07-23"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "SRE", "Postmortems", "Incident Response", "Blameless Culture"]
+series: "AI for software development"
+seriesOrder: 12
+---
+
+The hardest part of writing a good postmortem isn't the timeline. It's the framing. Phrasing that quietly assigns blame, language that suggests heroes and villains, narratives that make the same person responsible for both the bug and the fix — these patterns sneak in even when the team is committed to blameless culture.
+
+AI-assisted postmortem drafts help. Not because the AI is wiser. Because the AI doesn't have the workplace context that biases human authors. The first draft is more neutral. The team's edits make it useful.
+
+## Timeline reconstruction
+
+The first job: reconstruct what happened, in order, with timestamps. Inputs:
+
+- Incident channel chat history.
+- PagerDuty timeline.
+- Deploy history during the incident window.
+- Dashboard event history.
+- Customer support tickets logged during the window.
+
+The AI assembles these into a structured timeline:
+
+> **02:14 UTC.** Alert fired: Customer-API p99 latency >5s.
+> **02:14 UTC.** PagerDuty paged on-call (Sarah).
+> **02:18 UTC.** Sarah acknowledged, joined #incident-2026-07-22.
+> **02:22 UTC.** First diagnostic check: pod metrics. No CPU/memory anomaly.
+> ...
+
+The on-call engineer reviews. Adds anything the artifacts missed. The timeline is now ground for the analysis.
+
+## Contributing-factor framing
+
+The shift from "root cause" to "contributing factors" is the load-bearing reframe. Most outages have several contributing factors. Picking one and calling it "the cause" is reductive and often blame-coded.
+
+The AI drafts the contributing-factors section:
+
+- **Technical.** What systems behaved unexpectedly. What configurations weren't right. What gaps in test coverage allowed the bug to ship.
+- **Process.** What gaps in deployment process didn't catch the issue. What gaps in monitoring didn't alert sooner.
+- **Operational.** What gaps in on-call training or runbook coverage extended the response time.
+
+Each factor is described, not blamed. "The deployment process didn't include a canary phase for this service" beats "the engineer skipped canary."
+
+## Action-item discipline
+
+Postmortem action items have a long history of getting filed and forgotten. The AI's draft:
+
+- Filing the action items as tickets in the team's tracker.
+- Assigning each to a likely owner (subject to human confirmation).
+- Setting a due date proportional to the severity.
+- Including the rationale for each.
+
+The action items go on the team's dashboard. The team's monthly review includes the open postmortem actions. Aging items get attention.
+
+## Reviewer loop
+
+The postmortem draft goes through:
+
+- Engineer who responded to the incident — for accuracy of the timeline.
+- Team lead — for tone and contributing-factor framing.
+- Manager — for clarity and stakeholder readability.
+- (For severe incidents) Director or VP — for strategic implications.
+
+Each pass adds clarity. The published postmortem is more nuanced than any individual would have written alone.
+
+## Tone calibration
+
+The AI's drafts are run through a tone eval:
+
+- No hero/villain narratives.
+- No language assigning blame to individuals.
+- Symmetrical attribution of credit and responsibility.
+- Active voice for the system; passive voice (where appropriate) for individual actions.
+
+The tone eval is built from the team's prior good-postmortem examples. Drafts that don't pass don't reach the reviewer.
+
+## A real postmortem
+
+A scenario: an outage caused by a database migration that locked a critical table for 90 seconds. Customer requests timed out during the window.
+
+The AI's draft, after timeline reconstruction and contributing-factor analysis:
+
+> **Summary.** A database migration on 2026-07-22 02:14 UTC held a lock on the `transactions` table for 92 seconds, during which customer-facing API requests timed out. Recovery was automatic when the migration completed at 02:15 UTC. Customer impact: ~340 timed-out requests over a 92-second window.
+>
+> **Contributing factors.**
+> 1. The migration used `ALTER TABLE` without `CONCURRENTLY`, which acquires an exclusive lock. The team's standard practice for online migrations on tables of this size is to use `pg_repack` or `CONCURRENTLY` variants. This migration was authored against the wrong template.
+> 2. The pre-deploy lint did not catch the missing `CONCURRENTLY` clause. The lint exists for the `users` table but had not been extended to other tables of similar volume.
+> 3. The on-call rotation was understaffed for the deploy window, with no in-region engineer available for the first 90 seconds of the incident.
+>
+> **Action items.**
+> - ENG-501: Extend the migration lint to all production tables >10M rows. Owner: @platform-team. Due: 2026-08-05.
+> - ENG-502: Update the migration template documentation to surface the lock-mode requirement. Owner: @platform-docs. Due: 2026-07-29.
+> - OPS-203: Review on-call coverage for off-hour deploys. Owner: @ops-lead. Due: 2026-08-12.
+
+The narrative does not name individuals. The action items are concrete and assigned. The team can act on this.
+
+## What stays human
+
+- The framing decisions where reasonable people might disagree.
+- The action-item priority calls.
+- The customer-comms decisions.
+- The escalation calls.
+
+These are leadership decisions. The AI's draft is a starting point, not the answer.
+
+## What we won't ship
+
+**Postmortems with individual names attached to mistakes.**
+
+**Postmortems published before the team has reviewed.**
+
+**Action items filed without owners.**
+
+**Anything that masks the structural causes** with surface-level fixes.
+
+## Close
+
+Postmortem drafts with Claude Code are the timeline and the framing handled with discipline. The blameless culture survives because the first draft doesn't accidentally violate it. The action items become trackable work. The team learns. The next incident is a little less likely.
+
+## Related reading
+
+- [SRE: runbook generation](/blog/sre-runbook-generation) — captures the same incidents differently.
+- [DevOps: CI pipeline diagnosis at 2am](/blog/devops-ci-2am-diagnosis) — same fix-and-document discipline.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're improving postmortem discipline, we'd love to hear about it. [Get in touch.](/contact)*

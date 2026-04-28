@@ -1,0 +1,75 @@
+---
+title: "Trend evals vs. threshold evals"
+description: "Threshold evals catch regressions; trend evals catch slow drift. Both matter."
+date: "2026-12-17"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "Trends", "Engineering", "Output Testing", "Monitoring"]
+series: "Evals & output testing"
+seriesOrder: 17
+---
+
+A team's eval pass rate had been at 96% for months. No PR regressed below the 95% threshold. But the rate was slowly drifting from 98% (six months ago) to 96% (now). The threshold gate caught nothing; the trend was real.
+
+Threshold evals catch regressions. Trend evals catch drift. Both matter.
+
+## The two patterns
+
+**Threshold:** is the eval above X%? Pass/fail at the threshold. PR-time gating.
+
+**Trend:** how is the eval trending? Direction matters. Reviewed periodically.
+
+Each catches different issues.
+
+## When each wins
+
+- **Threshold:** regression detection, PR gating, hard quality requirements.
+- **Trend:** drift detection, slow-quality changes, model-bump effects.
+
+## Reviewer ritual
+
+Threshold: per-PR.
+
+Trend: weekly. Direction reviewed; significant moves investigated.
+
+## A real implementation
+
+A team's eval monitoring:
+
+- Threshold gate: every PR.
+- Trend dashboard: updated daily.
+- Weekly review of trends.
+- Investigation triggered when 7-day average drifts more than 1%.
+
+The team catches drift early. The threshold catches regressions late (which is when they matter for shipping).
+
+## Trade-offs
+
+- More signal types = more reviewing.
+- Cleaner picture of quality.
+
+For mature teams, both make sense. For early-stage teams, threshold first.
+
+## What we won't ship
+
+**Threshold-only monitoring.** Drift goes undetected.
+
+**Trend-only monitoring.** Regressions ship.
+
+**Trend dashboards** nobody reviews.
+
+**Skipping the drift investigation** when trends move.
+
+## Close
+
+Trend evals and threshold evals are complementary. Threshold for regression. Trend for drift. The team's quality picture spans both.
+
+## Related reading
+
+- [Drift catchers](/blog/drift-catchers) — surrounding pattern.
+- [Eval CI](/blog/eval-ci) — threshold implementation.
+- [What makes an eval good](/blog/what-makes-an-eval-good) — quality framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening eval monitoring, we'd love to hear about it. [Get in touch.](/contact)*

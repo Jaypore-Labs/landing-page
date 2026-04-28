@@ -1,0 +1,104 @@
+---
+title: "Multimodal agents: when adding vision actually helps"
+description: "Vision adds capability and cost. Use it where text alone underperforms; skip it where text alone wins."
+date: "2026-09-01"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Multimodal", "Vision", "Engineering", "Building Agents"]
+series: "Building agents"
+seriesOrder: 15
+---
+
+A team built a multimodal agent because "everything's multimodal now." Six months in, the agent's vision capability was a feature nobody used. It cost 4× more per task than the text-only version and produced output that was rarely better.
+
+Vision is a capability, not a default. Use it where text alone underperforms. Skip it where text alone is enough.
+
+## Where vision earns
+
+Vision earns its keep when:
+
+- **The visual content carries information not present in available text.** Charts, diagrams, photos of physical conditions, screenshots of UIs.
+- **The text-extraction step is unreliable.** OCR on noisy or stylised content; PDF parsing on irregular layouts.
+- **The visual context changes the semantic.** Same words, different meanings in different visual contexts.
+
+Field photo classification, medical imaging triage, document processing for non-standard layouts, UI testing — these are the strong cases.
+
+## Where vision wastes
+
+Vision wastes resources when:
+
+- The information is also in available structured data.
+- The image is just decoration around text.
+- The cost of the vision model exceeds the marginal value over text-only.
+- Latency budget can't absorb the vision-call overhead.
+
+For most agents, most of the time, text wins.
+
+## The vision-as-input rule
+
+The pattern: vision is an input, not a destination. The agent reads the image, extracts the relevant features as structured data, and then proceeds with the rest of the task.
+
+This means:
+
+- The vision call happens once per image.
+- The result is cached.
+- Downstream reasoning uses the structured extraction, not the raw image.
+
+Without this discipline, agents call the vision model repeatedly with the same image, wasting cost and latency.
+
+## Latency cost
+
+Vision calls are slower than text calls. Architectures that issue vision calls in the hot path (agent waits for the call, then proceeds) have noticeably higher latency.
+
+Patterns to mitigate:
+
+- Pre-process images at upload time, store the extraction.
+- Async vision calls when latency budget allows.
+- Use vision sparingly; only when essential.
+
+## Quality gates
+
+Vision outputs are noisier than text outputs. The discipline:
+
+- Vision extractions feed into eval sets.
+- Confidence scores are tracked.
+- Low-confidence extractions get human review or escalation.
+- Periodic audits compare vision outputs to ground truth.
+
+A team relying on vision without quality gates will eventually have an incident traceable to a vision miscall.
+
+## A real workflow
+
+A scenario: claims-processing agent with vision for damage photos.
+
+- User uploads photos of damaged item.
+- Vision step extracts: damage type, severity, location on item, surrounding context.
+- Structured output goes to the agent's reasoning.
+- Agent uses extracted features plus claim text to draft a recommendation.
+- High-confidence cases auto-route; low-confidence cases get human reviewer.
+
+Vision earned its keep because text alone (the claimant's description) couldn't substitute for what the photo showed. The cost was justified by the value.
+
+## What we won't ship
+
+**Vision capability "for completeness."** If text alone works, ship text alone.
+
+**Vision in latency-critical paths** without confirming the latency budget.
+
+**Vision outputs that bypass quality gates.**
+
+**Vision inputs without privacy-aware handling.** Photos can contain unintended sensitive content.
+
+## Close
+
+Multimodal agents are the right answer when vision adds information. They're the wrong answer when vision is a checkbox feature. The discipline is honest evaluation: where does text win, where does vision earn? Build accordingly. Skip the rest.
+
+## Related reading
+
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+- [Tool design like APIs](/blog/tool-design-like-apis) — vision as a tool.
+- [Cost guardrails](/blog/cost-guardrails) — vision cost-management discipline.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're considering multimodal agents, we'd love to hear about it. [Get in touch.](/contact)*

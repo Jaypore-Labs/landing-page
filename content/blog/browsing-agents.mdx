@@ -1,0 +1,100 @@
+---
+title: "Browsing agents: scraping vs. structured tools"
+description: "Browsing agents are powerful and brittle. Turn the browse into a tool wherever possible."
+date: "2026-09-03"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "Browsing", "Engineering", "Building Agents", "Scraping"]
+series: "Building agents"
+seriesOrder: 17
+---
+
+A team's browsing agent worked beautifully on the customer they built it for. It broke catastrophically the next month when the customer's website redesigned. The team had built selectors directly into the agent's prompt. The HTML changed; the prompt didn't.
+
+Browsing agents are useful for the cases where structured tools don't exist. They're brittle by nature. The discipline is converting browse-once-and-figure-it-out into structured tool calls wherever possible.
+
+## The 'turn it into a tool' rule
+
+Whenever a browsing agent does something repeatedly, build a structured tool for it:
+
+- Filling out a specific form → write a tool that takes the form's inputs and submits.
+- Reading data from a specific site → write a tool that scrapes (with care) and returns structured data.
+- Navigating a known flow → write a tool that runs the flow.
+
+The browsing agent figures it out the first time. The team builds the tool. From then on, the structured tool runs.
+
+This converts brittle one-off behaviour into reliable repeated behaviour. The website might still change; when it does, the team updates the tool, not every prompt.
+
+## Sandboxing
+
+Browsing agents touch the open internet. Risks include:
+
+- Prompt injection from page content.
+- Unintended actions taken in third-party services.
+- Data exfiltration if the agent has read access to sensitive data.
+- Accidental compliance violations (the agent ends up in places the team didn't authorise).
+
+Sandboxing:
+
+- Browsing happens in an ephemeral environment.
+- The agent can't access the team's infrastructure during the browse.
+- Outputs are filtered before reaching the agent's main context.
+- Action limits enforced (max-clicks, max-form-submits, max-page-fetches).
+
+## Rate limits
+
+The agent visiting a site at agent-speed looks like a bot to the site. Rate limits:
+
+- Per-site, per-second request limits.
+- Polite headers (user-agent identifying as automation).
+- Honour robots.txt.
+- Backoff on errors.
+
+Without these, the agent gets blocked on first encounter. With them, it operates within site-owner expectations.
+
+## Eval discipline
+
+Browsing-agent evals are tricky. Live websites change. Eval cases that test specific page behaviour rot.
+
+The pattern:
+
+- Eval against snapshots of pages, not live pages.
+- Periodically refresh snapshots.
+- Eval cases that test the agent's reasoning about pages, not specifics.
+
+## A real browsing agent
+
+A research agent that pulls company data from public sources:
+
+- Initial: agent browsed Crunchbase, LinkedIn, company sites freely.
+- Three months in: team built `crunchbase_lookup`, `linkedin_company_lookup`, `company_basic_info` tools.
+- Browsing was reserved for novel sources.
+- Costs dropped (tools are cheaper than browsing).
+- Reliability rose (tools don't break when the page redesigns).
+- Maintenance shifted from prompt-tuning to tool-maintenance.
+
+The team's velocity stayed high because the architecture matched the workload.
+
+## What we won't ship
+
+**Browsing agents that interact with shared accounts.**
+
+**Browsing without sandboxing** in production.
+
+**Agents that scrape sites at rates inconsistent with the site's terms.**
+
+**Agents that don't strip prompt-injection markers** from page content before adding to context.
+
+## Close
+
+Browsing agents are brittle by nature and useful by capability. Convert browse-once into tool-call wherever possible. Sandbox the rest. Honour rate limits. Eval against snapshots. The agent's reliability comes from the architecture, not from the model's cleverness.
+
+## Related reading
+
+- [Tool design like APIs](/blog/tool-design-like-apis) — what a good browse-tool looks like.
+- [MCP servers are USB-C for AI](/blog/mcp-is-usb-c-for-ai) — how integrations should land.
+- [Plan vs. act](/blog/plan-vs-act-loop) — surrounding architecture.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're shipping browsing agents, we'd love to hear about it. [Get in touch.](/contact)*

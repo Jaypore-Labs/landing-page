@@ -1,0 +1,116 @@
+---
+title: "CS: renewal-risk scoring that explains itself"
+description: "Most renewal-risk dashboards show colors. The AI version shows reasoning — which is what CS managers can actually act on."
+date: "2026-06-11"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Customer Success", "AI Employees", "Retention", "Renewal Risk"]
+series: "Claude Code in business"
+seriesOrder: 7
+---
+
+Most renewal-risk tools produce a number. Account A is 87 (green). Account B is 42 (yellow). Account C is 23 (red). The number is the wrong output. CS managers don't need a number. They need to know what to *do*.
+
+The renewal-risk AI employee produces explanation, not a score. For each at-risk account, it surfaces: what's worrying, what's grounded in evidence, what's the fastest mitigation, who should reach out. The CSM acts on the explanation. The score, if anyone cares, is a side effect.
+
+## The shape of the role
+
+**Title.** Customer Success Operations AI — Renewal Risk Specialist.
+
+**Mission.** Continuously assess every account's renewal risk, surface high-risk accounts to the CSM with grounded explanations, and prepare mitigation plans.
+
+**Outcomes.** Renewal rate, time-from-risk-detection-to-mitigation, gross-revenue retention.
+
+**Reports to.** VP of Customer Success.
+
+**Tools.** Product-usage data, support-ticket history, CRM, NPS/CSAT scores, contract metadata, stakeholder activity.
+
+**Boundaries.** Surfaces, explains, drafts. Doesn't reach out. Doesn't make commercial decisions.
+
+## What gets read
+
+The agent reads continuous signals across:
+
+**Usage data.** Active users (count and trend), feature breadth, time-to-action, drop in core workflow usage.
+
+**Support history.** Open tickets, severity distribution, escalation rate, time-to-resolution.
+
+**Stakeholder activity.** Champion still engaged? Decision-maker still in role? Has a competitor name appeared in any conversation?
+
+**Commercial signals.** Contract auto-renewal vs. negotiated. Recent budget changes. Recent leadership changes.
+
+**Sentiment markers.** NPS shifts, review patterns, social-media mentions, customer-advocacy participation.
+
+These aren't combined into a number. They're combined into a narrative.
+
+## The narrative output
+
+For each at-risk account, the agent produces:
+
+- **Risk summary.** "ABC Corp is at high risk of non-renewal in Q3."
+- **Evidence.** "Active users dropped 35% over the last 8 weeks. Champion role-changed in March; new contact hasn't engaged. Two open P2 tickets aged 14+ days. NPS dropped from 9 to 4 in the last survey."
+- **Likely cause.** Synthesised from the evidence.
+- **Mitigation plan.** Specific, sequenced, attributed. "Step 1: CSM reaches out to former champion to confirm they're still relevant. Step 2: schedule executive sponsor call to re-engage. Step 3: technical-account-manager reviews open tickets..."
+- **Owner.** Who runs the play.
+
+The CSM reviews, adjusts, executes. The plan isn't auto-prescribed; it's a starting point.
+
+## The compounding signal
+
+Some risk signals are early. Some are late. The agent surfaces both:
+
+- **Early signals.** Champion role-change before the new contact is engaged. Drop in usage of one feature. Single-stakeholder dependency. These are recoverable.
+- **Late signals.** Open exec-level dispute. Multiple compounding usage drops. Stated competitor evaluation. These need escalation.
+
+Acting on early signals is the renewal-rate lift. Late signals are usually too late. The agent's value is mostly in the earliness.
+
+## The reviewer loop
+
+The CSM accepts, rejects, or adjusts each surfaced risk. Each accepted-but-mitigated case is the gold standard. Each rejected case ("this isn't actually a risk because…") tunes the agent. Each missed account that churned is the eval gap to close.
+
+After two quarters, the agent's signal-to-noise improves dramatically. The CSM trusts the surfaced list because the false-positive rate is low.
+
+## What this changes for the CS leader
+
+Before the agent: the CS leader's QBR has a chart. Some accounts churn surprisingly. Post-mortems are about why nobody saw it coming.
+
+After: the CS leader sees the risk pipeline in real time. Most churn is explained in advance — the team saw it, the team tried, sometimes the customer wasn't recoverable. The post-mortem is about *which mitigations worked* and how to apply them earlier next time.
+
+The CS function shifts from reactive to proactive. The renewal rate moves.
+
+## What we won't ship
+
+**Auto-discounting to save renewals.** Pricing is a commercial decision.
+
+**Auto-emailing customers with risk-flagged content.** No customer wants to receive "we noticed you're at risk."
+
+**Behavior-modification campaigns toward customers without their consent.** Manipulation isn't customer success.
+
+**Surveillance metrics outside what the customer signed up to share.** Some signals (open emails, third-party data) aren't appropriate.
+
+## The KPIs the CS leader watches
+
+1. **Time from risk-detection to first mitigation action.**
+2. **Mitigation success rate** (accounts where mitigation was attempted and the renewal happened).
+3. **Surprise-churn rate** (churns where the risk wasn't surfaced before).
+4. **GRR** (gross revenue retention) trend.
+
+If surprise-churn rate doesn't drop, the agent isn't catching the right signals. Investigate before scaling.
+
+## How to start
+
+Pick a customer cohort — high-ARR accounts make a good first one. Run the agent in shadow mode for a quarter (CSMs work normally; agent surfaces risks for review). Compare the agent's flags against actual churn outcomes. Tune. Then operationalise the surfaced list as the CS team's weekly priority queue.
+
+## Close
+
+The renewal-risk AI employee is a teammate whose job is to make the team faster at noticing what's wrong while there's still time to fix it. The score is irrelevant. The reasoning is the deliverable. CSMs act on reasoning. Reasoning, accumulated over time, becomes institutional knowledge about why customers stay.
+
+## Related reading
+
+- [CS: onboarding playbook generator](/blog/claude-code-onboarding-playbook) — upstream of renewal risk.
+- [Agents in SaaS: in-product agents that earn renewal](/blog/agents-in-saas) — adoption side of the same problem.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI CS-risk employee, we'd love to hear about it. [Get in touch.](/contact)*

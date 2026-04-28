@@ -1,0 +1,122 @@
+---
+title: "Operations: vendor-comparison briefs in 30 minutes"
+description: "Vendor evaluations used to take an ops manager two weeks. Run by an AI employee, they collapse into a half-day with better discipline."
+date: "2026-06-15"
+author: "Yash Shah"
+category: "Strategy"
+tags: ["Claude Code", "Operations AI", "AI Employees", "Vendor Selection", "Procurement"]
+series: "Claude Code in business"
+seriesOrder: 9
+---
+
+A head of operations told us his last vendor evaluation took 12 calendar days. The decision took 90 minutes. The other 11 days were spent assembling apples-to-apples information from vendor websites that were optimised to obscure pricing, feature lists that didn't map to each other, and contractual terms that varied wildly.
+
+The vendor-comparison brief AI employee compresses the assembly. The decision still takes 90 minutes — and it should, because the decision is a judgment call. Everything before the decision is pattern-matching the agent does well.
+
+## The shape of the role
+
+**Title.** Operations AI — Vendor Evaluation Specialist.
+
+**Mission.** For any vendor selection process, produce a comparison brief in 30-90 minutes that the decision-makers can act on.
+
+**Outcomes.** Cycle time from "we need a vendor" to "we picked one," brief completeness, decision quality (post-hoc rated).
+
+**Reports to.** COO or Head of Operations.
+
+**Tools.** Web research, vendor RFP intake, internal-needs-document ingest, comparison-template library.
+
+**Boundaries.** Compares and surfaces. Doesn't decide. Doesn't negotiate.
+
+## The brief template
+
+The agent's output follows a consistent template:
+
+**Section 1 — Requirements summary.** What we need (functional, non-functional, must-haves, nice-to-haves, deal-breakers).
+
+**Section 2 — Vendor matrix.** Each candidate scored against each requirement. Cells include source citations (vendor docs, demo notes, reference calls). No invented features; everything traceable.
+
+**Section 3 — Pricing breakdown.** Apples-to-apples cost comparison normalised to the team's actual usage (seats, volume, units). Hidden costs flagged (implementation, data migration, training, premium support).
+
+**Section 4 — Contract terms.** Key clauses across vendors — auto-renewal, termination, data ownership, SLA, liability cap, indemnification. Material differences flagged.
+
+**Section 5 — Disqualification rules.** Any vendor that fails a deal-breaker is removed from the matrix with the specific failure cited. (Failing this discipline is how teams end up evaluating five vendors when three were already disqualified.)
+
+**Section 6 — Decision recommendation.** The agent's analysis of fit. The decision-makers may or may not agree; the recommendation is a starting point.
+
+**Section 7 — Decision record.** Empty for the agent to fill — gets populated when the decision is made.
+
+## Disqualification first
+
+Most vendor evaluations waste time evaluating candidates that should have been disqualified earlier. The agent's first pass is disqualification: which candidates fail on a deal-breaker?
+
+Common deal-breakers:
+
+- Pricing tier above budget.
+- Missing a must-have feature.
+- Geographic data residency wrong for the team's compliance requirements.
+- Contract terms that don't allow termination during the team's evaluation period.
+
+Eliminating these candidates immediately reduces the brief from "compare 8 vendors" to "compare 3." The 3-vendor decision is much more tractable.
+
+## Pricing summary discipline
+
+Vendor pricing is intentionally opaque. The agent's job is to see through it:
+
+- Normalise to the team's actual usage profile (not the vendor's "typical customer").
+- Annualise everything (per-seat-per-month → annual cost for projected headcount).
+- Surface all add-ons (premium support, additional integrations, professional services).
+- Calculate switching costs (data migration, training, lost productivity).
+- Project 2- and 3-year total cost (where multi-year contracts are an option).
+
+The pricing summary is a single table with vendors in columns and cost categories in rows. Subtotals at the bottom. No vendor has the lowest number on every row; the team picks based on their priorities.
+
+## Decision-record output
+
+When the decision is made, the agent populates the decision record:
+
+- Vendor selected.
+- Reasoning (which factors mattered most).
+- Risks accepted.
+- Renewal-evaluation criteria for next cycle.
+- Implementation start date.
+
+This becomes the artifact that the team can reference when the vendor relationship comes up for review. The reasoning that produced the decision is captured. Future teams don't have to reconstruct it from memory.
+
+## A real example
+
+A team needed a customer-data platform. Briefed the agent: requirements doc, budget, timeline. Agent surveyed the market in 4 hours, eliminated 6 of 14 candidates on deal-breakers, produced a side-by-side brief on the remaining 8. The team eliminated 5 more in their first review (40 minutes). The remaining 3 went to deeper evaluation. Decision in 8 calendar days vs. the team's prior baseline of 6 weeks.
+
+The agent didn't pick the vendor. The team did. But the agent ran 95% of the assembly work.
+
+## What we won't ship
+
+**Auto-decisioning.** Vendor selection is a business judgment.
+
+**Auto-negotiating.** Negotiation is a relationship and contract discipline.
+
+**Sharing internal requirements with vendors without permission.** The agent operates inside the team's privacy boundary.
+
+## The KPIs the COO watches
+
+1. **Cycle time** from vendor-need to decision.
+2. **Brief completeness** (does the brief cover the dimensions the team actually used to decide?).
+3. **Post-hoc decision rating** at 6 and 12 months (was the right vendor picked?).
+4. **Vendor renewal/replacement rate** — too many replacements within 18 months suggests the brief is missing something.
+
+## How to start
+
+Pick the next vendor evaluation on the team's queue. Run the agent. Compare the brief to what the team would have produced. Tune the template. Once it's working for one category, expand to others.
+
+## Close
+
+The vendor-brief AI employee is a teammate whose job is the unglamorous procurement-research work. The decision stays human. The assembly speeds up by 5-10x. The decision record means the company learns from each vendor relationship instead of starting from scratch each time.
+
+## Related reading
+
+- [Operations: SOP writer](/blog/claude-code-sop-writer) — same documentation-quality discipline.
+- [Marketing: campaign-brief copilot](/blog/claude-code-marketing-brief) — same draft-then-decide pattern.
+- [An AI employee isn't a bot](/blog/ai-employee-not-bot) — framing.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're hiring an AI ops employee, we'd love to hear about it. [Get in touch.](/contact)*

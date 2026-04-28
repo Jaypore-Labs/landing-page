@@ -1,0 +1,109 @@
+---
+title: "Backend: API design + endpoint scaffolding"
+description: "The contract is human. The scaffolding is AI. The boundary is where the productivity gain lives."
+date: "2026-07-09"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Backend", "API Design", "AI Development", "Software Engineering"]
+series: "AI for software development"
+seriesOrder: 2
+---
+
+A senior backend engineer described her workflow once: "I spend an hour thinking through what an API should *be*, and the next four hours typing it into existence." The hour was the value. The four hours were the implementation tax.
+
+Claude Code reverses the ratio. The thinking — argument shapes, error semantics, idempotency, pagination, versioning — stays human. The typing — handlers, validators, OpenAPI definitions, tests, docs — gets faster. A 5-hour endpoint becomes a 2-hour one without sacrificing thought.
+
+## The contract-first pattern
+
+The pattern that works: write the contract first, then have the AI scaffold against it.
+
+Concretely:
+
+1. Sketch the API contract in OpenAPI or a similar schema. Routes, methods, request shapes, response shapes, error codes. This is where you put the thinking — what the endpoint *means*.
+2. Hand the contract to the AI with the codebase context (existing handlers, validation patterns, error conventions).
+3. Ask for the implementation: handler, validators, types, basic tests.
+4. Review the implementation against the contract. Adjust where the AI's choices diverge.
+
+The reverse pattern — "implement an endpoint that does X" — almost always loses something. The AI invents details that weren't in your head. You discover them on review and have to push back. Net: slower than starting with the contract.
+
+## What scaffolding looks like
+
+For a typical CRUD endpoint, the AI's scaffolding includes:
+
+- Route registration with the existing router pattern.
+- Request DTO with validation matching project conventions.
+- Service-layer call with appropriate error handling.
+- Response DTO and HTTP status code logic.
+- OpenAPI annotations matching the spec.
+- Unit tests covering happy path, validation errors, auth failures, not-found cases.
+- Integration test stubs.
+
+Not every project needs every piece. The AI uses the codebase context to produce what fits.
+
+## What stays human
+
+Decisions the AI shouldn't make:
+
+- **Naming.** Endpoint names, parameter names, response field names. Names compound; an inconsistent name now is technical debt later.
+- **Error semantics.** Which errors get 400, which get 422, which get 409, which get 500. These are product decisions; the AI's defaults rarely fit.
+- **Idempotency.** Whether an endpoint is idempotent affects retry semantics and infrastructure design. Human call.
+- **Pagination strategy.** Cursor vs. offset, default page sizes, limits — depends on the data and the consumers.
+- **Versioning approach.** URL-versioned, header-versioned, no version — depends on the API's consumer story.
+
+These decisions should be made before the AI scaffolds. The AI implements; the human decides.
+
+## Test-first generation
+
+A strong pattern: write the tests by hand or with light AI assistance, then have the AI implement against them.
+
+This works because:
+
+- Writing tests forces precision about behaviour.
+- The AI's implementation has a definite goal: pass these tests.
+- Bugs surface fast — either the implementation is wrong (test fails) or the test is wrong (test passes for the wrong reason).
+
+The reverse — implementation first, tests after — leads to tests that mirror the implementation rather than the spec. Bugs that the implementation has are bugs the tests also have.
+
+## A real refactor
+
+A real engineering moment: refactoring an API from REST to a more typed pattern (gRPC or tRPC). The shape of the work with AI:
+
+- **Hour 1.** Audit the existing endpoints. Categorise by complexity. Decide migration order. Human work.
+- **Hour 2-3.** Hand each endpoint to the AI: existing implementation, target type definition, the convention for the new pattern. AI produces the migration.
+- **Hour 4.** Review each migration. Catch the cases where the AI's translation lost a behaviour. Adjust.
+- **Hour 5.** Update tests. AI helps; human reviews.
+- **Hour 6.** Migration shipped.
+
+A migration that would have taken a week of grinding is a day of focused work. The thinking time isn't reduced. The typing time is.
+
+## Code-review loop
+
+The team's PR-review pattern still applies. The AI's output is a PR like any other. Reviewer reads the diff, comments on substance, requests changes if needed. The AI's authorship is visible (commit messages, comments) but doesn't get special treatment — same standards as a human-authored PR.
+
+## What we won't ship
+
+**AI-generated code without tests.** Always. Ever.
+
+**AI-generated code in a security-sensitive path** without a security-aware review.
+
+**AI-generated migrations of authentication or authorisation code** without extra scrutiny.
+
+**Anything where the AI's plan and the human's intent diverge** without resolving the divergence first.
+
+## How to start
+
+Pick one endpoint. Write the contract. Hand to AI. Review the implementation. Notice what the AI did well and what required correction. Build a personal pattern library. Within a week, the workflow is intuitive.
+
+## Close
+
+The contract-first backend workflow with Claude Code is the productivity gain that compounds. The thinking stays human. The typing speeds up. The endpoints get shipped faster, with the same care as before. The engineer's time per endpoint drops from a day to a half-day. The accumulated time goes to harder problems.
+
+## Related reading
+
+- [Backend: database migrations without fear](/blog/backend-migrations-with-claude-code) — same contract-first pattern.
+- [Building agents: tool design like APIs](/blog/tool-design-like-apis) — design discipline transferred.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — series opener.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're modernising backend workflows, we'd love to hear about it. [Get in touch.](/contact)*

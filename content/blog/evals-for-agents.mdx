@@ -1,0 +1,96 @@
+---
+title: "Evals for agents: trajectory + outcome"
+description: "Agent eval has two axes — what the agent did, and whether it ended at the right place."
+date: "2026-12-14"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Evals", "AI Agents", "Engineering", "Output Testing", "Trajectory"]
+series: "Evals & output testing"
+seriesOrder: 14
+---
+
+Agent eval is two-dimensional:
+
+- **Trajectory.** What did the agent do? Did it use the right tools, in the right order, with the right arguments?
+- **Outcome.** What did the agent achieve? Was the final state correct?
+
+A correct outcome with a wrong trajectory is suspicious. A correct trajectory with a wrong outcome means the trajectory wasn't actually correct. Both axes need eval.
+
+## Trajectory eval
+
+For each case:
+
+- Expected trajectory (tools called, in order).
+- Actual trajectory (from agent traces).
+- Comparison.
+
+Strict comparison: tools must match.
+
+Lenient comparison: equivalent tool patterns acceptable.
+
+The right strictness depends on the use case.
+
+## Outcome eval
+
+For each case:
+
+- Expected end state.
+- Actual end state.
+- Comparison.
+
+End state might be: a created record, a sent message, a final response, a database state.
+
+## Combined
+
+Combined evaluation:
+
+- Trajectory + outcome both correct: PASS.
+- Trajectory wrong but outcome right: investigate (lucky correctness?).
+- Trajectory right but outcome wrong: investigate (system issue downstream?).
+- Both wrong: clear fail.
+
+## Reviewer ritual
+
+PR review:
+
+- Both axes evaluated.
+- Discrepancies investigated.
+- Cohort patterns surfaced.
+
+## A real implementation
+
+A team's customer-research agent:
+
+- 40 cases with trajectory annotations.
+- 40 cases with outcome annotations.
+- Both axes pass at 95%+ for merge.
+
+Catch rate compared to outcome-only: 30% more issues found.
+
+## Trade-offs
+
+Trajectory annotation is harder than outcome annotation. The investment is in the eval-set authoring. Once authored, the eval is reliable.
+
+## What we won't ship
+
+**Agent eval** with only outcome scoring.
+
+**Trajectory eval** that's so strict the agent has no flexibility.
+
+**Skipping the discrepancy investigation.**
+
+**Cohort blindness** to pattern-level issues.
+
+## Close
+
+Evals for agents need both axes. Trajectory captures how. Outcome captures what. Together, they tell the team whether the agent worked the way intended. Skip either and the eval has blind spots.
+
+## Related reading
+
+- [Tests for tool-using agents](/blog/tests-for-tool-using-agents) — testing context.
+- [Agent observability](/blog/agent-observability) — trajectory data source.
+- [Eval taxonomy](/blog/eval-taxonomy) — surrounding context.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening agent evals, we'd love to hear about it. [Get in touch.](/contact)*
