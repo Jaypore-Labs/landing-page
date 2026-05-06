@@ -1,0 +1,231 @@
+---
+title: "Getting started with Claude Code: install to first real task"
+description: "A clean, practical walk-through. Install, authenticate, configure, ship your first multi-file task. About forty minutes of focused time."
+date: "2026-05-07"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "AI Tools", "Tutorial", "Developer Tools", "CLI"]
+---
+
+This is part 2 of the AI-tools-for-engineers series. The orientation lives in [part 1](/blog/ai-tools-for-engineers-getting-started). This article gets you from "Claude Code installed" to "Claude Code shipped a real change to a real codebase," in about forty focused minutes.
+
+You'll want a real codebase open. Not a hello-world. Something with a dozen files, real tests, an existing style. The first task you give Claude Code should require it to read context — that's where the value lives. Toy tasks don't reveal anything useful.
+
+## What you'll have at the end
+
+- Claude Code installed and authenticated.
+- A `~/.claude.json` configured with sensible defaults.
+- A project-level `CLAUDE.md` documenting your codebase's patterns.
+- A real change shipped (or at least drafted) that touched 2-4 files.
+- A working mental model of the daily workflow.
+
+## Install
+
+Claude Code ships as a single binary plus IDE integrations. The CLI is the foundation; everything else extends it.
+
+```bash
+# macOS / Linux
+curl -fsSL https://claude.ai/install.sh | sh
+
+# Or via npm if you prefer
+npm install -g @anthropic-ai/claude-code
+```
+
+Confirm the install:
+
+```bash
+claude --version
+# claude-code 1.x.y
+```
+
+If your shell can't find `claude`, add `~/.local/bin` (or wherever the installer placed it) to your `PATH`. The installer should print the path it used.
+
+## Authenticate
+
+```bash
+claude login
+```
+
+This opens a browser, you log into your Anthropic account, the CLI receives a token. The token lives in `~/.claude/credentials` — chmod 600 by default, which you can verify:
+
+```bash
+ls -l ~/.claude/credentials
+# -rw-------
+```
+
+Test the connection:
+
+```bash
+claude --help
+```
+
+If you have Claude Pro, Claude for Teams, or an API key, the same login flow handles all three. The Pro and Teams paths bill against your subscription. The API-key path bills against your API account.
+
+## Configure `~/.claude.json`
+
+The global config file controls defaults across projects. A sensible starter:
+
+```json
+{
+  "model": "claude-opus-4-7",
+  "editor": "code",
+  "theme": "dark",
+  "defaultMode": "interactive",
+  "telemetry": {
+    "enabled": false
+  },
+  "mcpServers": {}
+}
+```
+
+A few choices worth understanding:
+
+- **model**. We use `claude-opus-4-7` for everyday work. Switch to `claude-haiku-4-5` for speed-sensitive tasks where the highest reasoning isn't needed. The CLI's `--model` flag overrides per-call.
+- **editor**. The command Claude Code uses when it opens a file for you to review. `code` for VS Code, `cursor` for Cursor, `nvim` for Neovim, etc.
+- **defaultMode**. `interactive` keeps the CLI conversational. `headless` is for scripting and CI.
+- **mcpServers**. Empty for now. We'll add servers in part 5 of the series.
+
+## Configure project-level `CLAUDE.md`
+
+This is the file that makes Claude Code dramatically more useful. It's a Markdown file at your project root that explains your codebase to the assistant.
+
+A real example from a service we work on:
+
+```markdown
+# Project: payments-api
+
+This is a Python service handling payment processing. FastAPI + Postgres + Stripe.
+
+## Conventions
+
+- All new endpoints go through the `app/api/v2/` router. v1 is deprecated.
+- Use Pydantic v2 models in `app/schemas/`.
+- Database access goes through repository classes in `app/repos/`. Never import SQLAlchemy session directly into a handler.
+- Errors are raised as subclasses of `app.errors.AppError`. The error handler in `app/api/errors.py` maps them to HTTP status codes.
+- Tests use pytest with async fixtures from `tests/conftest.py`.
+- Run formatter before commit: `make fmt`. Run tests: `make test`.
+
+## Patterns to avoid
+
+- Don't introduce new dependencies without ADR. Existing ADRs are in `docs/adr/`.
+- Don't write raw SQL in handlers. Use the repository.
+- Don't add new top-level packages without architecture review.
+
+## Where to look first
+
+- New endpoints: examples in `app/api/v2/customers.py`.
+- New tests: examples in `tests/api/test_customers.py`.
+- New error types: `app/errors.py`.
+- Schema migrations: `migrations/` (we use Alembic).
+```
+
+Claude Code reads `CLAUDE.md` automatically when it sees the file. You don't need to reference it in every prompt. The presence of this file is the single biggest difference between Claude Code "kind of helping" and Claude Code "writing code that fits your conventions on the first try."
+
+A reasonable rule: any project where you work for more than two days deserves a `CLAUDE.md`. Update it whenever a convention surprises you when reviewing the assistant's output — that surprise is information about something missing in the doc.
+
+## Your first session
+
+Open the CLI in your project root:
+
+```bash
+cd ~/projects/payments-api
+claude
+```
+
+You'll see a prompt. Try a small but real task. Not "explain my code"; an actual change.
+
+```
+> Add a /v2/customers/{customer_id}/refunds GET endpoint that returns
+> the customer's refund history, paginated by cursor. Match the patterns
+> of the existing GET endpoints in app/api/v2/customers.py.
+```
+
+The assistant reads CLAUDE.md, opens the relevant files, proposes a plan, then asks for confirmation before making edits. The plan-confirm loop is intentional. You read the plan; if the plan is wrong, you say so before any code is written.
+
+A typical interaction:
+
+```
+Claude: I see customer GET endpoints in app/api/v2/customers.py. I'll
+        follow that pattern. Plan:
+
+        1. Add a `RefundHistoryResponse` schema in app/schemas/refunds.py.
+        2. Add a `list_refunds_for_customer` method on the refund repo.
+        3. Add the GET endpoint in app/api/v2/customers.py.
+        4. Add a test in tests/api/test_customers.py.
+
+        Should I proceed?
+
+You:    yes
+
+Claude: [reads files, makes edits, runs tests, reports back]
+```
+
+Read the diff before you accept. Always. The flow we use:
+
+```bash
+git status                      # confirm Claude touched what was expected
+git diff --stat                 # what files changed, by how much
+git diff app/api/v2/customers.py  # the actual diff, file by file
+```
+
+If anything is off — a name that doesn't match your taste, an error code that's the wrong one for your team — push back. Claude will revise.
+
+## The daily workflow
+
+After a few sessions, a pattern settles in. The one that works for most engineers we've watched:
+
+**Morning.** Open `claude` in the repo. Tell it the day's plan in one paragraph. Ask it for context — "what's changed in this directory in the last week?" — to refresh your own context before diving in.
+
+**Tasks throughout the day.** When you have a discrete task that's mechanical-with-thinking — implement an endpoint, refactor a module, write a migration — start it with the assistant. Confirm the plan. Let it edit. Review the diff. Run tests. Ship.
+
+**End of day.** Ask the assistant to summarise what you (and it) did today. It's surprisingly accurate; it has the recent context. The summary becomes your standup notes.
+
+What you don't use the assistant for:
+
+- Tasks where you're trying to build understanding. Reading the codebase is a skill; outsourcing it dulls the skill.
+- Trivial mechanical tasks. Sometimes typing it yourself is faster.
+- Debugging under fire. The assistant is a thinking partner during incidents, not a code generator.
+- Architecture decisions. The assistant has opinions, but the decision is yours.
+
+We covered this pattern in more depth in [a senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code).
+
+## Verifying your setup
+
+Quick checks before moving on:
+
+```bash
+claude --version                  # binary works
+ls ~/.claude/credentials          # authenticated
+cat ~/.claude.json | head -10     # config exists
+ls CLAUDE.md                      # project context exists in your repo
+```
+
+Run a small task end-to-end. If you can ask for a change, see a plan, accept the plan, get a working diff, and have tests pass — the setup is good. If any of those steps fails, fix it before moving on. Building on a flaky setup compounds frustration.
+
+## Common starting issues
+
+A few things that surprise people on day one:
+
+**The assistant is asking too many questions.** Lower the question budget by giving more context up front. The plan it produces with a paragraph of context is much better than the plan from a one-line prompt.
+
+**The assistant is not asking enough questions.** Raise expectations. If the task involves a decision, ask explicitly: "before you start, list the design choices you're going to make so I can review them."
+
+**Generated code doesn't match your style.** Add the convention to `CLAUDE.md`. The assistant won't infer style from one example; it does respect explicit instructions.
+
+**Tests are passing but the change is wrong.** Your test coverage might be the issue, not the assistant. The assistant's output is the lens; sometimes the lens reveals problems with your existing code.
+
+## What's next
+
+Part 3 covers Codex — OpenAI's CLI for similar work. We'll set it up the same way and build a vocabulary for comparing the two. By the end of part 4, you'll know which tool to reach for when.
+
+Before then: spend a focused day with Claude Code on a real project. Hit a few rough edges. Update your `CLAUDE.md` based on what surprised you. The setup compounds with use; the time you spend now pays back across every future session.
+
+## Related reading
+
+- [AI tools for engineers: a practical orientation](/blog/ai-tools-for-engineers-getting-started)
+- [Getting started with Codex](/blog/getting-started-with-codex)
+- [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're standing up Claude Code on your team, we'd love to hear about it. [Get in touch.](/contact)*

@@ -1,0 +1,218 @@
+---
+title: "Claude Code + Sentry: incident debugging as conversation"
+description: "Wire Claude Code to your error tracker. Triage live incidents, draft post-mortems, surface error patterns — without leaving the assistant."
+date: "2026-05-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Sentry", "MCP", "Tutorial", "Incident Response"]
+---
+
+This is part 8 of the AI-tools-for-engineers series. Part 7 covered Supabase; this article does the same for Sentry. The integration here is one of the highest-value MCP wirings we've seen on real teams — it changes the shape of incident response in measurable ways.
+
+By the end of this article you'll have Claude Code (or Codex; same patterns) reading from your Sentry project, surfacing error context, and drafting post-mortems from real incident data.
+
+## What we're building
+
+A working integration that lets you:
+
+- Query Sentry events in plain language ("show me 500-class errors in the last hour for the payments service").
+- Pull full stack traces, breadcrumbs, and request context for a specific event.
+- Compare two recent releases and surface what's changed in error patterns.
+- Draft a post-mortem from a Sentry-tracked incident.
+
+What we're explicitly not building:
+
+- An auto-remediation pipeline. The assistant reads errors and proposes fixes; humans ship.
+- A way to leak customer PII out of Sentry. Sentry's built-in PII scrubbing stays on; the assistant respects what Sentry has redacted.
+
+## Prerequisites
+
+- A Sentry project. The free tier has plenty of throughput for this tutorial.
+- Claude Code installed and authenticated.
+- A Sentry auth token with the right scopes (more on this below).
+
+## Step 1: create a scoped auth token
+
+In Sentry: User Settings → Auth Tokens → Create New Token.
+
+Scope it carefully:
+
+- `event:read` — read events (always needed).
+- `project:read` — read project metadata.
+- `org:read` — read org metadata.
+- Skip `event:write` and `project:write` unless you have a specific reason. The MCP server we're using is read-focused.
+
+Copy the token. Store it in your shell:
+
+```bash
+export SENTRY_AUTH_TOKEN="sntrys_..."
+export SENTRY_ORG="your-org"
+export SENTRY_PROJECT="your-project"
+```
+
+If your team uses Sentry's self-hosted version, also note the base URL:
+
+```bash
+export SENTRY_BASE_URL="https://sentry.your-company.com"
+```
+
+Most teams on Sentry SaaS can leave the base URL unset; the default works.
+
+## Step 2: install the Sentry MCP server
+
+Sentry maintains an official MCP server. There are also community servers; the official one is what we'd recommend for most teams.
+
+```bash
+npm install -g @sentry/mcp-server
+```
+
+You can also use it via `npx -y @sentry/mcp-server`, which is what we'll do in the Claude Code config.
+
+## Step 3: configure Claude Code
+
+Edit `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "sentry": {
+      "command": "npx",
+      "args": ["-y", "@sentry/mcp-server"],
+      "env": {
+        "SENTRY_AUTH_TOKEN": "${env:SENTRY_AUTH_TOKEN}",
+        "SENTRY_ORG": "${env:SENTRY_ORG}",
+        "SENTRY_PROJECT": "${env:SENTRY_PROJECT}"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Code. The Sentry server registers. Test:
+
+```
+> List the top 5 errors in the last 24 hours.
+```
+
+The assistant calls the Sentry server's `list_events` (or equivalent) tool and reports the top errors with counts.
+
+## Step 4: a real incident workflow
+
+Where this integration earns its keep is during an incident. Here's a real flow we use.
+
+A page comes in. Customer-facing API showing elevated 500s. Open Claude Code in the relevant repo.
+
+```
+You:    Show me the most recent 500 errors on the payments-api project,
+        last 30 minutes.
+
+Claude: [calls sentry.list_events with project=payments-api, level=error, time=30m]
+        12 events. Top three groups:
+          1. KeyError: 'currency' in services/billing.py:142 — 7 occurrences
+          2. TimeoutError calling Stripe.charges.create — 4 occurrences
+          3. ConnectionError: redis-cache — 1 occurrence
+
+You:    Tell me about the KeyError. What's the request context?
+
+Claude: [calls sentry.get_event with the most recent event id]
+        Event 1234567:
+          - User: customer cust_A1B2C3D4E5F6
+          - Endpoint: POST /v2/charges
+          - Stack: services/billing.py:142, line `currency = body['currency']`
+          - Body received: {'amount_cents': 5000, 'reason': 'duplicate'}
+            (no 'currency' key)
+          - Recent deploys: deploy_8842 (12m ago)
+
+You:    What changed in deploy 8842?
+
+Claude: [calls git log via the filesystem MCP]
+        deploy_8842 corresponds to commit 4f2a91c on main.
+        Changed files: services/billing.py, schemas/charge.py
+        Key change: schemas/charge.py made `currency` required.
+        services/billing.py was not updated to read it as required;
+        it's still using body['currency'] which raises KeyError when absent.
+
+        The bug: clients sending old-shape requests (no currency) hit
+        a KeyError instead of getting a 422 with a clear message.
+
+You:    Draft a fix and a test.
+
+Claude: [proposes a small patch + test]
+```
+
+That entire interaction took maybe 4 minutes. Without the integration, the same flow involves jumping between Sentry, GitHub, your editor, your terminal, and your incident channel — probably 15-20 minutes for the same conclusion.
+
+The fix and test still go through the team's normal review. The assistant accelerates the diagnosis, not the deploy.
+
+## Step 5: post-mortem drafts
+
+Once the incident is resolved, the assistant can draft the post-mortem from the same data.
+
+```
+You:    Draft a post-mortem for the KeyError incident from this morning.
+        Use the Sentry data and the recent commits. Format per our template.
+
+Claude: [reads the team's post-mortem template + Sentry incident + git history]
+        Drafted post-mortem at docs/incidents/2026-05-15-keyerror-charges.md.
+        Covers timeline, contributing factors, action items.
+        The action items are placeholders; please review and assign.
+```
+
+The team's actual post-mortem reviewer (the EM, usually) reads the draft, fills in judgment-heavy sections (the contributing-factor framing, the action-item priorities), and ships it.
+
+We covered the post-mortem-discipline pattern more deeply in [SRE: postmortem first drafts](/blog/sre-postmortem-drafts). The Sentry MCP integration is what makes the draft step trivial.
+
+## Step 6: error-pattern queries
+
+Beyond incidents, the integration is useful for steady-state pattern queries.
+
+```
+You:    Are there any new error groups that started in the last 7 days
+        and have at least 10 occurrences?
+
+You:    Compare error counts in the payments-api project this week vs.
+        last week, broken down by deploy.
+
+You:    Show me the top 5 errors that affect users on the enterprise plan.
+```
+
+These are the questions you'd struggle to answer without writing a Sentry-API script. The assistant runs them in a sentence.
+
+## Patterns and pitfalls
+
+**Don't expose write access.** The integration is read-only by default; keep it that way. There's almost never a reason for the assistant to need to write to Sentry.
+
+**Be careful with PII in error messages.** Sentry has PII scrubbing; verify it's enabled. The MCP server returns whatever Sentry shows; if Sentry shows PII, so will the assistant. Audit a sample of MCP outputs to confirm.
+
+**Don't skip the human read.** When the assistant proposes a fix during an incident, the team's normal PR review still happens. Speed comes from the diagnosis being faster, not from skipping review.
+
+**Mind the rate limits.** Sentry's API has rate limits. The MCP server respects them but heavy use during a busy incident can hit them. If you see "rate limited" errors, slow your queries.
+
+## When this integration shines
+
+The pattern of value:
+
+- Reactive debugging during incidents. Diagnoses get faster.
+- Pre-deploy checks. "Are there any open errors in production related to the area I'm about to deploy?"
+- Weekly review. "What's the top 5 most-frequent errors that I haven't fixed yet?" — which becomes a real backlog item generator.
+- Post-mortem drafting. The first 80% of the doc is mechanical; the assistant handles it.
+
+The pattern that doesn't earn its keep:
+
+- Routine spot-checks. If you'd only open Sentry for two minutes anyway, a chat round-trip is overhead.
+
+## What's next
+
+Part 9 wires up PostHog. Same shape: install the MCP server, scope the keys, get a working read flow, expand from there.
+
+After PostHog, part 10 ties everything together into a daily workflow. By the end you'll have a working stack — Claude Code, plus three production integrations, plus the discipline to run it safely.
+
+## Related reading
+
+- [Effective MCP patterns](/blog/effective-mcp-patterns)
+- [Claude Code + Supabase integration](/blog/claude-code-supabase-integration)
+- [SRE: postmortem first drafts that don't blame](/blog/sre-postmortem-drafts)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're integrating Sentry with Claude Code, we'd love to hear about it. [Get in touch.](/contact)*

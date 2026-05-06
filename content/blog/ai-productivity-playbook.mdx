@@ -1,0 +1,172 @@
+---
+title: "The AI productivity playbook: a real engineer's day"
+description: "Putting Claude Code, MCP, and three integrations together into a sustainable daily workflow."
+date: "2026-05-19"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "MCP", "Productivity", "Tutorial", "Developer Tools"]
+---
+
+This is the final article in the AI-tools-for-engineers series. Parts 1-9 covered the tools, the protocol, and the integrations. This article puts it together into a working day.
+
+The pattern is real. We use it. Multiple teams we work with use a version of it. It's not a productivity hack; it's an engineering habit, sustained over months. The compound interest is the gain.
+
+## What you should have wired up
+
+By the time you're reading this article, you should have:
+
+- Claude Code (or Codex) installed and authenticated.
+- A `CLAUDE.md` (or `CODEX.md`) in every project you work on more than two days at a time.
+- One or more MCP servers connected — at minimum, filesystem; ideally, also Supabase, Sentry, PostHog, GitHub, depending on your stack.
+- Read-only servers as the default. Write servers (where they exist) using scoped tokens with confirmation flows.
+
+If you're missing any of these, go back to the relevant article. The playbook below assumes the foundation is there.
+
+## A day, hour by hour
+
+A real Tuesday from a senior engineer we work with. Names changed; the workflow is exact.
+
+**8:30 — Open shop.** Reema gets coffee, sits down. Opens her laptop. First commands:
+
+```
+$ cd ~/projects/payments-api
+$ claude
+> What's changed in this repo since I left yesterday?
+> Are there any open Sentry incidents on this service?
+```
+
+Two questions. Two MCP-server calls. Thirty seconds. She's caught up before she's read a single Slack message. The Slack messages get triaged after she has context.
+
+**9:00 — Standup prep.** She asks the assistant to summarise her work yesterday. The assistant has the git log; it produces a three-bullet summary that goes into her standup notes. She edits it for tone; the bullets are right. Two minutes of work that used to be ten.
+
+**9:15 — Standup.** Camera on. She reads the bullets. Done.
+
+**9:30 — Deep work block, hour 1.** Today's main task: implement a new endpoint. She knows the design (drafted last week with the team's architect). She opens Claude Code:
+
+```
+> Read docs/adr/0042-refunds-endpoint.md. Draft the endpoint per
+> the ADR, following our v2 patterns. I'll review the plan before
+> any edits.
+```
+
+The assistant proposes a plan. Reema reads it carefully. Two changes to the plan (one error code, one parameter name). Apply.
+
+The assistant edits five files, runs the tests, reports back. Tests pass. Reema reads the diff. Two small adjustments — a name choice, a comment that's wrong. She fixes them by hand. Commits.
+
+Total time: 45 minutes. Same task last quarter without the integration: ~3 hours.
+
+**10:30 — Slack check.** She's been ignoring Slack for an hour. She catches up. Two unanswered questions; one is "what's the open-PR situation on the payments service?" She asks the assistant:
+
+```
+> List my open PRs and the platform team's open PRs on the
+> payments-api repo. Note any that are waiting on review more than 48h.
+```
+
+GitHub MCP pulls the list. She summarises in Slack: "Three of mine ready for review; nothing of yours older than 48h." Two minutes of work; she'd have spent ten minutes clicking around GitHub.
+
+**11:00 — Pair session.** Her teammate Aditi pings her about a customer issue. The customer is reporting wrong refund amounts. Reema and Aditi pair in a video call.
+
+```
+> A customer (cust_A1B2C3D4E5F6) is reporting incorrect refund amounts
+> in the last week. Pull their refund history from Supabase and check
+> against the original charge amounts.
+```
+
+Supabase MCP pulls the data. The assistant compares amounts. There's a discrepancy: refunds in cents but the customer is reporting them in dollars in their dashboard. The bug isn't in the refund calculation; it's in the dashboard rendering.
+
+Five minutes of paired investigation. Without the integration, the same conclusion takes 25 minutes of jumping between Supabase, the customer-comms tool, and the dashboard code.
+
+**12:00 — Lunch.** No assistant.
+
+**1:30 — Deep work block, hour 2.** A planned refactor. The team's authentication middleware has accumulated cruft. Reema kicks off Claude Code:
+
+```
+> I want to refactor the auth middleware in app/middleware/auth.py.
+> Goal: extract the token-validation logic into a separate module
+> so each token type (JWT, API key, OAuth) has its own validator.
+> First, propose the new file layout. No code yet.
+```
+
+The assistant proposes. Reema picks one of two layouts. The assistant generates the refactor across four files. Tests pass. Reema reviews. Done by 3:00.
+
+**3:00 — Code review.** Three PRs from teammates. Two are routine; she runs `claude review` on the diff (a wrapper that runs the team's review prompt against the PR). The wrapper surfaces three substantive questions to ask the author plus minor style notes. She reads, agrees with two of three, asks the author about them in the PR.
+
+The third PR is a complex one — a database migration. She reads it without the assistant. Some PRs deserve full human attention; the assistant's review is the floor, not the ceiling.
+
+**4:30 — Sentry triage.** A daily ritual. She asks the assistant:
+
+```
+> Show me any new error groups from production that started today
+> and have at least 5 occurrences.
+```
+
+Two new groups. She inspects both:
+
+- One is a known third-party flake. Tagged it as such in Sentry.
+- One is a real bug introduced by the noon deploy. She drafts a fix; will ship it tomorrow.
+
+Twelve minutes of triage that used to be a half-hour scroll through Sentry's UI.
+
+**5:00 — Wrap.** Asks the assistant to summarise the day. Pastes the summary into her end-of-day notes. Logs off.
+
+Total deep-work time: ~5 hours. Total assistant time: probably 90 minutes of active interaction. Productivity vs. last year: she ships about 2-2.5x more endpoints per sprint, with comparable bug rates.
+
+## What the day required
+
+A few enabling conditions, in priority order:
+
+**1. Project context.** `CLAUDE.md` was up-to-date. The assistant produced code that fit conventions on the first try.
+
+**2. The right MCP servers, scoped well.** Filesystem, Supabase (read-only), Sentry, GitHub. No write access to anything where damage was possible. The auth middleware refactor used local edits the assistant couldn't push to main without Reema's explicit `git push`.
+
+**3. Habits, repeated.** End-of-day summary. Morning catch-up question. Daily Sentry triage. The habits are the productivity multiplier; the tools are the substrate.
+
+**4. Boundaries.** Reema doesn't ask the assistant to make architecture decisions. She doesn't ask it to do work she's trying to learn. She doesn't ask it during incidents (she has different patterns then; we covered those in [DevOps: CI pipeline diagnosis at 2am](/blog/devops-ci-2am-diagnosis)).
+
+The combination produces durable productivity. Not 10x. Not "AI replaced engineers." Closer to: a senior engineer with a good tool that earns its keep on the work that's actually mechanical-with-thinking.
+
+## What we won't promise
+
+A few patterns that don't pan out, that we keep seeing teams chase:
+
+**"Replace the junior engineer."** AI assistants are leverage for engineers who already understand the work. They are not a replacement for the engineer who's learning. Junior engineers using AI tools without grounding in the fundamentals get faster at producing code they can't maintain. That's not productivity.
+
+**"Automate the whole pipeline."** End-to-end automation — issue ticket to production deploy, no human in the loop — is technically possible and almost always a bad idea. The discipline that makes the assistant valuable is the human-in-the-loop pattern. Skip the loop and the failure modes compound.
+
+**"Ten engineers, ten setups."** Letting every engineer pick their own tools and configurations produces a team that can't share context. Standardise enough — same `CLAUDE.md` template, same MCP servers, same wrappers — that the team can pair-program with the assistant in the loop.
+
+## How to start, if you haven't
+
+If you've read the series and not yet set anything up, today's the day. The path:
+
+1. Install Claude Code (or Codex). Forty-five minutes.
+2. Write `CLAUDE.md` for one project. Forty-five minutes.
+3. Connect one MCP server — pick the integration most relevant to your daily work. Two hours.
+4. Use the stack for a real task. One day.
+5. Iterate. Add `CLAUDE.md` to the next project. Add the next MCP server. Build habits.
+
+A week of focused effort and you have a working baseline. A month and you have a habit. A quarter and you have a productivity edge that compounds.
+
+## A small commitment
+
+This series will be updated as the tools change. We expect to revise it twice a year as new model versions, new MCP servers, and new integration patterns emerge.
+
+If you finish the series and have a question, an integration we didn't cover, or a pattern you'd like to share — get in touch. The series will grow with the category.
+
+## Close
+
+The AI-tools-for-engineers landscape in 2026 is real, productive, and occasionally overhyped. The teams getting durable value out of it are the teams treating it as engineering work — setup, configuration, scoped permissions, eval discipline, daily habits.
+
+The rest is noise.
+
+Reema's day is achievable. Yours is too. Spend the focused weeks now, while the category is settling. The compound returns are larger than the catch-up cost will be in two years.
+
+## Related reading
+
+- [AI tools for engineers: a practical orientation](/blog/ai-tools-for-engineers-getting-started) — the orientation.
+- [A senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — the deeper version of Reema's pattern.
+- [Effective MCP patterns](/blog/effective-mcp-patterns) — the discipline that holds it together.
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're standing up an AI-assisted engineering practice on your team, we'd love to hear about it. [Get in touch.](/contact)*

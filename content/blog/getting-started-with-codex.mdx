@@ -1,0 +1,215 @@
+---
+title: "Getting started with Codex: install to first real task"
+description: "OpenAI's coding-CLI side of the stack. Install, authenticate, configure, ship a real change. About thirty focused minutes."
+date: "2026-05-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Codex", "AI Tools", "OpenAI", "Tutorial", "Developer Tools"]
+---
+
+This is part 3 of the AI-tools-for-engineers series. Part 2 covered [Claude Code](/blog/getting-started-with-claude-code). This article gets you from "Codex installed" to "Codex shipped a real change," in about thirty focused minutes. Same shape as the Claude Code article, by design — you should be able to compare what each tool feels like in your own hands.
+
+## What you'll have at the end
+
+- Codex installed and authenticated.
+- A config that captures sensible defaults.
+- A project context file that the agent reads.
+- A real change drafted on a real codebase.
+- A working mental model of where Codex feels different from Claude Code.
+
+## A quick framing
+
+Codex is OpenAI's coding-CLI. It overlaps heavily with Claude Code in capability — multi-file edits, tool use, codebase context, planning. It differs in defaults, ergonomics, and ecosystem alignment.
+
+You don't have to pick one or the other. Plenty of teams run both. Where they differ, we'll point it out as we go. The decision article is part 4 of this series.
+
+## Install
+
+Codex ships as a CLI plus extensions for major editors. The CLI is the foundation:
+
+```bash
+# macOS / Linux
+curl -fsSL https://openai.com/cli/install.sh | sh
+
+# Or via npm
+npm install -g @openai/codex-cli
+```
+
+Verify:
+
+```bash
+codex --version
+# codex-cli 1.x.y
+```
+
+If your shell can't find `codex`, the installer's last line tells you which path to add. Add it to your shell's startup file.
+
+## Authenticate
+
+```bash
+codex login
+```
+
+A browser opens. You authenticate with your OpenAI account. The CLI receives a token. The token lives in `~/.config/codex/credentials`.
+
+If your team uses an API key instead of an OpenAI Plus subscription, you can authenticate with the key:
+
+```bash
+export OPENAI_API_KEY=sk-...
+codex auth status
+# Authenticated via OPENAI_API_KEY
+```
+
+The two paths bill differently. The Plus path bills against the subscription. The API-key path bills against your API account. For team use, API keys are usually the right answer because they support per-user quotas and audit trails through OpenAI's dashboards.
+
+## Configure
+
+The Codex config lives at `~/.config/codex/config.toml`. A starter:
+
+```toml
+[default]
+model = "gpt-5-codex"
+editor = "code"
+mode = "interactive"
+
+[telemetry]
+enabled = false
+
+[mcp]
+# We'll add servers in part 5.
+servers = {}
+```
+
+Notes:
+
+- **model**. Codex defaults to OpenAI's most capable coding model at the time of install. Override per-call with `--model`.
+- **mode**. `interactive` for the conversational CLI. `headless` for scripting and CI.
+- **mcp**. Codex supports MCP via this section. Same protocol as Claude Code.
+
+## Project context: `CODEX.md`
+
+Like `CLAUDE.md` for Claude Code, Codex reads a project-level Markdown file as context. The exact filename Codex looks for is `CODEX.md` at the repo root, with `AGENTS.md` as a fallback that some teams use across both tools.
+
+A working example, slightly trimmed:
+
+```markdown
+# Project: payments-api
+
+Python service. FastAPI + Postgres + Stripe.
+
+## Conventions
+
+- New endpoints in `app/api/v2/`. v1 deprecated.
+- Pydantic v2 schemas in `app/schemas/`.
+- Database access through repository classes in `app/repos/`.
+- Errors as subclasses of `app.errors.AppError`.
+- Tests use pytest; async fixtures in `tests/conftest.py`.
+- Format before commit: `make fmt`. Tests: `make test`.
+
+## Don't
+
+- Add dependencies without an ADR.
+- Write raw SQL in handlers.
+- Add new top-level packages without architecture review.
+```
+
+If you wrote a `CLAUDE.md` for the project already, you can typically symlink:
+
+```bash
+ln -s CLAUDE.md CODEX.md
+```
+
+Some teams maintain `AGENTS.md` and link both files to it, which avoids duplication when the two assistants need the same context.
+
+## Your first session
+
+In your project root:
+
+```bash
+cd ~/projects/payments-api
+codex
+```
+
+The CLI prompt appears. The pattern is similar to Claude Code: tell it what you want, in real engineering English.
+
+```
+> Add a /v2/customers/{customer_id}/refunds GET endpoint that returns
+> the customer's refund history, cursor-paginated. Follow the patterns
+> in app/api/v2/customers.py.
+```
+
+Codex reads `CODEX.md`, opens the relevant files, proposes a plan, and asks for confirmation before edits. Sound familiar? Same shape as Claude Code. Different defaults in some places.
+
+A typical exchange:
+
+```
+codex: Plan:
+       1. Schema RefundHistoryResponse in app/schemas/refunds.py
+       2. Repo method list_refunds_for_customer
+       3. GET endpoint in app/api/v2/customers.py
+       4. Test in tests/api/test_customers.py
+       Apply this plan?
+
+you:   apply
+
+codex: [edits files, runs tests, reports]
+```
+
+The thing to notice from your first session: where does Codex's plan differ from Claude Code's plan on the same task? Sometimes the plans are identical. Sometimes one notices a constraint the other missed. That difference is the basis for the comparison article in part 4.
+
+## The patterns that work
+
+Codex shines in a few specific patterns:
+
+**Inline completion in the editor.** The Codex VS Code / JetBrains extensions are mature; many teams who already live in those IDEs prefer Codex's inline suggestion experience over a separate CLI window.
+
+**Tight integration with OpenAI's broader stack.** If your team is already using OpenAI's API for production features, having the same auth and billing for the developer CLI reduces friction.
+
+**Headless mode for scripting.** Both Codex and Claude Code support headless mode. Codex's `--json` output is well-shaped for piping into other tools.
+
+A small example of headless use:
+
+```bash
+codex --headless \
+  --model gpt-5-codex \
+  --task "Generate a one-paragraph release note for the diff vs. main" \
+  --json \
+  | jq '.output' > release_note.md
+```
+
+That command runs in CI, pipes through jq, lands on disk. The same pattern works for diff summaries, PR comments, changelog generation, anything where you want a small structured output from the assistant in a non-interactive context.
+
+## Where Codex feels different from Claude Code
+
+Honest observations from running both daily:
+
+- **Default verbosity differs.** Codex tends to produce slightly tighter plans on first ask. Claude Code's plans are sometimes more verbose. Both are good; the right one depends on whether you'd rather skim or get details.
+- **MCP support is converging.** Both support MCP in 2026. The set of community-maintained MCP servers is large for both. Pick the assistant whose CLI feels better; MCP works either way.
+- **Permission model is similar.** Both ask for confirmation before file edits and shell commands. The default-to-confirm behaviour is what makes them safe to install on a real machine.
+
+## Verifying your setup
+
+```bash
+codex --version                       # binary works
+codex auth status                     # authenticated
+cat ~/.config/codex/config.toml       # config exists
+ls CODEX.md                           # project context (or AGENTS.md / symlink)
+```
+
+Then ship a small real task end-to-end. If you can do that — plan, edits, tests pass — the setup is good. If any step fails, fix before moving on.
+
+## What's next
+
+Part 4 compares Claude Code and Codex side-by-side on real tasks. Not benchmarks. Patterns: "for X kind of work, this tool is better right now."
+
+Before then, spend a focused day on the same project with both tools. Note where one felt better than the other. Note the tasks where the difference was meaningful and the tasks where the choice was a coin flip. The comparison article will give you a framework, but your hands-on impression matters more.
+
+## Related reading
+
+- [AI tools for engineers: a practical orientation](/blog/ai-tools-for-engineers-getting-started)
+- [Getting started with Claude Code](/blog/getting-started-with-claude-code)
+- [Claude Code vs. Codex: which to reach for](/blog/claude-code-vs-codex)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're picking between Claude Code and Codex, we'd love to hear about it. [Get in touch.](/contact)*

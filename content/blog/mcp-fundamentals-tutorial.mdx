@@ -1,0 +1,183 @@
+---
+title: "MCP fundamentals: connecting your AI tools to your team's stack"
+description: "What the Model Context Protocol is, why it exists, and the three concepts you need to use it confidently."
+date: "2026-05-12"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Claude Code", "Codex", "Tutorial", "Integration"]
+---
+
+This is part 5 of the AI-tools-for-engineers series. The first four parts got you set up with Claude Code and Codex. This article gets you into MCP — the Model Context Protocol — which is what makes either tool useful against the systems your team actually uses.
+
+If you've installed an MCP server and it kind of works, this article will give you the mental model to use it well. If you haven't, this article will get you to a working setup with one real server.
+
+## What MCP is, in one sentence
+
+MCP is a small open spec that lets your AI assistant discover and call external tools — your team's database, error tracker, project tracker, internal API — without requiring custom integration code per assistant.
+
+The shorter version: USB-C for AI tools. One protocol, many devices, no per-pair adapter cables.
+
+## Why it exists
+
+In 2023, integrating an AI assistant with the team's tooling meant writing custom code per assistant per tool. Slack-Claude. Slack-ChatGPT. Linear-Claude. Linear-ChatGPT. Postgres-Claude. Postgres-ChatGPT. The matrix grew quadratically. Engineers wrote integrations and immediately had to rewrite them when their team adopted a different assistant.
+
+MCP, released by Anthropic in late 2024 as an open spec, standardised the boundary. One server speaks MCP. Many clients can call it. The integration cost stops scaling with the number of assistants you support.
+
+The practical effect: you write or install an MCP server for your tool once. Every MCP-aware AI assistant — Claude Code, Codex, Cursor, etc. — can use it.
+
+## The three concepts
+
+A working MCP mental model is three nouns:
+
+**Tools.** Functions the assistant can call. `list_recent_issues(repo)`, `get_customer(customer_id)`, `query_database(sql)`. The assistant decides when to call which tool and with what arguments. Tools can read state or change state; the server defines what each one does.
+
+**Resources.** Documents or data the assistant can read. A README. A directory listing. A live snapshot of an issue's content. Resources are addressed by URI and have a content type. Tools are *verbs*; resources are *nouns*.
+
+**Prompts.** Reusable prompt templates the server provides. The assistant can invoke a named prompt with arguments. Useful for things like "use this team's PR review template" or "use this team's customer-support voice."
+
+That's the spec. Three concepts. Everything else is engineering on top of those primitives.
+
+## The three transports
+
+A server has to talk to its client somehow. MCP defines three transports, and you pick based on deployment shape.
+
+**stdio.** The server runs as a child process of the AI client. Communication via stdin/stdout. Lightweight, local-only, single-user. The right pick for most internal MCP servers — your local file system, your local database, scripts that run on your machine.
+
+**HTTP.** Standard request-response. The server is a long-running process; clients connect over the network. Multi-user, cross-machine. The right pick for SaaS-style integrations — a hosted service that multiple engineers use.
+
+**SSE (Server-Sent Events).** HTTP-based but server-pushed. Useful when the server needs to notify the client of events asynchronously. Less common in 2026; pick HTTP unless you have a specific need.
+
+For starters: stdio. Almost every starter MCP server is stdio. Graduate to HTTP only when you need to share the server across users or machines.
+
+## Connecting your first server
+
+Take the simplest case: connect Claude Code to a filesystem MCP server. You probably already have it; let's verify.
+
+Edit `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/yash/projects"],
+      "env": {}
+    }
+  }
+}
+```
+
+Restart Claude Code. The server is registered. Claude Code launches the server as a child process, talks to it over stdio, exposes its tools to the model.
+
+Test it. Open Claude Code in a terminal:
+
+```
+> What files are in my projects directory?
+```
+
+Claude Code calls the `read_directory` tool from the filesystem server, gets back a listing, and tells you. The integration is invisible from the user's perspective. You didn't write any code.
+
+Codex's equivalent config lives in `~/.config/codex/config.toml`:
+
+```toml
+[mcp.servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/Users/yash/projects"]
+```
+
+Same protocol, different config syntax. The server itself is unchanged.
+
+## What MCP gives you
+
+A clean way to think about MCP: it turns your AI assistant from a smart text generator into a smart actor that can read and (carefully) act on your team's systems.
+
+Without MCP, the workflow is:
+
+1. You ask the assistant something.
+2. The assistant gives you SQL or commands.
+3. You copy-paste them into the actual tool.
+4. You copy-paste the result back to the assistant.
+5. The assistant interprets and gives you the next step.
+
+With MCP, the workflow is:
+
+1. You ask the assistant something.
+2. The assistant calls the tool directly, reads the result, gives you the answer.
+
+The cut-and-paste loop disappears. So does the gap where the human accidentally pastes the wrong thing or forgets to bring the result back.
+
+## Where MCP fits
+
+A common confusion: people think MCP replaces the team's APIs. It doesn't. Your customer-facing REST API stays REST. Your microservice gRPC interfaces stay gRPC. MCP is specifically the *AI-to-tool* boundary.
+
+If you have an internal API your team uses, MCP gives you a way to expose a curated set of operations to your AI assistant — usually a smaller, more focused set than the full API, with clearer error messages and tighter scopes.
+
+The pattern most teams converge on: a small MCP server in front of each major internal system. Database. Issue tracker. Error tracker. Analytics. Each server exposes the read tools liberally and the action tools sparingly, with audit logs and (where action tools exist) human-confirmation patterns.
+
+## A working stack
+
+By the end of this series, you'll have wired up roughly this:
+
+```
+[Claude Code]                         [Codex]
+     |                                   |
+     +---- speaks MCP ---->              |
+                              [MCP servers your team runs]
+                                   |
+            +----------+------------+--------------+----------+
+            |          |            |              |          |
+        Filesystem  Supabase     Sentry         PostHog    GitHub
+        (stdio)    (stdio/HTTP) (HTTP)         (HTTP)     (HTTP)
+                                                           
+            |          |            |              |          |
+            v          v            v              v          v
+      [your code]  [your DB]   [errors]      [analytics]  [PRs/issues]
+```
+
+That's a real stack. Five MCP servers. Two AI assistants. The assistants don't know about each other's existence; they each just talk MCP.
+
+Once it's wired up, your assistant can answer questions like:
+
+- "Why did request `req_4471` 500?" (Sentry server pulls the error context.)
+- "Are users from the new pricing experiment churning more?" (PostHog server runs the cohort.)
+- "List my open PRs that are waiting on review." (GitHub server.)
+- "Find the customers who churned last month and were using feature X." (Supabase + PostHog, in sequence.)
+
+You don't have to leave the assistant. The integration plumbing handles the rest.
+
+## What you should not expect MCP to do
+
+Three things people sometimes confuse MCP with:
+
+**It's not a security model.** MCP itself doesn't define auth, scopes, audit, or rate limits. The server you connect to may or may not have those. You're responsible for picking servers that do, or for adding those layers yourself. The next article in this series covers the patterns.
+
+**It's not a way to give the AI everything.** A common pitfall: people connect every server they can find and end up with an assistant that has too many tools, makes worse choices, and burns through context budgets reading tool definitions it doesn't need. Curation matters. Connect the servers that match the team's actual workflow, not every server you can install.
+
+**It's not a productivity miracle.** Wiring up MCP doesn't change anything by itself. The gain comes from using the connected stack on real work. The first time you ask the assistant about a Sentry incident and it pulls the trace, the customer's history, and the related deploy in one round — that's when MCP earns its keep. Before then it's just a config file.
+
+## Verifying your understanding
+
+A small self-check before moving on. Can you answer these?
+
+1. What are the three primitives MCP defines? (Tools, resources, prompts.)
+2. What are the three transports? (stdio, HTTP, SSE.)
+3. Why use stdio over HTTP for your first server? (Simpler, local, single-user.)
+4. What's the relationship between MCP and your team's regular APIs? (MCP is the AI-to-tool boundary; your APIs stay where they are.)
+
+If those click, you have the mental model. The next articles get into specific server integrations.
+
+## What's next
+
+Part 6 covers effective MCP patterns — the discipline that keeps MCP safe at scale. Read-only first. Scoped tokens. Audit trails. Human confirmation for action tools. Kill switches.
+
+Then parts 7-9 walk through real integrations: Supabase, Sentry, PostHog. Each one includes the working config, the auth model, and the patterns that work in production.
+
+## Related reading
+
+- [Getting started with Claude Code](/blog/getting-started-with-claude-code)
+- [Getting started with Codex](/blog/getting-started-with-codex)
+- [Effective MCP patterns](/blog/effective-mcp-patterns)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're standing up an MCP integration on your team, we'd love to hear about it. [Get in touch.](/contact)*

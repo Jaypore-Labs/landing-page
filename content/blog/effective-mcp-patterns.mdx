@@ -1,0 +1,249 @@
+---
+title: "Effective MCP patterns: keeping AI tools safe at scale"
+description: "Read-only first. Scoped tokens. Audit trails. Human confirmation for action tools. Kill switches. The discipline that makes MCP production-ready."
+date: "2026-05-13"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["MCP", "Best Practices", "Tutorial", "Security", "Developer Tools"]
+---
+
+This is part 6 of the AI-tools-for-engineers series. Part 5 introduced [MCP fundamentals](/blog/mcp-fundamentals-tutorial). This article covers the discipline that makes MCP safe to use on real production systems — the patterns separating "we have MCP set up" from "we have MCP we trust."
+
+The patterns are unglamorous. They're also the difference between an AI tool that earns the team's trust and one that produces an incident inside the first month.
+
+## Pattern 1: read-only first
+
+When you add a new MCP server to your stack, start with read-only tools. Even when the server you're connecting offers actions.
+
+Read-only first means:
+
+- The first version exposes `list_*`, `get_*`, `search_*` tools.
+- Action tools (`create_*`, `update_*`, `delete_*`) are added later, deliberately, after the read patterns are working.
+- You ship the read-only version, use it for a week, then evaluate.
+
+Why: you can't do real damage with a read-only server. You can do real damage with an action server that has unfamiliar gaps in your understanding. Build the understanding first; add the actions when you have it.
+
+Concretely, in `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server", "--read-only"],
+      "env": {
+        "SUPABASE_URL": "${env:SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${env:SUPABASE_READONLY_KEY}"
+      }
+    }
+  }
+}
+```
+
+Two things make this safer than the default: the `--read-only` flag (when the server supports it), and a separately-issued read-only token. Even if the server's flag is misimplemented, the token can't write.
+
+## Pattern 2: scoped tokens
+
+Tokens you give to MCP servers are scoped to the smallest set of permissions the tool actually needs.
+
+A few practical examples:
+
+**GitHub MCP.** Don't use a personal token with full repo access. Issue a fine-grained token scoped to the repos and operations the server needs. Revoke when done.
+
+**Supabase.** Use a service-role key only when you genuinely need server-side operations. For most read tools, an anon key plus row-level security policies is enough.
+
+**Internal APIs.** If your MCP server wraps an internal API, mint a token that maps to a service-account with the minimum permissions. Don't reuse the engineer's personal token.
+
+Scoping is the difference between "the agent can do everything I can" (terrifying) and "the agent can do exactly the dozen things I want it to do" (safe).
+
+## Pattern 3: audit trails
+
+Every action through an MCP server is logged. Not just at the assistant's side; at the server's side, where you control retention and access.
+
+A simple pattern: the MCP server writes an audit row for every tool call. The row captures:
+
+- Timestamp.
+- Tool name.
+- Arguments (PII-redacted).
+- Result hash and size.
+- Error if any.
+- The user / session identifier.
+
+```python
+# Inside the MCP server's tool handler
+async def call_tool(name: str, args: dict, ctx: ToolContext):
+    audit.log({
+        "ts": datetime.utcnow().isoformat() + "Z",
+        "tool": name,
+        "args_hash": hash_redacted(args),
+        "user_id": ctx.user_id,
+        "session_id": ctx.session_id,
+    })
+    try:
+        result = await dispatch(name, args, ctx)
+        audit.log({"ts": ..., "tool": name, "outcome": "success", "result_size": len(json.dumps(result))})
+        return result
+    except Exception as e:
+        audit.log({"ts": ..., "tool": name, "outcome": "error", "error_type": type(e).__name__})
+        raise
+```
+
+The audit log is queryable. When something goes wrong — an unexpected write, a confusing customer-facing answer, a regulator question three months later — you have receipts.
+
+Treat the audit log as a real engineering artifact. Retention policies. Access controls. Periodic review. Same discipline as your production logs.
+
+## Pattern 4: human confirmation for action tools
+
+Action tools — anything that mutates state — require human confirmation before they run. Not "the assistant asks 'should I?' and the user says 'yes.'" That's not a confirmation. The assistant can mistype the question.
+
+Real human confirmation:
+
+- The assistant proposes the action with the exact arguments.
+- The user reads the proposed action and explicitly approves.
+- The approval is logged.
+
+In Claude Code's case, the assistant prompts for explicit `apply` before running shell commands or making edits. For MCP action tools, the same discipline. The MCP server can return a "this is a mutation; needs approval" hint that the assistant honours.
+
+A pattern we use in our own tools: action tools take an explicit `confirmation_token` argument that's separately validated. The token is short-lived and tied to a specific action. The assistant has to ask for it, the human has to issue it. The token is what authorises the call.
+
+```python
+@tool(name="create_refund", side_effect=True)
+async def create_refund(
+    customer_id: str,
+    amount_cents: int,
+    reason: str,
+    confirmation_token: str,
+):
+    if not confirm.validate(confirmation_token, action="create_refund"):
+        return ToolError(
+            "REQUIRES_CONFIRMATION",
+            "create_refund requires a fresh confirmation token. Ask the user to approve.",
+        )
+    # ... actually create the refund
+```
+
+The flow: assistant proposes, user approves (which mints a token), assistant calls the tool with the token, server validates, action runs. The user's approval is structurally required, not just culturally expected.
+
+## Pattern 5: kill switches
+
+Every MCP server needs a kill switch. A way to stop it from running, immediately, without redeploying.
+
+Kill switch granularity, in increasing severity:
+
+- Kill a specific user's session.
+- Kill all sessions for a tenant.
+- Kill all sessions for an agent.
+- Kill all sessions globally.
+
+A simple Redis-backed implementation:
+
+```python
+def is_killed(server: str, user: str | None, tenant: str | None) -> bool:
+    if redis.get("kill:global"):
+        return True
+    if redis.get(f"kill:server:{server}"):
+        return True
+    if user and redis.get(f"kill:user:{user}"):
+        return True
+    if tenant and redis.get(f"kill:tenant:{tenant}"):
+        return True
+    return False
+```
+
+The pre-tool-call check runs `is_killed(...)`. If true, the call returns an error explaining the system is paused.
+
+Test the kill switch quarterly. Set it. Verify the right requests fail. Unset it. Verify the requests resume. Document the procedure in the team's runbook. A kill switch that hasn't been drilled in twelve months is a kill switch that doesn't work when you need it.
+
+## Pattern 6: rate limits as politeness
+
+The MCP server's downstream — your database, your API, your error tracker — has rate limits. Your MCP server needs to respect them. Not just for the downstream's sake; for your own service quality, too.
+
+A polite rejection pattern:
+
+```python
+@tool
+async def expensive_query(sql: str, ctx: ToolContext):
+    bucket = rate_limiter.acquire(ctx.user_id, weight=1)
+    if not bucket.allowed:
+        return ToolError(
+            "RATE_LIMITED",
+            f"Too many requests. Retry after {bucket.retry_after_seconds}s.",
+            retry_after=bucket.retry_after_seconds,
+        )
+    return await run_query(sql)
+```
+
+The assistant reads the error, sees the retry-after, waits, retries. The downstream stays healthy.
+
+## Pattern 7: schemas that mean something
+
+Earlier in the series we covered tool schemas. The pattern transfers: tight schemas at the MCP boundary catch wrong-arg errors before they reach your real systems.
+
+```python
+@tool
+async def create_refund(
+    customer_id: str = Field(..., regex=r"^cust_[A-Z0-9]{12}$"),
+    amount_cents: int = Field(..., ge=1, le=1_000_000),
+    reason: Literal["duplicate", "fraud", "requested", "error"],
+    confirmation_token: str,
+):
+    ...
+```
+
+The assistant cannot pass a malformed customer_id. Cannot exceed the cap. Cannot invent a new reason category. Schemas are the cheapest reliability layer in the MCP stack.
+
+## Pattern 8: read tools that lie a little
+
+A subtle but useful pattern: read tools that intentionally show less than the underlying system has access to. Don't return raw rows from the database; return the columns the assistant needs. Don't return full file contents; return the snippet that's relevant to the query.
+
+This serves two purposes. It reduces the assistant's context bloat. It also reduces the blast radius if the assistant somehow leaks the tool's output into a place it shouldn't.
+
+A working example from our Supabase MCP wrapper:
+
+```python
+@tool
+async def lookup_customer_by_email(email: str) -> CustomerSummary:
+    """Read a customer's basic, non-PII fields."""
+    # The underlying DB has 80+ columns on customers. We return 6.
+    row = await db.fetchrow(
+        "SELECT id, plan, region, signup_date, has_active_subscription, churn_risk_band "
+        "FROM customers WHERE email = $1",
+        email,
+    )
+    if not row:
+        return None
+    return CustomerSummary(**row)
+```
+
+The assistant sees enough to reason. It doesn't see fields that would be a privacy issue if leaked.
+
+## Putting it together
+
+A working production MCP setup uses all eight patterns. Your first server might use three or four. Add the rest as you encounter the failure modes that motivate them.
+
+A useful priority order:
+
+1. Read-only first.
+2. Scoped tokens.
+3. Schemas that mean something.
+4. Audit trails.
+5. Rate limits.
+6. Read tools that lie a little.
+7. Human confirmation for action tools (only when you add action tools).
+8. Kill switches (only when you have multiple users / agents).
+
+You don't need everything on day one. You do need the discipline to add each pattern when you graduate to the failure mode it prevents.
+
+## What's next
+
+Parts 7, 8, 9 walk through real integrations. Each one applies these patterns. By the end you'll have a running stack: Claude Code (or Codex) plus three production-grade MCP integrations.
+
+## Related reading
+
+- [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial)
+- [Claude Code + Supabase integration](/blog/claude-code-supabase-integration)
+- [Cost guardrails](/blog/cost-guardrails)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're tightening MCP discipline, we'd love to hear about it. [Get in touch.](/contact)*

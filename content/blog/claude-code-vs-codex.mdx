@@ -1,0 +1,123 @@
+---
+title: "Claude Code vs. Codex: which to reach for"
+description: "A pattern-based decision guide. No leaderboards. Just the kinds of work each tool wins at, in 2026."
+date: "2026-05-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Codex", "AI Tools", "Decision Guide", "Tutorial"]
+---
+
+This is part 4 of the AI-tools-for-engineers series. Parts 2 and 3 covered installs. This article is the practical decision guide.
+
+I'll skip the part where we run benchmarks. Benchmarks change weekly. The honest answer in 2026 is that both Claude Code and Codex are excellent. The right pick depends on the kind of work, the team's existing setup, and personal taste. This article maps the kinds of work to the tools that currently feel best.
+
+The recommendations here will go stale. We'll update the article as the tools change. The framing — "match the tool to the kind of work" — won't go stale.
+
+## A short matrix
+
+This is what we use across teams we work with:
+
+| Kind of work | Tool we'd reach for first | Why |
+| --- | --- | --- |
+| Multi-file refactors with tight conventions | Claude Code | Strong CLAUDE.md adherence; long-context planning |
+| Inline editor suggestions while typing | Codex | Mature VS Code / JetBrains plugins |
+| Implementing endpoints from a contract | Either | Both excellent; pick by team preference |
+| Writing tests against existing code | Either | Both produce useful drafts |
+| Migrating across language idioms (UIKit → SwiftUI) | Claude Code | Better at preserving structural intent |
+| Generating release notes / changelogs in CI | Codex | Cleaner JSON output for piping |
+| Debugging across services with traces | Claude Code | MCP integrations slightly more mature today |
+| Quick scripts and one-shot commands | Either | Both fine; speed matters more than choice |
+| Pair programming on a hard problem | Claude Code | Plan-first behaviour matches deep-work pattern |
+| Codebase Q&A ("where is X defined?") | Either | Either with project context performs well |
+| Production agent runtime with managed agents | Both have offerings | Pick the platform your team is already using |
+
+This is a snapshot. The matrix shifts every release.
+
+## How to decide for your team
+
+Three practical filters, in order:
+
+**1. What's already in your stack?**
+
+If your team is already using OpenAI's API for production features, has billing set up, has dashboards configured — Codex shares those rails. Less new infrastructure.
+
+If your team is already using Anthropic's API or Claude in production — Claude Code shares those rails. Same auth, same billing, same observability story.
+
+If your team is greenfield, the choice is taste-based. Try both for a week.
+
+**2. Where does the team live during the day?**
+
+Some engineers spend the day in their editor (VS Code, JetBrains) and want suggestions inline. Codex's editor extensions are excellent. Claude Code has IDE integration too, but its centre of gravity is the CLI.
+
+Some engineers spend the day in the terminal — tmux, vim, separate windows for diffs and tests. Claude Code's CLI is designed for that workflow. The chat-meets-shell ergonomics are mature.
+
+Match the tool's centre of gravity to where your engineers already are. Forcing a CLI-first tool on an editor-first engineer (or vice versa) produces friction the model can't fix.
+
+**3. What's the highest-leverage task you'd hand to the tool first?**
+
+If the answer is "refactor this gnarly module" — Claude Code's plan-then-edit loop is purpose-built for this.
+
+If the answer is "speed up the inner loop while I write code in my editor" — Codex's inline experience is stronger.
+
+If the answer is "wire it into CI to do PR reviews" — both work; pick based on filter 1 (what your team already pays for).
+
+## When to run both
+
+Plenty of teams run both. Two patterns we've seen:
+
+**Pattern A: Codex for everyday, Claude Code for hard.** Engineers use Codex inline while writing code. They open Claude Code in a terminal when they hit a multi-file refactor or a debugging session that needs a thinking partner. The two tools don't fight; they cover different parts of the day.
+
+**Pattern B: Claude Code for code, Codex for content.** Engineers use Claude Code for actual codebase work. They use Codex for PR descriptions, release notes, README updates, comment generation — the content that surrounds the code. Both tools respect the boundary; neither is forced into work the other does better.
+
+Either pattern is fine. The teams that struggle are the ones that try to use both for everything; the constant switching costs more than the gain.
+
+## What doesn't matter for this decision
+
+A few things people obsess over that don't actually move the decision:
+
+**"Which is smarter."** Both are very capable. The difference at the margin is rarely the bottleneck for a real engineering task. The bottleneck is almost always context — does the tool have access to the codebase, the conventions, the constraints. Match that and both tools land in the same neighbourhood of useful.
+
+**"Which is cheaper."** They cost similar amounts at the same usage volume. Real-world cost differences are dominated by how much your team uses the tool, not which one it is. Neither will save your engineering budget on its own.
+
+**"Which is the future."** Both are. The category will look different in 2027 and 2028. Pick what's useful today; expect to migrate or run both in the years ahead.
+
+## Switching costs
+
+If you're already on one tool and considering switching, the costs are real:
+
+- Re-learning the keyboard ergonomics of a different CLI.
+- Setting up auth, config, project-context files on every machine.
+- Re-tuning your team's wrappers and CI integrations.
+- Convincing the team's MCP server set to work the same way (the protocol is shared, but each tool has its own MCP-server config syntax).
+
+This means the right time to switch is rarely. Run side-by-side for a week, decide, and stick. The compound interest of building habits with one tool exceeds the marginal "this tool's a bit better at X" advantage.
+
+## A real story
+
+A team I worked with last year started on Codex because two of their senior engineers had OpenAI Plus accounts. After three months they added Claude Code because one of their projects required heavy multi-file refactor work and the team's senior who led that project felt Claude Code's plan-first loop fit that work better.
+
+They never standardised. Different engineers used different tools. Their CI used Codex (the JSON output was cleaner for their PR-review pipeline). Their IDE setup was per-engineer. Both tools' MCP servers worked against the same Supabase, Sentry, and Linear integrations.
+
+Eight months in, the team's productivity is up roughly 25-30% by their own measurement. Neither tool is the cause of all of that. Both contribute. The discipline that surrounds them — `CLAUDE.md` and `CODEX.md` files, scoped MCP tokens, eval-set practices — is the rest.
+
+## What this article won't tell you
+
+We will not tell you "always pick X." That's the wrong advice for a category that's evolving this fast. We will tell you: the cost of trying both is low (a week of effort), the cost of picking wrong is recoverable (you can always switch), and the discipline that makes either tool work is the part that actually matters.
+
+The teams that obsess over the choice ship slower than the teams that pick something and start building the discipline.
+
+## What's next
+
+Part 5 covers MCP fundamentals — the protocol that makes either CLI useful for production work. By the end you'll know what MCP is, why it exists, and how the three transports differ.
+
+Before then: spend the week running both tools on the same project. Take notes. Don't trust this article over your own experience.
+
+## Related reading
+
+- [Getting started with Claude Code](/blog/getting-started-with-claude-code)
+- [Getting started with Codex](/blog/getting-started-with-codex)
+- [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're picking between Claude Code and Codex, we'd love to hear about it. [Get in touch.](/contact)*

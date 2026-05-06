@@ -1,0 +1,97 @@
+---
+title: "AI tools for software engineers: a practical orientation"
+description: "What Claude Code and Codex actually do, where MCP fits, and how to think about the AI-coding stack without getting lost in marketing."
+date: "2026-05-06"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Tools", "Claude Code", "Codex", "MCP", "Developer Tools", "Tutorial"]
+---
+
+In the last twelve months, the AI-tools landscape for software engineers has moved from "two demos and a Discord bot" to a real category — installed on millions of developer machines, integrated into CI pipelines, doing actual production work.
+
+That's good news. It's also confusing news. Claude Code, Codex, Cursor, Continue, MCP, Anthropic agents, OpenAI agents — the words pile up faster than the patterns. New engineers ask me where to start; senior engineers ask me whether they're missing something. Both groups deserve a straight answer.
+
+This is the orientation article for a ten-part tutorial series. By the end of the series you'll have a clear mental model of the stack, working setups for the major tools, and concrete integrations with the systems your team probably already uses — Supabase, Sentry, PostHog, GitHub. No magic. No "AI will replace you" framing. Just what the tools do, how to set them up, and what to use them for.
+
+## The mental model in two minutes
+
+Two products dominate AI-assisted coding in 2026:
+
+- **Claude Code** (Anthropic) — a CLI plus IDE integrations. Lives in your terminal. Best at multi-step engineering tasks that span files. Strong at tool use; the Model Context Protocol (MCP) was developed alongside it.
+- **Codex** (OpenAI) — a CLI and API surface. Strong at code generation and inline suggestions. Has its own agent runtime and tool-use story. Good fit for teams already deep in the OpenAI ecosystem.
+
+Both can read your codebase, suggest changes, run commands, edit files, and integrate with external tools. They differ in defaults, tooling philosophy, and which AI assistants and IDEs they ship best with. We'll cover each in their own article.
+
+The piece that makes either one production-useful is **MCP — the Model Context Protocol**. It's the spec that lets your AI assistant talk to your team's tools — your database, your error tracker, your analytics, your project tracker. Without MCP you're cutting and pasting between the assistant and the tool. With MCP the assistant can read and (carefully) act directly.
+
+That's the whole stack at a high level. CLI tool plus protocol plus integrations. Everything else is detail.
+
+## Who this series is for
+
+If you're writing software for a living and one of the following is true, this series is for you:
+
+- You've installed Claude Code or Codex but mostly just use them for autocomplete.
+- Your team is talking about "AI tools" but nobody's quite sure what's set up and what isn't.
+- You've heard about MCP and want to know what it actually does for you.
+- You want to integrate your team's actual tools (Supabase, Sentry, etc.) into your AI workflow.
+- You want to be the person on the team who has a productive, sustainable AI-assisted workflow rather than "I tried it once and got bored."
+
+If you're doing none of these, you can skip the series. The tools are real; they're not magic. The teams getting value out of them are the teams treating them as engineering work, with setup time, configuration, and a feedback loop.
+
+## What's in the series
+
+Each article in the series is short — ten to fifteen minutes to read — and ends with a working setup or workflow you can verify on your own machine.
+
+**Part 2: Getting started with Claude Code.** Install, first task, daily workflow. Covers the CLI and the IDE plugin. By the end you'll have a working `~/.claude.json`, an authenticated session, and a real coding task completed.
+
+**Part 3: Getting started with Codex.** Same shape, OpenAI's tool. Covers the CLI, API setup, and the patterns that work. You'll know when to reach for Codex vs. Claude Code by the end.
+
+**Part 4: Claude Code vs. Codex — which to reach for.** A practical decision guide. Not a benchmarks war; a pattern of "for this kind of work, this tool wins right now."
+
+**Part 5: MCP fundamentals.** What the protocol is, what it solves, the three transports (stdio, HTTP, SSE), and the three primitives (tools, resources, prompts).
+
+**Part 6: Effective MCP patterns.** Read-only first, scoped tokens, audit trail, human-confirmation for action tools, kill switches. The discipline that makes MCP safe at scale.
+
+**Part 7: Claude Code + Supabase via MCP.** Full walkthrough. Spin up a Supabase project, add the MCP server, connect Claude Code, query and write through the assistant. Covers the auth model, the row-level-security implications, and the read/write split.
+
+**Part 8: Claude Code + Sentry.** Connect Sentry's MCP server. Use Claude Code to triage live incidents, draft post-mortems, surface error patterns. Covers the workflow during a real incident and the privacy boundaries.
+
+**Part 9: Claude Code + PostHog.** Analytics-aware development. Use the assistant to run cohort queries, draft event-tracking code, propose A/B test analyses. Covers the GA4 alternative pattern most teams want.
+
+**Part 10: The productivity playbook.** Putting it all together. What a real engineering day looks like with Claude Code, MCP, and three integrations wired up. Covers the habits, the failure modes, and the things that don't work.
+
+## A note on what this series is not
+
+It's not a benchmarks comparison. Benchmarks change weekly. The tools you'd pick on a Tuesday might not be the tools you'd pick on a Friday. We avoid the comparison entirely; we focus on the workflows that survive the next provider update.
+
+It's not a "build an autonomous agent that runs your company" series. Autonomous agents are a real category. They're also not what most engineers need this quarter. This series is about the tools you'll use day-to-day, with the discipline to keep them safe.
+
+It's not framework-specific. The patterns work whether you write Python or Rust or TypeScript. Where we use specific code, we'll show it — and when we do, it's usually Python or TypeScript because those are the languages most MCP servers ship in.
+
+## How to follow along
+
+Read the next article. Set up Claude Code. Spend a focused hour on a real task. Come back. Read the next article. Set up Codex. Compare. Come back. Read MCP fundamentals. Add one integration that matches a tool your team actually uses. Iterate.
+
+The fastest path to a sustainable AI-assisted workflow is to run the setups in order, not to read all ten articles in a row and try to set up everything at once. Each article ends with a "verify this works" check; pass that check before moving on. Within ten focused sessions you'll have a working stack and a real feel for what each tool earns its keep on.
+
+## A small commitment
+
+These tools change quickly. Articles in this series will be updated as the tools change — model names, CLI flags, MCP spec details. The conceptual framing — what to use when, where the boundaries are — doesn't change as fast and is the part worth internalising.
+
+If you finish the series and have a question or a use case we didn't cover, get in touch. The series will grow.
+
+## Close
+
+The AI-tools-for-engineers landscape in 2026 is messy in detail and clear in shape. CLI tools plus a protocol plus integrations. Pick a CLI. Add the protocol. Wire up the integrations your team actually uses. Build the discipline. The team that gets there has a sustainable productivity edge. The team that doesn't has a Slack channel full of demos and a quarterly review where nothing has shipped.
+
+Let's get to part 2 — installing Claude Code and shipping your first real task.
+
+## Related reading
+
+- [Getting started with Claude Code](/blog/getting-started-with-claude-code)
+- [Getting started with Codex](/blog/getting-started-with-codex)
+- [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're standing up an AI-assisted workflow on your team, we'd love to hear about it. [Get in touch.](/contact)*

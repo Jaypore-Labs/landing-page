@@ -1,0 +1,228 @@
+---
+title: "Claude Code + PostHog: analytics-aware development"
+description: "Wire Claude Code to PostHog. Cohort queries, A/B test analysis, event-tracking drafts — without leaving the assistant."
+date: "2026-05-18"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "PostHog", "MCP", "Tutorial", "Analytics"]
+---
+
+This is part 9 of the AI-tools-for-engineers series. The orientation lives in [part 1](/blog/ai-tools-for-engineers-getting-started). This article wires up PostHog — the analytics layer most product engineers we work with use today, and one of the most underrated MCP integrations for engineering productivity.
+
+By the end, you'll be running cohort queries, comparing A/B test variants, and generating event-tracking code from the assistant. The integration changes how product engineers think about analytics — from "I'll ask the data team" to "let me check."
+
+## What we're building
+
+A working integration that lets you:
+
+- Ask cohort questions ("are users who signed up via the new pricing page churning more?").
+- Compare A/B test variants on the metrics that matter.
+- Generate event-tracking code that follows the team's conventions.
+- Surface funnel drop-off in plain language.
+
+What we're not building:
+
+- A way to bypass your team's data-modelling discipline. The integration is for ad-hoc analysis, not for replacing dashboards.
+- A way to overwrite event definitions or destroy data. The MCP server we use is read-focused.
+
+## Prerequisites
+
+- A PostHog project (cloud or self-hosted). PostHog's free tier is generous; this tutorial fits inside it.
+- Claude Code installed and authenticated.
+- A PostHog personal API key.
+
+## Step 1: get a personal API key
+
+In PostHog: My settings → Personal API Keys → Create key.
+
+Scope:
+
+- `query:read` — run analytics queries.
+- `event_definition:read` — list and inspect event definitions.
+- `feature_flag:read` — read feature flag and experiment data.
+
+Skip the write scopes. We don't want the assistant creating cohorts or modifying event definitions; that's still a human job.
+
+```bash
+export POSTHOG_API_KEY="phx_..."
+export POSTHOG_HOST="https://app.posthog.com"   # or your self-hosted URL
+export POSTHOG_PROJECT_ID="12345"
+```
+
+## Step 2: install the PostHog MCP server
+
+PostHog has an official MCP server in 2026; it ships under the `@posthog` namespace.
+
+```bash
+npm install -g @posthog/mcp-server
+```
+
+You can also use it via `npx -y @posthog/mcp-server` per-invocation, which is what we'll do in the Claude Code config.
+
+## Step 3: configure Claude Code
+
+Edit `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "posthog": {
+      "command": "npx",
+      "args": ["-y", "@posthog/mcp-server"],
+      "env": {
+        "POSTHOG_API_KEY": "${env:POSTHOG_API_KEY}",
+        "POSTHOG_HOST": "${env:POSTHOG_HOST}",
+        "POSTHOG_PROJECT_ID": "${env:POSTHOG_PROJECT_ID}"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Code. The PostHog server registers. Test:
+
+```
+> List the event definitions in my PostHog project.
+```
+
+The assistant calls the server, gets back the event catalogue, summarises. You can ask things like:
+
+```
+> What's the most-tracked event in the last 30 days?
+> Which events fire frequently but aren't used in any insight?
+> Which events haven't fired in the last 7 days?
+```
+
+That last query — events that should be firing but aren't — is one of the most useful uses we've found. Silent breakage of event tracking is a common bug; the assistant surfaces it in seconds.
+
+## Step 4: cohort queries in plain language
+
+The pattern that earns the integration's keep: cohort questions you'd otherwise ping the data team for.
+
+```
+You:    How many users signed up in the last 30 days, and what
+        percentage have completed onboarding?
+
+Claude: [calls posthog.run_query with appropriate HogQL]
+        - 1,432 signups in last 30 days.
+        - 67% completed onboarding (defined as "first_meaningful_action" event fired within 7 days).
+        - The 33% incomplete cohort has a few patterns:
+            - 42% abandoned at the team-invite step.
+            - 28% didn't connect a data source.
+            - 30% got stuck somewhere we can't tell from current events.
+
+You:    Are users from the "new-pricing-page" experiment converting at a different rate?
+
+Claude: [calls posthog.run_experiment_query]
+        Looking at signups in the last 14 days who saw the experiment:
+        - Variant A (control): 12.4% signup-to-paid conversion (n=812)
+        - Variant B (new pricing): 15.8% signup-to-paid conversion (n=794)
+        - Lift: +3.4 pp, 95% CI [+0.8 pp, +6.0 pp]
+        - Variant B is winning, statistically significant at p<0.05.
+```
+
+The conversation is the analyst loop, compressed. You'd write each of those queries by hand in PostHog; here you ask, the assistant translates, runs, summarises. You can verify any number by clicking through to the underlying PostHog query.
+
+## Step 5: event-tracking drafts
+
+When you're shipping a new feature, you need to add event tracking. The assistant can draft it consistent with the team's conventions.
+
+```
+You:    I'm shipping a new feature: bulk-archive in the tasks list.
+        Draft the event-tracking code following our conventions
+        (look at how task_created and task_deleted are tracked).
+
+Claude: [reads CLAUDE.md, reads existing event-tracking code, drafts]
+        - Event name: `tasks_bulk_archived`
+        - Properties: { count: int, source: 'list-view'|'detail-view', plan: string }
+        - Suggested location: components/TaskList/BulkActions.tsx
+        - Code:
+        
+        ```typescript
+        posthog.capture('tasks_bulk_archived', {
+          count: selectedTaskIds.length,
+          source: 'list-view',
+          plan: user.plan,
+        });
+        ```
+        
+        Also: this event isn't in your current event definitions.
+        After deploy, you'll want to add it to the team's event dictionary.
+```
+
+The assistant matched the team's naming convention (verb_past_tense + noun), inferred the right properties from existing code, and flagged the documentation step that's easy to forget.
+
+## Step 6: funnel and retention queries
+
+Two more high-leverage patterns:
+
+**Funnel drop-off in plain language.**
+
+```
+You:    Where are users dropping off between signup and first meaningful action?
+
+Claude: [runs the funnel query]
+        Funnel signup → first_action over last 14 days:
+            signup:                    1,432  (100%)
+            email_verified:            1,289   (90%)
+            workspace_created:         1,098   (77%)
+            first_data_connected:        892   (62%)
+            first_meaningful_action:     848   (59%)
+        
+        The biggest drop is workspace_created → first_data_connected
+        (77% → 62%, -15 pp). Worth investigating.
+```
+
+**Retention cohorts.**
+
+```
+You:    Show me 4-week retention for users who signed up in the last quarter,
+        broken down by acquisition channel.
+
+Claude: [runs the retention query, summarises]
+        Channel: organic_search
+            W1: 78%, W2: 64%, W3: 56%, W4: 51%
+        Channel: paid_social
+            W1: 72%, W2: 51%, W3: 39%, W4: 32%
+        Channel: referral
+            W1: 84%, W2: 76%, W3: 72%, W4: 69%
+        
+        Referral users retain meaningfully better; paid_social drops fastest.
+```
+
+That kind of question — once you have the integration — takes 30 seconds. Without it, it's a 30-minute analyst request.
+
+## Patterns and pitfalls
+
+**Verify a few numbers manually at first.** When you're new to the integration, click through the assistant's claims to the underlying PostHog query a few times. Confirm the numbers match. Build trust gradually.
+
+**The assistant doesn't know your team's data semantics.** A query like "how many active users do we have?" is ambiguous. "Active" means different things at different companies. Be explicit; or document the team's definitions in `CLAUDE.md` so the assistant uses the right one consistently.
+
+**Don't skip data quality checks.** If event tracking is broken, the assistant's answer is confidently wrong. Periodically ask "are any events that should be firing not firing?" — that's the simplest data-quality check.
+
+**Mind the cost of expensive queries.** Some PostHog queries scan a lot of data. The assistant doesn't always know which are cheap and which are expensive. If you see queries timing out, scope them to a smaller window.
+
+## When this integration shines
+
+- Product engineers who want to validate their own hypotheses without context-switching to PostHog's UI.
+- Engineering managers who want quick read-outs of cohort behaviour during planning.
+- On-call rotations that want to surface analytics anomalies during incidents.
+- Drafting event-tracking code that follows the team's conventions on first try.
+
+When this integration is overkill: ad-hoc one-off queries you'd run twice a year. The setup cost is real; you want a daily-use case to justify it.
+
+## What's next
+
+Part 10, the final article in the series, ties it all together. A working day with Claude Code, three MCP integrations, and the daily habits that make the stack durable.
+
+Before then: get the PostHog integration running, run a few real queries through it, and verify the numbers against the PostHog UI for a week. Then trust the conversation more than the UI.
+
+## Related reading
+
+- [Effective MCP patterns](/blog/effective-mcp-patterns)
+- [Claude Code + Supabase integration](/blog/claude-code-supabase-integration)
+- [Claude Code + Sentry integration](/blog/claude-code-sentry-integration)
+
+---
+
+*We build AI-enabled software and help businesses put AI to work. If you're integrating PostHog with Claude Code, we'd love to hear about it. [Get in touch.](/contact)*
