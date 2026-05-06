@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Calendar, Clock, Linkedin, Twitter, User } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { getPostBySlug, getAllPostSlugs, getAllPosts } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
@@ -79,6 +80,38 @@ const mdxComponents = {
   ),
   blockquote: (props: React.HTMLAttributes<HTMLQuoteElement>) => (
     <blockquote className="border-l-2 border-accent pl-5 italic text-paper my-6 text-lg" {...props} />
+  ),
+  table: (props: React.HTMLAttributes<HTMLTableElement>) => (
+    <div className="my-6 -mx-4 sm:mx-0 overflow-x-auto rounded-xl border border-line">
+      <table className="w-full text-sm text-paper-dim border-collapse" {...props} />
+    </div>
+  ),
+  thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+    <thead className="bg-muted/40 text-paper" {...props} />
+  ),
+  tbody: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+    <tbody className="divide-y divide-line" {...props} />
+  ),
+  tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
+    <tr {...props} />
+  ),
+  th: (props: React.ThHTMLAttributes<HTMLTableCellElement>) => (
+    <th
+      className="text-left mono text-[11px] uppercase tracking-[0.18em] text-paper-dim font-normal px-4 py-3 border-b border-line"
+      {...props}
+    />
+  ),
+  td: (props: React.TdHTMLAttributes<HTMLTableCellElement>) => (
+    <td className="px-4 py-3 align-top leading-relaxed" {...props} />
+  ),
+  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
+    <hr className="my-10 border-line" {...props} />
+  ),
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong className="text-paper font-semibold" {...props} />
+  ),
+  em: (props: React.HTMLAttributes<HTMLElement>) => (
+    <em className="italic" {...props} />
   ),
 };
 
@@ -165,7 +198,11 @@ export default async function BlogPostPage({ params }: PageProps) {
       <section className="relative bg-ink border-b border-line py-16 md:py-24">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <article className="prose prose-lg max-w-none">
-            <MDXRemote source={post.content} components={mdxComponents} />
+            <MDXRemote
+              source={post.content}
+              components={mdxComponents}
+              options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+            />
           </article>
 
           {post.tags.length > 0 && (
