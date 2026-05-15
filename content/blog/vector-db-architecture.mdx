@@ -1,0 +1,110 @@
+---
+title: "Vector DB architecture: pgvector, managed, or homemade"
+description: "The vector database market is loud and confusing. Three architectures cover 95% of use cases. Pick the right one and stop reading product comparisons."
+date: "2026-01-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Vector Database", "RAG", "Architecture", "AI Engineering", "Infrastructure"]
+---
+
+In 2024 there were 30 vector database vendors. In 2026 there are 14 with funding and three with momentum. Most teams don't need a specialty vector DB. Most teams need one of three boring architectures.
+
+## Architecture 1: pgvector inside your existing Postgres
+
+For most teams with < 10M documents and existing Postgres, this is the answer. Why:
+
+- **You already have Postgres.** No new ops surface.
+- **Joins work.** Filter by tenant, by date, by user permissions, in the same query as similarity search.
+- **Backups, replication, monitoring** — already in place.
+- **Cost.** Marginal — you pay for storage and a slightly bigger instance.
+
+When pgvector stops working:
+
+- Above 10M vectors with sub-100ms recall requirements.
+- When IVF/HNSW tuning becomes a full-time job.
+- When you need multi-region read replicas for vector search specifically.
+
+For 80% of teams, pgvector ships and stays shipped.
+
+## Architecture 2: managed vector service
+
+Pinecone, Weaviate Cloud, Qdrant Cloud, Vespa Cloud, Turbopuffer. They differ in pricing and features, less in fundamentals.
+
+When this wins:
+
+- You have 10M+ vectors and don't want to manage HNSW indexes.
+- You need very fast (< 50ms) recall at scale.
+- You want filtered search with high-cardinality metadata.
+- You don't want to be paged about index rebuild.
+
+Trade-offs:
+
+- Vendor lock-in is real. Migration tools exist but are project-scale.
+- Cost scales with vectors + queries. Project the math at 5x your current scale.
+- Joins don't work. You query the vector DB then join elsewhere.
+
+For most B2B SaaS at scale, this is where you land. Pinecone has been the default; the managed Postgres-compatible options (Supabase pgvector, Neon) are eating into that.
+
+## Architecture 3: self-hosted Qdrant or Weaviate
+
+When you self-host:
+
+- Strict data residency requirements (gov, healthcare, enterprise).
+- You have an ops team that wants to own the box.
+- Your scale justifies the engineering cost (50M+ vectors typically).
+
+Trade-offs:
+
+- HNSW tuning is work.
+- Backup and restore is your problem.
+- Performance at scale needs care.
+
+For most teams this is overkill. For some it's the only option.
+
+## What about Elasticsearch + hybrid search?
+
+Elasticsearch added vector support; OpenSearch did the same. They're a reasonable middle ground when:
+
+- You already run Elastic for keyword search.
+- You want hybrid keyword+vector retrieval in one query.
+- Your team has ES operational experience.
+
+For new builds without existing ES, the case is weaker. The vector-native options are simpler.
+
+## The decision in 60 seconds
+
+```
+Q: Do you have Postgres and < 10M vectors?
+   → pgvector. Ship.
+Q: Are you above 10M vectors with a budget?
+   → Managed (Pinecone, Turbopuffer, Weaviate Cloud). Pick based on price.
+Q: Strict data residency / no managed allowed?
+   → Self-hosted Qdrant. Plan the ops work.
+Q: Already run Elasticsearch heavily?
+   → ES vector support. Hybrid retrieval baked in.
+```
+
+## What kills vector-DB projects
+
+- **Premature optimization on benchmarks.** "X is 30% faster on a synthetic benchmark." Your data isn't the benchmark.
+- **Skipping the eval set.** Different DBs have different recall profiles. Without an eval, you don't know which serves *your* queries better.
+- **Re-embedding without versioning.** When you swap embedding models, you need to re-embed. Plan it; version the embeddings.
+- **Building your own.** Don't build your own ANN index. The mature ones are very good. Your time is better spent elsewhere.
+
+## A note on hybrid retrieval
+
+Pure vector search loses to hybrid (vector + BM25) on most real corpora by 5-15%. Whatever DB you pick, plan for hybrid. Most teams reach this conclusion 6 months in; save yourself the time.
+
+## Close
+
+The vector DB market is loud. The architecture choice is dull. pgvector is the right default for most. Managed wins at scale. Self-hosted exists for the edge cases. Pick the smallest answer that ships, and tune from real eval data, not benchmark posts.
+
+## Related reading
+
+- [Embedding model selection](/blog/embedding-model-selection) — pairs with this for the full stack.
+- [RAG is a public library](/blog/rag-is-a-public-library) — the broader retrieval frame.
+- [Tests for retrieval](/blog/tests-for-retrieval) — the eval discipline.
+
+---
+
+*We help teams architect retrieval stacks that actually fit their use case. [Get in touch](/contact).*

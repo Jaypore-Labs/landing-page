@@ -1,0 +1,69 @@
+---
+title: "Agents in aviation: copilot in the literal sense"
+description: "Aviation has decades of experience deploying semi-autonomous systems under regulatory scrutiny. AI engineers should be reading their playbook."
+date: "2026-01-27"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Aviation", "Safety-Critical", "Regulated Industries", "Industry"]
+---
+
+Aviation deployed automation that talks to pilots, drafts checklists, and runs decisions through validation chains long before "copilot" became a brand name in software. The industry has 70 years of practice integrating non-human decision-making into a workflow where errors cost lives.
+
+AI engineers should be reading their playbook, not reinventing it. The patterns transfer.
+
+## What aviation got right
+
+**The two-pilot rule.** A captain and a first officer cross-check each other. Decisions of consequence are dual-signed. Aviation didn't replace the second pilot with a checklist; they kept two pilots and added the checklist.
+
+The translation to AI: critical decisions need a human signer. The agent is a third hand, not a replacement.
+
+**The checklist.** Atul Gawande wrote a book about why. Checklists make implicit knowledge explicit, catch errors before they compound, and survive personnel turnover.
+
+The translation: agents need checklists too. Don't trust the model to remember every step. Encode the checklist; have the agent execute it.
+
+**The black box.** Every commercial flight records everything. When something goes wrong, the investigation has data. When nothing goes wrong, the data still trains the next generation of pilots.
+
+The translation: log everything. Inputs, model decisions, tool calls, human overrides. Especially the boring days when nothing happened.
+
+**The FAA's certification process.** New aircraft don't fly passengers until they've been through formal verification. The process is slow; it's also why commercial aviation in the US is statistically the safest mode of transport invented.
+
+The translation: AI in safety-critical domains needs analogous certification. Not the FAA — domain-specific equivalents (FDA, financial regulators, your own internal review boards). The conversation about AI cert in regulated industries is just starting.
+
+## What AI does well today in aviation
+
+**Maintenance prediction.** Models predict component wear from sensor data. Maintenance scheduling becomes proactive. Real wins here, often unpublicized.
+
+**Crew scheduling.** Route assignment, crew rest compliance, equipment rotation. Combinatorial optimization plus constraint reasoning. Agents handle this efficiently.
+
+**Document drafting.** Maintenance reports, incident write-ups, regulatory filings. The agent drafts; humans verify against the actual aircraft state.
+
+**Training simulators.** Adaptive scenarios for pilot training. The agent generates novel emergency scenarios based on a pilot's recent training history.
+
+## What AI doesn't do
+
+- **Fly the aircraft.** Autopilot has decades of certification; that's the floor for autonomy in cockpits. Generic LLMs are nowhere near.
+- **Make airworthiness calls.** The mechanic's signature still matters.
+- **Replace ATC voice communication.** Voice clarity in degraded conditions is a hard problem with low tolerance for error.
+- **Draft passenger communications during incidents.** PR-critical, requires human judgment.
+
+## What software people can steal from aviation
+
+Three habits:
+
+- **Run failure-mode-and-effects analysis on your AI features.** What can go wrong? What's the consequence? What's the mitigation? Aviation pilots do FMEA on every system change. Most AI features have never had it done.
+- **Build in explicit human-checkpoint moments.** Aviation calls them "decision altitudes" — points at which a continue-or-divert decision must be made consciously. Your agent should have analogues.
+- **Train on simulators, not production.** Aviation's hours-in-simulator-to-hours-in-cockpit ratio is high. AI engineering's equivalent is shadow-mode evaluation and adversarial training data. We tend to underinvest in both.
+
+## Close
+
+Software ate the world; aviation already knew what to do with the bits that touched humans. AI engineers should be reading FAA advisory circulars and NTSB reports. The patterns are mature, the failure modes are documented, and we don't have to learn them by crashing.
+
+## Related reading
+
+- [AI and air traffic control](/blog/ai-and-air-traffic-control) — the playbook for safe autonomy.
+- [Agents in healthcare](/blog/agents-in-healthcare) — another safety-critical pattern.
+- [Agent observability](/blog/agent-observability) — the black-box analogue.
+
+---
+
+*We help teams design AI for regulated and safety-critical domains. [Get in touch](/contact).*

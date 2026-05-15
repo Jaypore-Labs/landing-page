@@ -1,0 +1,104 @@
+---
+title: "AI feature flags: a model rollout looks like a deployment"
+description: "Most teams roll out model changes by editing a config and praying. Feature-flag the model the same way you flag any production change."
+date: "2026-02-05"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Feature Flags", "Deployment", "AI Engineering", "Model Versioning", "Production AI"]
+---
+
+A team we worked with upgraded their main feature to a new model version on a Tuesday afternoon. By Wednesday morning, their support queue had 200 tickets. The new model was confident, fluent, and wrong on a specific edge case that 8% of their users hit.
+
+They didn't have a flag. The rollback was a redeploy. The redeploy took 35 minutes. The damage was already done.
+
+Model changes are deployments. Treat them like deployments — flag them, ramp them, watch them.
+
+## What an AI feature flag controls
+
+The minimum surface:
+
+- **Model identifier.** `gpt-4o-mini` vs `claude-sonnet-4-7` vs your fine-tune.
+- **Prompt version.** `v2.1` vs `v2.2`.
+- **Sampling parameters.** Temperature, top-p, max tokens.
+- **Tool set.** Which tools the agent can call in this variant.
+- **Cost/latency policies.** Cache TTL, retry budget.
+
+These should not be five different flags. They should be one *variant* flag with a payload:
+
+```json
+{
+  "variant_id": "v2.2-sonnet",
+  "model": "claude-sonnet-4-7",
+  "prompt_template": "prompts/v2.2.j2",
+  "temperature": 0.2,
+  "max_tokens": 1500,
+  "tools": ["search", "summarize", "rewrite"],
+  "cache_ttl_seconds": 3600
+}
+```
+
+The flag service returns the whole variant. The application reads it as a unit.
+
+## The ramp
+
+Three steps that ship safely:
+
+1. **0%** — variant exists, no traffic.
+2. **1-5%** — internal users, dogfood, and a small slice of real traffic. Compare evals + ops metrics.
+3. **25%** — broader. Watch errors, latency, NPS.
+4. **100%** — promote.
+
+Each step has a holding period. We default to 24-48 hours per step. Long enough for usage patterns to surface; short enough to keep velocity.
+
+## The metrics that matter
+
+For every ramp, watch:
+
+- **Eval pass rate.** Same eval set across all variants. If the new variant fails any high-priority eval, halt.
+- **Cost per request.** Tracked at the variant level.
+- **P95 latency.** A faster model that's slower is suspicious.
+- **Error rate.** API errors, schema-validation failures, refusals.
+- **Downstream metrics.** Conversion, retention, support volume. Lag indicators but real.
+
+Set thresholds before you start. "If eval pass rate drops by more than 2 points, halt." Pre-committed decisions are how you avoid loss-aversion under pressure.
+
+## The rollback
+
+The rollback should be a flag flip, not a redeploy. Anyone on-call should be able to flip it. Document the rollback in your runbook.
+
+Verify with a fire drill at least quarterly: flip the flag, time the recovery, confirm users get the previous variant. If your rollback is theoretical, it doesn't exist.
+
+## What gets weird
+
+**Stateful conversations.** If a user is mid-conversation when the variant changes, do you keep them on the old variant? Usually yes. Stick a user to their variant for the lifetime of the conversation.
+
+**Cached responses.** Different variants produce different cached answers. Either segment the cache by variant or invalidate on variant change.
+
+**Tool definitions.** If a variant adds a new tool, ensure the new tool is deployed everywhere before the variant ramps. The tool isn't part of the flag.
+
+**Cost spikes during the ramp.** A variant 4x more expensive will quadruple the slice's cost. Watch attribution dashboards, not just aggregates.
+
+## What changes about your team
+
+A team that flag-rolls model changes runs differently:
+
+- Model changes become routine, not events.
+- Engineers and PMs both look at the eval dashboard before ramping.
+- Rollback is muscle memory.
+- A bad variant becomes a 10-minute incident, not a day.
+
+The discipline pays for itself the first time you avoid the Wednesday-morning support queue.
+
+## Close
+
+LLMs are a production dependency, and a brittle one. The same release engineering you apply to your own code should apply harder to your model and prompt choices. Flag, ramp, watch, rollback. Routine. Boring. Saves your week.
+
+## Related reading
+
+- [AI canary deployments](/blog/ai-canary-deployments) — the per-request slice of this pattern.
+- [Pinning model versions](/blog/pinning-model-versions) — what to pin before you flag.
+- [Versioning model and prompt](/blog/versioning-model-and-prompt) — what counts as a variant.
+
+---
+
+*We help teams build the release engineering for AI features. [Get in touch](/contact).*

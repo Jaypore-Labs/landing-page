@@ -1,0 +1,107 @@
+---
+title: "Self-healing pipelines: the night shift you don't have to pay"
+description: "Data pipelines fail at 3 a.m. Most teams page a human. The self-healing pattern handles the routine 80% — and pages humans only when novelty appears."
+date: "2026-01-05"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Data Engineering", "Pipelines", "AI Engineering", "Reliability", "Automation"]
+---
+
+A data engineer we work with had a habit. Every morning, she'd check the failure queue for the data pipelines, dispatch the routine recovery scripts, and start the day. Twenty minutes, every morning, for two years.
+
+Six months ago, an AI-driven self-healing layer took over the routine 80%. Her morning queue is empty most days. When it isn't, it's because something genuinely novel happened.
+
+That's the self-healing pipeline pattern. It's older than AI; AI just makes the "routine 80%" much larger.
+
+## What "self-healing" means here
+
+Not magical resilience. Specific:
+
+- The pipeline detects a known failure mode.
+- It runs the known mitigation.
+- It logs the action and continues.
+- If the failure is novel, it pages a human with context.
+
+The "known failure mode" library is what AI compresses. Without AI, you wrote a script per known mode. With AI, a single agent reads the error context and picks the mitigation.
+
+## A real architecture
+
+```
+[pipeline step fails]
+  → [collect: error message, stack, recent input sample, dependencies status]
+  → [agent: classify against known-mode library]
+     → KNOWN MODE
+       → [execute mitigation script]
+       → [retry pipeline step]
+       → [log]
+     → UNKNOWN MODE
+       → [page on-call with full context]
+       → [pause pipeline; downstream waits]
+  → [post-resolution: if novel, add to library]
+```
+
+Three crucial details:
+
+- The agent's job is *classification*, not invention. It maps a failure to one of the known mitigations or marks it as novel.
+- Mitigations are deterministic scripts. The agent doesn't write new code at 3 a.m.
+- Novel failures *always* page. Better to wake a human than to silently mishandle.
+
+## Known modes that recur
+
+The library starts with patterns from your history. Examples we've seen:
+
+- **Upstream schema drift.** A new column appears. Mitigation: alert, optionally auto-extend the schema with a flagged review.
+- **Rate-limit hit.** Mitigation: exponential backoff with a budget; resume.
+- **Stale credential.** Mitigation: rotate the credential from the vault, retry once, alert.
+- **Source-data delay.** Mitigation: wait N minutes, recheck, escalate if past SLA.
+- **Resource OOM.** Mitigation: re-schedule on larger machine, alert if recurring.
+
+Each mode has: a detector pattern, a mitigation script, a log format. The agent does the matching.
+
+## The novel-mode protocol
+
+When the agent classifies a failure as novel:
+
+1. Pipeline pauses at the failed step.
+2. On-call is paged with full context (error, recent inputs, history).
+3. Human diagnoses, runs the manual fix, marks resolved.
+4. The retro includes: should this be added to the known-mode library?
+
+If yes, the next failure of this pattern self-heals. The library grows.
+
+## What you absolutely don't automate
+
+- **Data correction.** If the data is wrong, the agent doesn't decide what's right. Flag for human review.
+- **Customer-facing communication.** If an SLA is broken, a human writes the status update.
+- **Schema changes in production tables.** The agent suggests; humans approve.
+- **Credential rotation in security-sensitive systems.** Use a vault and a deterministic rotation; don't have the agent rotate.
+
+## What changes about the on-call rotation
+
+The volume of routine pages drops dramatically. The remaining pages are higher-density: every page is something genuinely worth waking up for.
+
+This is humane for engineers. It's also a quiet metric your VP should be watching. If your "AI self-heal" rate isn't > 70% within a quarter of building this, the library is undersized — and engineers are getting less rest than they should.
+
+## The log discipline
+
+The log of every auto-mitigation is more important than the mitigation itself:
+
+- It's where the team learns what's failing repeatedly (and should be fixed at the source).
+- It's where audits show what the agent did and why.
+- It's where post-incident reviews start.
+
+We default to one log line per auto-mitigation with: timestamp, pipeline, step, mode_classified, mitigation_run, retry_outcome.
+
+## Close
+
+Self-healing pipelines aren't a leap forward in reliability. They're a compression of the routine work that used to wake humans up. The known-mode library is the asset; the agent is the dispatcher. Build the library deliberately, page humans on novelty, and your on-call shifts get a lot less painful.
+
+## Related reading
+
+- [Agent rollback](/blog/agent-rollback) — adjacent operational pattern.
+- [SRE runbook generation](/blog/sre-runbook-generation) — runbook discipline this depends on.
+- [Devops CI 2am diagnosis](/blog/devops-ci-2am-diagnosis) — adjacent on-call frame.
+
+---
+
+*We help teams build self-healing automation that lets engineers sleep. [Get in touch](/contact).*

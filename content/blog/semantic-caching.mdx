@@ -1,0 +1,119 @@
+---
+title: "Semantic caching: why your top 1% of queries cost 60% of your bill"
+description: "Most LLM bills follow a power law. The same questions get asked a thousand times. Cache them by meaning, not by string."
+date: "2026-02-17"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Caching", "LLM", "Cost Optimization", "Production AI", "Engineering"]
+---
+
+A team we audited had a $9,000 monthly LLM bill. We ran a histogram on their query logs. The top 8 query patterns — by semantic similarity, not exact match — accounted for 61% of the spend.
+
+They were paying full inference for the same question, phrased differently, thousands of times a day.
+
+Semantic caching is the obvious fix. It's also one of the most-misimplemented patterns in AI engineering.
+
+## What semantic caching is
+
+You embed the query. You search for embedding-near queries you've answered before. If similarity is above threshold, you return the cached answer. If not, you call the model and store the new pair.
+
+```python
+def query(text):
+    emb = embed(text)
+    hit = cache.search_by_vector(emb, threshold=0.95)
+    if hit:
+        return hit.response
+    response = llm.call(text)
+    cache.store(emb, text, response)
+    return response
+```
+
+That's the core. The devil is in the threshold, the eviction, and the staleness.
+
+## The threshold is everything
+
+Set threshold too high (e.g., 0.99): you get no cache hits. You pay full inference and the cache is theater.
+
+Set threshold too low (e.g., 0.85): you serve wrong answers. "How do I delete my account?" and "How do I cancel my subscription?" might have 0.86 similarity. Different answers.
+
+The right threshold is task-dependent. For FAQ-style queries, 0.93-0.95 typically. For nuanced reasoning, you may not want semantic caching at all.
+
+The threshold should be set by running your eval set through the cache and measuring the false-positive rate. Empirical, not vibes.
+
+## Staleness is the hidden killer
+
+Cached answers go stale when:
+
+- Your product changes ("How do I export?" answer changes when you ship a new exporter).
+- Your prices change.
+- Your policies change.
+- The underlying model drifts on a version bump.
+
+Staleness fixes:
+
+- **TTL per cache class.** FAQs that rarely change: 30 days. Pricing answers: 1 day. Anything model-version-specific: invalidate on model bump.
+- **Tag-based invalidation.** When you ship a feature, you flush the tagged cache entries.
+- **Confidence sampling.** Periodically re-run cached queries through the live model and compare. If divergence is high, lower the threshold or shorten TTL.
+
+## What to cache, what to never cache
+
+**Cache happily:**
+
+- FAQ-style queries.
+- Classification outputs (very high cache hit rates).
+- Embedding outputs for documents you've seen.
+- Tool-call decisions for stable inputs.
+
+**Never cache:**
+
+- Anything personalized to a user.
+- Anything time-sensitive ("What's the weather?").
+- Anything with a randomness/temperature requirement.
+- Anything where users might notice the identical wording.
+
+## A real architecture
+
+```
+[query] → [embed]
+       → [vector cache lookup (Redis Vector, pgvector, or similar)]
+          → HIT (sim > threshold, not stale)
+            → return cached response
+          → MISS
+            → [LLM call]
+            → [store (embedding, query, response, ttl, tags)]
+            → return response
+```
+
+Add metrics: hit rate, miss rate, false-positive rate (from periodic audit), cost saved.
+
+## What about exact-match caching?
+
+Exact-match caching is free and ships in five minutes. Do it first. Most teams skip it for "semantic caching" — and miss that 20-30% of their queries are literally identical strings.
+
+The pattern is layered: exact match → semantic match → model call. Each layer has its place.
+
+## What the bill change looks like
+
+For the team above, after rolling out exact + semantic caching:
+
+| Layer | Hit rate | Cost reduction |
+|---|---|---|
+| Exact match | 22% | 22% off the bill |
+| Semantic match (0.94 threshold) | 41% of remaining | another 32% off |
+| **Combined** | **63% of all queries hit cache** | **$9,000 → $3,300** |
+
+64% cost reduction. P50 latency improved from 800ms to 110ms on cache hits.
+
+## Close
+
+Semantic caching is the most underrated cost lever in production AI. It's also where teams get burned by skipping the threshold tuning and the staleness handling. Do the math, set the threshold empirically, and audit the false positives every two weeks. Pay for the cache infrastructure with the LLM bill it eats.
+
+## Related reading
+
+- [Caching deterministic prefixes](/blog/caching-deterministic-prefixes) — the cheaper, simpler sibling.
+- [Cost guardrails](/blog/cost-guardrails) — how to keep cost from running away.
+- [Idempotency keys for LLM calls](/blog/idempotency-keys-for-llm-calls) — adjacent reliability pattern.
+
+---
+
+*We help teams cut LLM bills without hurting quality. [Get in touch](/contact) for a cost audit.*

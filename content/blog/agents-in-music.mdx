@@ -1,0 +1,78 @@
+---
+title: "Agents in music: the producer's new intern"
+description: "Generative music is a press release. The agent that actually ships in music is the one that handles metadata, licensing, and mixing notes."
+date: "2026-02-18"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Music AI", "Industry", "Production AI", "Creative Tools"]
+---
+
+Every six months a music-AI press release goes viral. "Generate a hit song from a text prompt." Every six months, the actual music industry quietly ships boring AI that earns real money.
+
+The boring AI: metadata enrichment, sample search, stems separation, lyric translation, royalty-share drafting, sync-license metadata. Each one a forgettable annual line item; together, a transformed studio.
+
+## What the studio actually needs
+
+A studio's bottleneck isn't generating sounds. It's:
+
+- **Metadata.** Every track needs ISRC, ISWC, performer credits, writer splits, publisher info. Hours of work per release.
+- **Sample search.** "Find me a Rhodes loop in C minor at 92 BPM with a vintage feel." Currently a 30-minute task in Splice.
+- **Lyric editing.** Translations, censored versions, syllable counts.
+- **Mix notes.** "The bass is sitting at 80Hz, the kick is at 65Hz, they're masking. Suggest fixes." A junior engineer's first job.
+- **Submission prep.** Sync libraries want specific tags and BPM/key/mood data. The label submits 200 tracks a month.
+
+Agents do every one of these well. The producer keeps the creative call.
+
+## The shipping pattern: producer's intern
+
+```
+[producer asks] → [agent retrieves: catalog + sample library + history]
+                → [LLM with music-tools playbook]
+                → [structured output: 3 options + reasoning]
+                → [producer picks / refines]
+                → [agent executes: tag, write metadata, fill form]
+```
+
+The producer is the bandleader. The agent is the intern who fills out forms, finds samples, drafts liner notes, and remembers what the producer chose last week.
+
+## Three real-world wins
+
+**Catalog labeling.** An indie label we work with had 14,000 tracks with patchy metadata. The agent labeled BPM, key, mood, and instrumentation for the catalog in two weeks. A human spot-checked 5%. Sync-license revenue on the catalog rose 40% in the next quarter — discoverability did the work.
+
+**Split-sheet drafting.** Writer splits are an ugly conversation. The agent listens to studio audio, transcribes contributions ("Alex came up with the topline, Sam wrote the bridge"), drafts a split sheet. Humans negotiate; the draft skips the awkwardness.
+
+**Mix critique.** The agent listens to a rough mix, runs FFT analysis, compares to reference tracks the producer named, and writes critique: "Vocals sit 2dB too far back versus the reference; kick has 200Hz buildup; reverb tail on the snare is muddying the second drop." Notes, not edits.
+
+## What doesn't ship: full-song generation as a primary tool
+
+The press-release pattern fails for the same reasons every creative-replacement AI fails:
+
+- **Top-line songwriting is the artist.** Replacing the artist doesn't ship; nobody buys the album.
+- **Generated audio quality has a ceiling.** Acceptable for stock music libraries; not yet for label A&R picks.
+- **Rights are unresolved.** Training data, output ownership, mechanical-license obligations. Lawyers say no.
+
+Generative tools have a real home in jingles, stock music, and sound design. Not in front-line label A&R yet.
+
+## What changes for the engineer
+
+The mix engineer's job in 2026 isn't gone. It's reshaped:
+
+- Less time on technical clean-up (de-noise, de-ess, tuning).
+- More time on artistic decisions (where the song breathes).
+- More tracks per month.
+
+The engineers who adopt the tools out-produce the engineers who don't, by 3-5x. The market sorts.
+
+## Close
+
+The most useful AI in music isn't the AI that pretends to be the artist. It's the AI that does the artist's least-favorite paperwork. The studio that wires up the boring patterns ships more, earns more, and keeps the creative work for humans.
+
+## Related reading
+
+- [Agents in publishing](/blog/agents-in-publishing) — parallel creative-industry pattern.
+- [Agents in media](/blog/agents-in-media) — adjacent vertical.
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the framing.
+
+---
+
+*We help creative-industry teams put AI to work without spooking the artist. [Get in touch](/contact).*

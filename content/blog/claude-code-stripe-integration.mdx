@@ -1,0 +1,119 @@
+---
+title: "Claude Code + Stripe: revenue-aware development"
+description: "Wire Claude Code to your Stripe data and 'when did revenue dip' becomes a one-line prompt instead of a half-day SQL exercise."
+date: "2026-01-28"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Stripe", "MCP", "Revenue Analytics", "Integrations"]
+---
+
+There's a special pain in revenue-impacting bugs: you only find them when finance flags a number. The gap between "deployed the change" and "finance noticed the change" is sometimes weeks.
+
+Wiring Claude Code to Stripe data changes that. The data is one prompt away.
+
+## What you can do after a 15-minute setup
+
+- "Pull Stripe MRR for the last 90 days, broken down by plan. Is there a step-change anywhere?"
+- "Find subscriptions that have failed payment in the last 7 days. Group by failure reason."
+- "List customers whose plan changed in the last 30 days. Compare to ARPU before/after."
+- "Show me the top 20 highest-value at-risk customers based on usage drop."
+
+The agent doesn't make business decisions. It does the SQL the analytics team is too busy to write.
+
+## Setup
+
+Stripe has a clean API and a Stripe-published MCP server.
+
+```bash
+npm install -g @stripe/mcp
+export STRIPE_SECRET_KEY=sk_live_...
+```
+
+Config (read-only is *strongly* recommended):
+
+```json
+{
+  "mcpServers": {
+    "stripe": {
+      "command": "stripe-mcp",
+      "env": {
+        "STRIPE_SECRET_KEY": "rk_live_...",
+        "STRIPE_MODE": "read_only"
+      }
+    }
+  }
+}
+```
+
+Use a restricted API key (`rk_live_`), not your secret key. Scope it to read on the resources you need. The agent should never have write access without a code review for the specific use case.
+
+## Prompts that earn rent
+
+**Daily revenue check.** "Pull yesterday's Stripe revenue, compare to the 7-day average. Anything out of expected range?" Daily standup prep, 5 seconds.
+
+**Churn cohorting.** "Customers who canceled in the last 30 days — group by plan, by signup month, and by primary feature used. Tell me what stands out."
+
+**Pricing change post-mortem.** "We changed pricing on June 1. Compare conversion rate, upgrade rate, and ARPU before and after." Without the agent, this is a half-day SQL exercise.
+
+**Recovery sweep.** "List subscriptions with `past_due` status. Group by customer LTV. Help me prioritize who to reach out to first."
+
+## What to keep manual
+
+- **Refunds.** Even with read-only, when the agent suggests "you should refund X" — you do it. Don't automate.
+- **Plan changes.** Customer plan state is sensitive.
+- **API key generation, webhook config.** Stripe configuration is a security boundary.
+- **Customer communication.** The agent drafts an email. You send.
+
+## The data the agent doesn't see
+
+Stripe has good data but not the whole picture. The agent shouldn't be the only place you look:
+
+- Stripe doesn't know your product usage.
+- Stripe doesn't know support touchpoints.
+- Stripe doesn't know NPS.
+
+For a complete view, you'd want the agent connected to your data warehouse, not just Stripe. Stripe is one input.
+
+## The B2B vs. B2C split
+
+For B2B SaaS:
+
+- Account-level analysis matters more than user-level.
+- The agent helps with deal-level questions ("how does this deal compare to similar deals at the same ACV?").
+- Frequent prompts: renewal risk, expansion candidates, deal-discount patterns.
+
+For B2C:
+
+- Cohort analysis matters more.
+- The agent helps with funnel-level questions ("did the new pricing change conversion at the $9 tier?").
+- Frequent prompts: cohort retention, ARPPU shifts, refund-rate trends.
+
+Tune your prompt library to your business model.
+
+## The audit trail
+
+Every Stripe query the agent makes: log it. Why:
+
+- Compliance. Some SOC 2 audits ask about who queried customer financial data.
+- Pattern detection. If you see the agent querying the same thing daily, it's a candidate for a saved dashboard.
+- Cost. Stripe's API isn't free at scale.
+
+A simple log:
+
+```
+ts, requester, prompt, queries_run, rows_returned, cost_estimate
+```
+
+## Close
+
+Stripe + Claude Code makes revenue analytics conversational. The agent doesn't replace your data team, but it does compress the 90% of revenue questions that are "pull this number and slice it that way." Wire it up, keep it read-only, and revenue conversations get a lot faster.
+
+## Related reading
+
+- [Claude Code + Datadog](/blog/claude-code-datadog-integration) — the ops-data equivalent.
+- [AI cost attribution](/blog/ai-cost-attribution) — the LLM-side of revenue-aware development.
+- [The AI productivity playbook](/blog/ai-productivity-playbook) — broader workflow.
+
+---
+
+*We help teams wire AI into their revenue and operational data. [Get in touch](/contact) before the finance team's next surprise.*

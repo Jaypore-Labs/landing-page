@@ -1,0 +1,75 @@
+---
+title: "Agents in veterinary medicine: scribe for the species that can't talk"
+description: "Veterinary medicine has all the documentation burden of human medicine with a quarter of the staff. AI scribes are arriving fast — and the line stays where it always was."
+date: "2026-01-30"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Veterinary", "Healthcare AI", "AI Scribes", "Industry"]
+---
+
+A small-animal practice owner we work with does 30 appointments a day. Each appointment generates a SOAP note that takes 8-12 minutes to write. That's 4-6 hours of charting per day for one veterinarian.
+
+The vet doesn't have the time. The chart suffers. The clinic's records are notoriously inconsistent in audit reviews. The vet stays late.
+
+AI scribes for veterinary clinics ship faster than human-medicine scribes because the trust line is in the same place: documentation yes, decision no. The species changes; the discipline doesn't.
+
+## What the scribe does
+
+The vet wears a small mic. The mic captures the consultation — vet, owner, and (literally) the patient. The model produces a draft SOAP note: subjective (the owner's complaint), objective (the physical exam findings), assessment (working diagnosis), and plan (treatment).
+
+The vet reviews on the screen between appointments, edits where needed, signs.
+
+Time per chart: 8 minutes → 90 seconds.
+
+## What's different from human medicine
+
+- **No HIPAA in most jurisdictions.** Privacy concerns exist but the regulatory bar is lower. Vet practices ship faster.
+- **The owner is the historian, not the patient.** Different conversation dynamics; the model needs to parse owner-reported symptoms vs. vet observations.
+- **The exam is more tactile.** The vet narrates findings out loud more than human-medicine doctors. The transcription quality matters.
+- **Pricing and surgical estimates are part of the chart.** The plan section usually contains a cost estimate. The model needs to handle this.
+
+## A practical pipeline
+
+```
+[in-room mic] → [STT: medical/veterinary vocabulary]
+              → [diarize: vet / owner / staff]
+              → [LLM: structure into SOAP + estimate sections]
+              → [validate: required fields, drug-dose sanity check]
+              → [practice management system: status = DRAFT, await vet sign]
+              → [audit: 7-year retention]
+```
+
+The drug-dose sanity check is the one place the agent acts as a guard. If the draft chart mentions a dose outside normal range for the species/weight, flag for the vet. Not a refusal; a flag.
+
+## What doesn't work
+
+- **Telemedicine triage where the agent decides.** "Should I bring my pet in?" The model can ask clarifying questions; the recommendation goes to a vet or vet tech.
+- **Surgical planning without humans.** The pre-op plan is the surgeon's. The agent drafts the consent form and procedure note.
+- **Behavioral diagnosis from owner descriptions.** Pet behavior is deeply context-dependent. The model can't see the animal.
+
+## The vet's day after
+
+The vets we work with describe the change in identical terms: "I get to be a vet again." Less time at a keyboard, more time with patients, less weekend charting.
+
+Throughput typically grows 15-25% because charting compression frees the vet to take an extra appointment per day. The clinic's revenue grows; the vet's hours don't.
+
+## Adoption gotchas
+
+- **Owners want to know.** A small "We use an AI scribe to help with notes" sign in the exam room is standard. Most owners don't care; the ones who do appreciate the transparency.
+- **Staff training.** Vet techs need to learn to narrate findings out loud the way vets do.
+- **Practice management system integration.** Most veterinary PMS are old. The agent's PMS connector is the friction point.
+- **Liability insurance.** Check that the malpractice carrier is okay with AI scribes. Most are now; a few aren't.
+
+## Close
+
+Veterinary scribes are one of the clearest wins in healthcare AI in 2026. The line is clear, the time saved is enormous, the staff are happier, the clinic is more profitable. The pet — who can't read the chart anyway — gets a more attentive vet.
+
+## Related reading
+
+- [Agents in healthcare](/blog/agents-in-healthcare) — the parallel pattern in human medicine.
+- [Agents in dental](/blog/agents-in-dental) — adjacent practice pattern.
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the framing.
+
+---
+
+*We build AI scribes for veterinary clinics and specialty practices. [Get in touch](/contact).*

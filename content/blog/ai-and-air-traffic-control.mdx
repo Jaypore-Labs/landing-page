@@ -1,0 +1,93 @@
+---
+title: "AI and air traffic control: a 70-year-old playbook for safe autonomy"
+description: "Air traffic control is the most successful autonomy-augmentation story in human history. AI engineers should be studying it, not reinventing it."
+date: "2025-12-18"
+author: "Yash Shah"
+category: "AI"
+tags: ["Safety", "Air Traffic Control", "Autonomy", "AI Engineering", "Engineering"]
+---
+
+Modern air traffic control routinely handles thousands of aircraft in shared airspace at near-zero failure rate. The system uses tools that look a lot like agents: TCAS, predictive trajectory modeling, automated conflict resolution, weather radar overlay. The humans — controllers — still hold the decisions.
+
+It's the most successful autonomy-augmentation story in human history. AI engineers building anything safety-relevant should be studying the ATC playbook, not reinventing it.
+
+## What ATC got right
+
+**Defense in depth.** A single failure doesn't cause an accident. There are layers: pilot vigilance, controller vigilance, TCAS, ground-proximity warning, traffic radar. Each layer can fail; the accident only happens when many fail together.
+
+The AI translation: don't build a single guardrail. Build layers. Prompt-level constraints, schema validation, output filtering, human review, monitoring. Each layer catches different failure modes.
+
+**Mode awareness.** Pilots distinguish between "the autopilot is flying" and "I'm flying with autopilot support." The mode is visible. The handoff is explicit.
+
+The AI translation: users should always know who's in control. Is the AI making the decision? Is it suggesting? Is it just drafting? Make the mode visible and the handoff explicit.
+
+**Trained-and-licensed humans.** Controllers are not generalists. They train for years, certify on specific airspaces, retrain on procedure changes. The system depends on competent humans in specific seats.
+
+The AI translation: in regulated domains, the human in the loop is a *trained* human, not just any human. Pretending otherwise dilutes the safety story.
+
+**The blameless culture, with documented procedures.** Aviation incidents get reported because reporting is rewarded, not punished. The reports go into a system that updates procedures. The procedures protect everyone.
+
+The AI translation: build a culture where users and operators flag bad AI outputs without penalty. Update prompts, evals, and procedures based on the flags.
+
+## What ATC got that engineers should steal
+
+**Phraseology.** Controllers and pilots speak in a constrained vocabulary. "Cleared to land," "go-around," "say again." The constraints reduce ambiguity, especially under stress.
+
+The AI translation: constrained output formats. Structured JSON, not free text, for any output that another system or process consumes. Free text only for outputs humans read.
+
+**Read-back.** When a controller gives an instruction, the pilot reads it back. Discrepancy gets caught immediately.
+
+The AI translation: confirm critical decisions. Before taking a consequential action, have the agent state what it's about to do; have the human or another agent confirm.
+
+**Squawks and transponders.** Every aircraft carries identification. Controllers know who is where.
+
+The AI translation: every agent call is traced. Every output is attributable. The audit log is the equivalent.
+
+**Holding patterns.** When there's congestion, aircraft hold. Movement is deferred safely until the system can handle it.
+
+The AI translation: when the agent is uncertain or rate-limited, it should defer or queue, not improvise. Hold patterns are okay.
+
+## The single biggest lesson
+
+ATC has resisted full automation for sixty years not because the technology can't do it, but because the cost of a single bad call is unacceptable. The discipline is: humans hold consequential decisions; technology supports them.
+
+This shouldn't be controversial in AI engineering. It often is. Founders pitch "fully autonomous" agents in domains where the cost of one bad call is human harm. ATC's history says: don't.
+
+## When the metaphor stops
+
+ATC has things AI doesn't:
+
+- A unified international protocol (ICAO).
+- A regulatory body with teeth.
+- A century of incident data.
+- Controllers who can be licensed and held accountable.
+
+AI doesn't have these yet. The equivalent will emerge slowly. In the meantime, individual companies are responsible for building these structures internally — the procedures, the licensing analogues, the incident-reporting cultures.
+
+## What to build
+
+In a safety-relevant AI product:
+
+- Layered guardrails (multiple defense in depth).
+- Explicit modes ("AI drafting," "AI deciding," "human deciding").
+- Trained operators where humans are in the loop.
+- Read-back patterns for consequential actions.
+- Audit logging at every step.
+- A no-blame culture for flagging bad outputs.
+- Holding patterns when uncertain.
+
+None of these are exotic. All of them are well-understood. The AI industry routinely skips them and is routinely surprised when something goes wrong.
+
+## Close
+
+Air traffic control made flying statistically safer than driving despite carrying many more people in machines that fall when they fail. They did it with humans in the loop, decades of incident data, and ruthless discipline about who decides what. AI engineers building anything consequential should be reading the playbook.
+
+## Related reading
+
+- [Agents in aviation](/blog/agents-in-aviation) — the operational frame.
+- [Agent supervision loops](/blog/agent-supervision-loops) — supervision patterns.
+- [Safety guardrails](/blog/safety-guardrails) — adjacent control patterns.
+
+---
+
+*We help teams design AI for consequential domains. [Get in touch](/contact).*

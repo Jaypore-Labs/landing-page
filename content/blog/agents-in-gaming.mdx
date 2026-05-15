@@ -1,0 +1,83 @@
+---
+title: "Agents in gaming: from live-ops support to dynamic NPCs"
+description: "The most-shipped AI in games today isn't the NPC. It's the support agent that handles 60% of player tickets while you sleep."
+date: "2026-02-23"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Gaming AI", "Live Ops", "Production AI", "Industry"]
+---
+
+The first thing every gaming studio asks about AI is the same thing. "Can we have NPCs that actually talk to the player?" Every press release in 2024 promised it. Most of those NPCs ended up cut from the launch build.
+
+Meanwhile, two patterns shipped quietly and made real money: AI-powered player-support agents, and AI-assisted live-ops. The dynamic NPC is hard. Support and live-ops are not.
+
+## The boring win: player support
+
+A mid-sized free-to-play studio we work with handles 80,000 support tickets a week. Refund requests, "I lost my account," "the patch broke my UI," cheater reports, payment disputes. Their AI-agent layer now handles 62% of tickets end-to-end. Of the remaining 38%, the agent drafts a response that a human edits.
+
+Cost-per-ticket: down 71%. Resolution time: down 84%. Player NPS on support: *up* 6 points, because faster.
+
+The architecture is dull:
+
+```
+[ticket inbound] 
+  → [classify: refund / bug / account / payment / cheater / other]
+  → [pull context: player history, recent matches, transaction history]
+  → [LLM with playbook for this ticket class: draft response + action]
+  → [confidence check + policy guard]
+     → [auto-send if confident] OR [route to human queue]
+  → [log: response, model version, outcome]
+```
+
+Three details matter:
+
+- **The playbook is policy-encoded, not prompt-encoded.** Refund thresholds, account-recovery rules, anti-fraud checks are deterministic guards before the LLM drafts. The model can't refund $400; the policy can.
+- **Action and reply are separate.** The model writes the reply. A code path performs the refund. Different audit logs.
+- **The human queue is the floor, not the ceiling.** Anything below confidence threshold goes human. The threshold gets raised over time as the eval improves.
+
+## The other boring win: live-ops content drafting
+
+Patch notes, event copy, in-game push notifications, store listings, A/B test variant copy. The studio above produces 40+ copy artifacts per week. The agent drafts each, the live-ops lead edits, the artifact ships.
+
+The shift: live-ops leads now do 4 events a week instead of 1. The bottleneck moved from drafting to creative judgment.
+
+## The hard one: dynamic NPCs
+
+Dynamic NPCs are hard because of three things players don't tolerate:
+
+- **Latency.** A 1.2-second LLM response feels like an eternity in a fast game.
+- **Inconsistency.** NPCs that contradict their lore, forget what they said two lines ago, or break character.
+- **Cost.** A million players × 50 NPC interactions per session × N tokens. The bill is real.
+
+The patterns that work today are narrow:
+
+- **Quest-giver dialogue with a fixed branching tree, LLM-paraphrased.** The branches are designed. The model paraphrases the line in the player's recent context. Bounded.
+- **Side-character barks generated offline.** Run the model overnight, generate 50 variants of each NPC's idle dialogue, store as audio. No runtime LLM.
+- **End-game companion in turn-based games.** Latency tolerance is higher in turn-based. Cost-per-interaction is lower.
+
+What you don't ship at launch: an open-ended NPC that a million players can prompt-inject in real-time combat.
+
+## What changes when you do
+
+When the support agent works, the support team's job changes. They become the *editors of the agent*, not the responders. They:
+
+- Review the agent's outputs daily.
+- Flag wrong responses for retraining or playbook update.
+- Tune the confidence threshold.
+- Write the new playbooks when policies change.
+
+That's a different job description. Studios that don't update the job description end up with bored support staff and a slowly drifting agent.
+
+## Close
+
+The most-shipped AI in games today is invisible to players — and that's why it works. It saves money, ships faster, and keeps humans focused on the judgment calls. The dynamic NPC will come, but it'll come narrower than the trailers promised, and that's fine. The boring wins compound.
+
+## Related reading
+
+- [Agents in customer support](/blog/agents-in-customer-support) — the same pattern, generalized.
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the staffing frame.
+- [Voice-first agents](/blog/voice-first-agents) — relevant when NPCs do go voice.
+
+---
+
+*We help gaming studios put AI to work in live-ops and support before they ship the splashy NPC demo. [Get in touch](/contact).*

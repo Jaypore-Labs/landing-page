@@ -1,0 +1,96 @@
+---
+title: "Small models are underrated: a case for boring infrastructure"
+description: "The biggest model on the menu is rarely the right model for the job. A pragmatic case for 8B parameters and below."
+date: "2026-02-24"
+author: "Yash Shah"
+category: "AI"
+tags: ["LLM", "Cost Optimization", "AI Engineering", "Production AI", "Infrastructure"]
+---
+
+A startup we work with had a $14,000/month inference bill. They were running Claude Opus on every customer-support message — classification, routing, drafting, sentiment, follow-up. The model worked beautifully. The bill was a quarter of their revenue.
+
+We replaced four of the five steps with an 8B-parameter model. The bill dropped to $1,400. The quality stayed within their internal threshold. The Opus calls were preserved for the one step that benefited from it — final draft of escalation responses.
+
+Small models are underrated. The big-model-for-everything reflex is a comfortable trap.
+
+## When small wins
+
+Small models are competitive when:
+
+- **The task is narrow and well-specified.** Classification, extraction, routing, structured-output generation. The model doesn't need general reasoning.
+- **You can fine-tune.** A 7B model fine-tuned on your data routinely beats a frontier model out-of-the-box on your specific task.
+- **You care about latency.** A small model runs in 100ms. A frontier model runs in 800ms. Multiply by 10 calls per request.
+- **You care about cost.** Inference is roughly 10-50x cheaper.
+- **You care about privacy.** Self-hosting an 8B is feasible. Self-hosting a 400B isn't.
+
+## When big wins
+
+Big models still win on:
+
+- **Long-context reasoning.** Read 50 pages, summarize the contradictions. Small models lose coherence.
+- **Open-ended generation.** Writing in a brand voice, drafting from sparse specs, generating creative variations.
+- **Tool use with many tools.** Picking the right tool from 30 options, chaining them, recovering from errors. Frontier models are visibly better.
+- **The customer-facing final step.** The thing your user reads. Spend the tokens there.
+
+## The architecture pattern
+
+The pattern that ships: a small model does the bulk work, a big model does the last mile.
+
+```
+[user input]
+   → [small model: classify, route, extract]
+   → [small model: draft response]
+   → [big model: polish if customer-facing OR if confidence < 0.7]
+   → [output]
+```
+
+The small model handles 80% of cases end-to-end. The big model handles the 20% where the small model's confidence is low, where the output goes to a customer, or where the prompt requires depth.
+
+## What you need to build it
+
+Three pieces of plumbing:
+
+**Confidence scoring on the small model.** Either log-prob-based or a small classifier on top. Without it you can't route.
+
+**A fallback policy.** "If small-model confidence < X, escalate to big." Specific thresholds, set per task, reviewed monthly.
+
+**An eval harness that runs across both.** Same eval set, same metrics, both models. The small model must hit your floor; the big model defines the ceiling.
+
+## What you skip
+
+Fine-tuning is optional. Many small models work well enough zero-shot with a tight prompt. Fine-tune when:
+
+- The same task runs millions of times a month (amortize the cost).
+- The format is very specific (JSON with a particular shape).
+- The domain is jargon-heavy (legal, medical, finance).
+
+Otherwise, prompt engineering on the small model is faster and cheaper.
+
+## What the bill looks like
+
+A real example, lightly anonymized:
+
+| Step | Before (Opus) | After (8B + Opus on 1 step) |
+|---|---|---|
+| Classify | $0.012 / msg | $0.0002 / msg |
+| Extract | $0.008 / msg | $0.0001 / msg |
+| Draft | $0.018 / msg | $0.0003 / msg |
+| Polish | $0.012 / msg | $0.012 / msg |
+| Sentiment | $0.006 / msg | $0.0001 / msg |
+| **Total** | **$0.056 / msg** | **$0.0127 / msg** |
+
+77% cost reduction. No measurable quality loss on the eval suite.
+
+## Close
+
+The most expensive infrastructure in AI is the infrastructure that nobody questioned. The big-model-for-everything pattern got there because the small models used to be visibly bad. They aren't anymore. Audit your pipeline. Push every step to the smallest model that still passes the eval, and reserve the big model for the work it's uniquely good at.
+
+## Related reading
+
+- [Multi-model routing](/blog/multi-model-routing) — the dispatcher pattern, implemented.
+- [Cost guardrails](/blog/cost-guardrails) — how to keep the bill from running away.
+- [Pinning model versions](/blog/pinning-model-versions) — once you've picked, lock it.
+
+---
+
+*We help teams architect AI pipelines that don't break their burn rate. [Get in touch](/contact) for a cost audit.*

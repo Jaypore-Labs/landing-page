@@ -1,0 +1,87 @@
+---
+title: "Agents in fashion: stylist yes, designer no"
+description: "Fashion brands keep asking AI to be a designer. The shipping pattern is much more boring — and much more valuable. Stylist, merchandiser, copywriter."
+date: "2026-02-27"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Fashion AI", "Retail AI", "Production AI", "Industry"]
+---
+
+A founder of a mid-market apparel brand pitched us last winter. She wanted an AI designer — a model that would generate this season's silhouettes. She had a board of investors who'd seen Midjourney lookbooks and wanted the brand to "ride the wave."
+
+We asked her one question. "Who buys what the agent produces?"
+
+The room went quiet. The honest answer was: the head designer, who would either rubber-stamp or rework everything. Which meant the agent saved nobody time, added a step, and introduced legal risk on IP. We didn't take the project.
+
+The shipping fashion-AI pattern isn't designer. It's stylist, merchandiser, and copywriter. Each respects the line between *generate* and *decide*.
+
+## What works: stylist mode
+
+The stylist agent looks at a customer's purchase history, returns history, browse data, and inventory, then proposes outfits. A merchandising team reviews. The agent doesn't push live. It drafts.
+
+This pattern ships because:
+
+- Catalog data is structured and clean (titles, colors, materials, sizes, prices).
+- Output is verifiable — the human can see the outfit at a glance.
+- The agent is a workflow lubricant, not a workflow replacement.
+
+A typical pipeline:
+
+```
+[customer signal] → [inventory filter: in stock + size]
+                  → [LLM with style embedding: propose 3 outfits]
+                  → [merchandiser review queue]
+                  → [approved outfits go to email/PDP]
+                  → [audit log: what was approved, why]
+```
+
+The output is structured. The customer never gets unreviewed AI.
+
+## What works: merchandiser mode
+
+The merchandiser agent reads sell-through reports, returns data, and competitor scraping. It drafts a buy plan — quantities, sizes, colors — for human buyers.
+
+The economic value is real. Buyers are expensive and slow. Agents are cheap and structured. The buyer reviews, edits, signs.
+
+What kills this pattern: skipping the review step. Inventory is real money. A bad buy is a quarter of cash flow on a shelf.
+
+## What works: copywriter mode
+
+Product descriptions, alt text, size-guide language, customer-service responses. Brand-voice fine-tuning makes the difference. Without it the output sounds like every other e-commerce site.
+
+Three things that matter:
+
+- A brand-voice doc the model can reference (tone words, banned phrases, audience persona).
+- A human reviewer for the first 100 outputs, then audit-only.
+- A retraining signal — flag the descriptions that performed worst on CTR, feed them back as negative examples.
+
+## What doesn't work: designer mode
+
+We've seen four brands try this and stop. The reasons rhyme:
+
+- **IP risk.** Training data of designer outputs touches copyrighted silhouettes. Legal won't sign.
+- **Sample cost.** A "design" isn't worth anything until a pattern-maker makes a sample. The bottleneck is humans and fabric, not ideas.
+- **Brand drift.** Generated silhouettes don't feel like the brand. The brand is built over years; the agent isn't trained on years.
+- **Buyer pushback.** The head designer doesn't want to "review AI sketches." That's not a job they took.
+
+The agent that tries to be a designer ends up generating mood boards nobody uses.
+
+## The structural test
+
+Ask of any fashion-AI pilot: *who buys what the agent produces?* If the answer is "the human approves," draw the line at approval. If the answer is "it ships unreviewed," the pilot won't ship.
+
+Stylist, merchandiser, copywriter — all keep humans on the buying side of the line.
+
+## Close
+
+The brands that win this decade aren't going to be the ones with the best AI designer. They'll be the ones whose human designers had AI take twenty hours of admin off their week, every week, for five years running. Compound interest is the gain.
+
+## Related reading
+
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the staffing frame that travels across industries.
+- [Agents in retail](/blog/agents-in-retail) — adjacent vertical, same patterns.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — brand-voice writing needs recipes.
+
+---
+
+*We build AI-enabled software for retail and fashion brands. If you're putting AI to work without breaking your buying calendar, [get in touch](/contact).*

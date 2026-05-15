@@ -1,0 +1,87 @@
+---
+title: "Claude Code + Jira: standups without the standing"
+description: "Most engineers loathe Jira. The agent doesn't. Wire it up once and the daily ritual changes shape."
+date: "2026-02-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Jira", "MCP", "Productivity", "Integrations"]
+---
+
+There are two relationships with Jira. The PM relationship, where Jira is the system of record, and the engineer relationship, where Jira is an obstacle between code and shipping. AI doesn't fix Jira. It removes the friction of dealing with it.
+
+A team we work with cut their standup from 25 minutes to 8 minutes by letting Claude Code draft each engineer's status from their ticket activity, commits, and PR comments. The standup became a 10-minute review of edge cases instead of a roll-call of what everyone did yesterday.
+
+## What we're wiring
+
+Three flows:
+
+- **Ticket drafts.** "Create a ticket for the bug I just reproduced" — agent writes title, description, acceptance criteria, attaches the failing test output.
+- **Status sync.** Agent reads commits + PR + sub-tasks, drafts a daily status, posts to the ticket.
+- **Sprint planning prep.** Agent groups tickets by epic, flags missing acceptance criteria, suggests sizes based on similar past tickets.
+
+## Setup
+
+Jira has a REST API and an MCP server option. Either works. The MCP route is cleaner because Claude Code can query and update tickets without a separate tool wrapper.
+
+```bash
+# Install Atlassian's MCP server (community version)
+npm install -g @atlassian-mcp/server
+
+# Authenticate
+export JIRA_URL=https://your-org.atlassian.net
+export JIRA_USER=you@org.com
+export JIRA_TOKEN=ATATT...
+```
+
+Wire it into your `claude_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "atlassian-mcp",
+      "env": {
+        "JIRA_URL": "https://your-org.atlassian.net",
+        "JIRA_USER": "you@org.com",
+        "JIRA_TOKEN": "..."
+      }
+    }
+  }
+}
+```
+
+## The recipes that matter
+
+Three prompts that earn their keep:
+
+**Status draft.** "Read my commits and PRs from yesterday. Look at tickets I'm assigned to. Draft a status update for each in 1-2 sentences. Don't speculate; only report what the activity shows."
+
+**Ticket from incident.** "I just fixed bug X. Here's the diff and the failing test output. Create a ticket retroactively with: title, root cause, fix summary, prevention recommendation. Label it `incident-followup`."
+
+**Acceptance criteria sweep.** "List tickets in the current sprint where the description has no acceptance criteria. For each, draft three criteria based on the title and context."
+
+The pattern: the agent does the structured-writing work. You do the judgment work.
+
+## What doesn't work
+
+- **Letting the agent close tickets.** Closure is a state change with consequences. Keep it manual. The agent drafts a comment proposing closure; you click the button.
+- **Auto-creating from chat.** "Make a ticket out of this Slack thread" sounds great. In practice, the chat doesn't have enough context. Make ticket creation explicit.
+- **Sprint planning without humans.** Sizing is socially calibrated within a team. The agent's estimate is a starting point, not the answer.
+
+## Audit and rollback
+
+Every ticket the agent touches: tag the comment with `via:claude-code` so it's filterable. Every state change: require a human click. If the agent goes off the rails, you want to find and revert in one query.
+
+## Close
+
+Jira isn't going away. Standups aren't going away. The friction of doing both might be. Wire the agent up once and the daily ritual changes shape — less typing, more thinking.
+
+## Related reading
+
+- [The AI productivity playbook](/blog/ai-productivity-playbook) — the broader workflow this fits in.
+- [Claude Code + Linear](/blog/claude-code-linear-integration) — the Linear flavor.
+- [Effective MCP patterns](/blog/effective-mcp-patterns) — patterns this integration relies on.
+
+---
+
+*We help teams put AI to work across their daily tools — Jira, Linear, Notion, Slack. [Get in touch](/contact) if you want to skip the trial-and-error.*

@@ -1,0 +1,112 @@
+---
+title: "Twelve AI procurement questions every buyer should ask"
+description: "Most AI procurement conversations skip the questions that matter. Twelve questions, asked early, save a year of regret."
+date: "2025-12-24"
+author: "Yash Shah"
+category: "Leadership"
+tags: ["Procurement", "Vendor Selection", "AI Strategy", "Buying", "Leadership"]
+---
+
+Most AI procurement conversations sound like product demos. Slick screens, plausible numbers, ten customer logos. The buyer leaves impressed, signs, and discovers in month three that the demo product and the production product are different products.
+
+Twelve questions, asked early, separate the vendors who answer cleanly from the vendors who fog up.
+
+## The twelve
+
+**1. What model is under the hood? Which version specifically?**
+
+Vendors that won't tell you the model are using a model they don't want to admit. Vendors that tell you the model but not the version are pinning to a moving target. You want both, and you want to know when it changes.
+
+**2. What's your data retention policy on our inputs?**
+
+Acceptable: "Zero retention by default; configurable." Unacceptable: "We use your data to improve our models" (without explicit opt-out and contractual terms).
+
+**3. Show us your eval results on a workload you didn't optimize for.**
+
+Vendors will show you the workloads they've tuned for. Hand them yours. If they refuse to run an eval on your data before contract, you've learned something important.
+
+**4. What's your latency P95? On what region? Under what load?**
+
+"It's fast" is not an answer. The number should be measured, regional, and load-tested.
+
+**5. What happens during a vendor outage on the upstream model provider?**
+
+If the answer is "we go down," that's a single point of failure you're inheriting. Look for vendors who multi-source.
+
+**6. Show us your audit log format.**
+
+Vendors should be able to show you a sample log line. If they can't, you're not getting the data you need to debug or comply.
+
+**7. What's your incident communication SLA?**
+
+How quickly will they tell you when something is wrong? An hour? A day? You want this in writing.
+
+**8. Who in your company is on the SOC 2 / HIPAA BAA / GDPR DPA?**
+
+Test by asking for the documents up front. Real compliance posture means real documents.
+
+**9. What do we do if you go out of business or get acquired?**
+
+The "what's the exit plan" question. Acceptable answers: data export tools, prompt portability, no proprietary protocols.
+
+**10. What's the unit cost at our expected volume? In writing?**
+
+Demos hide pricing. Production reveals it. Get the formula, get the per-unit rates, get expected total spend at 1x, 3x, and 10x your current scale.
+
+**11. Who runs your eval set? What's in it?**
+
+If they don't have one, they ship blind. If they won't show you what's in it, you have no way to assess their quality bar.
+
+**12. What's your customer's worst incident look like, and how did you handle it?**
+
+Vendors who say "we've never had a major incident" are either new or lying. Vendors who walk you through a real incident with poise are the ones who can handle yours.
+
+## What to do with the answers
+
+For each question, score the answer:
+
+- **Clear, specific, comfortable** — green.
+- **Vague but cooperative** — yellow. Push for specifics.
+- **Defensive or marketing-speak** — red. Walk.
+
+Aim for at least 10/12 green answers from any vendor you're seriously considering. Three or more yellows means you're inheriting risk; understand it before signing.
+
+## The proof-of-concept
+
+After the questions, run a real proof-of-concept. Specifically:
+
+- Your data.
+- Your prompts.
+- Your eval set.
+- Two weeks minimum.
+
+Vendors who refuse a PoC are vendors who can't pass one. Vendors who try to charge for the PoC are pricing in their own anxiety about whether they'll win it.
+
+## The lock-in conversation
+
+Three forms of lock-in you can't avoid entirely, but can minimize:
+
+- **Prompt lock-in.** Your prompts have grown into vendor-specific quirks. Mitigate by keeping prompts in a vendor-neutral format (markdown, YAML) and writing thin adapters.
+- **Data lock-in.** Your fine-tuned weights live with them. Mitigate by checking export terms.
+- **API lock-in.** Their endpoints aren't OpenAI-compatible. Mitigate by wrapping their client in your own interface from day one.
+
+## What kills procurement projects
+
+- **Buying on the demo.** The demo is the showroom car. Drive yours for two weeks.
+- **Buying without an internal champion.** No champion = no rollout = wasted contract.
+- **Buying with no escape route.** Always know how you exit.
+- **Buying before you've defined success.** What does "this contract worked" look like at 6 months? Write it down.
+
+## Close
+
+AI procurement isn't different from procurement; it has more failure modes per dollar. The twelve questions take an hour to ask and prevent a quarter of regret. Print them. Use them. Watch which vendors answer cleanly.
+
+## Related reading
+
+- [Architect vendor comparison](/blog/architect-vendor-comparison) — adjacent buyer's lens.
+- [Claude Code vendor briefs](/blog/claude-code-vendor-briefs) — using AI in the procurement process itself.
+- [AI for the CTO](/blog/ai-for-cto) — the audit framing.
+
+---
+
+*We advise buyers on AI procurement. [Get in touch](/contact) before you sign.*

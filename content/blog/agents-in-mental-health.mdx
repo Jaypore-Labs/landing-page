@@ -1,0 +1,90 @@
+---
+title: "Agents in mental health: triage yes, therapy no"
+description: "Mental-health AI is a minefield. The patterns that ship safely live tightly on one side of a hard line. Therapy doesn't cross it."
+date: "2026-01-16"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Mental Health", "Healthcare AI", "Safety", "Industry"]
+---
+
+A clinical psychologist we work with said something we've quoted in every mental-health AI conversation since: "The dangerous AI in mental health isn't the one that gives bad advice. It's the one that gives *plausible* advice that delays someone seeking care."
+
+The line in mental-health AI is hard, drawn before any pilot. On one side: triage, intake, scribing, scheduling, between-session support. On the other side: therapy, diagnosis, medication advice, crisis response. The line does not move with model improvements.
+
+## What ships safely
+
+**Intake automation.** A patient fills out an intake form. The agent structures the data, flags clinical risk indicators (suicidal ideation, abuse history, current medications), and routes to the appropriate clinician. The clinician reviews before the first session.
+
+**Scribe for sessions.** Same pattern as primary care: the clinician sees the patient, the agent transcribes and structures the note, the clinician signs. Mental-health-specific care: extra training data on therapy modalities, careful handling of trauma vocabulary, robust PHI redaction.
+
+**Between-session journaling support.** Structured prompts patients can use between sessions, the responses returned to the clinician as context for the next session. The agent doesn't reply with therapy; it stores and structures the patient's writing.
+
+**Insurance and authorization paperwork.** A real burden for clinicians. The agent drafts. The clinician reviews.
+
+**Scheduling and reminders.** Boring but valuable. No-shows cost mental-health practices significantly.
+
+## What doesn't ship
+
+- **Chatbot therapy.** Even "supportive" chatbots have published failure modes. The pattern keeps reappearing: a user in crisis, an AI response that is plausible but harmful, real consequences.
+- **Diagnosis from chat transcripts.** Diagnosis requires clinical judgment under specific frameworks (DSM, ICD). The agent's transcript is data; the diagnosis is the clinician's.
+- **Crisis triage without humans.** Crisis lines have specific protocols, training, and legal exposure. AI can route to humans faster; it doesn't take their place.
+- **Medication advice.** Drug-drug interactions, dose adjustments, and prescribing are physician work.
+
+## The crisis-routing edge case
+
+The hardest design problem in mental-health AI is what happens when a user in a non-crisis flow expresses crisis content. "I'm scheduling my appointment" turns into "I don't want to be here anymore" mid-flow.
+
+The pattern that works:
+
+- Crisis content is detected with high recall (better to over-trigger than miss).
+- Detection routes to a clear, scripted human-handoff response: crisis resources, an immediate offer to connect with a clinician on-call, and explicit acknowledgment.
+- The agent's "therapy" response in those moments is the script. Not generated. Reviewed by clinical leadership.
+- Logged for clinical review within 24 hours, regardless of resolution.
+
+This is one of the few places where the agent's response to an input is hardcoded for safety. Resist the urge to make it "feel more natural." The constraint is the safety.
+
+## What regulators care about
+
+The FDA has been clear: software intended to treat or diagnose a mental-health condition is a medical device. Crossing into therapy is a regulatory event. Most products keep on the safe side of the line: clinical support, not clinical care.
+
+State licensing matters too. A model that gives advice that constitutes practicing therapy without a license is exposure to state-board complaints in addition to harm.
+
+## A specific pipeline
+
+```
+[patient input]
+  → [PHI guard: redact what shouldn't appear in logs]
+  → [crisis classifier: high-recall detection]
+     → [crisis path: scripted handoff, immediate clinician page]
+  → [intent classifier: scheduling / intake / journaling / question]
+  → [LLM with rigid response templates per intent]
+  → [response review for high-risk intents before user sees]
+  → [audit: input, intent, response, decision, clinician]
+```
+
+The intent-driven structure is critical. The agent isn't free-responding. It's filling templates.
+
+## What clinicians want
+
+A repeated theme from clinical conversations:
+
+- More time with patients, less paperwork.
+- Better handoffs between sessions (what happened since I saw them).
+- Clearer documentation of risk indicators they might have missed.
+- A way to surface patterns across their caseload (is everyone reporting more insomnia this month?).
+
+AI that does these things is welcomed. AI that tries to do the clinician's job is unwelcome — and dangerous.
+
+## Close
+
+Mental-health AI has higher consequences than almost any other vertical we work in. The patterns that ship live tightly on one side of a hard line. Triage, intake, scribe, scheduling — yes. Therapy — no. The line doesn't move. The technology improving doesn't move the line. The clinician stays the clinician.
+
+## Related reading
+
+- [Agents in healthcare](/blog/agents-in-healthcare) — broader healthcare frame.
+- [Agents in veterinary](/blog/agents-in-veterinary) — adjacent scribe pattern.
+- [Safety guardrails](/blog/safety-guardrails) — the discipline this requires.
+
+---
+
+*We build AI for mental-health practices with clinical leadership in the loop from day one. [Get in touch](/contact).*

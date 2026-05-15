@@ -1,0 +1,116 @@
+---
+title: "AI cost attribution: a chargeback model for LLM spend"
+description: "When your finance team asks who's spending $80,000 on Claude, 'product' isn't an answer. Build chargeback before the bill makes the question urgent."
+date: "2026-02-12"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Cost Optimization", "Finance", "LLM", "Engineering Management", "Observability"]
+---
+
+A CTO we work with got a call from her CFO at month-end. The Anthropic bill had jumped from $12,000 to $43,000. The CFO asked which feature drove it. The CTO said, "I'll get back to you."
+
+It took her engineering team three days to figure out that a new feature in beta was looping over a recursive prompt without bound. The bill question was the right one. The engineering team didn't have the answer because they hadn't built attribution.
+
+Cost attribution is plumbing you want *before* you need it.
+
+## What attribution means
+
+Every LLM call should answer four questions when logged:
+
+- **Who** triggered it? (user, tenant, team)
+- **What feature** is it serving? (chat, search, agent X)
+- **What environment**? (prod, staging, dev)
+- **What unit of value** is it producing? (a message, a draft, an embedding)
+
+If your logs don't carry these, you can't answer "who's spending the money" without forensics.
+
+## The minimum-viable attribution layer
+
+A single wrapper around your LLM client:
+
+```python
+def call_llm(prompt, *, feature, tenant_id=None, user_id=None, env="prod", metadata=None):
+    start = time.time()
+    response = llm.complete(prompt)
+    cost = compute_cost(response)
+    log({
+        "feature": feature,
+        "tenant_id": tenant_id,
+        "user_id": user_id,
+        "env": env,
+        "model": response.model,
+        "tokens_in": response.input_tokens,
+        "tokens_out": response.output_tokens,
+        "cost_usd": cost,
+        "latency_ms": (time.time() - start) * 1000,
+        "metadata": metadata or {},
+        "ts": datetime.utcnow().isoformat(),
+    })
+    return response
+```
+
+Two requirements:
+
+- Every code path that calls an LLM must use this wrapper. No exceptions.
+- `feature` is required. The call fails at code review if it's missing.
+
+That second rule is the cultural lever. It forces every new feature to declare itself in cost data on day one.
+
+## Where to send the logs
+
+Don't reinvent. Pick one:
+
+- **A warehouse table.** BigQuery, Snowflake, Postgres. Easiest. Run SQL.
+- **A purpose-built tool.** Helicone, LangSmith, OpenLLMetry. More features, vendor lock-in.
+- **A cost-tracking column in your existing analytics.** PostHog with custom events.
+
+For most teams, a BigQuery/Postgres table beats specialty tools for the first year. SQL is the lingua franca; everyone on the team can query.
+
+## The four reports finance needs
+
+**Daily total spend.** Trend, with annotated deploys. When the line jumps, you correlate to a deploy.
+
+**Spend by feature.** Helps with feature-level ROI conversations.
+
+**Spend by tenant.** For B2B SaaS, this is where chargeback or usage-based pricing comes from.
+
+**Spend by user.** For B2C, the long tail of usage. Pareto distribution is normal; outliers are signal.
+
+Build these as saved queries. Pin them in a dashboard. Update them when finance asks new questions.
+
+## The chargeback conversation
+
+For B2B SaaS, the AI line item often crosses 10-20% of COGS. At that point, finance wants to charge customers based on usage.
+
+Three models that work:
+
+- **Token-based.** Cleanest but exposes you to model price changes.
+- **Action-based.** "10 cents per AI-drafted email." Maps to customer mental model.
+- **Tier-based.** Plans include a budget; overage charges. Predictable.
+
+Whatever you pick, the attribution data is the foundation. You can't bill what you can't measure.
+
+## What goes wrong without attribution
+
+We've seen four failure modes:
+
+- **The recursive bug.** A loop without bound, $30k in an afternoon. Caught in days with attribution; weeks without.
+- **The internal user.** An engineer's debugging script left running over a weekend, $2k. Looks like a customer pattern in aggregate logs.
+- **The renegade feature.** A team ships an LLM-heavy feature without telling finance. Bill spikes; nobody owns it.
+- **The model upgrade.** Quietly switching a feature to a more expensive model. With attribution, you see the per-call cost jump immediately.
+
+All four are catastrophic without attribution and trivial with it.
+
+## Close
+
+LLM cost is going to be a top-5 line item for AI-first companies. The attribution layer is plumbing you build once and benefit from forever. Build it in week one. Make `feature` required. Send logs somewhere SQL-able. The conversations with finance get a lot shorter.
+
+## Related reading
+
+- [Cost guardrails](/blog/cost-guardrails) — preventive measures.
+- [Multi-model routing](/blog/multi-model-routing) — the lever attribution data drives.
+- [Token economics](/blog/token-economics) — unit economics for AI products.
+
+---
+
+*We help teams build cost attribution and routing layers for AI products. [Get in touch](/contact) before the bill makes the question urgent.*

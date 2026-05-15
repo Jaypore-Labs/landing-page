@@ -1,0 +1,88 @@
+---
+title: "Agents in maritime: the wheelhouse and the warehouse"
+description: "Shipping moves 90% of global trade. The AI that's quietly shipping in maritime isn't on the bridge — it's in the operations office onshore."
+date: "2026-01-23"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Maritime", "Logistics", "Industry", "Operations"]
+---
+
+A maritime operations manager we work with told us the maritime industry's secret. "Everyone outside thinks ships move freight. Inside, we know freight is just the back-end of a documentation factory."
+
+A single container moving from Shanghai to Rotterdam generates 300+ documents: bills of lading, customs declarations, certificates of origin, hazmat manifests, insurance forms, charter party agreements. The documentation is where AI ships first. The bridge gets it last.
+
+## Where AI ships today
+
+**Documentation factory.** Bills of lading drafting, customs paperwork, certificate cross-referencing. Hours of clerk time per container. The agent drafts, the clerk reviews.
+
+**Demurrage and detention dispute drafting.** A real cost line item for shippers. The agent reads the contracts, the timeline, the port data, and drafts dispute letters. Real ROI.
+
+**Crew rotation planning.** Maritime labor regulations are complex — STCW rest hours, contract durations, repatriation rules. The agent surfaces compliance risks before they happen.
+
+**Port scheduling and ETA prediction.** Combining AIS data, weather, port congestion, historical patterns. The agent doesn't replace the planner; it surfaces the patterns.
+
+**Charter party clause review.** Standard contract review the agent flags non-standard clauses or risks for human counsel.
+
+## What doesn't ship: AI on the bridge
+
+Not because it's impossible. Because:
+
+- IMO and class society regulations are conservative for good reasons.
+- The international rules of the road (COLREGs) require a competent human watchkeeper.
+- Communication with VTS, pilots, and other vessels is voice-based and adversarial.
+- Liability frameworks haven't caught up.
+
+Autonomous vessels exist (Yara Birkeland, some short-sea ferries). They're not the future of deep-sea shipping in 2026. The future is a watchkeeper with very good tools, not no watchkeeper.
+
+## The compliance angle
+
+Maritime is regulated by IMO, flag states, port states, charterers, insurers, and class societies. Documentation has multiple audiences with overlapping but distinct requirements.
+
+The agent's job is making compliance cheaper, not deciding what compliance means.
+
+```
+[shipping documents inbound]
+  → [classify: bill of lading / customs / certificate / hazmat / other]
+  → [extract: structured fields by document type]
+  → [validate: against contract terms, regulations, prior versions]
+  → [flag: non-standard terms, missing data, expired certificates]
+  → [draft response or amendment]
+  → [human review]
+```
+
+Class societies are starting to publish guidance on AI in operations. The pioneers are working with them, not around them.
+
+## Where to start
+
+For a mid-sized operator:
+
+1. Audit your current documentation workflow. Find the steps that are repetitive and bounded.
+2. Pilot the agent on one document class (typically bills of lading or customs).
+3. Measure: time per document, error rate, dispute outcomes.
+4. Expand to adjacent document classes.
+
+A pilot that ships within a quarter is realistic. The full-scale rollout takes 12-18 months because of training, integration, and union/regulator engagement.
+
+## The Achilles heel: data exchange
+
+The maritime industry's data exchange is famously fragmented. EDI standards from the 1980s coexist with XML, JSON APIs, and PDF emails. The agent often spends as much time parsing input formats as doing useful work.
+
+Mitigations:
+
+- A canonical internal schema that all documents normalize to.
+- A parsing layer (often LLM-driven) that handles the formats.
+- An explicit "unparseable" queue for humans.
+
+## Close
+
+Maritime AI in 2026 is documentation, planning, and dispute drafting. The bridge stays human. The operations office gets compressed by 30-50% as agents take the routine paperwork. Boring wins; the industry runs on margin and every clerk-hour matters.
+
+## Related reading
+
+- [Agents in logistics](/blog/agents-in-logistics) — adjacent industry pattern.
+- [Agents in aviation](/blog/agents-in-aviation) — parallel safety-critical pattern.
+- [Agents in legal](/blog/agents-in-legal) — the contract-review pattern this borrows from.
+
+---
+
+*We help maritime and logistics operators put AI to work in their documentation factory. [Get in touch](/contact).*

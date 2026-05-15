@@ -1,0 +1,76 @@
+---
+title: "Agents in publishing: from slush pile to acquisition"
+description: "Publishing's slush pile is where 95% of submissions die. AI doesn't replace the editor — it shortens the path between submission and the editor who'd love the book."
+date: "2026-02-10"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Publishing", "Media", "Production AI", "Industry"]
+---
+
+A literary agent we know described her slush pile as "a 4,000-document inbox of mostly heartbreak." Most submissions never get read past the first paragraph. Most rejections are form letters. Most authors never hear why.
+
+The publishing industry's bottleneck is reader attention, and it has been for two centuries. AI doesn't fix the bottleneck. It widens the funnel just enough that more good books get a fair read.
+
+## What AI does well in publishing
+
+**First-pass screening.** The agent reads the query letter + sample pages, checks against an editor's stated taste and the imprint's recent acquisitions, and rates fit. Editor reviews the top 10%. Time saved: editor reads 10x more carefully selected submissions.
+
+**Sensitivity and consistency reading.** A model trained on style guides flags inconsistencies, anachronisms, and sensitivity issues. Human sensitivity readers focus on judgment calls; the agent catches the easy stuff.
+
+**Metadata enrichment.** ISBN, BISAC codes, comparable titles, jacket copy drafts, marketing keyword extraction. The kind of work that takes a junior editor a full day per book.
+
+**Sales-forecast modeling.** Comp-title analysis. The agent pulls historical sales of comparable books, surfaces the patterns, gives editors a 12-month forecast range. Editors use it as one input among many.
+
+**Translation support.** Initial draft translations for foreign rights. Human translators polish. Speeds up rights deals.
+
+## What AI doesn't do
+
+- **Acquire books.** The acquisition decision is human, social, taste-driven, and contractual. No editor we know will let an agent decide.
+- **Write jacket copy that sounds like the book.** Drafts yes; the version that ships needs a human ear.
+- **Manage authors.** Authors are people. The relationship is the editor's job.
+- **Catch the diamond in the slush pile alone.** AI is consistent; it isn't surprising. The book that breaks rules and works often gets screened out.
+
+For the last point, we recommend a deliberate 5-10% "random sample" through to the editor's queue regardless of agent rating. Counteracts the consistency bias.
+
+## A pipeline for a small publisher
+
+```
+[submission inbox] 
+  → [extract: query letter, sample pages, author bio]
+  → [LLM with imprint's taste profile + recent acquisitions]
+  → [rate: 1-5 + reasons; flag interesting elements]
+  → [random-sample 5% regardless of rating]
+  → [editor's queue, prioritized by score]
+  → [editor reads, decides, responds]
+  → [optional: agent drafts personalized rejection or invitation]
+```
+
+The agent never sends to the author directly. The editor approves every outbound communication.
+
+## The personalized-rejection question
+
+Form rejection letters are the publishing industry's quiet shame. Authors wait 6 months and get "doesn't fit our list."
+
+AI can write personalized rejections — one sentence about what the editor read, one specific reason for declining. Authors get something. The cost is bounded.
+
+This is genuinely good if done with care. It is bad if it becomes a different kind of form letter. The fix: the editor names the reason in a 5-word note; the agent expands to a polite paragraph; the editor approves.
+
+## What changes about the editor's job
+
+Editors who use the agent well shift from triage to advocacy. Less time reading bad submissions; more time championing books they love. The work becomes more taste-driven, not less.
+
+Editors who use the agent poorly start trusting its ratings. The slush pile becomes a meritocratic-looking pipeline that misses the same books a junior reader's biases would miss — just consistently. Tune the prompts; audit the rejections; sample the misses.
+
+## Close
+
+Publishing AI in 2026 is reader, summarizer, metadata clerk, comp-title analyst. The editor remains the editor. The agent's purpose is to make sure every manuscript with a chance gets read by a human with time to read it. That's the unsexy, valuable win.
+
+## Related reading
+
+- [Agents in media](/blog/agents-in-media) — adjacent vertical.
+- [Agents in music](/blog/agents-in-music) — creative-industry frame.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — the prompt discipline this requires.
+
+---
+
+*We help publishers put AI to work without algorithmically narrowing what gets published. [Get in touch](/contact).*

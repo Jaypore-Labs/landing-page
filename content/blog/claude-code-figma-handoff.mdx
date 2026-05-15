@@ -1,0 +1,106 @@
+---
+title: "Claude Code + Figma: design handoff in one prompt"
+description: "Design handoff is the slowest part of most product cycles. Wire Claude Code to Figma and the handoff compresses from days to hours."
+date: "2026-01-21"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Figma", "MCP", "Design", "Frontend"]
+---
+
+Design handoff is the place where shipping speed quietly dies. Designer publishes the file, engineer opens it, asks questions in Slack, builds, designer reviews, two more rounds.
+
+Wiring Claude Code to Figma compresses the loop. The agent reads the Figma file directly, infers tokens, generates components in your framework, and flags ambiguities.
+
+## What's possible
+
+- "Read this Figma frame. Generate a React + Tailwind component matching it. Use our design tokens from `src/styles/tokens.ts`."
+- "Compare this Figma component to the existing component at `src/components/Button.tsx`. List the differences."
+- "Pull the color palette from this Figma file. Generate a `tokens.css` matching it."
+- "This Figma flow has 7 screens. Generate route stubs and page components for each."
+
+## Setup
+
+Figma has a stable read API and the official Figma MCP server (released mid-2025).
+
+```bash
+npm install -g @figma/mcp-server
+```
+
+Generate a Figma personal access token. Config:
+
+```json
+{
+  "mcpServers": {
+    "figma": {
+      "command": "figma-mcp",
+      "env": {
+        "FIGMA_TOKEN": "figd_...",
+        "FIGMA_TEAM_IDS": "team-id-1,team-id-2"
+      }
+    }
+  }
+}
+```
+
+Verify: "Find the most recently edited Figma file in our team." Should return name + URL within a second.
+
+## The prompts that earn rent
+
+**Component generation from frame.** "Here's a Figma frame URL. Generate a React component matching it. Use our existing components where possible. Tokens from `tokens.ts`. Tailwind for everything else."
+
+**Style guide extraction.** "Pull all unique colors, font weights, font sizes, and spacing values from this Figma library. Output as a `tokens.css` file."
+
+**Diff and reconciliation.** "We have a component at `src/components/Card.tsx`. The designer just updated the Figma component. What's different and how should I update the code?"
+
+**Responsive variants.** "This Figma frame has desktop and mobile variants. Generate a single React component with Tailwind responsive classes that matches both."
+
+## What the agent gets wrong
+
+- **Interactive states.** Figma sometimes shows hover/active states explicitly; sometimes not. Always confirm in the implementation.
+- **Animation timing.** Figma has motion specs in some places, not all. The agent guesses; you adjust.
+- **Auto-layout edge cases.** Complex flex/grid arrangements sometimes generate verbose code. Refactor for readability.
+- **Asset export.** Icons and images need explicit export commands. The agent can suggest but execution is yours.
+
+## The handoff that doesn't suck
+
+A team workflow that compresses cycles:
+
+1. Designer publishes the Figma file with a `ready-for-handoff` tag.
+2. Engineer runs the generate-components prompt against the new frames.
+3. Engineer reviews generated code, fills gaps the agent couldn't infer (data sources, click handlers, error states).
+4. Engineer pings designer with the deployed staging URL.
+5. Designer reviews the implementation, files Figma comments on discrepancies.
+
+The agent isn't replacing design or engineering judgment. It's eliminating the boilerplate that fills the gap between them.
+
+## The token convention
+
+The agent is much better at generating clean code when your design tokens are well-defined. Specifically:
+
+- Tokens live in one file (`tokens.ts` or `tokens.css`).
+- Tokens are referenced by name everywhere (no raw hex codes in components).
+- Figma styles match token names.
+
+A small upfront discipline yields large compounding benefits in handoff speed.
+
+## Component-library pattern
+
+For teams with mature design systems:
+
+- Map Figma components to your code components by name.
+- The agent uses the mapping to choose existing components vs. generate new ones.
+- New Figma components flag for explicit handoff review (a new pattern is a team decision, not an agent decision).
+
+## Close
+
+Figma + Claude Code is one of the highest-ROI integrations for shipping product. Setup is 30 minutes. Time saved per design cycle is 4-8 engineering hours. The win compounds with every new feature.
+
+## Related reading
+
+- [Frontend component scaffolding](/blog/frontend-component-scaffolding) — the broader frontend workflow.
+- [Frontend a11y audits](/blog/frontend-a11y-audits) — pairs naturally with handoff.
+- [The AI productivity playbook](/blog/ai-productivity-playbook) — broader workflow.
+
+---
+
+*We help product teams wire AI into the design-to-code loop. [Get in touch](/contact).*

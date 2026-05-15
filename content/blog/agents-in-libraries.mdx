@@ -1,0 +1,87 @@
+---
+title: "Agents in libraries: Dewey's heir is silicon"
+description: "Libraries built the original retrieval-augmented system. Wiring AI into a modern library is less novelty than continuation."
+date: "2026-02-06"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Libraries", "Public Sector", "Information Retrieval", "Industry"]
+---
+
+The original retrieval-augmented system was the card catalog. The original embedding was the subject heading. The original RAG pipeline was a librarian listening to a patron's vague question, asking three clarifying questions, and walking to a shelf.
+
+Libraries don't need to be told what retrieval is. They invented it. The AI conversation in libraries is less about new capability and more about scaling the librarian's pattern.
+
+## What libraries need
+
+- **Reference desk hours are dropping.** Smaller staffs, longer queues, more digital patrons.
+- **Discovery is fractured.** Catalog, databases, journals, e-books, special collections, archives, microfilm. A patron's question crosses systems.
+- **Patron literacy varies.** A high schooler and a retired research professor are both at the desk.
+- **Collection maintenance is expensive.** Deaccessioning decisions, gap analysis, reading-level tagging.
+
+## What AI does well
+
+**Reference chat.** A patron asks "I need sources on the labor history of textile mills in New England in the 1880s." The agent searches the catalog, journal databases, and the special collections finding aid. Returns a curated list with explanations of each source's relevance and limits.
+
+**Reading-level suggestions.** A parent asks "books for a 7-year-old who liked Dragon Masters." The agent searches by reading level, theme, vocabulary, and library availability.
+
+**Catalog QA.** Find records with inconsistent subject headings, missing fields, or duplicate entries. Catalog maintenance has always been understaffed.
+
+**Collection development.** "Show me topic areas where our holdings are weak relative to our patron checkout history." Recommendation list, not decision.
+
+**ILL drafting.** Interlibrary loan request drafting and routing. Bureaucratic; automatable.
+
+## What AI doesn't do
+
+- **Replace the reference librarian.** Especially for advanced research, where the librarian's domain knowledge and institutional memory matter.
+- **Make collection-development decisions.** Buying choices are political (community needs, board preferences, budget priorities). The agent informs.
+- **Verify special-collection provenance.** Provenance is a chain of custody. Humans verify.
+- **Replace the children's storytime.** No, really. Some asked. The answer is no.
+
+## The patron-trust question
+
+Libraries have higher trust than almost any institution. A library agent that hallucinates or recommends bad sources costs more reputation than the time savings. Implementation discipline matters more here than in most verticals.
+
+What we recommend:
+
+- The agent always cites. Every recommendation links to the catalog record.
+- The agent admits uncertainty. "I'm not confident in this — would you like me to flag a reference librarian to help?"
+- The patron's question history isn't tracked beyond the session unless they explicitly opt in.
+- A human reviews any new prompt templates before deployment.
+
+## A real pipeline
+
+```
+[patron question]
+  → [classify: reference / reader's advisory / catalog / hours / other]
+  → [retrieve: catalog, database APIs, finding aids, by domain]
+  → [LLM with library voice + cite-everything rules]
+  → [response with sources, hold options, librarian-handoff button]
+  → [log: question, response, whether patron clicked anything]
+```
+
+The handoff button is critical. The agent is a reference librarian's helper, not their replacement.
+
+## Funding and politics
+
+Library boards worry about AI for good reasons: misinformation, vendor lock-in, privacy, cost. The implementations that pass board review:
+
+- Self-hosted or zero-data-retention vendor models.
+- Open eval set with the library's own quality criteria.
+- Public documentation of what the agent does and doesn't do.
+- A staff-training plan that respects librarian expertise.
+
+The implementations that fail review skip these. Don't skip them.
+
+## Close
+
+Libraries have spent 150 years making knowledge findable. AI is the next chapter, not a replacement. The library agents that compound trust — that cite, defer, learn from librarians — earn their place. The ones that don't get retired by a board vote within a year.
+
+## Related reading
+
+- [RAG is a public library](/blog/rag-is-a-public-library) — the framing this post extends.
+- [Agents in museums](/blog/agents-in-museums) — adjacent public institution.
+- [Agents in government](/blog/agents-in-government) — public-trust constraints.
+
+---
+
+*We help public-sector institutions put AI to work with the discipline they require. [Get in touch](/contact).*

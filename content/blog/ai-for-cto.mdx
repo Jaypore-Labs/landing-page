@@ -1,0 +1,119 @@
+---
+title: "AI for the CTO: a sixty-minute audit"
+description: "A CTO's AI strategy doesn't require a quarter-long offsite. A sixty-minute audit surfaces 80% of what needs attention."
+date: "2025-12-29"
+author: "Yash Shah"
+category: "Leadership"
+tags: ["CTO", "Engineering Leadership", "AI Strategy", "Audit", "Management"]
+---
+
+A CTO friend called me. Her board had asked for "the AI plan." She'd spent two weeks staring at a blank doc. The instinct was to write a strategy. The actual need was to audit what was happening.
+
+Most companies don't have one AI strategy. They have eight informal AI experiments, three vendors with different governance, two unwatched cost lines, and a couple of features in production that nobody owns end-to-end. The audit names what exists. The strategy comes after.
+
+Here's the sixty-minute audit.
+
+## Minutes 0-10: the production inventory
+
+List every AI feature currently in production. Specifically:
+
+- Which user-facing or internal feature
+- Which model / provider
+- Which engineer or team owns it
+- Which prompts or models have changed in the last 90 days
+- Approximate cost per month
+
+If you can't fill this in, that's the first finding. Schedule a follow-up to gather the data; it needs to be standing data.
+
+## Minutes 10-20: the cost picture
+
+Pull the last 90 days of LLM spend:
+
+- Trend (flat, growing, spiking?)
+- Attribution (which features drive what %)
+- Outlier days
+- Single-tenant concentration
+
+Find the surprising line item. There's always one.
+
+## Minutes 20-30: the risk picture
+
+Three questions:
+
+- **What AI feature would create the biggest incident if it went wrong?** Customer-trust impact, legal exposure, financial exposure.
+- **Do we have rollback for it?** Specifically, can we revert a model or prompt change in < 10 minutes?
+- **Do we have detection?** When it goes wrong, will we notice before a customer does?
+
+For each "no," write a follow-up task with owner and date.
+
+## Minutes 30-40: the people picture
+
+Three questions:
+
+- **Who owns AI infrastructure?** Cost tracking, model routing, evals, deployment pipeline. If the answer is "everyone does a little," that's a finding.
+- **Who owns AI evaluation?** Eval set ownership, eval CI, quality thresholds.
+- **Who owns AI policy?** What models can be used for what data, what disclosures are required, what's banned.
+
+For each unowned area, assign an owner (interim) and a deadline to ratify.
+
+## Minutes 40-50: the vendor picture
+
+List your AI vendors:
+
+- Model providers (OpenAI, Anthropic, etc.)
+- Tools (LangChain, Weights & Biases, etc.)
+- Specialty (eval tools, observability)
+
+For each:
+
+- Contract status (renewal date, terms)
+- Data flow (what data leaves your stack)
+- BAA / SOC 2 / GDPR posture
+- Single-vendor dependency risk
+
+Flag anything that's a single point of failure. Plan a fallback.
+
+## Minutes 50-60: the three-thing plan
+
+After 50 minutes of inventory, write three things to do this quarter. Examples:
+
+- "Build cost attribution by feature, no later than [date]."
+- "Implement flag-gated model deployment for our top-3 AI features."
+- "Hire eval lead OR designate existing engineer 50% to eval work."
+
+Three things. Not eight. The audit reveals more than three problems; you can fix three of them this quarter.
+
+## What the board wants to hear
+
+Boards want to hear three answers:
+
+- **Where are we exposed?** (Risk inventory.)
+- **What are we doing about it?** (The three-thing plan.)
+- **What's the cost trajectory?** (Spend and attribution.)
+
+They don't want a 40-slide deck on "AI strategy." They want to know that you know.
+
+## The longitudinal version
+
+Run this audit quarterly. The first time finds the most. By the fourth time, it's mostly maintenance: confirming things you already track are still tracked, surfacing new vendors and features that need governance.
+
+## What kills these audits
+
+- **Doing them alone.** Pull in your VP Eng, your data lead, and an AI-savvy engineer. The findings need multiple perspectives.
+- **Not writing them down.** Audits without artifacts disappear. The doc lives in your CTO folder.
+- **Skipping the three-thing plan.** Inventory without action is theater.
+- **Letting it become a strategy document.** Sixty minutes. Inventory first. Strategy follows.
+
+## Close
+
+The CTO's AI work in 2026 is mostly governance, mostly visibility, mostly ownership clarity. A sixty-minute audit surfaces what's actually happening across your AI surface area. The strategy that follows is more grounded because it starts from facts, not aspirations.
+
+## Related reading
+
+- [AI team scaling](/blog/ai-team-scaling) — the team-shape framing.
+- [AI cost attribution](/blog/ai-cost-attribution) — the cost discipline.
+- [Architect vendor comparison](/blog/architect-vendor-comparison) — the vendor lens.
+
+---
+
+*We work with engineering leaders on AI strategy and governance. [Get in touch](/contact).*

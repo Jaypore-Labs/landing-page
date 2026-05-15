@@ -1,0 +1,137 @@
+---
+title: "Agent supervision loops: the OODA loop, re-implemented"
+description: "John Boyd's OODA loop describes how fighter pilots make decisions. It also describes a well-designed agent supervision loop."
+date: "2026-01-02"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Agent Architecture", "Supervision", "AI Engineering", "Production AI", "Control Loops"]
+---
+
+Air Force colonel John Boyd described decision-making with four steps: Observe, Orient, Decide, Act. The OODA loop became the foundation of military doctrine and, separately, a clean way to describe how an AI agent should be supervised in production.
+
+Most agent failures we see are OODA failures. The agent observed wrong, oriented wrong, or — most often — acted before deciding.
+
+## The four steps in agent terms
+
+**Observe.** The agent collects input. User message, tool output, retrieval results, current state.
+
+**Orient.** The agent interprets observation against context: history, goals, available tools, constraints.
+
+**Decide.** The agent chooses an action.
+
+**Act.** The agent executes — calls a tool, returns text, modifies state.
+
+Repeat.
+
+## What a supervision loop adds
+
+The supervisor watches the OODA loop, intervenes when something is off. Specifically:
+
+- After **observe**: did the agent get unexpected input? (Prompt injection, garbage, signs of attack.)
+- After **orient**: does the agent's interpretation match the inputs? (Hallucinated context.)
+- After **decide**: is the chosen action allowed, sensible, in-budget? (Policy guard.)
+- After **act**: did the action produce the expected effect? (Validation, observability.)
+
+The supervisor doesn't replace the agent. It catches the agent's failure modes earlier.
+
+## A real implementation
+
+```python
+class SupervisedAgent:
+    def __init__(self, agent, supervisor):
+        self.agent = agent
+        self.supervisor = supervisor
+        self.budget = budget()
+
+    async def run(self, request):
+        state = State(request=request)
+        while not state.done:
+            obs = self.observe(state)
+            if self.supervisor.observe_check(obs):
+                return self.supervisor.halt("bad observation", obs)
+
+            orientation = await self.agent.orient(state, obs)
+            if self.supervisor.orient_check(orientation):
+                return self.supervisor.halt("bad orientation", orientation)
+
+            decision = await self.agent.decide(orientation)
+            if not self.supervisor.decide_check(decision, self.budget):
+                return self.supervisor.halt("decision rejected", decision)
+
+            result = await self.agent.act(decision)
+            self.supervisor.observe_act(decision, result)
+
+            state.update(decision, result)
+            if state.cycles_exceeded():
+                return self.supervisor.halt("cycle limit", state)
+        return state.output
+```
+
+A few details that matter:
+
+- **Cycle limit is mandatory.** No agent runs forever. Hard cap on iterations.
+- **Budget is shared with the supervisor.** Tokens, dollars, tool calls. The supervisor enforces.
+- **Halt reasons are typed.** "Cycle limit" and "decision rejected" are different failure modes; they get different downstream handling.
+
+## What the supervisor checks
+
+**Observe-check.** Is this input suspicious? Patterns:
+
+- Prompt-injection signatures.
+- PII or sensitive data the agent shouldn't process.
+- Inputs from sources outside the allowed set.
+
+**Orient-check.** Does the agent's interpretation look reasonable? Hard to automate fully; heuristics:
+
+- Length of orient output within range.
+- References to context items the agent actually has.
+- No "I will now do X" statements that violate policy.
+
+**Decide-check.** Is this action allowed?
+
+- Tool is in the allow-list.
+- Tool arguments validate.
+- Action is within rate limits.
+- Action is within cost budget.
+
+**Act-check.** Did it work?
+
+- Return code expected.
+- Output schema validates.
+- No errors in observability.
+
+## Designing the supervisor
+
+Two failure modes to avoid:
+
+**Supervisor too lenient.** Catches nothing meaningful, costs latency, gives false confidence.
+
+**Supervisor too strict.** Halts on everything, agent never finishes a task, user experience tanks.
+
+The calibration is empirical. Start with light checks. Tighten based on what you see in production. Loosen what's blocking good behavior.
+
+## The kill switch
+
+Above all supervision: a kill switch. A single config flag that says "halt all agents immediately." When something goes badly wrong, the on-call engineer flips it.
+
+Verify the kill switch quarterly with a fire drill. If you've never flipped it, you don't know that it works.
+
+## What this isn't
+
+This is not a replacement for evals. Evals run pre-deployment. Supervision runs in production. They cover different failure modes.
+
+This is also not a replacement for human review. Supervision catches the failures it knows how to catch. Human review catches the failures the supervisor hasn't seen yet.
+
+## Close
+
+The OODA loop is good engineering long before it's military doctrine. Apply it to your agent: observe, orient, decide, act, supervise each stage. The result is fewer surprise failures, faster diagnosis when failures happen, and an agent that earns more autonomy over time.
+
+## Related reading
+
+- [Agent observability](/blog/agent-observability) — the visibility this requires.
+- [Safety guardrails](/blog/safety-guardrails) — adjacent control patterns.
+- [Plan vs act loop](/blog/plan-vs-act-loop) — the inner loop.
+
+---
+
+*We help teams build agent supervision and safety layers. [Get in touch](/contact).*

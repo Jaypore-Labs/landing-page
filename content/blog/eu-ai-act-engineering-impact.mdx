@@ -1,0 +1,98 @@
+---
+title: "EU AI Act: what changes in your engineering process"
+description: "The EU AI Act is law. The compliance asks are concrete. Most of them are engineering work, not legal work."
+date: "2025-12-30"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Regulation", "EU AI Act", "Compliance", "AI Engineering", "Policy"]
+---
+
+The EU AI Act has been law since 2024, with phased enforcement through 2026 and 2027. Most of the panic was about whether it would pass. Now that it has, the question is operational: what changes about your engineering process?
+
+For most product teams, the answer is less than feared and more than ignored.
+
+## What the Act actually does
+
+The Act categorizes AI systems by risk:
+
+- **Unacceptable risk.** Banned. Real-time biometric ID in public spaces (with carve-outs), social scoring, etc.
+- **High risk.** Subject to substantial obligations. Includes AI in education, employment, credit, law enforcement, healthcare, critical infrastructure.
+- **Limited risk.** Transparency obligations. Includes chatbots, deepfakes, emotion recognition.
+- **Minimal risk.** No specific Act obligations beyond existing law.
+
+Most B2B SaaS products land in limited or minimal risk. The interesting category is high-risk, which has the bulk of the engineering ask.
+
+## The high-risk engineering ask
+
+If your product touches a high-risk category, you face requirements including:
+
+- **Risk management system.** Documented, kept up to date, reviewed across the lifecycle.
+- **Data governance.** Documented training-data provenance, bias assessments, data quality controls.
+- **Technical documentation.** Detailed, before market placement.
+- **Logging.** Automatic recording of events relevant to risk and post-market monitoring.
+- **Human oversight.** Designed in. Specific user interface elements supporting it.
+- **Accuracy, robustness, cybersecurity.** Stated levels; testing against them.
+- **Conformity assessment.** Either self-assessment or third-party, depending on the system.
+- **Registration in the EU database.** Public.
+- **Post-market monitoring.** Plans, signals, incident reporting.
+
+Each of these is an engineering project, not just a legal exercise. The risk-management documentation and logging requirements alone are months of work for a team that hasn't already built them.
+
+## What changes for the rest of us
+
+If you're not high-risk — most chatbots, drafting assistants, internal tools — the asks are lighter but real:
+
+**Transparency.** Users must know they're interacting with AI. A persistent label or message. Most products already have this, but make sure.
+
+**Synthetic content disclosure.** AI-generated images, audio, video, or text that could be mistaken for real must be marked. Watermarking standards are evolving.
+
+**Foundation model providers have their own obligations.** If you're using OpenAI or Anthropic, they handle theirs. If you're building your own, you have provider obligations.
+
+**Existing GDPR doesn't go away.** PII handling, lawful basis for processing, data subject rights. All still apply.
+
+## The engineering checklist
+
+For high-risk systems:
+
+- [ ] Risk management process documented, owners assigned, review cadence set.
+- [ ] Training data inventory, with provenance and quality assessment.
+- [ ] Bias evaluation methodology and documented results.
+- [ ] Comprehensive logging at the system level (model versions, prompts, inputs, outputs, decisions).
+- [ ] Human oversight UX: clear handoffs, escalation paths, override capabilities.
+- [ ] Robustness testing plan and results.
+- [ ] Cybersecurity controls documented.
+- [ ] Conformity assessment path chosen and documented.
+- [ ] EU database registration completed (when applicable).
+- [ ] Post-market monitoring plan, with signal definitions and incident response.
+
+For limited-risk:
+
+- [ ] AI-interaction disclosure UI.
+- [ ] Synthetic-content marking where applicable.
+- [ ] User-data flows compliant with GDPR.
+- [ ] Documentation light but consistent.
+
+## What kills compliance projects
+
+- **Treating it as legal-only.** The asks are technical. Legal can advise; engineers must build.
+- **Starting late.** The fines are real (up to 7% of global turnover). Backfilling logging and documentation under deadline pressure is brutal.
+- **Skipping the data-provenance work.** This is the most-skipped item and the one with the worst surprise cost. Document where training data came from before it's a deadline.
+- **Forgetting the model-update process.** When you upgrade your model, you re-run a slice of the conformity assessment. Build the workflow.
+
+## The non-EU question
+
+If you have no EU customers, you can skip. If you might in the future, build to the spec — it's a defensible global baseline and reduces switching cost later. California and other jurisdictions are heading toward similar frameworks. Building to the EU bar is conservative but cheaper than rebuilding twice.
+
+## Close
+
+The EU AI Act is a documentation and engineering project, not a legal panic. Most of the asks are good practice anyway: documented data provenance, comprehensive logging, human oversight, post-market monitoring. The teams treating it as engineering work are ahead of the teams treating it as legal work.
+
+## Related reading
+
+- [Agent observability](/blog/agent-observability) — the logging foundation.
+- [Eval ownership](/blog/eval-ownership) — the monitoring discipline.
+- [Privacy tests for AI](/blog/privacy-tests-ai) — adjacent compliance pattern.
+
+---
+
+*We help teams build AI products to regulatory standards without burying engineering velocity. [Get in touch](/contact).*

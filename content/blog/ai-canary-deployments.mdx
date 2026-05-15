@@ -1,0 +1,114 @@
+---
+title: "AI canary deployments: 1% traffic, 100% paranoia"
+description: "A canary release for an AI feature isn't the same as a canary for a service. Different failure modes, different gates."
+date: "2026-02-02"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Deployment", "Canary", "Production AI", "Engineering", "AI Engineering"]
+---
+
+A canary deployment is the standard pattern for releasing risky changes. You route a small slice of traffic to the new version, watch metrics, expand if things look good, rollback if not.
+
+AI canaries have a twist: most of what kills you isn't visible in the usual ops metrics. The model returns 200s, doesn't throw exceptions, has the same latency. It's just *worse* — wrong in a way the user notices and abandons.
+
+The canary needs to watch quality, not just liveness.
+
+## What to watch
+
+Standard ops metrics:
+
+- Error rate (5xx, timeouts).
+- P50/P95/P99 latency.
+- Resource usage (CPU, memory, token budget).
+
+AI-specific metrics:
+
+- **Eval pass rate on a live-shadow eval set.** Re-run on every canary expansion.
+- **Output schema-validation failure rate.** A new model that emits invalid JSON 0.5% more often is a problem.
+- **Refusal rate.** New models sometimes refuse benign queries the old one accepted.
+- **Average output length.** Drift in verbosity is a quality smell.
+- **Cost per request.** The new variant might be 3x more expensive.
+
+Combine these into a "canary health" rollup that the deploy system reads.
+
+## The shadow-eval pattern
+
+The cheapest quality canary: run the new variant in *shadow mode* on a percentage of live traffic. Both old and new variants generate outputs; the user sees the old one; the new one is logged for comparison.
+
+```python
+def serve(request):
+    primary = call_variant(current_variant, request)
+    if should_shadow(request):
+        # fire-and-forget; doesn't block the user
+        asyncio.create_task(shadow_call(canary_variant, request, primary))
+    return primary
+
+async def shadow_call(variant, request, primary_response):
+    canary_response = await call_variant(variant, request)
+    judge_result = await judge.compare(primary_response, canary_response)
+    log_shadow_result(variant, request, judge_result)
+```
+
+Shadow mode gives you statistical confidence before you serve a single user the new variant. Cost is paid for the shadow inference; users are protected.
+
+## Gates between canary stages
+
+We default to a four-stage canary:
+
+1. **Shadow only.** New variant runs in parallel; no user sees it.
+2. **1% serve.** Real traffic, real users, small slice.
+3. **10% serve.** Wider reach.
+4. **100% serve.** Full promotion.
+
+Each stage has gates:
+
+- Shadow → 1%: judge model agrees with primary on >X% of shadow comparisons; no schema-validation regression.
+- 1% → 10%: ops metrics within 5% of baseline; user-feedback metrics flat or up.
+- 10% → 100%: 72-hour soak with no anomalies; cost within budget.
+
+## The auto-rollback
+
+When a gate fails, the canary auto-rolls back. Don't make a human decide at 3 a.m.
+
+```python
+if (
+    canary_metrics.eval_pass_rate < baseline.eval_pass_rate - 0.02
+    or canary_metrics.error_rate > baseline.error_rate * 1.5
+    or canary_metrics.refusal_rate > baseline.refusal_rate + 0.05
+):
+    rollback_canary()
+    page_oncall("AI canary auto-rolled back: see dashboard")
+```
+
+The page goes out. The user sees the old variant. Tomorrow-you investigates without pressure.
+
+## What kills AI canary projects
+
+- **No shadow phase.** Going straight from 0% to 1% means real users get the regression first. Shadow first.
+- **Trusting the judge model blindly.** Judge models drift. Audit the judge with human reviewers periodically.
+- **Letting the canary linger.** If you can't decide in 72 hours, you're not measuring the right metrics. Force a decision.
+- **Canarying without an attribution log.** When something looks weird, you need to know which variant served which request.
+
+## The cost reality
+
+A shadow phase doubles your inference cost during the canary. That feels expensive until you avoid one bad deploy. The math is forgiving.
+
+To control the bill:
+
+- Shadow on a smaller traffic slice (1-2%) rather than all of it.
+- Sample-shadow on representative request types, not uniformly.
+- Cap the shadow phase duration explicitly.
+
+## Close
+
+AI canary deployments need a different toolkit than service canaries. The model returns 200s while being wrong. Shadow it, judge it, gate the expansion, auto-rollback when quality slips. The discipline pays for itself the first time it saves you.
+
+## Related reading
+
+- [AI feature flags](/blog/ai-feature-flags) — the flag layer this rides on.
+- [Agent rollback](/blog/agent-rollback) — what happens after the canary fails.
+- [Eval CI](/blog/eval-ci) — the eval suite that informs the gates.
+
+---
+
+*We help teams build canary infrastructure for AI features. [Get in touch](/contact).*

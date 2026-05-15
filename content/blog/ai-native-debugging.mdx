@@ -1,0 +1,82 @@
+---
+title: "AI-native debugging: the rubber duck got smarter"
+description: "Debugging is the slowest part of most engineers' day. AI changes the shape of the loop — but only if you change your habits."
+date: "2026-02-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Tools", "Debugging", "Developer Productivity", "Claude Code", "Engineering"]
+---
+
+A senior engineer we work with said something interesting last month. "I haven't `git bisect`-ed in six weeks."
+
+Not because she stopped having bugs. Because the bisect loop changed. She now drops the failing test output into Claude Code, gives it the diff between the working and broken commits, and asks it to point at the suspect range. It's not always right. But the loop is fifteen minutes instead of two hours.
+
+The rubber duck got smarter. The trick is using it like a duck — not like an oracle.
+
+## The shape of the new loop
+
+Traditional debugging:
+
+1. Reproduce locally.
+2. Add prints / breakpoints.
+3. Form a hypothesis.
+4. Test it.
+5. Refine.
+
+AI-augmented debugging:
+
+1. Reproduce locally.
+2. Paste the failure, the recent diff, and the relevant function into the assistant.
+3. Ask for *three* hypotheses, ranked by likelihood.
+4. Test the top one.
+5. Refine — but ask the assistant to update its ranking based on new evidence.
+
+The key shift is **plurality**. One hypothesis is the trap. Three hypotheses with reasoning is the unlock. You evaluate, you don't rubber-stamp.
+
+## What still requires a human
+
+- **Pinpointing the right repro.** AI is bad at "this only happens on Tuesdays after 3pm in the EU region." You frame the repro.
+- **Knowing the codebase's quirks.** The assistant doesn't know that this function silently swallows errors for legacy reasons. You do.
+- **Calling the model wrong.** AI is overconfident on patterns it's seen. The bug that looks like a null check might be a race condition. You smell the difference.
+
+The assistant does the syntax-pattern-matching work that used to take your morning. You keep the judgment work.
+
+## A short recipe
+
+Three habits that compound:
+
+**Always paste context, never describe it.** "The function returns a 500 for some users" is bad input. The actual function, the actual error, the actual log line is good input. Token cost is real but small compared to your time.
+
+**Ask for a ranked list of causes.** Force the model to commit to ordering. The act of ordering forces a model to compare — which is where reasoning shows up. A single-answer prompt encourages confabulation.
+
+**Treat the model's confidence as a smell.** If it sounds certain about a complex bug, doubt it. If it sounds uncertain about a simple bug, listen to the uncertainty.
+
+## What changes about your team
+
+Debugging used to be a private skill. The bug stayed in someone's head until they emerged with a fix. That doesn't scale, and it loses the lessons.
+
+When the assistant is in the loop, the transcript is the artifact. You can:
+
+- Paste the chat into the PR description.
+- Search past chats for similar bugs.
+- Hand off mid-debug because the model can re-summarize state.
+
+The bug fix gets faster. The institutional memory of *how* the bug was fixed gets vastly better.
+
+## What still costs you sleep
+
+Race conditions across services. Heisenbugs that don't reproduce. Memory leaks measured in MB-per-hour. Distributed-tracing puzzles. The assistant helps you triage but the deep work is yours. Don't outsource the part that makes you a senior engineer.
+
+## Close
+
+The AI-augmented debug loop isn't faster because the model is smarter than you. It's faster because hypothesis generation used to be a bottleneck, and now it's free. The bottleneck moves to selection — which is the part you were always good at anyway.
+
+## Related reading
+
+- [Senior engineer's day with Claude Code](/blog/senior-engineer-day-with-claude-code) — what the new shape of the day looks like.
+- [Getting started with Claude Code](/blog/getting-started-with-claude-code) — install + first hour.
+- [Plan vs act loop](/blog/plan-vs-act-loop) — when to think more before doing.
+
+---
+
+*We help engineering teams build AI-enabled developer tooling. If your debug loop still feels like 2019, [get in touch](/contact).*

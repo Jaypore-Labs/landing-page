@@ -1,0 +1,145 @@
+---
+title: "An AI-aware pull request template"
+description: "Code review for AI features needs different checks than code review for normal features. Bake them into the PR template."
+date: "2026-01-08"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Code Review", "Pull Requests", "AI Engineering", "Process", "Productivity"]
+---
+
+A team we work with had a quiet pattern emerge: their AI-feature PRs were getting approved without anyone reading them closely. The reviewer would scan the diff, see "model change" or "prompt update," and approve.
+
+Two production incidents later, they realized AI-feature PRs need different code-review questions than normal PRs. They updated their PR template. The incidents stopped.
+
+## What's different about AI PRs
+
+A PR that changes:
+
+- A prompt template
+- A system instruction
+- A model version
+- A retrieval index
+- Eval thresholds
+- A tool definition
+
+…has different failure modes than a PR that changes business logic. The reviewer needs different prompts to remember to check.
+
+## The template
+
+```markdown
+## Summary
+
+[What's changing and why]
+
+## AI-feature impact
+
+- [ ] Does this change a prompt, model, tool definition, retrieval index, or eval?
+- [ ] If yes, complete the sections below. If no, skip to standard checklist.
+
+### Prompt change
+
+- [ ] Diff of the prompt is in the PR (not just a reference)
+- [ ] Prompt version bumped
+- [ ] Token-count change measured (in/out estimates)
+- [ ] Eval suite run; pass rate noted: __%
+- [ ] Specific eval cases this targets / improves: ___
+
+### Model change
+
+- [ ] Model version pinned (not a floating tag)
+- [ ] Cost-per-call change estimated: __%
+- [ ] Latency P95 measured: __ms (before) / __ms (after)
+- [ ] Eval suite re-run; pass rate noted: __%
+- [ ] Rollback plan documented
+
+### Tool change
+
+- [ ] Tool schema diff in PR
+- [ ] Eval cases for new tool added
+- [ ] Authorization for new endpoints reviewed
+- [ ] Tool failure modes documented
+
+### Retrieval change
+
+- [ ] Index re-build plan
+- [ ] Backfill plan if changing embeddings
+- [ ] Retrieval eval scores noted: before/after
+
+### Eval change
+
+- [ ] If lowering a threshold: explicit reason
+- [ ] If adding a case: case rationale documented
+- [ ] If removing a case: explicit reason and approval
+
+## Standard checklist
+
+- [ ] Tests pass
+- [ ] Linter passes
+- [ ] No secrets in diff
+- [ ] Cost attribution `feature` field set
+- [ ] Logging changes reviewed
+- [ ] Privacy impact reviewed (if user data flows changed)
+
+## Rollback
+
+- [ ] Documented above for model/prompt changes
+- [ ] For other changes: standard revert
+
+## Reviewers
+
+- [ ] Eng lead
+- [ ] Product (if behavior-visible)
+- [ ] AI ops (if model/cost change)
+```
+
+The structure is verbose by design. The cost of a forgotten checkbox is much higher than the cost of seeing it on every PR.
+
+## The high-leverage items
+
+If you can only add four checks to your PR template, make them:
+
+1. **Prompt diff visible in the PR.** Forces reviewers to see the actual change.
+2. **Eval suite results.** No prompt or model change ships without an eval number.
+3. **Model version pinned.** No floating tags like `claude-3-sonnet-latest`.
+4. **Cost attribution field set.** Every new call has a `feature` tag.
+
+Those four catch 80% of the silent regressions we see.
+
+## The review process
+
+Three review patterns that compound:
+
+- **Two reviewers for prompt changes.** One technical, one product-aware. The prompt is the spec; both perspectives matter.
+- **Required eval-run as a check.** GitHub Actions runs the eval suite; the result posts as a check. PRs can't merge without it.
+- **Quarterly review of the template.** Add checks based on the incidents you've had. Remove checks that nobody marks anymore.
+
+## Automating the boring parts
+
+The template is overhead. Some of it can be automated:
+
+- A bot that detects prompt-file changes and auto-adds the prompt-change section.
+- A bot that runs the eval suite on PR open and posts results.
+- A bot that calculates token-count and cost deltas.
+
+The more you automate, the more the manual checkboxes become judgment calls only.
+
+## What kills templates
+
+- **Length.** A 50-checkbox template gets ignored. Keep it focused.
+- **Irrelevant sections.** "AI-feature impact" should only show when an AI file changed.
+- **Boilerplate filling.** People copy-paste the same answer. Force specific values (numbers, file paths).
+- **No enforcement.** If you can merge with unchecked boxes, the boxes are theater.
+
+## Close
+
+Code review for AI features is a different muscle than code review for business logic. The PR template is where you bake in the discipline. Update it after every incident. Make the boxes specific. Enforce the eval check. The next silent regression won't be silent.
+
+## Related reading
+
+- [Eval CI](/blog/eval-ci) — the CI pipeline this depends on.
+- [AI feature flags](/blog/ai-feature-flags) — the release-engineering side.
+- [Tech lead PR reviews](/blog/tech-lead-pr-reviews) — the broader review discipline.
+
+---
+
+*We help teams build the review discipline for AI features. [Get in touch](/contact).*

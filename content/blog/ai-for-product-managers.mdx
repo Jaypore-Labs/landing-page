@@ -1,0 +1,94 @@
+---
+title: "AI for product managers: the new PRD looks like an eval set"
+description: "The PRD has been the PM's main artifact for two decades. With AI features, the eval set replaces it as the load-bearing doc."
+date: "2026-01-14"
+author: "Yash Shah"
+category: "AI"
+tags: ["Product Management", "AI Engineering", "PRD", "Evals", "Leadership"]
+---
+
+A senior PM at one of our clients started a sentence with "the PRD says…" mid-debate. The engineer pushed back. "The PRD says nothing. The eval set says X."
+
+A small moment, but a generational one. The PRD is rapidly being replaced as the binding artifact for AI features. The eval set is now the spec.
+
+## Why the eval set is the spec
+
+Traditional product features are specified by behavior: "when the user clicks X, Y happens." Engineers can implement Y unambiguously. QA can verify.
+
+AI features can't be specified that way. The output is probabilistic, the input space is unbounded, and "Y happens" isn't a sentence. What you can say is:
+
+- **For these example inputs, here are acceptable outputs.**
+- **For these classes of input, the output must include X / must not include Y.**
+- **For these failure modes, here's what should happen instead.**
+
+That's an eval set, not a PRD. The eval set defines the feature.
+
+## What the PRD still does
+
+The PRD doesn't disappear. It does:
+
+- Articulate the *why* — why are we building this, for whom, against what business goal.
+- Describe the user flow — the surface, the touch points, the UI.
+- Specify non-AI behaviors — what happens when the AI is down, what permissions apply.
+- List the rollout plan, the metrics, the stakeholders.
+
+The PRD describes the product around the AI. The eval set describes the AI itself.
+
+## What an AI PM does differently
+
+**They write evals.** Not engineers writing them. Product writing them, engineers running them, product editing them. The eval set is the PM's primary artifact.
+
+**They look at outputs.** Every week. Not aggregated metrics — actual outputs. They develop taste for what good looks like in the product.
+
+**They negotiate quality thresholds.** "We will ship when 87% of cases in the eval set pass." That's a product call, informed by engineering's measurement.
+
+**They watch model upgrades.** A model upgrade is a release event. The PM is in the loop.
+
+**They own the prompt.** Or they own the spec of what the prompt should do. They don't outsource it to engineering and then complain about output.
+
+## The eval-set workshop
+
+A pattern we've taught teams: a 90-minute workshop to start an AI feature.
+
+1. PM brings the feature concept and 5 example inputs.
+2. Group brainstorms 15 more inputs across cases (typical, edge, adversarial).
+3. For each input, PM writes the ideal output.
+4. For each input, PM writes the unacceptable failure modes.
+5. PM commits the eval set to the repo.
+6. Engineering builds against it.
+
+Three follow-up workshops over the build cycle expand the eval set with new failure modes discovered along the way.
+
+## What PMs get wrong
+
+- **Treating the eval set as QA's job.** It isn't. QA verifies; the eval set defines.
+- **Quality threshold by vibes.** "It should be good." Specific numbers force trade-off conversations.
+- **No adversarial inputs.** The eval set is only typical inputs. The bad cases are where the model embarrasses you.
+- **Static eval sets.** Production traffic surfaces inputs you didn't anticipate. The eval set grows quarterly.
+
+## What changes about your PM career
+
+PMs who get fluent at writing and reading evals are dramatically more valuable than PMs who don't. The market is going to sort hard on this in the next two years.
+
+The skills:
+
+- Spotting failure modes from sample outputs.
+- Translating qualitative complaints ("it's confused") into testable assertions.
+- Negotiating quality vs. speed/cost with engineering.
+- Reading eval dashboards.
+
+None of these are technical. All of them are PM craft, adapted.
+
+## Close
+
+The PRD doesn't die. It cedes load-bearing status to the eval set for AI features. The PM who writes evals as a primary artifact ships better AI features and ships them faster. The PM who treats evals as someone else's problem ships worse and slower.
+
+## Related reading
+
+- [Building your first eval set](/blog/building-your-first-eval-set) — the practical starting point.
+- [Authoring eval cases](/blog/authoring-eval-cases) — eval craft.
+- [Prompts are recipes, not spells](/blog/prompts-are-recipes) — the writing discipline this rests on.
+
+---
+
+*We help product teams build the eval discipline that makes AI features ship. [Get in touch](/contact).*

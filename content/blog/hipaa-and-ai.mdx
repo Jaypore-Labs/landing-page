@@ -1,0 +1,101 @@
+---
+title: "HIPAA and AI: the BAA is the first conversation"
+description: "HIPAA was written for fax machines and filing cabinets. Applying it to AI is more conversation than code — and the conversation starts with the BAA."
+date: "2025-12-26"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["HIPAA", "Healthcare AI", "Compliance", "Regulation", "Engineering"]
+---
+
+A founder of a healthcare-AI startup asked us last fall how to "make our AI HIPAA-compliant." The honest answer is that HIPAA is a process, not a feature. The first conversation isn't with engineering. It's with whoever signs the BAA.
+
+## What HIPAA actually requires for AI
+
+HIPAA covers Protected Health Information (PHI) — anything that identifies a patient and relates to health, treatment, or payment. The Privacy Rule and Security Rule define what you can do with PHI and how you must protect it.
+
+For AI specifically, you need to address:
+
+- **BAA with every vendor that touches PHI.** Including model providers.
+- **Minimum-necessary disclosure.** Don't send more PHI to the model than the use case requires.
+- **Encryption in transit and at rest.** Standard but mandatory.
+- **Access controls and audit logs.** Who saw what PHI when.
+- **Breach-notification readiness.** If PHI leaks, you have 60 days to notify.
+
+None of this is AI-specific. It's HIPAA. The AI part is making sure your stack honors it.
+
+## The BAA question
+
+Business Associate Agreements are the legal lever HIPAA gives you. If a vendor touches PHI, you need a BAA with them. No BAA, no PHI.
+
+For model providers:
+
+- **OpenAI.** Offers a BAA for enterprise customers on specific APIs.
+- **Anthropic.** Offers a BAA for healthcare customers under specific terms.
+- **Azure OpenAI.** BAA via Microsoft.
+- **Bedrock (AWS).** BAA via AWS.
+- **Self-hosted open models.** No BAA needed — the data doesn't leave your infrastructure.
+
+Each has terms. Read them. Some don't permit using the data to improve models; some include explicit zero-data-retention provisions. Pick based on what fits your use case.
+
+## The minimum-necessary discipline
+
+The most-skipped HIPAA requirement in AI engineering. "Minimum necessary" means: send the model only the PHI required for the task.
+
+A scribe processing a clinical encounter needs the conversation. It doesn't need the patient's full chart history. It doesn't need the patient's SSN. It often doesn't even need the patient's name.
+
+Patterns that work:
+
+- **De-identify before sending.** Replace patient name with `[PATIENT]`, dates with `[DATE]`. The model can structure the note without the identifiers.
+- **Tokenize identifiers.** Map identifiers to opaque IDs; map back after model response.
+- **Use a redaction step.** A small fast model removes PHI from the input to a larger model.
+
+## Access controls
+
+Two patterns:
+
+- **PHI-aware logging.** The audit log records that PHI was accessed, by what feature, for what user — but doesn't store the PHI itself.
+- **Tenant isolation.** Multi-tenant systems must guarantee one customer's PHI never appears in another customer's session. This is harder than it sounds with shared model caches.
+
+## Breach readiness
+
+If PHI leaks, you have specific notification obligations: affected individuals, HHS, and (for large breaches) the media. The clock starts the day you discover or should have discovered.
+
+For AI specifically, three breach scenarios to plan for:
+
+- **Prompt-injection leak.** Attacker tricks the model into emitting another user's PHI.
+- **Caching leak.** Cached response from one user is served to another.
+- **Training-data leak.** PHI from an earlier session influences a later one (mostly a self-hosted-fine-tune concern).
+
+Each needs detection, response, and notification plans.
+
+## What HIPAA doesn't require
+
+Surprises:
+
+- **HIPAA doesn't require US-based hosting.** It requires appropriate safeguards. International data flows can be HIPAA-compliant with the right contracts.
+- **HIPAA doesn't ban AI.** It regulates how PHI is handled. AI is a tool.
+- **HIPAA doesn't define "AI compliant."** Vendors that advertise this are marketing. There's no certification. There are vendors that operate within HIPAA's framework.
+
+## The compliance partner
+
+For most healthcare-AI teams, the highest-leverage hire isn't an engineer. It's a healthcare-compliance consultant who reviews your data flows, your contracts, and your breach plans.
+
+Engineers who write code without a compliance review ship technically-correct, contractually-illegal products. The consultant pays for themselves in avoided rework.
+
+## State law
+
+HIPAA is federal. States have their own privacy laws — California's CMIA, New York's SHIELD, Texas's medical records act. Some are stricter than HIPAA. Build to the strictest of the regimes you operate in.
+
+## Close
+
+HIPAA is conversation as much as code. The BAA conversation, the minimum-necessary conversation, the breach-plan conversation. Get them right and the engineering becomes routine. Skip them and the engineering becomes a liability.
+
+## Related reading
+
+- [Agents in healthcare](/blog/agents-in-healthcare) — the practice patterns this supports.
+- [Privacy tests for AI](/blog/privacy-tests-ai) — adjacent compliance pattern.
+- [PII in test fixtures](/blog/pii-in-test-fixtures) — the engineering hygiene this requires.
+
+---
+
+*We help healthcare-AI teams ship compliantly. [Get in touch](/contact).*

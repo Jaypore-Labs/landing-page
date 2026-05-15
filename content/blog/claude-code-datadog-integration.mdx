@@ -1,0 +1,119 @@
+---
+title: "Claude Code + Datadog: 2 a.m. is for the agent now"
+description: "Wire Claude Code to Datadog and the on-call experience changes shape. Symptom to root cause in minutes, not hours."
+date: "2026-02-04"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Datadog", "MCP", "Observability", "On-call"]
+---
+
+The worst part of being on-call isn't the page. It's the next 20 minutes — staring at four dashboards, scrolling four log queries, building a mental model of what's happening while the alert keeps firing.
+
+Claude Code with the Datadog MCP server shortens that 20 minutes to 3. Same alert, same dashboards, but the agent does the scrolling.
+
+## What the agent can do
+
+- "There's a Datadog alert on payment-service P99 latency. Pull the relevant metrics, recent deploys, and error logs. Tell me what changed."
+- "Here's a service ID — pull last hour's error count, top error messages, and trace samples for the slowest 5 requests."
+- "Set up a 15-minute synthetic check on the checkout endpoint. Confirm it's reporting."
+- "Pull the last week's APM trace data for the orders endpoint. Group by route. Anything unusual?"
+
+The agent isn't replacing your on-call judgment. It's removing the typing.
+
+## Setup
+
+Datadog has a public API and a community MCP server.
+
+```bash
+npm install -g @datadog-mcp/server
+export DD_API_KEY=...
+export DD_APP_KEY=...
+```
+
+Config:
+
+```json
+{
+  "mcpServers": {
+    "datadog": {
+      "command": "datadog-mcp",
+      "env": {
+        "DD_API_KEY": "...",
+        "DD_APP_KEY": "...",
+        "DD_SITE": "datadoghq.com"
+      }
+    }
+  }
+}
+```
+
+Scope the API key tightly. Read-only for most use cases. The agent doesn't need to delete monitors.
+
+## The 2 a.m. recipe
+
+A specific prompt template that earns its keep on-call:
+
+```
+Datadog alert fired: {alert_text}
+
+1. Pull metrics for the affected service for the last 60 minutes.
+2. Pull error logs for the same window, top 5 unique errors.
+3. Pull recent deploys in the last 2 hours.
+4. Pull traces for the slowest 3 requests in the last 30 minutes.
+5. Cross-reference: is this a known issue per our runbooks?
+6. Tell me your top 3 hypotheses, ranked, with reasons.
+```
+
+Paste this with the alert and you get a triage doc in 30 seconds. You evaluate the hypotheses, run one query to confirm, and you're 80% to root cause.
+
+## What to keep manual
+
+- **Acknowledging the page.** That's an explicit responsibility signal. Don't automate.
+- **Restarting services.** The agent suggests, you click.
+- **Changing monitor thresholds during an incident.** That's a "we'll deal with this later" decision and tomorrow-you should be in the loop.
+- **Posting to status pages.** Customer-facing communication. Human.
+
+## The post-incident win
+
+The agent's transcript is the postmortem first draft. Three weeks ago we watched an on-call engineer copy a 45-minute Claude Code session into a postmortem doc, edit for tone, and ship in 20 minutes. Without the transcript, the postmortem would have taken an afternoon.
+
+A specific prompt template:
+
+```
+Draft a postmortem from this session and the incident timeline. Sections:
+- Summary (2 sentences)
+- Impact (users affected, duration, $cost)
+- Timeline
+- Root cause
+- Detection
+- Mitigation
+- Lessons learned
+- Action items with owners
+```
+
+The skeleton lives in your repo. The agent fills it in. You edit.
+
+## What changes about on-call rotation
+
+The team's on-call rotation becomes more humane, in practice:
+
+- Pages still arrive at 2 a.m. (the universe is uncaring).
+- The mental cost of *responding* drops.
+- Postmortems get written within 48 hours instead of 2 weeks.
+- Action items accumulate less because triage detail is better.
+
+We've seen on-call engineer NPS go up after this integration. Real.
+
+## Close
+
+Datadog has the data. You have the judgment. The agent is the typing pool that does the dashboard digging while you think. Wire it up before the next page.
+
+## Related reading
+
+- [Claude Code + Sentry](/blog/claude-code-sentry-integration) — adjacent integration for error tracking.
+- [SRE postmortem drafts](/blog/sre-postmortem-drafts) — postmortem workflow.
+- [Devops CI 2am diagnosis](/blog/devops-ci-2am-diagnosis) — adjacent on-call pattern.
+
+---
+
+*We help teams wire AI into their on-call rotation without losing the humans. [Get in touch](/contact).*

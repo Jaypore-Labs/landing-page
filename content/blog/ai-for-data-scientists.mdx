@@ -1,0 +1,97 @@
+---
+title: "AI for data scientists: notebooks are the new IDE"
+description: "Data scientists were the first 'AI engineers.' AI tooling is now reshaping their craft too — and the shape of a data team in 2026 is different than it was in 2022."
+date: "2025-12-31"
+author: "Yash Shah"
+category: "AI"
+tags: ["Data Science", "AI Tools", "Notebooks", "Analytics", "Workflow"]
+---
+
+A senior data scientist we know described her last quarter: "I haven't written a SQL query from scratch in two months. I describe what I want, the agent drafts, I refine. I have time for the actual analysis now."
+
+Data scientists were the first AI engineers — they trained models long before LLMs were a category. AI is now reshaping their day-to-day craft, and the shape of a 2026 data team is different than it was in 2022.
+
+## What AI does well for data work
+
+**SQL drafting.** Natural-language → SQL. The agent reads your warehouse schema, drafts the query, you refine. Time per ad-hoc question drops from 20 minutes to 2.
+
+**Notebook scaffolding.** "Set up an analysis comparing conversion rate by region for the last 60 days." The agent generates the cells, the queries, the plots. You edit.
+
+**Statistical sanity checks.** "Run an Anderson-Darling normality test on this column. Suggest the next test based on the result." The agent walks you through the standard checks.
+
+**Feature engineering.** "Suggest 10 features from these columns that might predict churn." Brainstorm partner; you select and validate.
+
+**Documentation.** Notebook markdown cells, analysis writeups, model cards. The agent drafts; you fact-check.
+
+**Reproducibility tooling.** Generating the data-dictionary, the README, the environment file. Boring; high time saving.
+
+## What AI doesn't do
+
+- **Pick the question.** "Why is retention dropping?" is the analyst's question. The agent helps execute, not frame.
+- **Decide what's significant.** Statistical significance is one input; the analyst decides what matters to the business.
+- **Build trust with stakeholders.** That's a relationship, not a query.
+- **Replace deep ML work.** Model architecture, training-data curation, evaluation — still skilled human work.
+
+## The new daily rhythm
+
+The senior DS we mentioned:
+
+- Morning: 4-5 ad-hoc questions from PMs and execs. Each answered with agent-drafted SQL + plot in 5-10 minutes.
+- Afternoon: Deep work on the actual analysis project. Agent helps with feature engineering, model evaluation, writeup.
+- Less time at keyboards; more time on phone with stakeholders.
+
+The fast-twitch reactive work compresses; the deliberate strategic work expands.
+
+## The skill shift
+
+Three skills that matter more than they used to:
+
+- **SQL literacy** for editing the agent's output. You still need to read it.
+- **Statistical judgment** for spotting when the agent's analysis is wrong. The agent will confidently run the wrong test.
+- **Communication.** With more bandwidth to deliver, the bottleneck moves to landing the message.
+
+Three skills that matter less:
+
+- **Typing fast.** No.
+- **Memorizing SQL syntax.** No.
+- **Routine plot-generation craft.** No.
+
+## What changes about the team
+
+The data team's shape in 2026:
+
+- Senior data scientists with stronger business judgment and AI fluency.
+- Analytics engineers building the warehouse and the semantic layer.
+- Fewer "execution" analysts; their work compressed into agent-led queries from PMs directly.
+
+The "self-serve analytics" promise of 2014 — let business teams query data themselves — never worked because business teams couldn't write SQL. With an AI layer between them and the warehouse, self-serve actually ships. The analyst's role moves up the value chain.
+
+## The risks
+
+**Wrong-confident SQL.** The agent will write SQL that runs and returns plausible-looking but wrong results. Schema understanding matters; data lineage matters.
+
+**Statistical anti-patterns.** The agent doesn't always know when to use which test. Treat suggestions as drafts, not authoritative.
+
+**Knowledge atrophy.** If you never write SQL from scratch, will you forget how? Yes, somewhat. The trade-off is real. Pair work with AI-light sessions to keep the muscle.
+
+**Stakeholder over-reliance.** If a PM gets answers from the agent without an analyst's mediation, they may run with wrong conclusions. The analyst remains the trust layer.
+
+## The dbt question
+
+dbt and the modern data stack remain critical infrastructure. AI doesn't replace dbt; it makes dbt more accessible. The agent reads dbt models to understand what data exists, drafts queries that use those models correctly, and suggests new models when patterns repeat.
+
+A well-organized dbt project gives the agent the semantic layer it needs. Without one, the agent is querying raw tables and producing fragile analysis.
+
+## Close
+
+Data scientists are the engineers who saw AI coming first. The reshaping of their day is well underway. The ones leaning in are producing more analysis, with more impact, in less time. The ones resisting are doing the same work slower than the ones who didn't.
+
+## Related reading
+
+- [AI for product managers](/blog/ai-for-product-managers) — adjacent role evolution.
+- [AI for designers](/blog/ai-for-designers) — adjacent role evolution.
+- [Data SQL refactor lineage](/blog/data-sql-refactor-lineage) — adjacent technical pattern.
+
+---
+
+*We work with data teams on AI-augmented analytics workflows. [Get in touch](/contact).*

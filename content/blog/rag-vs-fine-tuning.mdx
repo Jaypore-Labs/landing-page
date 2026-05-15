@@ -1,0 +1,102 @@
+---
+title: "RAG vs. fine-tuning: a 90% decision tree"
+description: "Teams spend weeks debating RAG vs. fine-tuning. The decision is 90% of the time obvious. Here's the tree."
+date: "2026-01-22"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["RAG", "Fine-tuning", "AI Engineering", "Architecture", "LLM"]
+---
+
+The RAG-or-fine-tune debate is one of the most-wasted conversations in AI engineering. Most cases have an obvious answer. The remaining few benefit from doing both.
+
+Here's the decision tree we use with teams. It saves weeks of analysis paralysis.
+
+## Start: what are you trying to achieve?
+
+**"I want the model to know our internal docs."**
+→ RAG. Always. Don't fine-tune documents.
+
+**"I want the model to write in our company voice."**
+→ Few-shot prompting first. Fine-tune if few-shot isn't enough after real testing.
+
+**"I want the model to output a specific JSON shape."**
+→ Structured-output features in the model + prompt engineering. Fine-tune only if accuracy on schema is consistently below your floor.
+
+**"I want the model to handle a domain-specific language (legal, medical, financial)."**
+→ RAG first with domain context. Fine-tune if your evals show consistent gaps after RAG is well-tuned.
+
+**"I want the model to be cheaper or faster."**
+→ Fine-tune a small model. This is the most legitimate case for fine-tuning today.
+
+**"I want the model to be more accurate on my niche task."**
+→ Try RAG + better prompting + better retrieval first. If you've genuinely exhausted those, then fine-tune.
+
+## The hierarchy
+
+For any problem, try in order:
+
+1. **Prompt engineering.** A better prompt frequently solves the problem. Free, fast, debuggable.
+2. **Few-shot examples.** Add 3-7 examples to the prompt. Often solves voice/format problems.
+3. **RAG.** Retrieves the relevant facts. Solves knowledge problems.
+4. **Fine-tuning.** Reshapes the model's behavior. Solves consistency-of-output problems.
+
+Most teams jump to step 4 because it sounds like the most sophisticated answer. Sophistication isn't the goal. Shipping is.
+
+## Why RAG beats fine-tuning for knowledge
+
+**Documents change.** Your help docs get updated weekly. A fine-tune is frozen at training time. Re-training every week is expensive and slow. Retrieval reads the current docs.
+
+**Provenance.** RAG lets you cite. The user sees which doc the answer came from. Fine-tuning collapses sources into model weights.
+
+**Updates are cheap.** Adding a new policy doc to RAG is a re-index. Adding it to a fine-tune is a re-train.
+
+**Audit.** When the answer is wrong, you can trace it. With fine-tuning, the bug is buried in weights.
+
+## When fine-tuning genuinely helps
+
+- **Format consistency.** You need every output to match a strict shape. Fine-tuning beats prompting at high volume.
+- **Style/voice.** Brand voice that's distinctive and hard to convey in a prompt. Fine-tune on examples of the voice.
+- **Cost.** Fine-tuning a 7B to match a frontier-model output on a specific task. Inference is 10-30x cheaper.
+- **Latency.** Smaller fine-tuned models run faster.
+- **Tool use.** Fine-tuning on tool-call sequences for very high-volume agents.
+
+## The "do both" pattern
+
+The teams shipping the most impressive AI features in 2026 typically combine:
+
+- RAG for knowledge.
+- Fine-tuning for format/voice consistency.
+- Prompt engineering for the system instructions on top.
+
+The combination outperforms either alone for complex use cases. The order of construction is: prompt → RAG → fine-tune. Each layer addresses a different problem.
+
+## The cost reality
+
+| Approach | Engineering days | Recurring cost | Update cost |
+|---|---|---|---|
+| Prompt engineering | 1-2 | $ | minutes |
+| Few-shot | 1-3 | $$ | minutes |
+| RAG | 5-15 | $$ | hours |
+| Fine-tuning | 15-60 | $$$ | days to weeks |
+
+The further down the list, the more expensive to build and to maintain. Justify the trip with measured eval improvements you couldn't get higher up.
+
+## The trap
+
+The trap that consumes months of teams' time: fine-tuning before exhausting RAG. We've seen teams spend a quarter fine-tuning a model to do retrieval, when a 3-day RAG implementation would have outperformed it.
+
+Fine-tuning is a hammer. Not every problem is a nail.
+
+## Close
+
+Most cases have an obvious answer once you ask the right question. RAG for knowledge, prompt-engineering for behavior, fine-tuning when measurement says the others failed. Walk down the hierarchy in order; don't skip rungs.
+
+## Related reading
+
+- [RAG is a public library](/blog/rag-is-a-public-library) — the conceptual frame for RAG.
+- [Embedding model selection](/blog/embedding-model-selection) — picking the retrieval stack.
+- [Small models are underrated](/blog/small-models-are-underrated) — when fine-tuning makes sense.
+
+---
+
+*We help teams pick the right AI architecture without months of fine-tuning experiments. [Get in touch](/contact).*

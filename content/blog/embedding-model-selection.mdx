@@ -1,0 +1,93 @@
+---
+title: "Embedding model selection: the 5-minute decision tree"
+description: "There are too many embedding models. Most teams pick wrong by overthinking it. A decision tree to short-circuit the analysis."
+date: "2026-01-29"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Embeddings", "Vector Search", "AI Engineering", "RAG", "Selection"]
+---
+
+Every team we work with on retrieval asks the same question early: which embedding model? They've read MTEB rankings, seen Twitter takes on Cohere v3 vs. OpenAI v3, and they're stuck.
+
+The honest answer is: most embedding choices don't matter for your first version. Pick something reasonable, ship, measure on *your* data, iterate. The decision tree below gets you there in five minutes.
+
+## The decision tree
+
+**Start here.** What's your retrieval domain?
+
+- **General text** (English, mixed sources): use `text-embedding-3-small` or `voyage-3-lite`. Cheap, fast, fine.
+- **Multilingual**: `cohere-embed-multilingual-v3` or `voyage-multilingual-2`. Don't try to make a single-language model multilingual; you'll lose.
+- **Code**: `voyage-code-2` or `jina-embeddings-v2-base-code`. Code embeddings are domain-specific.
+- **Legal / financial / medical**: start with `voyage-3-large` or domain-fine-tuned models. The general models lose on domain jargon.
+
+**Then:** what's your scale?
+
+- < 100k documents: any of the above; the cost is rounding error.
+- 100k - 10M: optimize on cost/dim. Smaller embeddings (768 or 1024 dim) save real money in vector DB storage and search.
+- > 10M: you should be talking to a specialist. Email us; this is not a 5-minute decision anymore.
+
+**Then:** what's your latency budget?
+
+- < 100ms for embedding generation: stay with the small/fast models. Hosted, not self-hosted.
+- 100-500ms: you have flexibility.
+- Batch only (no real-time embedding): self-hosted is in play if you're large enough.
+
+## What this decision tree skips on purpose
+
+- **The chase for 1-2 MTEB points.** MTEB is a benchmark, not your task. The best general-purpose embedder on a leaderboard is often *worse* on your specific corpus.
+- **Reranking model choice.** Different decision. Rerank later.
+- **Dimension reduction.** Useful at scale, irrelevant for v1.
+
+## How to actually measure on your data
+
+A 30-minute test:
+
+1. Take 100 representative queries with hand-labeled "correct" documents.
+2. Embed your corpus with two candidate models.
+3. Run the queries, record top-10 retrieval per model.
+4. Compute MRR or nDCG against your labels.
+5. Pick the higher-scoring model. If they're within 2 points, pick the cheaper.
+
+The labels are the most-skipped step. Without them, you're flying blind. Spend an afternoon making 100 good labels — it pays for itself ten times over.
+
+## When to fine-tune your own embedding model
+
+Almost never. Three conditions all need to be true:
+
+- You have > 500k labeled query-document pairs.
+- Your domain is jargon-dense (legal, medical, specific industries).
+- You've already tried the domain-specialist models from Voyage, Cohere, Jina.
+
+If any is missing, fine-tuning will eat months and underperform.
+
+## The dimension question
+
+768, 1024, 1536, 3072 — which? In order of preference for most use cases:
+
+- 1024: the sweet spot for cost and quality in 2026.
+- 768: noticeably cheaper at scale; small quality drop.
+- 1536+: marginal quality gain; storage and search cost goes up significantly.
+
+If your retrieval is over 5M documents, the dimension choice matters for the vector DB bill. Otherwise it's a rounding error.
+
+## Vendor lock-in
+
+Embedding models are the most vendor-lock-in part of your AI stack. If you re-embed everything when you change vendors, you've got a project. Mitigations:
+
+- Keep raw documents; embeddings are derived. Always re-embeddable.
+- Use a model agnostic vector DB (pgvector, Qdrant, Chroma).
+- Plan re-embeddings on a schedule (once every year or two).
+
+## Close
+
+Embedding model choice is one of the most over-thought decisions in AI engineering. The 80/20 answer is `text-embedding-3-small` for English, dimension 1024, hosted, with a 30-minute eval on your own data before committing. The remaining 20% of edge cases need real measurement, but most teams aren't in that 20% and shouldn't pretend to be.
+
+## Related reading
+
+- [Vector DB architecture](/blog/vector-db-architecture) — what to embed *into*.
+- [RAG is a public library](/blog/rag-is-a-public-library) — the broader retrieval frame.
+- [Tests for retrieval](/blog/tests-for-retrieval) — the eval discipline this requires.
+
+---
+
+*We help teams pick embedding stacks and skip the analysis paralysis. [Get in touch](/contact).*

@@ -1,0 +1,95 @@
+---
+title: "Multi-model routing: the dispatcher pattern for LLMs"
+description: "Routing requests to the right model is the cheapest performance and cost win available to most teams. Here's the dispatcher pattern."
+date: "2026-02-20"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["LLM", "Routing", "Architecture", "AI Engineering", "Cost Optimization"]
+---
+
+A team we worked with had three models in production: a fast small model, a balanced mid-size, and a frontier-grade model. Every request went through all three for "quality." It worked. It was also four times the cost it needed to be.
+
+The dispatcher pattern is older than LLMs. The web has used it for two decades to route HTTP requests. The shape transfers cleanly to multi-model AI.
+
+## What a dispatcher does
+
+A single component sits in front of your model fleet. Every request flows through it. The dispatcher decides:
+
+- Which model to call.
+- Whether to retry on a different model on failure.
+- Whether to call a cheap model first and escalate.
+- Whether to call models in parallel and pick the winner.
+
+The decision is data: a config, a policy, sometimes a small classifier. Not a hand-coded switch buried in a service.
+
+## A minimal dispatcher
+
+```python
+class Dispatcher:
+    def __init__(self, policy):
+        self.policy = policy  # dict of routing rules
+
+    async def call(self, request):
+        route = self.policy.choose(request)
+        # route: {"model": "...", "fallback": "...", "max_retries": int}
+        try:
+            return await self.call_model(route.model, request)
+        except RateLimitError:
+            return await self.call_model(route.fallback, request)
+        except ModelError as e:
+            if request.retries_left > 0:
+                return await self.call(request.bump_retry())
+            raise
+
+    def call_model(self, model, request):
+        # actual provider call goes here
+        ...
+```
+
+The policy is the interesting part. Simple policies that earn their keep:
+
+- **Task-based.** Classification → small model. Code generation → mid. Long-context reasoning → large.
+- **Confidence-based.** Always start small. If the small model's confidence is below threshold, escalate.
+- **Cost-budget-based.** Track per-user/tenant cost. If they're over budget, force smaller models.
+- **Latency-based.** If P99 of small is below 200ms and quality is acceptable, prefer it.
+
+## Three patterns that ship
+
+**Cascade.** Cheapest model first. If output fails validation (schema, confidence, judge model), escalate to next tier. Saves 60-80% on cost in our experience for high-volume tasks.
+
+**Parallel-pick-best.** Call 2-3 models, pick the best via a judge model or simple heuristic. More expensive but lower latency than a serial cascade. Useful for high-stakes interactive flows.
+
+**Failover.** Primary model with a fallback when rate-limited or down. Doesn't save money — buys reliability. Mandatory for production.
+
+## What you need to make routing safe
+
+- **Same prompt format across models.** If you have model-specific prompt fragments, hide them in adapters. The dispatcher shouldn't care.
+- **Same eval set across models.** When you change routing, the same eval re-runs on the new path. No surprises in production.
+- **Logging at the dispatcher level.** Which model was chosen, why, what happened. This log is where most of your cost optimization comes from.
+- **A kill switch.** If a model is misbehaving, you flip it off in the policy without redeploying.
+
+## What kills router projects
+
+- **Routing on prompt tokens.** "If the prompt contains the word 'creative', use the big model." This breaks the moment prompts evolve.
+- **Hard-coding the policy in the application.** Move it to config. Move it to a database eventually. The policy should change without redeploying.
+- **Ignoring the warm-up.** A "cheap" model that's only used 5% of the time has cold-start penalties. Either keep it warm or accept the latency hit in the policy.
+
+## The economics
+
+For a high-volume team, the cascade pattern alone usually saves 40-70% on monthly inference cost without measurable quality loss. The dispatcher itself is a few hundred lines of code. The ROI is excellent.
+
+For a low-volume team, routing is mostly about reliability — failover and rate-limit handling. The cost savings are smaller; the uptime improvement is real.
+
+## Close
+
+Multi-model routing is one of the cheapest, highest-leverage architectural shifts in AI engineering. You don't need a new model. You don't need a new prompt. You need a dispatcher with a policy and a log. It pays for itself in a month.
+
+## Related reading
+
+- [Small models are underrated](/blog/small-models-are-underrated) — the case for putting cheap models in the cascade.
+- [Fallback chains](/blog/fallback-chains) — adjacent pattern.
+- [Cost guardrails](/blog/cost-guardrails) — the bill discipline this routing supports.
+
+---
+
+*We help teams design model-routing layers that save money without losing quality. [Get in touch](/contact).*

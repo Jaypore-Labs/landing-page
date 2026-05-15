@@ -1,0 +1,95 @@
+---
+title: "Claude Code + Notion: docs become structured data"
+description: "Notion is most teams' second brain. Wire Claude Code in and the second brain stops being write-only."
+date: "2026-02-16"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Notion", "MCP", "Documentation", "Integrations"]
+---
+
+Most teams' Notion is a write-only graveyard. Pages get created, linked once, never read again. The information is there. The retrieval isn't.
+
+Claude Code with the Notion MCP server turns that graveyard into a queryable surface.
+
+## What's possible after a 20-minute setup
+
+- "Find the design doc for the inventory service. Summarize the three key decisions."
+- "Pull the last three retro pages. What action items are still open?"
+- "Read the engineering wiki page on our deploy process. Walk me through it step by step."
+- "Draft a doc for the new MCP server I just built, modeled after our 'service template' page."
+
+The shift: Notion stops being where you put things and starts being where you ask things.
+
+## Setup
+
+```bash
+npm install -g @notionhq/mcp-server
+```
+
+Generate a Notion integration token, give it access to the workspaces/pages you want to expose.
+
+```json
+{
+  "mcpServers": {
+    "notion": {
+      "command": "notion-mcp",
+      "env": {
+        "NOTION_TOKEN": "secret_xxx",
+        "NOTION_DATABASES": "engineering-wiki,retros,design-docs"
+      }
+    }
+  }
+}
+```
+
+Verify: "List the last 5 pages I created in Notion." Should return them with titles and dates.
+
+## Prompts that earn rent
+
+**Knowledge retrieval.** "I'm working on the inventory service. Find every Notion page that references it — design docs, postmortems, retros. Summarize what I should know."
+
+**Retro action audit.** "Pull retros from the last quarter. List every action item, who owned it, and check our project board to see whether it shipped."
+
+**Doc consistency check.** "Read our engineering wiki on the deploy process. Compare to what our actual GitHub Actions yaml does. Flag mismatches."
+
+**Doc drafting.** "I just added a feature flag system. Look at our service-template page format. Draft a Notion doc for the feature flag system in the same format."
+
+## The killer use case: stale-doc detection
+
+Notion pages rot. Three patterns the agent catches:
+
+- Pages last edited > 12 months ago that are still linked from current pages.
+- Pages that reference deprecated services.
+- Pages with stale code blocks that don't match the current repo.
+
+A monthly prompt: "Find Notion pages in the engineering wiki that reference services we've deprecated. List them with their last-edited date." Triage from there.
+
+## What to keep manual
+
+- **Page deletion.** Never let the agent delete pages. Archive yes, delete no.
+- **Permission changes.** Page access is a security boundary. The agent surfaces who has access; humans change it.
+- **Cross-workspace moves.** Notion's workspace model is fragile. Don't move pages programmatically.
+
+## Performance
+
+Notion's API is rate-limited and slow on deep page reads. Tactics:
+
+- **Index database queries first.** Pulling a database with 1,000 rows is one query. Pulling 1,000 individual page reads is throttled.
+- **Cache page content.** The MCP server should cache page bodies for a configurable window. We default to 1 hour.
+- **Batch reads.** When the agent needs many pages, batch the API calls.
+
+For high-volume use cases (continuous doc QA, daily wiki rebuilds), use Notion's export API and pre-load content into a vector store. The MCP integration is the live layer; the vector store is the cold layer.
+
+## Close
+
+Notion + Claude Code makes the documentation tax pay you back. The same docs you wrote when you joined the company become a queryable knowledge base. The setup is one workspace install and three lines of config. ROI is hours per week per engineer.
+
+## Related reading
+
+- [Claude Code + Linear](/blog/claude-code-linear-integration) — pairs with this for the full work loop.
+- [Effective MCP patterns](/blog/effective-mcp-patterns) — the patterns this relies on.
+- [The AI productivity playbook](/blog/ai-productivity-playbook) — broader workflow.
+
+---
+
+*We help teams wire AI into Notion and the rest of their stack. [Get in touch](/contact) if your second brain feels write-only.*

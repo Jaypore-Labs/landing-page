@@ -1,0 +1,94 @@
+---
+title: "Claude Code + Slack: standups, escalations, and the back-channel"
+description: "Slack is where work is discussed. Wire Claude Code in and the discussion gets searchable, summarizable, and actionable."
+date: "2026-02-11"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Slack", "MCP", "Productivity", "Integrations"]
+---
+
+A common pattern in teams that ship fast: Slack is the system of record for work-in-progress conversations. Tickets and PRs are the formal artifacts; Slack is where the actual problem-solving happens.
+
+That makes Slack a goldmine for an agent. The integration changes what you can do in a single command — search, summarize, escalate, draft.
+
+## What you can do after setup
+
+- "Find Slack discussions from the last 72 hours about the payment service. Summarize what people are worried about."
+- "I'm being asked to triage this incident. Who in the channel has touched this code recently?"
+- "Draft a status update for #engineering based on my activity since Monday."
+- "Search the back-channel for any mention of customer 'Acme' in the last month."
+
+## Setup
+
+Use Slack's official MCP server or the community version. We default to the community one for the flexibility.
+
+```bash
+npm install -g @slack-mcp/server
+```
+
+Generate a Slack app token (xoxb-, with channels:history, chat:write scopes), and:
+
+```json
+{
+  "mcpServers": {
+    "slack": {
+      "command": "slack-mcp",
+      "env": {
+        "SLACK_BOT_TOKEN": "xoxb-...",
+        "SLACK_TEAM_ID": "T..."
+      }
+    }
+  }
+}
+```
+
+## Prompts that earn rent
+
+**Context recovery.** "I just joined the #incidents channel mid-thread. Summarize what happened and what's been tried." The agent reads the channel and condenses.
+
+**Decision archaeology.** "Search Slack for discussions in #architecture from the last 6 months about Kafka vs. Kinesis. What was the decision and why?" Surfaces the rationale; helps newcomers.
+
+**Who-to-ask.** "I have a question about the inventory service's caching layer. Who's been most active in those threads this quarter?" Smarter than digging through git blame for a Slack handle.
+
+**Draft-and-confirm.** "Draft a Slack message to #product summarizing this PR. Mention @design-lead. Don't send — show me first."
+
+## What to keep manual
+
+- **Sending the message.** The agent drafts; you send. Slack messages are social signals. The cost of an awkward one is real.
+- **DMs.** Don't let the agent read or send DMs without explicit per-call consent. Privacy and trust.
+- **Channel creation, archival.** Workspace state is sensitive.
+- **Reaction emojis.** Honestly, just keep this manual. The agent will always pick the wrong one.
+
+## Privacy and retention
+
+Three rules we apply with every team:
+
+- **Scope the bot's channel access.** Bot in `#engineering`, not in `#exec` or `#hr`.
+- **Don't store Slack content in your own DBs without explicit policy.** The MCP server should query Slack live, not mirror.
+- **Audit log every search.** Who asked the agent about what. Reviewable.
+
+The integration is powerful. That's exactly why it should be careful.
+
+## The async-status pattern
+
+The biggest single win we've seen with Slack integration is async standups. Instead of a meeting:
+
+- Each engineer's local agent drafts a status from their commits, PRs, Linear activity, and Slack messages.
+- The draft posts to a thread in #standup before 10 AM.
+- Manager scans, asks follow-ups in-thread.
+
+Real cost: 5 minutes per engineer per day, vs. 15 minutes of synchronous meeting. Compound that across a 30-person team.
+
+## Close
+
+Slack as a knowledge graph is most companies' biggest unexploited asset. The integration pays for itself in the first month. Setup is shallow; trust boundaries matter; the wins are weekly.
+
+## Related reading
+
+- [Claude Code + Linear](/blog/claude-code-linear-integration) — pairs with this for the full work loop.
+- [The AI productivity playbook](/blog/ai-productivity-playbook) — broader workflow.
+- [Effective MCP patterns](/blog/effective-mcp-patterns) — the patterns this relies on.
+
+---
+
+*We help teams wire AI into Slack carefully. [Get in touch](/contact) to skip the trust pitfalls.*

@@ -1,0 +1,98 @@
+---
+title: "Agents in dental practice: chart, code, and call"
+description: "Dental practices spend an hour of admin for every hour of clinical work. The agent compresses three of those admin tasks."
+date: "2026-01-09"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Dental", "Healthcare AI", "Practice Management", "Industry"]
+---
+
+Dental practices are healthcare's most overlooked AI customer. They have all the documentation burden of primary care, none of the prestige funding, and an above-average tolerance for new tools.
+
+A practice we work with has six chairs and eleven hours of admin daily across the staff. The agent has reduced that by 40% in nine months.
+
+## Three tasks AI compresses
+
+**Charting.** Dentists narrate findings during the exam. The agent transcribes, structures into the practice's chart format, and queues for sign-off. A 12-minute charting task becomes 90 seconds of review.
+
+**Coding.** Dental procedures have specific CDT codes for insurance billing. The agent draft codes based on the chart and the procedure performed. Coder reviews; billing team submits. Coding errors are the #1 reason claims get denied.
+
+**Patient communication.** Appointment reminders, post-op care instructions, recall scheduling, treatment plan presentations. The agent drafts; the practice's office manager edits and sends.
+
+## A typical workflow
+
+```
+[chair-side mic] → [STT with dental vocabulary: tooth numbers, surfaces, procedures]
+                 → [LLM: structure into practice's chart format]
+                 → [draft CDT codes based on chart]
+                 → [validate: code-procedure consistency, frequency limits]
+                 → [dentist reviews + signs]
+                 → [auto-generate: insurance claim draft, recall task, patient communication]
+                 → [office staff reviews each output, sends]
+```
+
+The dentist's interaction is the chair-side narration and a 30-second post-exam review. Everything else runs in the background.
+
+## What the patient sees
+
+A small change: the post-visit email arrives within 30 minutes of the appointment, not the next day. It's personalized to what happened. Recall scheduling links are filled in. Treatment plan PDFs are attached.
+
+Patients notice. NPS for practices using AI scribing rises measurably.
+
+## The economics
+
+For a six-chair practice doing $4M/year:
+
+- Admin staff hours saved: ~22 hours/week
+- Annual savings (loaded cost): ~$80K-$100K
+- Insurance claim accuracy improvement: 3-7%, often $30K-$50K in recovered revenue
+- Cost of the AI tooling: $1,500-$3,000/month
+
+ROI is typically 6-9 months. Most practices we work with have payback within a year.
+
+## What AI doesn't do
+
+- **Diagnose.** Reading X-rays is supervised by the dentist or assistant. AI X-ray readers exist (Pearl, Overjet) but as decision support, not decision.
+- **Treatment planning.** A treatment plan is the dentist's clinical judgment.
+- **Patient consent conversations.** Always human.
+- **Pediatric calming.** Nope.
+
+## Adoption gotchas
+
+- **Practice management system integration.** Most dental PMS (Dentrix, Eaglesoft, Open Dental) are old. Connectors are the bottleneck.
+- **Staff training.** Front-desk and clinical staff need to learn to trust the agent's drafts.
+- **HIPAA compliance.** Vendor BAA, encryption-at-rest, audit logging. Standard but non-negotiable.
+- **Insurance verification still requires humans.** AI drafts the claim; humans navigate the carrier's portal.
+
+## The DSO angle
+
+Dental Support Organizations (DSOs) — corporate practice groups — are aggressive adopters of AI tooling for the same reason any chain is: economies of scale on tooling investment.
+
+A DSO with 50 practices that rolls out an AI scribe sees 50x the headcount savings of a solo practice. The implementation budget is also 50x larger. The math works.
+
+Solo practices get the same per-practice savings but pay closer to retail for the tooling.
+
+## What clinicians want
+
+The dentist's wishlist, consistent across our conversations:
+
+- More time per patient.
+- Charts that don't pile up.
+- Cleaner claims, fewer denials.
+- A practice that runs without them being there every hour.
+
+The agent delivers each of these. The dentist still does the dentistry. Everyone wins.
+
+## Close
+
+Dental AI in 2026 is one of the clearest unit-economics wins in healthcare. The patterns are mature, the integrations are tractable, the savings are real. Practices that haven't adopted yet are leaving 5-10% of revenue on the table to admin overhead.
+
+## Related reading
+
+- [Agents in veterinary medicine](/blog/agents-in-veterinary) — adjacent scribe pattern.
+- [Agents in healthcare](/blog/agents-in-healthcare) — broader healthcare frame.
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the framing.
+
+---
+
+*We build AI for dental practices and DSO chains. [Get in touch](/contact).*

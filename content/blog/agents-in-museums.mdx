@@ -1,0 +1,79 @@
+---
+title: "Agents in museums: catalog, conservation, and the curator"
+description: "Museums sit on 90% of their collection in storage. AI is the cheapest tool in a century for surfacing what's already there."
+date: "2026-02-03"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Museums", "Public Sector", "Catalog", "Industry"]
+---
+
+A museum director we work with described her institution's archive: 240,000 objects, 14% on permanent display, the rest in climate-controlled storage. Most haven't been on public view in a generation. Most haven't been photographed since the 1990s. Most cataloging records are sparse.
+
+The museum doesn't lack collection. It lacks discoverability of its own collection.
+
+AI changes that economics — not by replacing the curator, but by making the curator's existing knowledge scale across the 86% of objects nobody ever sees.
+
+## Where AI earns its place
+
+**Catalog enrichment.** The agent reads existing records, cross-references provenance documents, and proposes additional metadata fields. Curator reviews. A backlog of 200,000 records becomes tractable.
+
+**Image-based search and similarity.** "Find all objects in the storage room with similar motifs to this one." Multimodal models do this well. Curators discover unexpected connections.
+
+**Translation of historical documents.** Donor letters, accession ledgers, conservation reports, sometimes in 19th-century cursive or dead languages. The agent drafts; specialists verify.
+
+**Visitor-facing wayfinding and Q&A.** "Where can I see Egyptian sculpture? What time does the gift shop close?" Boring questions that eat docent time.
+
+**Conservation triage.** The agent reads condition reports, flags objects whose state has changed, suggests inspection priorities.
+
+## What AI doesn't do
+
+- **Authenticate.** Provenance and authentication are deeply human, often legal, sometimes adversarial.
+- **Curate exhibitions.** Curating is interpretation. The thesis is the curator's; the agent helps gather supporting material.
+- **Decide deaccessioning.** Deaccessioning is contentious, board-level, sometimes legally constrained.
+- **Replace docents.** Visitors come to museums in part for the human encounter. The agent supplements, doesn't replace.
+
+## A catalog-enrichment pipeline
+
+```
+[object record]
+  → [pull existing metadata + photos + provenance docs]
+  → [LLM with the museum's cataloging conventions + style guide]
+  → [propose: subject tags, period, technique, comparable objects]
+  → [confidence-score each proposal]
+  → [curator review queue, sorted by confidence and importance]
+  → [curator accepts/edits/rejects]
+  → [updates to museum's CMS with audit trail]
+```
+
+The audit trail is mandatory. Every change should track: original record, agent proposal, curator decision, timestamp. Museums live and die by provenance documentation.
+
+## The trust constraint
+
+Museums have higher epistemic responsibility than most institutions. Misattribution, misdating, or misinterpretation have research and reputational costs that can take decades to undo.
+
+What we recommend:
+
+- All AI-proposed metadata is flagged as such in the record.
+- A curator-of-record approves every public-facing claim.
+- The agent's training and prompt templates are documented for the IMLS or peer institutions' review.
+- The agent never publishes directly to a public-facing surface without human approval.
+
+## Funding and grant pitches
+
+Catalog AI projects make excellent grant pitches because the deliverables are measurable: number of records enriched, percentage of collection digitized, hours of curator time freed for primary research.
+
+A typical 18-month grant pilot we've seen succeed: $250k to digitize and enrich 30,000 records, with a public-facing search interface as the deliverable. Real ROI on a granular metric.
+
+## Close
+
+Museums are sitting on more knowledge than they've ever published. AI makes the publishing economics make sense for the first time. The curator stays sovereign over interpretation; the agent does the cataloging that would otherwise wait another generation.
+
+## Related reading
+
+- [Agents in libraries](/blog/agents-in-libraries) — adjacent public institution.
+- [RAG is a public library](/blog/rag-is-a-public-library) — the underlying retrieval frame.
+- [Agents in government](/blog/agents-in-government) — public-trust constraints.
+
+---
+
+*We help cultural institutions put AI to work without compromising scholarship. [Get in touch](/contact).*

@@ -1,0 +1,126 @@
+---
+title: "AI incident response: the postmortem template you'll wish you had"
+description: "AI-specific incidents have shapes you don't see in normal SRE work. Write the postmortem template before the incident."
+date: "2026-01-15"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Incident Response", "Production AI", "SRE", "Postmortem", "Engineering"]
+---
+
+A team we work with had their first AI-specific incident in 2025. A model upgrade pushed silently caused their chatbot to make up product names. Customers noticed before the team did. The team had a postmortem template; it didn't fit. The template assumed "system error." This incident was "system functioning correctly, output wrong."
+
+AI incidents are categorically different from service incidents. Your template should reflect that.
+
+## What's different about AI incidents
+
+- **The system reports green.** No errors, no spikes, no alarms. Everything is healthy. The output is wrong.
+- **The cause is often a model or prompt change.** Not code. Often not even within your control (model provider deprecation).
+- **The blast radius is hard to scope.** You don't know who got the bad output unless you logged every interaction.
+- **The rollback isn't always clean.** Stateful interactions with users can't be unwound.
+
+The traditional "what broke / what we changed / what we'll do" template doesn't fit.
+
+## The AI-specific postmortem template
+
+```
+# Incident: [name]
+
+## Summary
+- What was wrong
+- Who was affected (count or estimate)
+- How long
+- Detection signal (and time to detect)
+
+## Timeline
+- T-N: change introduced (model upgrade, prompt change, data update)
+- T-0: incident impact begins (estimated)
+- T+detect: detection
+- T+notify: customer notification (if any)
+- T+mitigate: mitigation deployed
+- T+resolve: full resolution
+
+## What changed
+- [ ] Model version
+- [ ] Prompt template
+- [ ] Tool definitions
+- [ ] Retrieval index
+- [ ] Knowledge base content
+- [ ] Provider-side change (model deprecation, behavior shift)
+- [ ] Other
+
+## Detection
+- How did we find out? (user complaint, monitoring, eval regression)
+- Time-to-detect from impact start
+- What signal *should* have caught this earlier?
+
+## Root cause (what + why)
+- Technical root cause
+- Process root cause (why didn't our process catch this)
+
+## Mitigation
+- Immediate action taken
+- Rollback path used (or why none existed)
+
+## Impact assessment
+- Affected user count (estimate, with method)
+- Affected interactions (count from logs)
+- Affected downstream actions (orders placed, support tickets, etc.)
+- Financial impact (if any)
+
+## Customer communication
+- What we said, when, to whom
+- Open follow-ups
+
+## Action items
+- [ ] [Owner] [Due] Eval to detect this class of failure
+- [ ] [Owner] [Due] Monitor for X metric
+- [ ] [Owner] [Due] Process change to prevent recurrence
+
+## Lessons learned
+- What surprised us
+- What didn't surprise us but we'd downplayed
+```
+
+The categories are deliberate. The "what changed" section forces you to look at *all* the moving parts, not just code. The "detection" section forces the eval-improvement conversation.
+
+## The detection question
+
+For every AI incident, the most valuable section is "what signal should have caught this earlier." Three common answers:
+
+- **A behavioral eval.** A test case that would have failed. Add it to the eval set.
+- **An output-distribution monitor.** "Average response length jumped 30% on Tuesday." Easy to monitor.
+- **A user-complaint volume monitor.** Tickets with words like "wrong," "confused," "made up" rising in volume.
+
+Each incident should add one of these monitors. Over time, your detection coverage compounds.
+
+## The communications playbook
+
+A specific pattern that works:
+
+- **For low-severity:** internal note, no customer communication.
+- **For medium-severity:** affected customers get a direct email with what happened and what we did.
+- **For high-severity:** status page, blog post, proactive customer outreach.
+
+The decision tree for severity needs to be written down. AI incidents are subtle enough that "I'll know it when I see it" doesn't scale.
+
+## The legal angle
+
+Some AI incidents have legal exposure: hallucinated medical advice, defamatory output, generated content that misleads. Get legal involved earlier for these — they have customer-communication patterns that protect everyone.
+
+## The eval-debt log
+
+Every AI incident creates eval debt: a new test case to write, a new monitor to wire up. Track this in a "AI eval debt" backlog, prioritized like any other backlog. Teams that don't track it slip silently into the same shape of incident every quarter.
+
+## Close
+
+AI incidents look like systems working correctly with wrong output. Your incident response template needs to start there. Write it before you have your first incident, and you'll handle the first one a lot better.
+
+## Related reading
+
+- [SRE postmortem drafts](/blog/sre-postmortem-drafts) — general postmortem patterns.
+- [Eval CI](/blog/eval-ci) — the eval discipline that catches incidents earlier.
+- [Agent rollback](/blog/agent-rollback) — the rollback discipline.
+
+---
+
+*We help teams build AI incident response and detection. [Get in touch](/contact) before your first one.*

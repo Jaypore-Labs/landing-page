@@ -1,0 +1,113 @@
+---
+title: "AI and the symphony conductor: orchestration is older than software"
+description: "Multi-agent orchestration looks new. It isn't. The symphony conductor solved the same problem 250 years ago. The patterns transfer."
+date: "2025-12-19"
+author: "Yash Shah"
+category: "AI"
+tags: ["Multi-Agent", "Orchestration", "AI Agents", "Architecture", "Engineering"]
+---
+
+The multi-agent AI conversation in 2025 sounded breathless. Specialist agents, dispatcher agents, judge agents, the whole symphony of capabilities working in concert.
+
+The "symphony" framing is closer to the truth than the people using it usually realize. A symphony orchestra solved the multi-agent orchestration problem 250 years ago. The patterns transfer.
+
+## What conductors do
+
+A conductor doesn't play an instrument during the performance. The conductor:
+
+- Sets tempo.
+- Cues entrances.
+- Balances dynamics across sections.
+- Communicates intent (the interpretation).
+- Holds the score.
+- Manages variance — a player who's off, a passage that's drifting.
+
+A symphony of 80 musicians is incomprehensibly complex without a conductor. With one, it's a singular performance.
+
+## What an agent orchestrator does
+
+The same things, translated:
+
+- **Sets pace.** Which agent runs when, how long does each get.
+- **Cues entrances.** Which agent is invoked for which subtask.
+- **Balances dynamics.** When should one agent's output dominate vs. when should multiple be consulted.
+- **Communicates intent.** The system-level prompt that all agents share.
+- **Holds the score.** The plan or the state machine that defines the overall flow.
+- **Manages variance.** When one agent fails or drifts, the orchestrator handles.
+
+The orchestrator doesn't do the work; it coordinates the workers.
+
+## Three orchestration patterns from music
+
+**Soloist with accompaniment.** A solo violin with orchestral support. One agent is the lead; others provide context, retrieval, validation. The lead's output is what the user sees.
+
+This is the most common production pattern. A "main" agent with retrieval, tool-use, and validation as supporting agents.
+
+**Tutti and section.** Sometimes the whole orchestra plays; sometimes only a section. Different parts of a task involve different sets of agents.
+
+The translation: dispatch by sub-task type. Easy questions use one cheap agent; complex questions invoke the full ensemble.
+
+**Call and response.** One section asks; another answers. Like a critique-and-revise loop.
+
+The translation: judge-and-rewrite patterns. Generator agent produces; critic agent reviews; generator revises.
+
+## What conductors don't do
+
+A conductor doesn't:
+
+- Play every instrument themselves. (Don't make the orchestrator do the work.)
+- Improvise everything in performance. (Have a score; don't free-form orchestration in production.)
+- Argue with players mid-piece. (Resolve disagreements between agents through pre-defined protocols, not runtime negotiation.)
+
+These map cleanly to anti-patterns in multi-agent systems.
+
+## The score
+
+The "score" in an orchestra is the music — the deterministic structure the conductor follows. The "score" in agent orchestration is the workflow definition.
+
+A good workflow definition is:
+
+- Declarative. "Step 1: retrieve. Step 2: draft. Step 3: validate."
+- Inspectable. You can read it without running it.
+- Version-controlled. Changes are reviewable.
+- Replayable. Given the same inputs, you can re-run.
+
+A bad workflow is improvised in the orchestrator's prompt. That's like a conductor making up the symphony on stage.
+
+## The rehearsal
+
+Orchestras rehearse before performing. The rehearsal is where mismatches between players and the conductor's intent get resolved.
+
+In agent systems, the rehearsal is your eval set. You run the orchestration on representative inputs, observe where agents disagree with each other or with the desired output, and tune.
+
+Teams that skip rehearsal — that ship multi-agent systems based on a few hand-tested examples — discover the failure modes in production. Same as orchestras that skip rehearsal.
+
+## When the soloist drops out
+
+A conductor handles a missed entrance, a wrong note, a player falling sick mid-tour. The performance continues.
+
+Your orchestrator should too. If the retrieval agent fails, fall back to a simpler retrieval. If the validation agent times out, proceed with a flag. If the main model is down, fail over to a backup. The performance — the user's experience — continues even when parts of the system don't.
+
+## What this isn't
+
+This metaphor isn't a complete architecture. It's a check on patterns:
+
+- If you're asking "should this be one prompt or multiple agents," ask "could a single musician play this or does it need an ensemble?"
+- If you're asking "how do agents coordinate," ask "what would the conductor's score say?"
+- If you're asking "what if one agent fails," ask "what would the orchestra do?"
+
+The metaphor isn't load-bearing. It's a useful lens.
+
+## Close
+
+Orchestration is an old problem. We've had two and a half centuries of practice. The patterns are mature: conductor, score, rehearsal, fallbacks. AI engineers borrowing the patterns will ship more cleanly than AI engineers reinventing them.
+
+## Related reading
+
+- [Multi-agent orchestration](/blog/multi-agent-orchestration) — the technical companion.
+- [Sub-agents](/blog/sub-agents) — Claude Code's pattern.
+- [Plan vs act loop](/blog/plan-vs-act-loop) — the inner loop.
+
+---
+
+*We help teams architect multi-agent systems that don't sound like 80 people tuning. [Get in touch](/contact).*

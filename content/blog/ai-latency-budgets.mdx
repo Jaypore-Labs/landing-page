@@ -1,0 +1,100 @@
+---
+title: "AI latency budgets: borrowing from network engineering"
+description: "Every AI product has a latency budget. Most teams don't write theirs down. The teams that do ship faster experiences without thinking about it twice."
+date: "2026-02-09"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Latency", "Performance", "Architecture", "AI Engineering", "Production AI"]
+---
+
+Network engineers have a habit AI engineers should steal. They write down end-to-end latency budgets — a target P99, decomposed across each hop. When something violates the budget, you know exactly which hop owns it.
+
+AI pipelines have hops too. They just don't usually have budgets.
+
+## What a latency budget is
+
+A target P99 for the user-perceived response, decomposed into per-component budgets. Example, for an AI chat interaction:
+
+| Component | Budget P99 | Notes |
+|---|---|---|
+| Network in | 30 ms | mobile users in worst region |
+| Auth + middleware | 20 ms | |
+| Retrieval (vector + keyword) | 150 ms | top-10 retrieval, no rerank |
+| Rerank | 80 ms | cross-encoder on top-10 |
+| LLM first token | 600 ms | model warm-up + initial generation |
+| LLM streaming through full response | (parallel with render) | |
+| Render to user | 20 ms | |
+| **Total time to first token** | **900 ms** | |
+
+The number isn't the point. The decomposition is. When something gets slow, you measure each hop and find the culprit.
+
+## Why latency budgets are AI-specific work
+
+In traditional web engineering, latency is dominated by network and database. In AI engineering, latency is dominated by:
+
+- LLM inference time (often 80% of the budget).
+- Retrieval (10-15%).
+- Embedding generation (when it's online).
+
+The LLM time is the unforgivable hop. Everything else can be cached, parallelized, or tuned. The LLM call is the chunky single dependency.
+
+## Three patterns that earn back time
+
+**Stream the LLM output.** Time-to-first-token is what users feel, not time-to-last-token. Streaming changes a 2-second response into a 600ms-perceived response. Almost every production AI app should be streaming.
+
+**Parallelize retrieval and LLM call.** When you can start the LLM call with partial context and stream additional context in, you save the full retrieval round-trip. Hard to engineer; pays off for high-traffic features.
+
+**Cache aggressively, semantically.** A cache hit is a 50ms response instead of 1500ms. The hit-rate math dominates the average-latency math for high-traffic features.
+
+## How to know where time is going
+
+Distributed tracing. Boring, mandatory. Every component logs span start/end with the request ID. You get a waterfall view of every request.
+
+The minimum:
+
+```python
+with tracer.span("retrieve"):
+    docs = retrieve(query)
+
+with tracer.span("rerank"):
+    docs = rerank(query, docs)
+
+with tracer.span("llm_first_token"):
+    stream = llm.stream(prompt + context)
+    first_token = next(stream)
+
+# rest streams in parallel with render
+```
+
+Send to OpenTelemetry-compatible backend. The traces are where latency questions are actually answered.
+
+## What kills latency projects
+
+- **Average latency targets.** You don't experience average. You experience P95 or P99. Optimize tails.
+- **Optimizing the cheap hop.** Knocking 5ms off auth doesn't matter if the LLM takes 1500ms. Optimize the dominant cost.
+- **Single-region deployment.** A 100ms cross-continent network hop is hard to optimize around. Edge function helpers and model providers in-region matter.
+- **No streaming.** Time-to-last-token is the wrong metric for interactive AI. Time-to-first-token is what users feel.
+
+## The model-version trap
+
+A model upgrade can silently double your latency. Pinning model versions includes pinning the latency profile. When you upgrade:
+
+- Run a latency regression test on your eval set.
+- Compare P50/P95/P99 to the previous version.
+- Decide whether the quality gain justifies the latency cost.
+
+We've seen teams upgrade for "smarter answers" and lose 10% of users to abandonment within a week. The quality gain didn't matter because users left before the answer arrived.
+
+## Close
+
+A written latency budget is the cheapest performance insurance an AI team can buy. Decompose. Trace. Stream. Cache. When the budget slips, you'll know exactly which hop ate the time, and you'll have a record of what "good" was supposed to look like.
+
+## Related reading
+
+- [Performance tests for LLMs](/blog/performance-tests-llm) — turning the budget into a test.
+- [Semantic caching](/blog/semantic-caching) — the biggest latency lever for cacheable workloads.
+- [Multi-model routing](/blog/multi-model-routing) — how to route around slow models.
+
+---
+
+*We help teams architect AI products to hit their latency budgets. [Get in touch](/contact) before users start leaving.*

@@ -1,0 +1,86 @@
+---
+title: "Claude Code + Linear: where work lives, the agent lives"
+description: "Linear is a developer's love letter to project management. Wire the agent in and the love affair compounds."
+date: "2026-02-19"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "Linear", "MCP", "Productivity", "Integrations"]
+---
+
+Linear earned its niche by treating engineers like adults. Keyboard shortcuts, fast UI, opinionated defaults. The integration with Claude Code earns its keep because Linear's data model is clean — tickets are predictable shapes, statuses are limited, projects are real.
+
+The agent doesn't have to fight Linear the way it fights other tools.
+
+## Three flows that pay rent
+
+**Triage backlog.** "Read all bugs labeled `triage`. Group them by root area, suggest a priority, flag duplicates." A bored engineering manager Sunday-evening task becomes a 5-minute review.
+
+**Cycle prep.** "Pull all issues for next cycle. Flag ones with no estimate, no acceptance criteria, or unresolved comments." Walks you into Monday planning instead of out of it.
+
+**Issue from PR.** "I just merged PR #1234. It fixes a bug we never had a Linear issue for. Create the issue retroactively for the audit trail."
+
+## Setup
+
+Linear has a clean GraphQL API and a few MCP server options. We use the official linear-mcp.
+
+```bash
+npm install -g @linear/mcp-server
+export LINEAR_API_KEY=lin_api_xxx
+```
+
+In `claude_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "linear": {
+      "command": "linear-mcp",
+      "env": {
+        "LINEAR_API_KEY": "..."
+      }
+    }
+  }
+}
+```
+
+Verify with a small query: "List my Linear issues assigned to me, open." The agent should return them within a second.
+
+## Prompts that earn their keep
+
+**Cycle status, end of week.** "Read all issues in the current cycle. Group by status. For each in-progress issue, summarize the latest comments. Output as a markdown table I can paste into our weekly update."
+
+**Standup draft.** "Look at my Linear activity yesterday and my git commits. Draft my standup post: what I did, what I'm doing today, blockers. Don't make anything up."
+
+**Duplicate sweep.** "Find Linear issues opened in the last 14 days with similar titles or descriptions. Group them. Suggest which is the canonical issue."
+
+**Refinement check.** "List issues in the `backlog` state that have no estimate, no labels, or no description. Output as a checklist."
+
+## What to keep manual
+
+- **State transitions to `done`.** The agent can draft a closing comment. The button is yours.
+- **Priority changes.** Priority is a social signal across the team. The agent can suggest; you push.
+- **Reassignments.** People's workload is a human conversation.
+
+## Caching and rate limits
+
+Linear's API is fast but rate-limited. The MCP server caches reads for short windows. Don't fight it — the cache freshness is fine for most prompts.
+
+For high-frequency flows (every-commit hooks, every-PR hooks), run a small local proxy that batches and dedupes Linear calls. Two lines of plumbing, big rate-limit relief.
+
+## What audit looks like
+
+Every Linear comment the agent posts: tag `via:claude-code`. Filter on it weekly. If 20% of comments are agent-authored and they're all good, you have a healthy integration. If they're noisy, tune the prompt and raise the threshold.
+
+## Close
+
+The integrations that compound are the ones that don't ask you to change your workflow — they just remove typing. Linear + Claude Code is that. Setup is 15 minutes. Time saved is in hours per week. The agent earns rent fast.
+
+## Related reading
+
+- [Claude Code + Jira](/blog/claude-code-jira-integration) — the parallel for non-Linear teams.
+- [The AI productivity playbook](/blog/ai-productivity-playbook) — broader workflow this fits in.
+- [Effective MCP patterns](/blog/effective-mcp-patterns) — the patterns this relies on.
+
+---
+
+*We help teams wire AI into the tools they already use. [Get in touch](/contact) to skip the trial-and-error.*

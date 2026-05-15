@@ -1,0 +1,88 @@
+---
+title: "Agents in fitness: a coach who reads your data"
+description: "Fitness AI has 100 wellness apps and 5 useful patterns. The useful patterns coach, structure, and explain — they don't replace the human who knows you."
+date: "2026-01-13"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Fitness", "Health Tech", "Consumer AI", "Industry"]
+---
+
+A personal trainer we know described the fitness-AI space as "a thousand mood-tracking apps and five real products." The mood trackers come and go. The five real products do three things: they coach, they structure, and they explain — they don't try to replace the human who knows the client.
+
+## What works
+
+**Plan drafting from data.** Wearable data + workout history + client goals → a draft program for the coming week. The coach reviews and adjusts. Time saved per client per week: 30-60 minutes.
+
+**Form analysis from video.** A short clip of a deadlift, the agent identifies common form issues (knee tracking, hip hinge, bar path). Notes for the coach to discuss with the client. Not a diagnosis, an observation.
+
+**Recovery guidance.** Sleep, HRV, soreness trends. The agent flags "this athlete is undertrained this week" or "this one is overreaching." Coach calls.
+
+**Nutrition logging support.** Photo of a meal, the agent estimates macros with a confidence range. Faster than typing; less accurate than weighing. Good enough for habit building.
+
+**Education on demand.** "What's the difference between RIR and RPE?" The agent explains in the client's level. Frees the coach to coach.
+
+## What doesn't work
+
+- **Replacing the coach.** Adherence is a relationship problem. Clients quit AI-only programs at 5-10x the rate they quit human-coached programs.
+- **Programming for advanced athletes.** Periodization for someone training for elite competition is bespoke. The agent gives templates; the coach makes the call.
+- **Injury rehab.** A different profession (physio). The agent should hand off, not advise.
+- **Medical claims.** "Are you eating enough protein?" yes. "Does this rash on my leg mean anything?" no.
+
+## Trust dynamics
+
+Fitness clients are skeptical of AI because the wellness-AI category has been overpromised for a decade. The trust-building tactics that work:
+
+- **Transparency about what the AI sees.** "Your plan was drafted from your last 4 weeks of data and your stated goal of running a half-marathon."
+- **The coach in every communication.** "Your coach approved this plan."
+- **Visible human review.** The plan changes after the coach reviews; that change is visible to the client.
+- **No medical claims.** Fitness, performance, recovery — yes. Diagnostic claims — no.
+
+## A real pipeline
+
+```
+[wearable + workout log + client message]
+  → [aggregate: 4-week window, current goals]
+  → [LLM with coach's voice + program template]
+  → [draft: weekly plan, recovery notes, education modules]
+  → [coach reviews in dashboard]
+  → [client receives approved plan]
+  → [audit: data used, draft, edits, sent]
+```
+
+The "coach reviews" step is what separates the products that work from the ones that don't. Skip it and clients sense the absence.
+
+## The B2C trap
+
+The temptation in fitness AI is to skip the coach entirely. "Direct-to-consumer AI coach!" Cheaper unit economics, scalable to millions of users.
+
+The market keeps not adopting these. The reasons:
+
+- Without a human in the loop, adherence dies fast.
+- Liability for any health advice is enormous.
+- The product feels generic; clients want a coach who knows their context.
+
+The products that ship in fitness AI position the AI as the coach's tool, not the coach. Coaches use them to take on more clients; clients get more attentive coaches.
+
+## What changes about coaching
+
+The coach who uses AI well can take 60-100 clients instead of 20-30, at roughly the same per-client quality. The economics shift dramatically:
+
+- Coach makes more.
+- Per-client cost drops.
+- Coaching becomes accessible to people who couldn't afford it before.
+
+The hold-out coaches keep their 20-30 client business, often at premium prices. The market segments.
+
+## Close
+
+Fitness AI works when it scales the coach, not when it replaces the coach. The patterns are unsexy compared to "AI personal trainer" demos. The patterns are also the ones with actual retention curves. Adherence is a human problem; AI is the tool the human uses.
+
+## Related reading
+
+- [Agents in mental health](/blog/agents-in-mental-health) — adjacent consumer-health pattern.
+- [Agents in healthcare](/blog/agents-in-healthcare) — broader healthcare frame.
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the framing.
+
+---
+
+*We help coaching and health businesses put AI to work without losing what makes them work. [Get in touch](/contact).*

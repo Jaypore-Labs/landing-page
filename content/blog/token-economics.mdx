@@ -1,0 +1,105 @@
+---
+title: "Token economics: what your unit cost actually is"
+description: "Most AI product unit economics are off by 2-5x. The fix is one spreadsheet and the discipline to look at it weekly."
+date: "2026-01-19"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Unit Economics", "Cost Optimization", "LLM", "Business", "AI Engineering"]
+---
+
+A founder we work with confidently quoted her gross margin at 78%. We asked how she calculated it. She didn't include LLM cost. After we put it in: 41%.
+
+She wasn't wrong about the rest of her business. She was wrong about a line item that didn't exist on her income statement until it did.
+
+Token economics is the unit-cost discipline that AI products skip. Here's how to not skip it.
+
+## The minimum line items
+
+For each AI-driven customer action, you need:
+
+- **Input tokens** (system prompt + user input + context).
+- **Output tokens** (model response).
+- **Model cost per million tokens** (in/out separately).
+- **Number of LLM calls per action** (RAG step, judge step, draft step).
+- **Embedding cost.** (Per-call, often ignored.)
+- **Retrieval cost.** (Vector DB queries, document storage.)
+- **Cache hit rate.** (Reduces inference cost; multiplies hit-rate gains.)
+
+Multiply them. Round up. That's your action cost.
+
+Then: actions-per-customer-per-month × action-cost = monthly AI COGS per customer.
+
+## A worked example
+
+A customer-support draft assistant. Per ticket:
+
+| Item | Value |
+|---|---|
+| System prompt tokens | 1,200 |
+| Average user/context tokens | 800 |
+| Average output tokens | 250 |
+| LLM calls per ticket | 1 draft + 1 judge = 2 |
+| Model in cost (Sonnet, per M tokens) | $3.00 |
+| Model out cost | $15.00 |
+| Embedding cost (cached) | $0.0005 |
+| Retrieval | $0.0001 |
+
+Per ticket:
+- Input: 2,000 × 2 calls = 4,000 tokens × $3/M = $0.012
+- Output: 250 × 2 = 500 tokens × $15/M = $0.0075
+- Total LLM: $0.0195
+- Plus embedding/retrieval: $0.0006
+- **Per-ticket: ~$0.02**
+
+A customer doing 500 tickets/month: $10/month in AI COGS. On a $79/month plan, the AI line is 13% of revenue. Add the rest of COGS; your gross margin is closer to 55% than to your headline number.
+
+The same product with a frontier-only model on every call: $0.07/ticket, $35/month, 44% of revenue. Now you're not a business.
+
+## The four levers
+
+Once you have the spreadsheet, the optimization is mechanical:
+
+**Reduce calls per action.** Combine draft + judge into one model call where quality allows. Use cheaper judges. Audit whether the second call is actually paying its way.
+
+**Use smaller models for sub-steps.** Classification, routing, extraction — all cheap with a small model. Reserve the frontier model for the customer-facing draft.
+
+**Cache aggressively.** Exact-match cache for repeated inputs. Semantic cache for near-duplicates. Hit rate above 30% changes your math.
+
+**Compress prompts.** System prompts grow. Audit quarterly. We've seen 8,000-token system prompts compressed to 2,000 with no quality loss.
+
+## What kills unit economics
+
+- **Recursive prompts.** A prompt that invokes itself N times where N varies with input. Build a hard cap.
+- **Long-context defaults.** Every call uses the maximum context window because "what if we need it." Most don't.
+- **No streaming for long outputs.** The full output is generated even when the user stopped reading after the first paragraph. Stream and let users abandon.
+- **Untracked prompt sprawl.** Multiple teams writing prompts independently. Some are 4x longer than they need to be.
+
+## The pricing implications
+
+Most B2B SaaS AI pricing today is broken. The common patterns:
+
+- **Per-seat unlimited.** Power users blow the unit economics. Casual users subsidize.
+- **Token-based.** Maps to cost but confuses customers.
+- **Action-based with tiers.** Cleanest mental model. "10 AI-drafted emails included; $0.10 per overage."
+
+Whatever you pick, the spreadsheet has to be correct. Pricing decisions on bad unit economics get repriced ugly.
+
+## Updating the spreadsheet
+
+Weekly or monthly. Model prices change. Cache hit rates evolve. New features add new line items. The spreadsheet that's a year old is the spreadsheet that's wrong.
+
+Save the spreadsheet versioned in your finance folder. When the bill spikes, you have a history to compare against.
+
+## Close
+
+Token economics isn't a finance trick. It's the discipline of knowing what your product actually costs to deliver. The spreadsheet takes a day to build and an hour a week to maintain. The payoff is years of decisions made with real numbers instead of vibes.
+
+## Related reading
+
+- [AI cost attribution](/blog/ai-cost-attribution) — the data plumbing this depends on.
+- [Cost guardrails](/blog/cost-guardrails) — keeping costs from running away.
+- [Small models are underrated](/blog/small-models-are-underrated) — the biggest cost lever.
+
+---
+
+*We help teams build the unit economics for AI products. [Get in touch](/contact).*

@@ -1,0 +1,104 @@
+---
+title: "Agents in podcasting: editor yes, host no"
+description: "Generative podcast hosts are a YouTube ad pitch. The production work that actually pays in podcasting is the work nobody films."
+date: "2026-02-13"
+author: "Yash Shah"
+category: "AI"
+tags: ["AI Agents", "Podcasting", "Media AI", "Production AI", "Industry"]
+---
+
+A podcast producer we work with has 14 shows in production. He told us flatly: "If someone tries to sell me an AI host one more time, I'll scream. I'll buy any tool that makes editing faster."
+
+The unsexy production work is where podcast AI earns its rent.
+
+## What kills a podcast team's time
+
+A single 45-minute episode requires, on average:
+
+- 90 minutes of audio editing (cuts, ums, breath removal, level matching).
+- 30 minutes of show-note writing.
+- 20 minutes of timestamp marking.
+- 45 minutes of social clip selection and cutting.
+- 15 minutes of metadata and platform upload.
+
+That's 3.5 hours of post-production per 45 minutes of audio. Multiply by the number of weekly shows. The math is brutal.
+
+## What AI does well
+
+**Edit-suggesting.** The agent listens, marks ums/breaths/pauses, suggests cuts. The human reviews in a timeline tool. Time saved: 60%.
+
+**Show notes.** Transcripts → structured summary, key topics, guest bio. Human edits for tone. Time saved: 80%.
+
+**Timestamp chapters.** Topic-detection on the transcript → chapter markers. Time saved: 95%.
+
+**Social clip selection.** "Find the 3 most-quotable 30-90 second segments." The agent surfaces candidates ranked by quote-density. Human picks. Time saved: 70%.
+
+**Metadata draft.** Title, description, tags, SEO keywords. Time saved: 70%.
+
+For a producer doing 4 shows a week, this is roughly 10 hours/week of saved time. Real money.
+
+## What AI doesn't do
+
+- **Pick the guest.** Booking is a relationships game.
+- **Run the conversation.** The host's job. Even if you wanted an AI host, listeners can hear the difference and they leave.
+- **Make the call on a controversial cut.** When a guest said something defamatory, ambiguous, or off-brand, the call is human.
+- **Tag emotion accurately enough.** "Find the funniest moment" works inconsistently. Human still drives clip selection at the top.
+
+## A typical pipeline
+
+```
+[raw audio] → [transcribe: Whisper or Deepgram]
+            → [diarize: speakers separated]
+            → [LLM pass 1: chapter markers, edit suggestions]
+            → [LLM pass 2: show notes draft, social clip candidates]
+            → [editor reviews in DAW + Notion doc]
+            → [export: episode + clips + metadata]
+            → [upload via platform API]
+```
+
+The agent runs each pass in the background. The editor's day is the review layer, not the grunt layer.
+
+## Costs
+
+For a 45-minute episode:
+
+- Whisper transcription: ~$0.40
+- LLM processing (passes 1 and 2): ~$0.30
+- Clip candidate ranking: ~$0.05
+
+Sub-dollar inference per episode. Compare to 2-3 hours of editor time at $40-80/hour. ROI is obvious.
+
+## What changes about the team
+
+Producers stop being editors and become *editors of the agent*. The skill that compounds:
+
+- Knowing which agent suggestions to trust.
+- Knowing when to override.
+- Tuning the prompt for the show's voice.
+- Catching the agent's blind spots (sarcasm, inside jokes, regional dialects).
+
+The producer who adopts this is producing 2-3x more shows by year three. The producer who doesn't is fighting the producer who does on rates.
+
+## What about the AI host
+
+The AI host works in narrow cases:
+
+- News briefings. Short, structured, low-stakes voice.
+- Sponsored content for stock audiences.
+- Localizations of an existing show into other languages.
+
+It does not work where listeners care about the host. Most podcast audiences care about the host more than the topic. That's why podcasts exist as a medium.
+
+## Close
+
+Podcast AI in 2026 is editor, draftsperson, and metadata clerk. The host stays human. The producer who treats the agent as an intern — drafting, suggesting, never deciding — ships more, sleeps more, and outproduces the field.
+
+## Related reading
+
+- [Agents in media](/blog/agents-in-media) — adjacent vertical.
+- [Agents in publishing](/blog/agents-in-publishing) — parallel creative-industry frame.
+- [AI is an employee, not a bot](/blog/ai-employee-not-bot) — the staffing frame.
+
+---
+
+*We help podcast networks put AI to work without losing what makes the show. [Get in touch](/contact).*
