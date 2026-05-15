@@ -69,15 +69,20 @@ body {
   font-family: var(--font-space), system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.035em;
-  line-height: 0.92;
+  /* 0.92 collided with descenders on next line. 1.02 keeps editorial tightness while clearing y/g/p/q clip. */
+  line-height: 1.02;
   text-wrap: balance;
+  /* Descender pad — survives inline leading-* overrides on display headings. */
+  padding-bottom: 0.1em;
 }
 
 .display-tight {
   font-family: var(--font-space), system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.05em;
-  line-height: 0.88;
+  line-height: 0.98;
+  /* Display-tight is routinely combined with leading-[0.82] on giant text — larger pad needed. */
+  padding-bottom: 0.2em;
 }
 
 .mono {
@@ -166,6 +171,8 @@ html.has-custom-cursor * {
   display: inline-block;
   overflow: hidden;
   line-height: 1;
+  /* Per-letter clip box must include the descender depth, or y/g/p/q get sliced. */
+  padding-bottom: 0.18em;
 }
 .char > span {
   display: inline-block;
