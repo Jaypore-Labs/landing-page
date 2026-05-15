@@ -144,7 +144,7 @@ function WorkRow({
             {/* Giant typographic title */}
             <div className="absolute inset-0 flex items-center justify-center p-6">
               <span
-                className="display-tight text-center leading-[0.82] select-none pb-[0.2em]"
+                className="display-tight text-center leading-[0.82] select-none pb-[0.32em]"
                 style={{
                   color: accent,
                   fontSize: "clamp(3.5rem, 11vw, 10rem)",

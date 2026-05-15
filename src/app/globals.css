@@ -69,20 +69,20 @@ body {
   font-family: var(--font-space), system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.035em;
-  /* 0.92 collided with descenders on next line. 1.02 keeps editorial tightness while clearing y/g/p/q clip. */
-  line-height: 1.02;
+  /* 0.92 collided with descenders on next line. 1.05 keeps editorial tightness while clearing y/g/p/q clip even with italic descenders. */
+  line-height: 1.05;
   text-wrap: balance;
-  /* Descender pad — survives inline leading-* overrides on display headings. */
-  padding-bottom: 0.1em;
+  /* Descender pad — survives inline leading-* utility overrides. Italic descenders are deeper than upright, so be generous. */
+  padding-bottom: 0.18em;
 }
 
 .display-tight {
   font-family: var(--font-space), system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.05em;
-  line-height: 0.98;
-  /* Display-tight is routinely combined with leading-[0.82] on giant text — larger pad needed. */
-  padding-bottom: 0.2em;
+  line-height: 1;
+  /* Display-tight is routinely combined with leading-[0.82] AND italic on giant text — the slanted italic y/g/p/q extends well past upright descender depth. */
+  padding-bottom: 0.32em;
 }
 
 .mono {
@@ -171,8 +171,30 @@ html.has-custom-cursor * {
   display: inline-block;
   overflow: hidden;
   line-height: 1;
-  /* Per-letter clip box must include the descender depth, or y/g/p/q get sliced. */
-  padding-bottom: 0.18em;
+  /* Per-letter clip box must include the descender depth, or y/g/p/q get sliced. Italic-safe pad. */
+  padding-bottom: 0.28em;
+}
+
+/* ============================================================
+   Site-wide descender safety backstop.
+
+   The italic descender on giant Space Grotesk text (y/g/p/q/j)
+   extends well past the line-box at tight leading. Any
+   overflow:hidden wrapper inside a display heading (animation
+   masks like LineReveal, per-letter .char wrappers, rotating
+   panels) must reserve room or the descender gets sliced.
+
+   This rule catches every such wrapper without per-component
+   patching. Section-level overflow:hidden already has its own
+   internal padding so the extra em is invisible there.
+   ============================================================ */
+:root {
+  --descender-pad: 0.32em;
+}
+
+.display [class*="overflow-hidden"],
+.display-tight [class*="overflow-hidden"] {
+  padding-bottom: var(--descender-pad);
 }
 .char > span {
   display: inline-block;

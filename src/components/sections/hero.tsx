@@ -229,7 +229,7 @@ function LineReveal({
   className?: string;
 }) {
   return (
-    <span className="block overflow-hidden pb-[0.2em]">
+    <span className="block overflow-hidden pb-[0.32em]">
       <motion.span
         initial={{ y: "105%" }}
         animate={{ y: "0%" }}
@@ -415,7 +415,7 @@ function SpecimenPanel() {
               </motion.span>
             </AnimatePresence>
 
-            <div className="mt-4 overflow-hidden pb-[0.2em]">
+            <div className="mt-4 overflow-hidden pb-[0.32em]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`title-${active}`}
