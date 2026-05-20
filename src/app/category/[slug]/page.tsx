@@ -19,10 +19,14 @@ function findCategoryLabel(slug: string): string | null {
   return getAllCategories().find((c) => slugify(c) === slug) ?? null;
 }
 
+// Thin category pages get robots:noindex,follow — see /tag/[slug]/page.tsx.
+const MIN_POSTS_FOR_INDEX = 3;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const category = findCategoryLabel(slug);
   if (!category) return { title: "Category not found" };
+  const postCount = getPostsByCategory(category).length;
   const desc = `${category} — field notes from the Jaypore Labs journal.`;
   return {
     title: `${category} · Journal`,
@@ -33,6 +37,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: desc,
       url: `${siteConfig.url}/category/${slug}`,
     },
+    robots:
+      postCount < MIN_POSTS_FOR_INDEX
+        ? { index: false, follow: true }
+        : { index: true, follow: true },
   };
 }
 

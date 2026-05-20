@@ -21,10 +21,17 @@ function findTagLabel(slug: string): string | null {
   return tags.find((t) => slugify(t) === slug) ?? null;
 }
 
+// Thin tag pages (< this many posts) get robots:noindex,follow so Google
+// doesn't waste crawl budget on near-duplicate hub pages and so they
+// stop showing up as "Crawled — currently not indexed" in GSC. The page
+// stays accessible to humans clicking a tag chip from an article.
+const MIN_POSTS_FOR_INDEX = 3;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const tag = findTagLabel(slug);
   if (!tag) return { title: "Tag not found" };
+  const postCount = getPostsByTag(tag).length;
   const desc = `Field notes from the Jaypore Labs journal tagged "${tag}".`;
   return {
     title: `${tag} · Journal`,
@@ -35,6 +42,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: desc,
       url: `${siteConfig.url}/tag/${slug}`,
     },
+    robots:
+      postCount < MIN_POSTS_FOR_INDEX
+        ? { index: false, follow: true }
+        : { index: true, follow: true },
   };
 }
 
