@@ -25,7 +25,7 @@ function findTagLabel(slug: string): string | null {
 // doesn't waste crawl budget on near-duplicate hub pages and so they
 // stop showing up as "Crawled — currently not indexed" in GSC. The page
 // stays accessible to humans clicking a tag chip from an article.
-const MIN_POSTS_FOR_INDEX = 3;
+const MIN_POSTS_FOR_INDEX = 5;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;

@@ -13,7 +13,7 @@ import { siteConfig } from "@/data/site";
 // indexing. Thinner pages get flagged "Crawled - currently not indexed"
 // by Google because they duplicate the underlying article without adding
 // signal. Bumping this threshold cleans up the index.
-const MIN_POSTS_FOR_INDEX_HUB = 3;
+const MIN_POSTS_FOR_INDEX_HUB = 5;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;

@@ -20,7 +20,7 @@ function findCategoryLabel(slug: string): string | null {
 }
 
 // Thin category pages get robots:noindex,follow — see /tag/[slug]/page.tsx.
-const MIN_POSTS_FOR_INDEX = 3;
+const MIN_POSTS_FOR_INDEX = 5;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
