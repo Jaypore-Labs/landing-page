@@ -30,10 +30,19 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
       {
+        userAgent: "ClaudeBot",
+        allow: "/",
+      },
+      {
+        userAgent: "PerplexityBot",
+        allow: "/",
+      },
+      {
         userAgent: "CCBot",
         allow: "/",
       },
     ],
     sitemap: `${siteConfig.url}/sitemap.xml`,
+    host: siteConfig.url,
   };
 }

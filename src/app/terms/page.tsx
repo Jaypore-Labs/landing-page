@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/layout/page-hero";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/data/site";
+import { ogDefaults, twitterDefaults } from "@/lib/seo";
 
 const desc =
   "The terms that cover use of jayporelabs.com — content licensing, accuracy, links, and what you can and can't do with what you find here.";
@@ -11,12 +12,12 @@ export const metadata: Metadata = {
   title: "Terms",
   description: desc,
   alternates: { canonical: `${siteConfig.url}/terms` },
-  openGraph: {
+  openGraph: { ...ogDefaults,
     title: `Terms · ${siteConfig.name}`,
     description: desc,
     url: `${siteConfig.url}/terms`,
   },
-  twitter: {
+  twitter: { ...twitterDefaults,
     title: `Terms · ${siteConfig.name}`,
     description: desc,
   },
@@ -84,7 +85,7 @@ const sections = [
     p: (
       <>
         Jaypore Labs, the logo, and the wordmark are ours. Other names
-        mentioned (Anthropic, Claude, Vercel, Logitech, Mercedes, etc.)
+        mentioned (Anthropic, Claude, Vercel, etc.)
         belong to their owners — we don&apos;t claim affiliation beyond
         what we describe in case studies.
       </>
@@ -134,13 +135,7 @@ export default function TermsPage() {
       />
       <PageHero
         eyebrow="Terms"
-        title={
-          <>
-            Plain-English
-            <br />
-            <span className="italic font-medium text-accent">terms.</span>
-          </>
-        }
+        title="Terms of use"
         description={
           <>
             Short version: read the site, share links, quote articles with
@@ -150,17 +145,17 @@ export default function TermsPage() {
         }
       />
 
-      <section className="relative bg-paper text-ink border-b border-line">
-        <div className="mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-10 py-24 md:py-32">
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12 py-16 md:py-24">
           <div className="space-y-16">
             {sections.map((s) => (
-              <div key={s.h} className="grid grid-cols-12 gap-8 items-start">
+              <div key={s.h} className="grid grid-cols-12 gap-y-8 gap-x-4 md:gap-x-8 items-start">
                 <div className="col-span-12 md:col-span-4">
-                  <h2 className="display text-2xl md:text-3xl text-ink">
+                  <h2 className="display text-[1.5rem] md:text-[1.75rem] text-ink">
                     {s.h}
                   </h2>
                 </div>
-                <div className="col-span-12 md:col-span-8 text-ink-soft text-base md:text-lg leading-relaxed">
+                <div className="col-span-12 md:col-span-8 text-ink-soft text-base md:text-[17px] leading-relaxed">
                   {s.p}
                 </div>
               </div>
@@ -168,12 +163,12 @@ export default function TermsPage() {
           </div>
 
           <div className="mt-24 flex items-center justify-between flex-wrap gap-4 pt-10 border-t border-line">
-            <span className="mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
+            <span className="text-sm text-ink-mute">
               Last updated · 2026-04-28
             </span>
             <Link
               href="/privacy"
-              className="mono text-[11px] uppercase tracking-[0.22em] text-ink-soft hover:text-accent transition-colors"
+              className="text-[15px] font-medium text-ink link-underline"
             >
               Read the privacy policy →
             </Link>

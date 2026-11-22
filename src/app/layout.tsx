@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Geist, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Cursor } from "@/components/fx/cursor";
-import { Grain } from "@/components/fx/grain";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/json-ld";
 import { siteConfig, seoKeywords } from "@/data/site";
 import "./globals.css";
@@ -18,10 +16,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -30,7 +29,7 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
-const rootTitle = `${siteConfig.name} — AI-enabled software for real businesses`;
+const rootTitle = `${siteConfig.name} — Enterprise software architecture & engineering`;
 
 export const viewport: Viewport = {
   themeColor: "#0B0B0B",
@@ -113,12 +112,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <OrganizationJsonLd />
         <WebSiteJsonLd />
-        <Grain />
-        <Cursor />
         <Header />
         <main className="flex-1 relative">{children}</main>
         <Footer />

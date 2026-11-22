@@ -1,10 +1,10 @@
 export const siteConfig = {
   name: "Jaypore Labs",
   description:
-    "Friendly product studio. We build AI-enabled software and help businesses introduce AI into their operations — scribes, copilots, voice AI, full SaaS. Hand-built since 2017.",
-  tagline: "AI-enabled software. The friendly way.",
+    "Enterprise software architecture and engineering. Jaypore Labs helps organizations design, modernize and integrate the systems they run on. Since 2017.",
+  tagline: "The systems your enterprise runs on, engineered to last.",
   // Short, magnetic line used in hero + OG cards
-  pitch: "We build AI-enabled software and help businesses put AI to work.",
+  pitch: "We help enterprises design, modernize and integrate their core platforms.",
   url: "https://jayporelabs.com",
   email: "hello@jayporelabs.com",
   phone: "+91 XXXXXXXXXX",
@@ -33,472 +33,291 @@ export const siteConfig = {
 
 // Keyword corpus — used in root metadata and per-page.
 export const seoKeywords = [
-  "AI-enabled software",
+  "software architecture consulting",
+  "custom software development",
+  "solution architecture services",
+  "legacy system modernization",
+  "system integration services",
+  "enterprise software development",
+  "SaaS product development",
+  "desktop application development",
+  "Electron app development",
+  "Next.js development agency",
+  "API and data integration",
+  "cloud architecture",
+  "healthcare software development",
+  "software development company India",
+  "remote senior engineering team",
   "AI integration services",
-  "AI adoption consulting",
-  "AI product studio",
-  "AI software development agency",
-  "custom AI software",
-  "AI scribes",
-  "AI copilots",
-  "AI agents",
-  "RAG systems",
-  "voice AI",
-  "MCP servers",
-  "Next.js AI development",
-  "AI for healthcare",
-  "healthcare AI software",
-  "AI for legal",
-  "legal tech AI",
-  "enterprise AI integration",
-  "AI for SaaS",
-  "AI consulting India",
-  "AI enablement",
-  "add AI to existing software",
-  "Electron AI apps",
-  "LLM application development",
-  "OpenAI Claude integration",
 ];
 
 export const services = [
   {
-    id: "ai-integration",
-    title: "AI Enablement",
-    shortDescription: "Add AI to the software you already run",
+    id: "architecture",
+    title: "Enterprise Architecture",
+    shortDescription: "A target architecture and roadmap for your core platforms.",
     description:
-      "Your product already works. We embed AI where it earns its keep — scribes, copilots, agents, RAG — without rewriting your stack or blowing up your compliance posture.",
-    icon: "Brain",
+      "Current-state assessment, target architecture and a sequenced roadmap across applications, data and infrastructure. Build-versus-buy decisions and trade-offs are documented for your technology and business stakeholders.",
+    icon: "Lightbulb",
     features: [
-      "LLM integration (OpenAI, Claude, open-source)",
-      "RAG pipelines with vector search and evals",
-      "Voice AI (real-time STT/TTS, diarization)",
-      "AI agents with tool-calling and audit trails",
+      "Current-state and risk assessment",
+      "Target architecture and roadmap",
+      "Cloud and infrastructure strategy",
+      "Security and compliance review",
     ],
   },
   {
-    id: "full-stack",
-    title: "Web Applications",
-    shortDescription: "Custom web apps built as coherent products",
+    id: "custom-software",
+    title: "Enterprise Applications",
+    shortDescription: "Business-critical applications, built to your standards.",
     description:
-      "Complete web applications — frontend, backend, and an AI layer when it earns its keep — shipped as a single coherent product. React, Next.js, Node, Postgres, whatever the job needs. No glue-code spaghetti.",
+      "Customer, partner and employee platforms, portals and operational applications, engineered for scale, security and long-term maintainability, and integrated with your core systems.",
     icon: "Code",
     features: [
-      "Next.js App Router, React Server Components",
-      "Type-safe APIs, webhooks, background jobs",
-      "Auth, billing, multi-tenant from day one",
-      "Cloud deploys on Vercel / AWS / Fly",
+      "Customer and partner portals",
+      "Workflow and operations platforms",
+      "SSO, role-based access and audit trails",
+      "APIs and event-driven services",
     ],
   },
   {
-    id: "desktop-apps",
-    title: "Desktop Applications",
-    shortDescription: "Native-feel Electron apps that run offline",
+    id: "modernization",
+    title: "Modernization & Integration",
+    shortDescription: "Modernize core systems without disrupting operations.",
     description:
-      "For when the web isn't the right surface. Electron apps that feel native, run offline, and ship smart features behind a fast, polished UI. macOS, Windows, Linux.",
-    icon: "Monitor",
+      "Incremental modernization of legacy platforms, and integration across ERP, CRM and line-of-business systems, using proven patterns that keep the business running throughout.",
+    icon: "Rocket",
     features: [
-      "Offline-first architecture",
-      "Native OS integrations (tray, shortcuts, files)",
-      "Auto-update + code-signing pipelines",
-      "Voice, vision, and local-LLM support",
+      "Incremental, phased migration",
+      "ERP, CRM and line-of-business integration",
+      "Data migration and pipelines",
+      "Performance, resilience and scalability",
     ],
   },
   {
     id: "saas-development",
-    title: "SaaS, from MVP to Scale",
-    shortDescription: "Full-lifecycle SaaS, built to last",
+    title: "Digital Platform Engineering",
+    shortDescription: "Multi-tenant platforms and digital products at scale.",
     description:
-      "Full-lifecycle SaaS with the AI layer built into the core loop when it matters — not bolted on. Multi-tenant, billing, analytics, evals. We help you go from zero to paying users without the usual debt.",
+      "Multi-tenant platforms, customer-facing digital products and internal platforms, with billing, analytics, observability and security designed in from the first release.",
     icon: "Rocket",
     features: [
-      "MVP to production in 8–16 weeks",
       "Multi-tenant architecture",
-      "Stripe billing, usage metering",
-      "Evals + monitoring baked in",
+      "Platform and API strategy",
+      "Observability and reliability engineering",
+      "First production release in 8–16 weeks",
     ],
   },
   {
-    id: "healthcare-tech",
-    title: "Healthcare Software",
-    shortDescription: "HIPAA-ready clinical software you can audit",
+    id: "desktop-apps",
+    title: "Desktop & Field Applications",
+    shortDescription: "Managed software for desktops and field operations.",
     description:
-      "Depth we've earned. Scribes, clinic OS, EHR add-ons, AI-assisted medical imaging — built to withstand audits, privacy reviews, and actual practitioners using them all day.",
-    icon: "Heart",
+      "Cross-platform applications for macOS, Windows and Linux that operate offline, integrate with devices and local data, and fit enterprise deployment and update processes. Delivered for a global hardware brand and for healthcare providers in Europe.",
+    icon: "Monitor",
     features: [
-      "HIPAA-compliant architectures",
-      "EHR/EMR integration",
-      "AI scribes for 10+ specialties",
-      "Voice-first clinical workflows",
+      "Offline-first architecture",
+      "Managed deployment and auto-update",
+      "Code signing and security hardening",
+      "Device and hardware integration",
     ],
   },
   {
-    id: "consulting",
-    title: "Strategy + Readiness",
-    shortDescription: "Honest advice on whether AI is the right bet",
+    id: "ai-integration",
+    title: "Applied AI & Automation",
+    shortDescription: "Applied where it delivers measurable value, with governance.",
     description:
-      "Not every product needs AI. Before you commit a quarter, we audit your product, data, and workflows — then tell you where AI will move the needle, and where it won't.",
-    icon: "Lightbulb",
+      "Document processing, enterprise search, decision support and workflow automation, built into existing systems with evaluation, monitoring, human review and the same governance as any production system.",
+    icon: "Brain",
     features: [
-      "AI opportunity mapping",
-      "Architecture + data review",
-      "Vendor-vs-build guidance",
-      "ROI + rollout roadmap",
+      "Document and data extraction",
+      "Enterprise search over internal content",
+      "Workflow automation and decision support",
+      "Governance, evaluation and human review",
     ],
   },
-];
-
-export const portfolio = [
-  {
-    id: "nudge-ai",
-    title: "Nudge AI",
-    category: "Healthcare AI",
-    shortDescription:
-      "AI Scribe and Coding Platform for medical practitioners",
-    description:
-      "Nudge is an AI Scribe and Coding Platform that supports Psychiatry, Psychotherapy, Family Medicine, Internal Medicine, Pediatrics & More. It saves doctors hours of documentation time and provides advanced insights on each session.",
-    image: "/portfolio/nudge.png",
-    accent: "#FF4D1F",
-    url: "https://getnudgeai.com",
-    technologies: ["Electron", "React", "AI/ML", "Node.js"],
-    highlights: [
-      "Saves hours of documentation",
-      "Multi-specialty support",
-      "Advanced session insights",
-    ],
-    featured: true,
-  },
-  {
-    id: "curastream-ai",
-    title: "Curastream AI",
-    category: "Healthcare AI",
-    shortDescription: "Voice Controlled Medical Assistant for Doctors",
-    description:
-      "Your Voice Controlled Medical Assistant that helps doctors focus more on patients rather than documentation. Streamlines the entire clinical workflow with intelligent voice commands.",
-    image: "",
-    accent: "#8BE9FD",
-    url: "https://curastreamai.com",
-    technologies: ["Voice AI", "React", "Node.js", "Speech Recognition"],
-    highlights: [
-      "Voice-first interface",
-      "Real-time transcription",
-      "Focus on patient care",
-    ],
-    featured: true,
-  },
-  {
-    id: "lucy",
-    title: "Lucy",
-    category: "Healthcare Software",
-    shortDescription: "Advanced healthcare software for medical practitioners",
-    description:
-      "Lucy is an advanced healthcare software solution deployed in Luxembourg, serving over 100 doctors and clinics. Built with Electron, it handles end-to-end processes related to doctors & patients management. Led a team of 5 developers from scratch to production.",
-    image: "",
-    accent: "#B5E48C",
-    url: "https://medlucy.com",
-    technologies: ["Electron", "React", "Node.js", "PostgreSQL"],
-    highlights: [
-      "100+ active doctors",
-      "Deployed in Luxembourg",
-      "Led team of 5 developers",
-    ],
-    featured: true,
-  },
-  {
-    id: "smarthabits",
-    title: "SmartHabits",
-    category: "Productivity",
-    shortDescription: "Work-life balance tool backed by Logitech",
-    description:
-      "SmartHabits is an Electron-based software developed for Logitech to manage user's work activities, reduce stress, and improve overall well-being with timely suggested breaks and mini exercises.",
-    image: "/portfolio/smarthabits.png",
-    accent: "#F5F0E8",
-    url: "https://smarthabits.logitech.com",
-    client: "Logitech",
-    technologies: ["Electron", "React", "Node.js"],
-    highlights: [
-      "Built for Logitech",
-      "Wellness-focused features",
-      "Productivity tracking",
-    ],
-    featured: true,
-  },
-  {
-    id: "sonnet-ai",
-    title: "Sonnet AI",
-    category: "Productivity AI",
-    shortDescription: "AI meeting assistant for transcription and insights",
-    description:
-      "Sonnet AI is an AI meeting assistant that helps you transcribe meetings, handle documentation, and provide actionable insights from your conversations.",
-    image: "/portfolio/sonnet.png",
-    accent: "#FFD166",
-    url: "https://sonnetai.com",
-    technologies: ["AI/ML", "React", "Node.js", "Speech Recognition"],
-    highlights: [
-      "Meeting transcription",
-      "Automated documentation",
-      "Actionable insights",
-    ],
-    featured: false,
-  },
-  {
-    id: "presselab",
-    title: "PresseLab",
-    category: "Scientific Research",
-    shortDescription: "Internal tool for University of Arizona Biology Dept",
-    description:
-      "PresseLab was an internal software developed for University of Arizona Biology department for their internal model testing on microscopic data and visualization. Software involved selecting microscopic data and running AI model-based analysis.",
-    image: "",
-    accent: "#C77DFF",
-    client: "University of Arizona",
-    technologies: ["Electron", "Python", "AI/ML", "Data Visualization"],
-    highlights: [
-      "Microscopic data analysis",
-      "AI model integration",
-      "Scientific visualization",
-    ],
-    featured: false,
-  },
-  {
-    id: "lsms-audit",
-    title: "LSMS Audit Tool",
-    category: "Healthcare Analytics",
-    shortDescription: "Audit tool for London School of Medical Science",
-    description:
-      "Developed a complex Audit tool for the London School of Medical Science for analyzing their Audit Data, Representation, Visualization, and result calculation. Used by their team and remote health experts.",
-    image: "",
-    accent: "#06D6A0",
-    client: "London School of Medical Science",
-    technologies: ["Electron", "React", "Data Visualization", "Node.js"],
-    highlights: [
-      "Complex data analysis",
-      "Visual reporting",
-      "Multi-user collaboration",
-    ],
-    featured: false,
-  },
-  {
-    id: "haven",
-    title: "Haven",
-    category: "Social Media Tools",
-    shortDescription: "Screenshot enhancement for social media",
-    description:
-      "Haven is a tool for social media users to create impressive screenshots with varied backgrounds ranging from gradients to images to special effects, with export options for different social media platforms.",
-    image: "",
-    accent: "#FF006E",
-    technologies: ["Electron", "React", "Canvas API"],
-    highlights: [
-      "Multiple export sizes",
-      "Custom backgrounds",
-      "Social media optimized",
-    ],
-    featured: false,
-  },
-];
-
-export const testimonials = [
-  {
-    id: 1,
-    name: "Healthcare Client",
-    role: "CTO, Medical Software Company",
-    content:
-      "Yash and his team delivered our healthcare platform with exceptional attention to compliance and user experience. The system now serves over 100 medical practitioners daily.",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "SaaS Founder",
-    role: "Founder & CEO",
-    content:
-      "From MVP to scale, Jaypore Labs has been instrumental in our growth. Their AI integration expertise helped us differentiate in a competitive market.",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Enterprise Client",
-    role: "Product Manager, Fortune 500",
-    content:
-      "Professional, reliable, and technically excellent. The team's experience with Electron applications is unmatched. Highly recommend for desktop application development.",
-    rating: 5,
-  },
-];
-
-export const clients = [
-  { name: "Logitech", logo: "/clients/logitech.svg" },
-  { name: "Mercedes Benz", logo: "/clients/mercedes.svg" },
-  { name: "University of Arizona", logo: "/clients/arizona.svg" },
-  { name: "London School of Medical Science", logo: "/clients/lsms.svg" },
 ];
 
 export const technologies = [
   { name: "React", category: "Frontend" },
   { name: "Next.js", category: "Frontend" },
-  { name: "TypeScript", category: "Language" },
-  { name: "Node.js", category: "Backend" },
-  { name: "Electron", category: "Desktop" },
-  { name: "Python", category: "AI/ML" },
-  { name: "PostgreSQL", category: "Database" },
-  { name: "MongoDB", category: "Database" },
+  { name: "TypeScript", category: "Languages" },
+  { name: "Python", category: "Languages" },
+  { name: "Node.js", category: "Services & APIs" },
+  { name: "REST and event-driven APIs", category: "Services & APIs" },
+  { name: "PostgreSQL", category: "Data" },
+  { name: "MongoDB", category: "Data" },
   { name: "AWS", category: "Cloud" },
-  { name: "Docker", category: "DevOps" },
-  { name: "OpenAI", category: "AI" },
-  { name: "TailwindCSS", category: "Styling" },
+  { name: "Vercel", category: "Cloud" },
+  { name: "Docker", category: "Delivery" },
+  { name: "CI/CD pipelines", category: "Delivery" },
+  { name: "Electron", category: "Desktop" },
+  { name: "React Native", category: "Mobile" },
+  { name: "OpenAI", category: "Applied AI" },
+  { name: "Anthropic", category: "Applied AI" },
 ];
 
 export const faq = [
   {
-    question: "So what exactly do you build?",
+    question: "What does Jaypore Labs do?",
     answer:
-      "AI-enabled software — web apps, desktop apps, SaaS platforms, internal tools — with AI embedded where it earns its keep. We also help existing products introduce AI without ripping everything up. We don't sell AI models; we build the software around them.",
+      "We help organizations design, modernize and integrate their core software: enterprise architecture, enterprise applications, legacy modernization and systems integration, with applied AI where it delivers measurable value.",
   },
   {
-    question: "We already have an engineering team. Can you fit in?",
+    question: "Do you work alongside our internal IT and engineering teams?",
     answer:
-      "Yes. A common engagement is team augmentation — we drop in as senior AI engineers beside your team to stand up scribes, RAG pipelines, agents, or eval infra, then hand off cleanly. You keep the IP and the playbook.",
+      "Yes. Most engagements are delivered jointly with internal teams. We align to your architecture standards, security policies and delivery processes, and transfer knowledge throughout.",
   },
   {
-    question: "How do you handle project pricing?",
+    question: "How do you approach legacy modernization?",
     answer:
-      "Three shapes: fixed-scope projects (best for MVPs and discrete AI features), monthly retainers (best for ongoing AI products), or per-engineer team augmentation (best for existing teams). We'll recommend one honestly — sometimes that means a different studio entirely.",
+      "Incrementally. We replace or wrap legacy components in stages so operations continue throughout. A full rewrite is rarely the lowest-risk option, and we recommend one only when the case is clear.",
   },
   {
-    question: "What is your typical timeline?",
+    question: "How are engagements structured?",
     answer:
-      "AI-enabled MVPs take 8–12 weeks. Full-production SaaS with AI inside runs 16–24 weeks. AI readiness audits are two weeks. Friday demos every week, in production from day one.",
+      "As phased programs with defined scope and milestones, dedicated multi-quarter teams, or capacity extension with senior architects and engineers. We recommend a model after an initial assessment, based on scope, risk and governance requirements.",
   },
   {
-    question: "Do you work with regulated industries?",
+    question: "What are typical timelines?",
     answer:
-      "Yes — we've shipped HIPAA-compliant medical software to Luxembourg clinics (serving 100+ doctors), AI scribes for multiple specialties, and enterprise work for Logitech and Mercedes Benz. We design for audits from day one.",
+      "An initial architecture assessment typically takes 1–2 weeks. A first production release on a new program typically follows in 8–12 weeks. Larger platforms are delivered in phases over 16–24 weeks or longer.",
   },
   {
-    question: "Do you work with clients outside India?",
+    question: "How do you handle security and compliance?",
     answer:
-      "Yes, we work globally and remotely. Most of our clients are in North America, Europe, and the Middle East. Async-first by default, with IST-friendly live hours for working sessions.",
+      "Security and compliance are designed in from the first release: access control, audit trails, encryption and data residency aligned to your policies. We have delivered clinical software used by more than 100 doctors under European data-protection requirements, and design to HIPAA and GDPR requirements where they apply.",
   },
   {
-    question: "What makes Jaypore Labs different?",
+    question: "Do you support systems after go-live?",
     answer:
-      "We're industry-first, then AI-first. We learn your business before we touch the stack. You talk to the engineers writing your code, we ship weekly, and we tell you when AI is the wrong answer. No middle layer, no buzzword bingo.",
+      "Yes. We provide ongoing support and continuous improvement under an agreed service model, or a structured handover to your teams with documentation and runbooks.",
+  },
+  {
+    question: "How do you compare with a large systems integrator?",
+    answer:
+      "You work directly with senior architects and engineers rather than a leveraged delivery pyramid. Senior teams mean faster decisions, clear accountability and lower overhead, with the same standards of governance and documentation.",
   },
 ];
 
 // What you actually get — deliverables matrix
 export const capabilities = [
   {
-    group: "AI inside your software",
+    group: "Architecture & systems",
     items: [
-      { title: "AI scribes", detail: "Domain-tuned scribes for medicine, law, meetings, voice notes" },
-      { title: "AI copilots", detail: "In-app assistants with streaming, structured output, and tool-calling" },
-      { title: "AI agents", detail: "Multi-step agents with evals, fallbacks, and audit trails" },
-      { title: "RAG systems", detail: "Retrieval pipelines with vector search, rerankers, evals" },
-      { title: "Voice AI", detail: "Real-time STT/TTS, multi-speaker diarization, wake-word" },
-      { title: "MCP servers", detail: "Model Context Protocol servers that plug into Claude, Cursor, IDEs" },
+      { title: "System architecture", detail: "Service boundaries, data models, and the decisions written down" },
+      { title: "Cloud infrastructure", detail: "AWS and Vercel, containerized, monitored, and costed" },
+      { title: "Integrations & APIs", detail: "Connecting ERP, CRM, EHR and line-of-business systems" },
+      { title: "Legacy modernization", detail: "Phased migration off business-critical legacy platforms" },
+      { title: "Data pipelines", detail: "Reliable movement and reporting of data across systems" },
+      { title: "Security & compliance", detail: "Access control, audit trails, HIPAA- and GDPR-aware design" },
     ],
   },
   {
     group: "Product surfaces",
     items: [
-      { title: "Web apps", detail: "Next.js · App Router · Server Actions · Edge runtime" },
-      { title: "Desktop apps", detail: "Electron apps that feel native — offline-first, auto-update" },
-      { title: "Mobile apps", detail: "React Native · Expo · iOS + Android from one codebase" },
-      { title: "Chrome extensions", detail: "MV3 extensions with AI assistance baked in" },
-      { title: "Internal tools", detail: "Admin dashboards, CMS, workflow automations" },
+      { title: "Web platforms", detail: "React and Next.js platforms with server-side rendering" },
+      { title: "Desktop apps", detail: "Cross-platform desktop apps with offline support and auto-update" },
+      { title: "Mobile apps", detail: "React Native and Expo, iOS and Android from one codebase" },
+      { title: "Portals", detail: "Customer, partner and patient portals with proper permissions" },
+      { title: "Internal tools", detail: "Admin dashboards, back-office tools, workflow automation" },
       { title: "APIs + backends", detail: "Type-safe APIs, webhooks, background jobs, queues" },
     ],
   },
   {
-    group: "Craft + care",
+    group: "Delivery & operations",
     items: [
-      { title: "Design systems", detail: "Component libraries, tokens, docs — built to last" },
-      { title: "Data viz", detail: "Charts, dashboards, clinical reports — numbers that tell stories" },
-      { title: "Evals + monitoring", detail: "LLM evals, observability, incident response playbooks" },
-      { title: "Compliance", detail: "HIPAA, SOC2-ready architectures for regulated industries" },
-      { title: "Infra + DevOps", detail: "Vercel, AWS, Fly, Docker — boring on purpose" },
-      { title: "Team augmentation", detail: "Drop us in beside your team as senior AI engineers" },
+      { title: "Monitoring", detail: "Logging, alerting and incident playbooks from the first release" },
+      { title: "CI/CD", detail: "Automated tests, deploy pipelines, code signing" },
+      { title: "Data & reporting", detail: "Dashboards, analytics and operational reporting" },
+      { title: "Design systems", detail: "Component libraries, tokens and documentation" },
+      { title: "AI features", detail: "Extraction, search and assistants, with evals and human review" },
+      { title: "Team extension", detail: "Senior engineers embedded within your team" },
     ],
   },
 ];
 
-export const industries = [
-  { name: "Healthcare", detail: "AI scribes, clinic OS, EHR add-ons — built for real practitioners" },
-  { name: "Legal", detail: "AI doc review, contract agents, client-intake copilots" },
-  { name: "Enterprise", detail: "Internal tools + AI copilots for knowledge work and ops" },
-  { name: "Productivity", detail: "Meeting AI, wellness rituals, focus + habit software" },
-  { name: "Fintech", detail: "Dashboards, analytics, AI-assisted underwriting + ops" },
-  { name: "Research", detail: "Labs, universities, scientific viz with AI analysis on top" },
-  { name: "Consumer", detail: "Creator tools, voice apps, AI-assisted social products" },
-  { name: "Education", detail: "Learning tools, tutors, AI-enabled assessments" },
-];
-
-// Homepage manifesto — expanded principles
+// How we work — differentiators
 export const principles = [
   {
     k: "01",
-    h: "AI-enabled, not AI-obsessed.",
-    b: "We put AI inside real software, where it earns its keep. The rest we keep boring on purpose — boring is what scales.",
+    h: "Architecture before code.",
+    b: "Every program starts with a clear view of your systems, data and constraints, and a target architecture your teams can build against.",
   },
   {
     k: "02",
-    h: "Industry-first.",
-    b: "We learn your business before we touch the stack. AI without context is theater. Good software starts with good questions.",
+    h: "Senior teams, single accountability.",
+    b: "Architects and senior engineers lead delivery directly. One team is accountable from design through operations.",
   },
   {
     k: "03",
-    h: "Friendly by default.",
-    b: "No architects peacocking. No gatekept Slack. You talk to the engineers writing your code, directly, every day.",
+    h: "Incremental, low-risk delivery.",
+    b: "We modernize in stages, with production-ready releases every sprint, so the business keeps running throughout.",
   },
   {
     k: "04",
-    h: "Ship weekly.",
-    b: "Every Friday you see something working in production. We iterate in public and measure in real users, not dry-runs.",
+    h: "Security and compliance by design.",
+    b: "Access control, audit trails, data protection and resilience are built in from the first release and aligned to your policies.",
   },
   {
     k: "05",
-    h: "Production, not prototype.",
-    b: "Every sprint ends in front of real users. Demos don't count. Shipping is the grader. Reality has the final word.",
+    h: "Decisions documented.",
+    b: "Architecture decision records, runbooks and documentation that your internal teams can own, audit and extend.",
   },
   {
     k: "06",
-    h: "No buzzword bingo.",
-    b: "We'll tell you when AI is the wrong answer. Half the time it is. We'd rather ship real software than sound smart in a pitch.",
+    h: "Built for handover.",
+    b: "You own the code, infrastructure and IP. We transition to your teams, or operate the system under an agreed service model.",
   },
 ];
 
-// Text-driven hero specimens (replaces image reel)
-export const heroSpecimens = [
+export const approach = [
   {
-    kicker: "AI Scribe · Healthcare",
-    title: "Nudge AI",
-    stat: "3 hrs",
-    statLabel: "saved per doctor, daily",
-    note: "Deployed across Psychiatry, Pediatrics, Family Medicine.",
+    n: "01",
+    h: "Assess",
+    duration: "1–2 weeks",
+    b: "Current-state assessment of systems, data, integrations and risk, with your technology and business stakeholders. Output: a target architecture and a prioritized roadmap.",
   },
   {
-    kicker: "Voice AI · Medical",
-    title: "Curastream",
-    stat: "100%",
-    statLabel: "hands-free clinical workflow",
-    note: "Voice-controlled assistant for doctors in clinic.",
+    n: "02",
+    h: "Architect",
+    duration: "1–2 weeks",
+    b: "Solution design, integration patterns, security model and delivery plan, reviewed with your architecture and security teams. A fixed scope for the first release.",
   },
   {
-    kicker: "Clinic OS · Luxembourg",
-    title: "Lucy",
-    stat: "100+",
-    statLabel: "doctors in production",
-    note: "End-to-end clinic OS. Led team of 5 to v1.",
+    n: "03",
+    h: "Deliver",
+    duration: "Phased",
+    b: "Releases in two-week increments with automated testing, CI/CD and observability from the outset, and regular reviews with your stakeholders.",
   },
   {
-    kicker: "Consumer · Logitech",
-    title: "SmartHabits",
-    stat: "8",
-    statLabel: "wellness rituals, on the wrist",
-    note: "Electron wellness app built for Logitech.",
+    n: "04",
+    h: "Operate",
+    duration: "Ongoing",
+    b: "Managed support and continuous improvement under an agreed service model, or a structured handover to your internal teams.",
+  },
+];
+
+export const engagementModels = [
+  {
+    name: "Program delivery",
+    price: "Fixed scope or phased",
+    summary:
+      "A defined program with agreed scope, milestones and governance. Suited to new platforms, modernization phases and major integrations.",
+    fits: ["New platforms and applications", "Modernization phases", "Defined milestones and budget"],
   },
   {
-    kicker: "Meeting AI · Consumer",
-    title: "Sonnet AI",
-    stat: "24/7",
-    statLabel: "meeting insights",
-    note: "AI that transcribes, tags, and surfaces actions.",
+    name: "Dedicated team",
+    price: "Monthly",
+    summary:
+      "A stable, cross-functional team working on your roadmap over multiple quarters, with predictable cost and continuity of people.",
+    fits: ["Multi-quarter roadmaps", "Evolving requirements", "Predictable monthly cost"],
+  },
+  {
+    name: "Capacity extension",
+    price: "Per engineer",
+    summary:
+      "Senior architects and engineers embedded within your teams to add specialist depth or accelerate delivery.",
+    fits: ["Specialist architecture skills", "Knowledge transfer", "Accelerated delivery"],
   },
 ];

@@ -1,25 +1,17 @@
 import { Hero } from "@/components/sections/hero";
-import { Marquee } from "@/components/sections/marquee";
-import { Clients } from "@/components/sections/clients";
-import { BigStatement } from "@/components/sections/big-statement";
-import { Capabilities } from "@/components/sections/capabilities";
-import { ServicesList } from "@/components/sections/services-list";
+import { Solutions } from "@/components/sections/solutions";
+import { ServicesGrid } from "@/components/sections/services-list";
 import { Industries } from "@/components/sections/industries";
-import { TestimonialQuote } from "@/components/sections/testimonial-quote";
+import { CaseStudyCards } from "@/components/sections/selected-work";
+import { Approach } from "@/components/sections/approach";
+import { Insights } from "@/components/sections/insights";
+import { Principles } from "@/components/sections/principles";
+import { FaqSection } from "@/components/sections/faq";
+import { CtaBand } from "@/components/ui/primitives";
 import {
   ProfessionalServiceJsonLd,
   ServicesJsonLd,
 } from "@/components/seo/json-ld";
-
-const marqueeLine = [
-  "AI-enabled software",
-  "Industry-first",
-  "Ship friendly",
-  "Built to last",
-  "Weekly demos",
-  "Deep craft",
-  "Independent",
-];
 
 export default function HomePage() {
   return (
@@ -27,23 +19,15 @@ export default function HomePage() {
       <ProfessionalServiceJsonLd />
       <ServicesJsonLd />
       <Hero />
-      <Clients />
-      <Marquee words={marqueeLine} size="xl" speed="normal" />
-      <BigStatement />
-      <Capabilities />
-      <ServicesList />
+      <Solutions />
+      <ServicesGrid />
+      <CaseStudyCards />
+      <Approach />
       <Industries />
-      <TestimonialQuote />
-      <Marquee
-        words={[
-          "Bringing AI to your business",
-          "Industry-first, then AI-first",
-          "Hello from India",
-        ]}
-        size="lg"
-        reverse
-        speed="slow"
-      />
+      <Principles />
+      <FaqSection limit={5} />
+      <Insights />
+      <CtaBand />
     </>
   );
 }

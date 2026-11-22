@@ -1,48 +1,44 @@
-# Jaypore Labs — AI-enabled software for real businesses
+# Jaypore Labs — Enterprise software architecture & engineering
 
-## About
-Jaypore Labs is a friendly product studio. We build AI-enabled software and help businesses put AI to work — without rewriting what already runs. Since 2017. Industry-first, then AI-first. Based in India, remote-worldwide.
+> Jaypore Labs helps organizations design, modernize and integrate the systems they run on. Senior architects and engineers, accountable from strategy to operations. Since 2017. Headquartered in India; clients across North America, Europe, the Middle East and APAC.
 
-We don't sell AI as a category. We build the software around it — web, mobile, desktop, SaaS, internal tools — with AI embedded where it earns its keep.
+## Solutions
+- [Architecture Assessment](https://jayporelabs.com/solutions#architecture-assessment): current-state review, target architecture and a phased roadmap (1–2 weeks)
+- [Legacy Modernization](https://jayporelabs.com/solutions#legacy-modernization): phased replacement of legacy platforms without a big-bang rewrite
+- [Systems Integration](https://jayporelabs.com/solutions#systems-integration): one operational picture across ERP, CRM and line-of-business systems
+- [Enterprise Application Delivery](https://jayporelabs.com/solutions#enterprise-applications): portals and business-critical applications, first production release in 8–12 weeks
+- [Applied AI & Automation](https://jayporelabs.com/solutions#applied-ai): document processing, enterprise search and workflow automation with governance and human review
+- [Managed Engineering & Support](https://jayporelabs.com/solutions#managed-engineering): operation, support and continuous improvement after go-live
 
-## Founder
-Yash Shah — Founder & Lead Engineer. 8+ years shipping software for global consumer brands, clinics in Europe, research teams, and ambitious founders.
-
-## Capabilities
-- Web applications — Next.js, React, type-safe
-- Mobile apps — React Native, Expo
-- Desktop applications — Electron, offline-first
-- SaaS platforms — MVP to production, multi-tenant
-- AI integration — scribes, copilots, agents, RAG, voice, MCP servers
-- Internal tools — dashboards, admin, workflow automation
-- Strategy + readiness — honest audits on whether AI is the right bet
+## Services
+- [Services overview](https://jayporelabs.com/services): Enterprise Architecture, Enterprise Applications, Modernization & Integration, Digital Platform Engineering, Desktop & Field Applications, Applied AI & Automation
 
 ## Engagement models
-- Project — fixed-scope delivery (new AI-enabled product or retrofit)
-- Retainer — monthly slice of the studio
-- Augment — plug in beside your team as senior AI engineers
+- Program delivery — defined scope, milestones and governance
+- Dedicated team — a stable, cross-functional team over multiple quarters
+- Capacity extension — senior architects and engineers embedded in client teams
 
 ## Industries
-Healthcare · Legal · Enterprise · Productivity · Fintech · Research · Consumer · Education
+- [Healthcare](https://jayporelabs.com/industries/healthcare)
+- [Financial Services](https://jayporelabs.com/industries/financial-services)
+- [Insurance](https://jayporelabs.com/industries/insurance)
+- [Legal & Professional Services](https://jayporelabs.com/industries/legal)
+- [Manufacturing](https://jayporelabs.com/industries/manufacturing)
+- [Logistics & Supply Chain](https://jayporelabs.com/industries/logistics)
+- [Retail & E-commerce](https://jayporelabs.com/industries/retail)
+- [Education & Research](https://jayporelabs.com/industries/education-research)
 
-## Blog index
-- /blog/ai-assistant-is-a-midwife — AI coding assistants × midwives (Claude Code / Cursor / Copilot)
-- /blog/mcp-is-usb-c-for-ai — MCP × USB-C, why boring protocols win
-- /blog/prompts-are-recipes — prompt engineering × recipes, not spells
-- /blog/ai-agent-kitchen-brigade — AI agents × Escoffier's brigade
-- /blog/medieval-scribes-ai-scribes — AI scribes × medieval scriptoria
+## Case studies (client names withheld)
+- [Clinic management platform](https://jayporelabs.com/portfolio/clinic-management-platform): unified platform in production with 100+ doctors and clinics
+- [Clinical documentation platform](https://jayporelabs.com/portfolio/clinical-documentation-platform): documentation and coding on one platform, ~3 hours saved per clinician daily
+- [Enterprise desktop software](https://jayporelabs.com/portfolio/workplace-wellbeing-desktop-app): cross-platform desktop software for a global hardware brand
+- [All case studies](https://jayporelabs.com/portfolio)
 
-## Contact
-Email: hello@jayporelabs.com
-Website: https://jayporelabs.com
-Sitemap: https://jayporelabs.com/sitemap.xml
-Feed: https://jayporelabs.com/feed.xml
+## Company
+- [About](https://jayporelabs.com/about)
+- [Insights](https://jayporelabs.com/blog)
+- [Contact](https://jayporelabs.com/contact): hello@jayporelabs.com — a senior architect responds within one business day
 
-## Social
-GitHub: https://github.com/theguidingstar
-LinkedIn: https://linkedin.com/company/jaypore-labs
-Twitter: https://twitter.com/jayporelabs
-Upwork: https://www.upwork.com/freelancers/theguidingstar
-
-## Tech fluency
-Next.js · React · React Native · TypeScript · Node.js · Electron · Python · PostgreSQL · MongoDB · AWS · Docker · OpenAI · Anthropic · Tailwind CSS
+## Machine-readable
+- Sitemap: https://jayporelabs.com/sitemap.xml
+- Feed: https://jayporelabs.com/feed.xml

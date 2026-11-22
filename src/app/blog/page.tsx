@@ -1,16 +1,19 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calendar, Clock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PageHero } from "@/components/layout/page-hero";
+import { InsightCard, formatDate } from "@/components/sections/insights";
+import { CtaBand, Wrap } from "@/components/ui/primitives";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
-import { getAllPosts, getAllCategories } from "@/lib/blog";
+import { getAllPosts, getAllCategories, slugify } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
+import { ogDefaults, twitterDefaults } from "@/lib/seo";
 
 const desc =
-  "Field notes on AI enablement — bringing AI into healthcare, legal, and enterprise workflows. Shipping patterns, eval playbooks, and the occasional strong opinion.";
+  "Insights for technology leaders on enterprise architecture, modernization, delivery and applied AI, written by the Jaypore Labs engineering team.";
 
 export const metadata: Metadata = {
-  title: "Journal",
+  title: "Insights",
   description: desc,
   keywords: [
     "AI enablement blog",
@@ -19,136 +22,100 @@ export const metadata: Metadata = {
     "healthcare AI playbook",
   ],
   alternates: { canonical: `${siteConfig.url}/blog` },
-  openGraph: {
-    title: `Journal · ${siteConfig.name}`,
+  openGraph: { ...ogDefaults,
+    title: `Insights · ${siteConfig.name}`,
     description: desc,
     url: `${siteConfig.url}/blog`,
     type: "website",
   },
-  twitter: {
-    title: `Journal · ${siteConfig.name}`,
+  twitter: { ...twitterDefaults,
+    title: `Insights · ${siteConfig.name}`,
     description: desc,
   },
 };
 
 export default function BlogPage() {
   const posts = getAllPosts();
-  const categories = getAllCategories();
+  // Only surface hubs that are indexable (5+ posts); thin one-off categories stay out of the nav.
+  const categories = getAllCategories().filter(
+    (c) => posts.filter((p) => p.category === c).length >= 5
+  );
+  const [lead, ...rest] = posts;
 
   return (
     <>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", href: "/" },
-          { name: "Journal", href: "/blog" },
+          { name: "Insights", href: "/blog" },
         ]}
       />
       <PageHero
-        eyebrow="Field notes"
-        title={
-          <>
-            The studio,
-            <br />
-            <span className="italic font-medium text-accent">out loud.</span>
-          </>
-        }
-        description="Lessons from shipping AI products, building with small teams, and the occasional strong opinion about software."
+        eyebrow="Insights"
+        title="Insights for technology leaders."
+        description="Perspectives on enterprise architecture, modernization, delivery and applied AI from our engineering team."
       />
 
-      <section className="relative bg-ink border-b border-line">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-20 md:py-32">
-          {posts.length === 0 ? (
-            <div className="max-w-xl">
-              <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-6">
-                Status
-              </div>
-              <h2 className="display-tight text-paper text-[clamp(2.25rem,6vw,5rem)] mb-6">
-                First issue
-                <br />
-                <span className="italic font-medium text-accent">coming soon.</span>
-              </h2>
-              <p className="text-paper-dim leading-relaxed mb-8 max-w-md">
-                We&apos;re putting together some long-form essays on healthcare
-                AI, Electron ergonomics, and shipping under constraint. Drop us
-                a line if you want to be first to know.
-              </p>
+      {categories.length > 0 && (
+        <nav aria-label="Topics" className="border-b border-line">
+          <Wrap className="flex flex-wrap gap-x-8 gap-y-2">
+            <span className="relative py-4 text-[15px] font-medium text-ink">
+              All insights
+              <span aria-hidden className="absolute inset-x-0 bottom-0 h-[2px] bg-accent" />
+            </span>
+            {categories.map((c) => (
               <Link
-                href="/contact"
-                className="group inline-flex items-center gap-3 rounded-full bg-accent text-ink px-6 py-3.5 text-sm font-medium hover:bg-accent-deep transition-colors"
+                key={c}
+                href={`/category/${slugify(c)}`}
+                className="py-4 text-[15px] text-ink-soft hover:text-ink transition-colors"
               >
-                Get notified
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper transition-transform group-hover:rotate-45">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </span>
+                {c}
               </Link>
-            </div>
+            ))}
+          </Wrap>
+        </nav>
+      )}
+
+      <section className="border-b border-line">
+        <Wrap className="py-16 md:py-24">
+          {!lead ? (
+            <p className="text-ink-soft">New articles are on their way.</p>
           ) : (
             <>
-              {categories.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-12">
-                  <span className="mono text-[11px] uppercase tracking-widest px-4 py-2 rounded-full bg-accent text-ink">
-                    All
-                  </span>
-                  {categories.map((c) => (
-                    <Link
-                      key={c}
-                      href={`/category/${c.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
-                      className="mono text-[11px] uppercase tracking-widest px-4 py-2 rounded-full border border-line text-paper-dim hover:bg-paper hover:text-ink transition-colors"
-                    >
-                      {c}
-                    </Link>
-                  ))}
+              <Link
+                href={`/blog/${lead.slug}`}
+                className="palette-classic group grid grid-cols-12 gap-x-4 md:gap-x-10 gap-y-6 bg-muted text-paper p-8 md:p-12 border-t-[3px] border-accent"
+              >
+                <div className="col-span-12 lg:col-span-8">
+                  <div className="eyebrow text-paper-dim">Latest · {lead.category}</div>
+                  <h2 className="display mt-5 text-[clamp(1.875rem,3.4vw,3rem)] text-paper">
+                    {lead.title}
+                  </h2>
                 </div>
-              )}
+                <div className="col-span-12 lg:col-span-4 flex flex-col justify-end">
+                  <p className="text-[15px] leading-relaxed text-paper-dim">{lead.description}</p>
+                  <div className="mt-6 flex items-center justify-between gap-4 text-sm text-paper-dim">
+                    <span>
+                      {formatDate(lead.date)} · {lead.readingTime}
+                    </span>
+                    <ArrowRight className="h-5 w-5 text-accent transition-transform group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </Link>
 
-              <ul className="border-t border-line">
-                {posts.map((post, i) => (
-                  <li
-                    key={post.slug}
-                    className="border-b border-line group"
-                  >
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="flex items-center justify-between gap-6 py-8"
-                    >
-                      <div className="flex items-baseline gap-6 md:gap-10 flex-1 min-w-0">
-                        <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim w-10 shrink-0">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-2">
-                            {post.category}
-                          </div>
-                          <h2 className="display text-2xl md:text-4xl text-paper group-hover:text-accent transition-colors">
-                            {post.title}
-                          </h2>
-                        </div>
-                      </div>
-                      <div className="hidden md:flex items-center gap-6 mono text-[11px] uppercase tracking-[0.22em] text-paper-dim shrink-0">
-                        <span className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {new Date(post.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5" />
-                          {post.readingTime}
-                        </span>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line group-hover:bg-accent group-hover:text-ink group-hover:border-accent transition-colors">
-                          <ArrowUpRight className="w-4 h-4" />
-                        </span>
-                      </div>
-                    </Link>
+              <ul className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+                {rest.map((post) => (
+                  <li key={post.slug}>
+                    <InsightCard post={post} />
                   </li>
                 ))}
               </ul>
             </>
           )}
-        </div>
+        </Wrap>
       </section>
+
+      <CtaBand />
     </>
   );
 }

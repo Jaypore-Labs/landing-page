@@ -1,124 +1,100 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowUpRight, Plus } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, Check } from "lucide-react";
 import { services } from "@/data/site";
+import { ArrowLink, SectionHeader, Wrap } from "@/components/ui/primitives";
 
-export function ServicesList() {
-  const [openId, setOpenId] = useState<string | null>(services[0]?.id ?? null);
-
+/** Homepage overview — six services as a hairline grid. */
+export function ServicesGrid() {
   return (
-    <section
-      id="services"
-      className="relative bg-ink border-b border-line"
-    >
-      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pt-24 md:pt-40 pb-16 md:pb-28">
-        <div className="grid grid-cols-12 gap-6 mb-14 md:mb-20">
-          <div className="col-span-12 md:col-span-5">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="h-px w-10 bg-accent" />
-              <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
-                Capabilities
-              </span>
-            </div>
-            <h2 className="display-tight text-paper text-[clamp(2.5rem,7vw,6rem)]">
-              What we
-              <br />
-              <span className="italic font-medium text-accent">build.</span>
-            </h2>
-          </div>
+    <section id="services" className="border-b border-line">
+      <Wrap className="py-20 md:py-28">
+        <SectionHeader
+          eyebrow="Practices"
+          title="Six practices. One accountable team."
+          intro="One accountable team across strategy, architecture, delivery and support, so nothing is lost between the people who design your systems and the people who build them."
+          action={{ href: "/services", label: "Explore our services" }}
+        />
 
-          <div className="col-span-12 md:col-span-6 md:col-start-7 flex md:items-end">
-            <p className="text-paper-dim text-base md:text-lg leading-relaxed max-w-md">
-              Six shapes of work. Whether you&apos;re starting fresh or
-              retrofitting an existing product, we pick the one that fits —
-              not the one that pads the invoice.
-            </p>
-          </div>
-        </div>
-
-        <ul className="border-t border-line">
-          {services.map((s, i) => {
-            const isOpen = openId === s.id;
-            const num = String(i + 1).padStart(2, "0");
-            return (
-              <li key={s.id} className="border-b border-line">
-                <button
-                  type="button"
-                  onClick={() => setOpenId(isOpen ? null : s.id)}
-                  aria-expanded={isOpen}
-                  className="group flex w-full items-center justify-between gap-6 py-6 md:py-8 text-left"
-                  data-cursor-label={isOpen ? "CLOSE" : "OPEN"}
-                >
-                  <div className="flex flex-1 items-baseline gap-6 md:gap-10 min-w-0">
-                    <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim shrink-0 w-10">
-                      {num}
-                    </span>
-                    <span className="display-tight text-paper group-hover:text-accent transition-colors text-[clamp(1.75rem,5vw,4rem)] truncate">
-                      {s.title}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-5 shrink-0">
-                    <span className="hidden md:block mono text-[11px] uppercase tracking-[0.22em] text-paper-dim max-w-[22ch] text-right">
-                      {s.shortDescription}
-                    </span>
-                    <motion.span
-                      animate={{ rotate: isOpen ? 45 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-line group-hover:border-accent group-hover:bg-accent group-hover:text-ink transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </motion.span>
-                  </div>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      key="content"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pb-10 md:pb-14 grid grid-cols-12 gap-6">
-                        <div className="col-span-12 md:col-span-5 md:col-start-2">
-                          <p className="text-paper-dim text-base md:text-lg leading-relaxed">
-                            {s.description}
-                          </p>
-                        </div>
-                        <div className="col-span-12 md:col-span-5 md:col-start-8">
-                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-                            {s.features.map((f) => (
-                              <li
-                                key={f}
-                                className="flex items-center gap-2 text-paper text-sm py-1"
-                              >
-                                <span className="h-1 w-1 rounded-full bg-accent" />
-                                {f}
-                              </li>
-                            ))}
-                          </ul>
-                          <Link
-                            href="/contact"
-                            className="mt-6 inline-flex items-center gap-2 mono text-[11px] uppercase tracking-[0.22em] text-paper hover:text-accent transition-colors"
-                          >
-                            <span className="swipe-link">Talk about this</span>
-                            <ArrowUpRight className="w-3.5 h-3.5" />
-                          </Link>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </li>
-            );
-          })}
+        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-14">
+          {services.map((s, i) => (
+            <li key={s.id}>
+              <Link
+                href={`/services#${s.id}`}
+                className="group relative flex h-full flex-col border-t border-line-strong pt-7"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 -top-px h-[2px] origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+                />
+                <span className="text-sm text-ink-mute tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="display mt-4 text-[1.625rem] text-ink group-hover:text-accent-ink transition-colors">{s.title}</h3>
+                <p className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-soft">
+                  {s.description}
+                </p>
+                <span className="mt-6 inline-flex items-center gap-2 text-[15px] font-medium text-ink">
+                  Learn more
+                  <ArrowRight className="h-4 w-4 text-accent transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            </li>
+          ))}
         </ul>
-      </div>
+      </Wrap>
+    </section>
+  );
+}
+
+/** Services page — each service as a full-width row with scope detail. */
+export function ServicesDetail() {
+  return (
+    <section className="border-b border-line">
+      <Wrap className="py-20 md:py-28">
+        <SectionHeader
+          eyebrow="Our services"
+          title="Our services."
+          intro="Each engagement combines architecture and delivery in one senior team, aligned to your standards and governance."
+        />
+        <ol className="border-t border-line">
+          {services.map((s, i) => (
+            <li
+              key={s.id}
+              id={s.id}
+              className="scroll-mt-28 grid grid-cols-12 gap-x-4 md:gap-x-8 gap-y-6 border-b border-line py-12 md:py-14"
+            >
+              <div className="col-span-12 lg:col-span-4">
+                <span className="text-sm text-ink-mute tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="display mt-3 text-[clamp(1.75rem,2.6vw,2.25rem)] text-ink">
+                  {s.title}
+                </h3>
+                <p className="mt-3 text-[15px] text-ink-mute">{s.shortDescription}</p>
+              </div>
+              <div className="col-span-12 md:col-span-7 lg:col-span-4">
+                <p className="text-base md:text-[17px] leading-relaxed text-ink-soft">
+                  {s.description}
+                </p>
+                <ArrowLink href="/contact" className="mt-6">
+                  Discuss this service
+                </ArrowLink>
+              </div>
+              <div className="col-span-12 md:col-span-5 lg:col-span-3 lg:col-start-10">
+                <div className="eyebrow text-ink-mute mb-4">Typical scope</div>
+                <ul className="space-y-3">
+                  {s.features.map((f) => (
+                    <li key={f} className="flex gap-3 text-[15px] leading-snug text-ink">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Wrap>
     </section>
   );
 }
