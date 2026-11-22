@@ -1,4 +1,14 @@
 import { siteConfig, services, faq } from "@/data/site";
+import { solutions } from "@/data/solutions";
+import type { Industry } from "@/data/industries";
+import type { CaseStudy } from "@/data/case-studies";
+
+const LOGO = {
+  "@type": "ImageObject",
+  url: `${siteConfig.url}/logo.png`,
+  width: 512,
+  height: 512,
+};
 
 function JsonLd({ data }: { data: Record<string, unknown> | Record<string, unknown>[] }) {
   return (
@@ -21,7 +31,8 @@ export function OrganizationJsonLd() {
     description: siteConfig.description,
     slogan: siteConfig.tagline,
     url: siteConfig.url,
-    logo: `${siteConfig.url}/opengraph-image`,
+    logo: LOGO,
+    image: `${siteConfig.url}/opengraph-image`,
     email: siteConfig.email,
     foundingDate: "2017",
     founders: [
@@ -53,16 +64,14 @@ export function OrganizationJsonLd() {
       siteConfig.social.twitter,
     ],
     knowsAbout: [
-      "AI-enabled software",
+      "Software architecture",
+      "Custom software development",
+      "Legacy modernization",
+      "System integration",
+      "Cloud infrastructure",
+      "Healthcare software",
+      "Desktop applications",
       "AI integration",
-      "AI adoption consulting",
-      "Healthcare AI",
-      "Legal AI",
-      "Voice AI",
-      "AI agents",
-      "RAG systems",
-      "AI scribes",
-      "MCP servers",
       "Next.js",
       "Electron",
       "SaaS development",
@@ -79,13 +88,13 @@ export function PersonJsonLd() {
     name: siteConfig.founder.name,
     jobTitle: siteConfig.founder.role,
     description:
-      "Founder of Jaypore Labs. 8+ years building AI-enabled software for global brands, clinics in Europe, and ambitious founders.",
+      "Founder of Jaypore Labs. 8+ years designing and building software for global brands, clinics in Europe, and ambitious founders.",
     url: `${siteConfig.url}/about`,
     worksFor: { "@id": `${siteConfig.url}#organization` },
     sameAs: [siteConfig.founder.github, siteConfig.founder.linkedin],
     knowsAbout: [
-      "AI-enabled software",
-      "AI integration",
+      "Software architecture",
+      "System integration",
       "Next.js",
       "React",
       "Electron",
@@ -120,6 +129,7 @@ export function ProfessionalServiceJsonLd() {
     description: siteConfig.description,
     url: siteConfig.url,
     priceRange: "$$$",
+    logo: LOGO,
     image: `${siteConfig.url}/opengraph-image`,
     areaServed: siteConfig.regions,
     serviceType: services.map((s) => s.title),
@@ -156,16 +166,17 @@ export function ServicesJsonLd() {
   return <JsonLd data={data} />;
 }
 
-export function FAQJsonLd() {
+export function FAQJsonLd({ items }: { items?: { q: string; a: string }[] } = {}) {
+  const list = items ?? faq.map((f) => ({ q: f.question, a: f.answer }));
   const data = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faq.map((f) => ({
+    mainEntity: list.map((f) => ({
       "@type": "Question",
-      name: f.question,
+      name: f.q,
       acceptedAnswer: {
         "@type": "Answer",
-        text: f.answer,
+        text: f.a,
       },
     })),
   };
@@ -213,6 +224,74 @@ export function ArticleJsonLd({ article }: { article: ArticleInput }) {
       name: article.author,
       url: siteConfig.founder.linkedin,
     },
+    publisher: { "@id": `${siteConfig.url}#organization` },
+    image: `${siteConfig.url}/opengraph-image`,
+  };
+  return <JsonLd data={data} />;
+}
+
+/** /solutions — the packaged offers as an OfferCatalog of Services. */
+export function SolutionsJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    "@id": `${siteConfig.url}/solutions#catalog`,
+    name: `${siteConfig.name} enterprise solutions`,
+    url: `${siteConfig.url}/solutions`,
+    itemListElement: solutions.map((s, i) => ({
+      "@type": "Offer",
+      position: i + 1,
+      itemOffered: {
+        "@type": "Service",
+        "@id": `${siteConfig.url}/solutions#${s.id}`,
+        name: s.name,
+        description: `${s.headline} ${s.summary}`,
+        provider: { "@id": `${siteConfig.url}#organization` },
+        areaServed: siteConfig.regions,
+        audience: { "@type": "BusinessAudience", name: s.bestFor },
+      },
+    })),
+  };
+  return <JsonLd data={data} />;
+}
+
+/** Industry landing page — the sector service plus its FAQ. */
+export function IndustryJsonLd({ industry }: { industry: Industry }) {
+  const url = `${siteConfig.url}/industries/${industry.slug}`;
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: `Enterprise software for ${industry.name}`,
+    description: industry.lede,
+    url,
+    serviceType: industry.useCases.map((u) => u.h),
+    provider: { "@id": `${siteConfig.url}#organization` },
+    areaServed: siteConfig.regions,
+    audience: { "@type": "BusinessAudience", audienceType: industry.name },
+  };
+  return (
+    <>
+      <JsonLd data={data} />
+      <FAQJsonLd items={industry.faq} />
+    </>
+  );
+}
+
+/** Case study detail — an Article about an anonymised engagement. */
+export function CaseStudyJsonLd({ cs }: { cs: CaseStudy }) {
+  const url = `${siteConfig.url}/portfolio/${cs.slug}`;
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    headline: cs.headline,
+    description: cs.summary,
+    articleSection: "Case studies",
+    about: cs.services.map((name) => ({ "@type": "Thing", name })),
+    keywords: [cs.sector, ...cs.services, ...cs.technologies].join(", "),
+    author: { "@id": `${siteConfig.url}#organization` },
     publisher: { "@id": `${siteConfig.url}#organization` },
     image: `${siteConfig.url}/opengraph-image`,
   };

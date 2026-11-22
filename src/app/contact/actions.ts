@@ -23,13 +23,13 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
   const message = input.message?.trim();
 
   if (!name || !email || !message) {
-    return { ok: false, message: "Name, email, and a short brief are required." };
+    return { ok: false, message: "Please provide your name, email, and a short description of your needs." };
   }
   if (!EMAIL_RE.test(email)) {
-    return { ok: false, message: "That email looks off — mind double-checking?" };
+    return { ok: false, message: "Please enter a valid email address." };
   }
   if (message.length < 10) {
-    return { ok: false, message: "Tell us a little more — at least a sentence." };
+    return { ok: false, message: "Please add a little more detail about your project." };
   }
 
   const url = process.env.SUPABASE_URL;
@@ -54,7 +54,7 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
     return {
       ok: true,
       storage: "log",
-      message: "Got it. We'll reply within 24 hours.",
+      message: "Thank you. We will reply within one business day.",
     };
   }
 
@@ -68,20 +68,20 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
       return {
         ok: false,
         message:
-          "We couldn't save your message. Email us directly at hello@jayporelabs.com?",
+          "We could not save your message. Please email us directly at hello@jayporelabs.com.",
       };
     }
     return {
       ok: true,
       storage: "supabase",
-      message: "Got it. We'll reply within 24 hours.",
+      message: "Thank you. We will reply within one business day.",
     };
   } catch (err) {
     console.error("[inquiry:exception]", err);
     return {
       ok: false,
       message:
-        "Something broke on our side. Email us at hello@jayporelabs.com and we'll sort it.",
+        "Something went wrong on our side. Please email us at hello@jayporelabs.com.",
     };
   }
 }

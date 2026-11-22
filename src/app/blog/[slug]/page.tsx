@@ -1,11 +1,13 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, Calendar, Clock, Linkedin, Twitter, User } from "lucide-react";
+import { ArrowLeft, Linkedin, Twitter } from "lucide-react";
+import { InsightCard, formatDate } from "@/components/sections/insights";
+import { ArrowLink, CtaBand, SectionHeader, Wrap } from "@/components/ui/primitives";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
-import { getPostBySlug, getAllPostSlugs, getAllPosts } from "@/lib/blog";
+import { getPostBySlug, getAllPostSlugs, getAllPosts, slugify } from "@/lib/blog";
 import { siteConfig } from "@/data/site";
 
 interface PageProps {
@@ -49,70 +51,63 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 const mdxComponents = {
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1 className="display text-3xl md:text-4xl text-paper mt-12 mb-5" {...props} />
+    <h2 className="display text-[2rem] text-ink mt-14 mb-5" {...props} />
   ),
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 className="display text-2xl md:text-3xl text-paper mt-10 mb-4" {...props} />
+    <h2 className="display text-[1.75rem] text-ink mt-12 mb-4" {...props} />
   ),
   h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3 className="display text-xl md:text-2xl text-paper mt-8 mb-3" {...props} />
+    <h3 className="display text-[1.375rem] text-ink mt-10 mb-3" {...props} />
   ),
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p className="text-paper-dim mb-5 leading-relaxed" {...props} />
+    <p className="text-ink-soft text-[17px] mb-6 leading-[1.75]" {...props} />
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc list-outside ml-5 text-paper-dim mb-5 space-y-2" {...props} />
+    <ul className="list-disc list-outside ml-5 text-ink-soft text-[17px] mb-6 space-y-2 marker:text-accent" {...props} />
   ),
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal list-outside ml-5 text-paper-dim mb-5 space-y-2" {...props} />
+    <ol className="list-decimal list-outside ml-5 text-ink-soft text-[17px] mb-6 space-y-2" {...props} />
   ),
   li: (props: React.HTMLAttributes<HTMLLIElement>) => (
-    <li className="text-paper-dim" {...props} />
+    <li className="leading-[1.7] pl-1" {...props} />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a className="text-accent hover:underline underline-offset-4" {...props} />
+    <a className="text-accent-ink underline underline-offset-4 decoration-1 hover:decoration-2" {...props} />
   ),
   code: (props: React.HTMLAttributes<HTMLElement>) => (
-    <code className="mono bg-muted px-2 py-0.5 rounded text-sm text-paper" {...props} />
+    <code className="mono bg-paper-deep px-1.5 py-0.5 text-[0.875em] text-ink" {...props} />
   ),
   pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre className="mono bg-muted border border-line text-paper p-5 rounded-xl overflow-x-auto mb-6 text-sm" {...props} />
+    <pre className="palette-classic mono bg-muted text-paper p-6 overflow-x-auto mb-8 text-sm leading-relaxed [&_code]:bg-transparent [&_code]:text-paper [&_code]:p-0" {...props} />
   ),
   blockquote: (props: React.HTMLAttributes<HTMLQuoteElement>) => (
-    <blockquote className="border-l-2 border-accent pl-5 italic text-paper my-6 text-lg" {...props} />
+    <blockquote className="border-l-[3px] border-accent pl-6 my-8 font-serif text-[1.375rem] leading-snug text-ink [&_p]:text-ink [&_p]:text-[1.375rem] [&_p]:leading-snug" {...props} />
   ),
   table: (props: React.HTMLAttributes<HTMLTableElement>) => (
-    <div className="my-6 -mx-4 sm:mx-0 overflow-x-auto rounded-xl border border-line">
-      <table className="w-full text-sm text-paper-dim border-collapse" {...props} />
+    <div className="my-8 -mx-5 sm:mx-0 overflow-x-auto border-y border-line-strong">
+      <table className="w-full text-[15px] text-ink-soft border-collapse" {...props} />
     </div>
   ),
   thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
-    <thead className="bg-muted/40 text-paper" {...props} />
+    <thead className="text-ink" {...props} />
   ),
   tbody: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
     <tbody className="divide-y divide-line" {...props} />
   ),
-  tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
-    <tr {...props} />
-  ),
+  tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => <tr {...props} />,
   th: (props: React.ThHTMLAttributes<HTMLTableCellElement>) => (
-    <th
-      className="text-left mono text-[11px] uppercase tracking-[0.18em] text-paper-dim font-normal px-4 py-3 border-b border-line"
-      {...props}
-    />
+    <th className="text-left text-sm font-semibold text-ink px-4 py-3 border-b border-line-strong" {...props} />
   ),
   td: (props: React.TdHTMLAttributes<HTMLTableCellElement>) => (
     <td className="px-4 py-3 align-top leading-relaxed" {...props} />
   ),
   hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
-    <hr className="my-10 border-line" {...props} />
+    <hr className="my-12 border-line" {...props} />
   ),
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong className="text-paper font-semibold" {...props} />
+    <strong className="text-ink font-semibold" {...props} />
   ),
-  em: (props: React.HTMLAttributes<HTMLElement>) => (
-    <em className="italic" {...props} />
-  ),
+  em: (props: React.HTMLAttributes<HTMLElement>) => <em className="italic" {...props} />,
 };
 
 export default async function BlogPostPage({ params }: PageProps) {
@@ -132,7 +127,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       <BreadcrumbJsonLd
         items={[
           { name: "Home", href: "/" },
-          { name: "Journal", href: "/blog" },
+          { name: "Insights", href: "/blog" },
           { name: post.title, href: `/blog/${slug}` },
         ]}
       />
@@ -147,149 +142,121 @@ export default async function BlogPostPage({ params }: PageProps) {
         }}
       />
       {/* Header */}
-      <section className="relative bg-ink border-b border-line pt-36 md:pt-44 pb-16 md:pb-20 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute -top-40 right-1/2 translate-x-1/2 h-[420px] w-[720px] rounded-full accent-glow pointer-events-none"
-        />
-        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <section className="border-b border-line">
+        <Wrap className="pt-12 md:pt-16 pb-14 md:pb-20">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 mono text-[11px] uppercase tracking-[0.22em] text-paper-dim hover:text-accent transition-colors mb-10"
+            className="inline-flex items-center gap-2 text-sm text-ink-mute hover:text-ink transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to journal
+            <ArrowLeft className="h-4 w-4" />
+            Insights
           </Link>
-
-          <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-6">
-            {post.category}
+          <div className="max-w-4xl">
+            <Link
+              href={`/category/${slugify(post.category)}`}
+              className="eyebrow mt-10 inline-block text-accent-ink hover:text-ink"
+            >
+              {post.category}
+            </Link>
+            <h1 className="display-tight mt-5 text-ink text-[clamp(2.25rem,4.6vw,4rem)]">
+              {post.title}
+            </h1>
+            {post.description && (
+              <p className="lede mt-6 text-ink-soft max-w-3xl">{post.description}</p>
+            )}
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-mute">
+              <span className="text-ink font-medium">{post.author}</span>
+              <span>{formatDate(post.date, "long")}</span>
+              <span>{post.readingTime}</span>
+            </div>
           </div>
-
-          <h1 className="display-tight text-paper text-[clamp(2.25rem,6vw,5.5rem)] mb-8">
-            {post.title}
-          </h1>
-
-          <p className="text-lg text-paper-dim leading-relaxed max-w-2xl mb-10">
-            {post.description}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-6 mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
-            <span className="flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              {post.author}
-            </span>
-            <span className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5" />
-              {new Date(post.date).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-            <span className="flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5" />
-              {post.readingTime}
-            </span>
-          </div>
-        </div>
+        </Wrap>
       </section>
 
       {/* Content */}
-      <section className="relative bg-ink border-b border-line py-16 md:py-24">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <article className="prose prose-lg max-w-none">
-            <MDXRemote
-              source={post.content}
-              components={mdxComponents}
-              options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
-            />
-          </article>
+      <section className="border-b border-line">
+        <Wrap className="py-14 md:py-20">
+          <div className="grid grid-cols-12 gap-x-4 md:gap-x-10">
+            <article className="col-span-12 lg:col-span-8 max-w-[720px]">
+              <MDXRemote
+                source={post.content}
+                components={mdxComponents}
+                options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+              />
 
-          {post.tags.length > 0 && (
-            <div className="mt-14 pt-8 border-t border-line">
-              <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-4">
-                Tagged
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="mono text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full border border-line text-paper-dim"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+              {post.tags.length > 0 && (
+                <div className="mt-14 border-t border-line pt-8">
+                  <div className="eyebrow text-ink-mute mb-4">Topics</div>
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="border border-line-strong px-3 py-1.5 text-sm text-ink-soft"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </article>
 
-          <div className="mt-8 pt-8 border-t border-line flex items-center justify-between gap-6 flex-wrap">
-            <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
-              Share
-            </div>
-            <div className="flex gap-2">
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-paper-dim hover:bg-accent hover:text-ink hover:border-accent transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-paper-dim hover:bg-accent hover:text-ink hover:border-accent transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-            </div>
+            <aside className="hidden lg:block col-span-3 col-start-10">
+              <div className="sticky top-28 space-y-10">
+                <div>
+                  <div className="eyebrow text-ink-mute mb-4">Share</div>
+                  <div className="flex flex-col gap-3 text-[15px]">
+                    <a
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-ink hover:text-accent-ink"
+                    >
+                      <Linkedin className="h-4 w-4" /> LinkedIn
+                    </a>
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-ink hover:text-accent-ink"
+                    >
+                      <Twitter className="h-4 w-4" /> X / Twitter
+                    </a>
+                  </div>
+                </div>
+                <div className="border-t-[3px] border-accent bg-paper-light p-6">
+                  <div className="display text-[1.25rem] text-ink">
+                    Exploring AI for your organization?
+                  </div>
+                  <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                    Speak with the engineers who wrote this.
+                  </p>
+                  <ArrowLink href="/contact" className="mt-5">
+                    Contact us
+                  </ArrowLink>
+                </div>
+              </div>
+            </aside>
           </div>
-        </div>
+        </Wrap>
       </section>
 
-      {/* Related */}
       {relatedPosts.length > 0 && (
-        <section className="relative bg-ink border-b border-line">
-          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-20 md:py-28">
-            <div className="flex items-center gap-3 mb-10">
-              <span className="h-px w-10 bg-accent" />
-              <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
-                Keep reading
-              </span>
-            </div>
-
-            <ul className="border-t border-line">
-              {relatedPosts.map((p, i) => (
-                <li key={p.slug} className="border-b border-line group">
-                  <Link
-                    href={`/blog/${p.slug}`}
-                    className="flex items-center justify-between gap-6 py-6"
-                  >
-                    <div className="flex items-baseline gap-6 flex-1 min-w-0">
-                      <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim w-8 shrink-0">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <div>
-                        <div className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim mb-1">
-                          {p.category}
-                        </div>
-                        <h3 className="display text-xl md:text-2xl text-paper group-hover:text-accent transition-colors">
-                          {p.title}
-                        </h3>
-                      </div>
-                    </div>
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line group-hover:bg-accent group-hover:text-ink group-hover:border-accent transition-colors shrink-0">
-                      <ArrowUpRight className="w-4 h-4" />
-                    </span>
-                  </Link>
+        <section className="bg-paper-deep border-b border-line">
+          <Wrap className="py-20 md:py-24">
+            <SectionHeader eyebrow="Related insights" title={`More on ${post.category}`} />
+            <ul className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+              {relatedPosts.map((p) => (
+                <li key={p.slug}>
+                  <InsightCard post={p} />
                 </li>
               ))}
             </ul>
-          </div>
+          </Wrap>
         </section>
       )}
+
+      <CtaBand />
     </>
   );
 }

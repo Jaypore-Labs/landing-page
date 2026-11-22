@@ -61,7 +61,7 @@ export default async function OGImage() {
             />
             <span style={{ color: "#F5F0E8" }}>Jaypore Labs</span>
           </div>
-          <div>AI-enablement · Est. 2017</div>
+          <div>Enterprise software · Est. 2017</div>
         </div>
 
         {/* Headline */}
@@ -76,7 +76,7 @@ export default async function OGImage() {
               display: "flex",
             }}
           >
-            Your business,
+            Engineered
           </div>
           <div
             style={{
@@ -89,7 +89,7 @@ export default async function OGImage() {
               display: "flex",
             }}
           >
-            AI-ready.
+            to last.
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export default async function OGImage() {
                 color: "#D9D1C3",
               }}
             >
-              Scribes · Copilots
+              Architecture · Modernization
             </span>
             <span
               style={{
@@ -151,7 +151,7 @@ export default async function OGImage() {
                 color: "#D9D1C3",
               }}
             >
-              Voice AI · RAG · SaaS
+              Integration · Platforms
             </span>
           </div>
         </div>

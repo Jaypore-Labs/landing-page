@@ -2,26 +2,27 @@ import { Metadata } from "next";
 import { ContactPageClient } from "./contact-client";
 import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/data/site";
+import { ogDefaults, twitterDefaults } from "@/lib/seo";
 
 const desc =
-  "Tell us about your AI idea. We reply within 24 hours, IST-friendly. Async-first — works across North America, Europe, Middle East, APAC.";
+  "Speak with a senior architect about enterprise architecture, modernization, systems integration or a new platform. We respond within one business day.";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: desc,
   keywords: [
-    "hire AI agency",
-    "AI consulting contact",
-    "AI software development India",
-    "remote AI engineers",
+    "hire software development company",
+    "software architecture consultation",
+    "software development India",
+    "remote senior engineers",
   ],
   alternates: { canonical: `${siteConfig.url}/contact` },
-  openGraph: {
+  openGraph: { ...ogDefaults,
     title: `Contact · ${siteConfig.name}`,
     description: desc,
     url: `${siteConfig.url}/contact`,
   },
-  twitter: {
+  twitter: { ...twitterDefaults,
     title: `Contact · ${siteConfig.name}`,
     description: desc,
   },

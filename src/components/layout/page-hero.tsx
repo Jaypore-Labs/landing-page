@@ -1,65 +1,34 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { Eyebrow, Wrap } from "@/components/ui/primitives";
 
 type PageHeroProps = {
   eyebrow: string;
   title: React.ReactNode;
   description?: React.ReactNode;
+  /** Optional right-hand column (key facts, actions). */
+  aside?: React.ReactNode;
+  /** Kept for API compatibility; heroes are always left-aligned. */
   align?: "left" | "center";
 };
 
-export function PageHero({
-  eyebrow,
-  title,
-  description,
-  align = "left",
-}: PageHeroProps) {
-  const alignText = align === "center" ? "text-center items-center" : "text-left items-start";
-  const alignWrap = align === "center" ? "mx-auto" : "";
+export function PageHero({ eyebrow, title, description, aside }: PageHeroProps) {
   return (
-    <section className="relative bg-ink border-b border-line pt-36 md:pt-44 pb-16 md:pb-24 overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute -top-40 right-1/2 translate-x-1/2 h-[420px] w-[720px] rounded-full accent-glow pointer-events-none"
-      />
-      <div className="relative mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
-        <div className={`flex flex-col ${alignText} ${alignWrap} max-w-5xl`}>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-3 mb-6"
-          >
-            <span className="h-px w-10 bg-accent" />
-            <span className="mono text-[11px] uppercase tracking-[0.22em] text-paper-dim">
-              {eyebrow}
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.2, 0.85, 0.2, 1] }}
-            className="display-tight text-paper text-[clamp(3rem,10vw,9rem)]"
-          >
-            {title}
-          </motion.h1>
-
-          {description && (
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className={`mt-8 text-base md:text-lg text-paper-dim leading-relaxed max-w-2xl ${
-                align === "center" ? "mx-auto" : ""
-              }`}
-            >
-              {description}
-            </motion.p>
+    <section className="border-b border-line">
+      <Wrap className="pt-16 md:pt-24 pb-14 md:pb-20">
+        <div className="grid grid-cols-12 gap-x-4 md:gap-x-8 gap-y-10 items-end">
+          <div className="col-span-12 lg:col-span-8">
+            <Eyebrow className="mb-6 rise">{eyebrow}</Eyebrow>
+            <h1 className="display-tight text-ink text-[clamp(2.5rem,5.2vw,4.75rem)] rise rise-1">
+              {title}
+            </h1>
+            {description && (
+              <p className="lede mt-7 text-ink-soft max-w-2xl rise rise-2">{description}</p>
+            )}
+          </div>
+          {aside && (
+            <div className="col-span-12 lg:col-span-4 rise rise-3">{aside}</div>
           )}
         </div>
-      </div>
+      </Wrap>
     </section>
   );
 }
