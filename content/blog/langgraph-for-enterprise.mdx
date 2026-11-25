@@ -1,0 +1,147 @@
+---
+title: "LangGraph for enterprise: agent use cases and architecture"
+description: "LangGraph is a low-level framework for stateful, long-running agents. Enterprise use cases, architecture, and how it compares with CrewAI and AutoGen."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "LangGraph", "AI Agents", "Enterprise AI"]
+---
+
+LangGraph is an open-source framework for building agents and workflows as explicit graphs of steps, with state that survives failures and pauses for human review. It is for engineering teams that need agent behaviour they can reason about, test and audit, rather than a black box that "figures it out."
+
+The short verdict: LangGraph is one of the better choices for enterprise agent work because it is low level and explicit. You decide the steps, the state and the checkpoints. The cost is that you write more code than with higher-level frameworks, and you still have to build the operational layer around it.
+
+## What is LangGraph?
+
+[LangGraph](https://github.com/langchain-ai/langgraph) is built by LangChain Inc and released under the MIT license. It had 45k+ GitHub stars as of November 2026. It is a Python library, with an equivalent JavaScript and TypeScript library, LangGraph.js. The maintainers note it can be used without LangChain itself.
+
+The README describes it as a "low-level orchestration framework for building, managing, and deploying long-running, stateful agents." Its design draws on Google's Pregel and Apache Beam. In practice, you define nodes (functions that do work, often calling a model or a tool), edges (which node runs next, including conditional branches), and a shared state object that flows through the graph.
+
+Key capabilities from the project documentation:
+
+- **Durable execution.** Agents persist through failures and resume from where they stopped.
+- **Checkpointers.** The repo ships checkpoint libraries for Postgres and SQLite, so graph state is stored in a database you control.
+- **Human in the loop.** Interrupts let a person inspect and change state at any point before the graph continues.
+- **Memory.** Short-term working memory within a run and long-term memory across sessions.
+- **Subgraphs and branching.** Compose larger systems from smaller graphs.
+- **Ecosystem.** Optional LangSmith for tracing, evals and managed deployment, and Deep Agents, a higher-level package built on LangGraph.
+
+For context on where it sits among other projects, see our [guide to open-source AI repos for enterprise](/blog/top-open-source-ai-github-repos-enterprise).
+
+## Enterprise use cases
+
+LangGraph fits work that has several steps, needs state, and needs a person to approve some of those steps.
+
+1. **Document intake and triage.** Classify an incoming document, extract fields, validate against business rules, and route exceptions to a person.
+2. **Case preparation.** Gather data from several systems, draft a summary, and pause for an analyst to review before anything is filed.
+3. **Internal support agents.** Answer employee questions from policy documents, and escalate with full context when the agent is not confident.
+4. **Multi-step research.** Plan a set of searches, run them, compare results and produce a sourced report. Our post on [plan vs act loops](/blog/plan-vs-act-loop) covers the pattern.
+5. **Long-running operations.** Jobs that wait hours or days for an external event, such as a signed document or a supplier reply, and then continue.
+6. **Supervisor and worker agents.** A coordinating agent hands narrow tasks to specialised sub-agents. See [multi-agent orchestration](/blog/multi-agent-orchestration).
+
+## Use cases by industry
+
+### Healthcare
+
+Prior authorisation is a natural graph: collect clinical notes, match them to payer criteria, draft the request, and stop for a clinician to sign off. Checkpoints mean a request waiting on missing records can resume days later without starting over. See [healthcare](/industries/healthcare).
+
+### Financial services
+
+KYC and onboarding reviews move through defined stages: document check, sanctions screening, risk scoring, analyst decision. LangGraph lets you model each stage as a node, keep the full state for audit, and require an interrupt before any approval. See [financial services](/industries/financial-services).
+
+### Insurance
+
+First notice of loss can be handled by a graph that extracts claim details, checks policy coverage, flags fraud signals and routes the file to the right adjuster. The adjuster sees the state and reasoning, and makes the decision. See [insurance](/industries/insurance).
+
+### Legal
+
+Contract review graphs can extract clauses, compare them with a playbook, draft redlines and hold for a lawyer. Because each step is explicit, you can show exactly which clause triggered which suggestion. See [legal](/industries/legal).
+
+### Manufacturing
+
+Quality deviation handling involves gathering sensor data, batch records and supplier certificates, then drafting a root-cause summary for an engineer. A graph keeps each investigation's state across shifts. See [manufacturing](/industries/manufacturing).
+
+### Education and research
+
+Research groups can run literature review graphs that search, screen abstracts against inclusion criteria and pause for a researcher to confirm each batch. See [education and research](/industries/education-research).
+
+## Reference architecture for production
+
+```text
+ [ App / API gateway (SSO) ] --> [ LangGraph service (workers) ]
+                                       |          |          |
+                              [ LLM gateway ] [ Tools / MCP ] [ Postgres checkpointer ]
+                                       |                      |
+                              [ Review UI for interrupts ]  [ Long-term memory store ]
+                                       |
+                              [ Traces, evals, metrics ] --> [ Alerting ]
+```
+
+- **Auth and SSO.** Put the graph behind your API gateway. Pass the end user's identity into graph state so tools act with that user's permissions, not a shared super-user.
+- **Secrets.** Keep model and tool credentials in a vault. Tools should fetch scoped tokens at call time.
+- **Network boundaries.** Run workers in a private network. Allow outbound calls only to your model gateway and approved tool endpoints.
+- **Human in the loop.** Use interrupts before any action that changes a system of record. Build a small review UI that shows the state and lets a reviewer approve, edit or reject.
+- **Data residency.** The Postgres checkpointer stores conversation and state, which may include personal data. Host it in the right region and set retention rules.
+- **Scaling.** Workers are stateless when state lives in the checkpointer, so you can scale them horizontally behind a queue.
+- **Observability.** Trace every node, model call and tool call. LangSmith is one option; OpenTelemetry into your existing stack is another. See [agent observability](/blog/agent-observability).
+
+## Security, compliance and licensing
+
+LangGraph is MIT licensed, so you can use and modify it commercially with few obligations. LangSmith and LangSmith Deployment are separate commercial products with their own terms.
+
+For HIPAA, SOC 2 and GDPR, the library itself is not the concern. The concern is where state, traces and prompts go. Checkpoints and traces can contain personal or regulated data. Decide whether traces leave your environment, mask sensitive fields before logging, and confirm your model provider's data terms. If you use a hosted LangChain product, check the vendor's current compliance page.
+
+What you must add yourself:
+
+- Per-user authorisation on every tool call.
+- Input and output guardrails. See [safety guardrails](/blog/safety-guardrails).
+- Evaluation suites that run on every change to prompts or graph structure.
+- Retention and deletion for checkpoints.
+- Cost limits per run and per tenant.
+
+## LangGraph vs alternatives
+
+| Option | Model | Best for | Main trade-off |
+|---|---|---|---|
+| LangGraph | Explicit graph of nodes and state with checkpoints | Auditable, long-running workflows with human review | More code; you design the graph |
+| CrewAI | Role-based agents ("crews") working on tasks | Fast prototypes of multi-agent collaboration | Less control over exact execution path |
+| AutoGen | Conversational multi-agent framework from Microsoft | Research and agent-to-agent conversation patterns | Conversation-driven flows can be harder to audit |
+| Plain code | Your own loop around model and tool calls | Simple, single-purpose agents | You build state, retries and resume yourself |
+
+Our honest view: for one model call plus a couple of tools, plain code is often enough. Once you need checkpoints, resumes and approvals, LangGraph saves you from building that machinery.
+
+## When not to use it
+
+- **Single-step tasks.** A classifier or extraction call does not need a graph.
+- **When you need a no-code builder.** LangGraph is a developer framework.
+- **When the workflow is fully deterministic.** Use a standard workflow engine; add a model call only where judgement is needed.
+- **When your team is not Python or TypeScript.** Other ecosystems have their own options.
+- **When you cannot invest in operations.** Durable state, traces and evals need owners. Long-running agents need more care, as we cover in [long-horizon tasks](/blog/long-horizon-tasks).
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates LangGraph into enterprise systems: graph design, Postgres checkpointing, review interfaces, per-user authorisation, tracing and evaluation. Where a graph is more than the problem needs, we build the simpler service instead. To scope an agent workflow, [talk to a senior architect](/contact) or read about our [solutions](/solutions).
+
+## FAQ
+
+### Is LangGraph production ready?
+
+Yes, for teams willing to run it properly. It provides durable execution, checkpointing and interrupts, and the maintainers list production users. You still need to add authorisation, guardrails, monitoring and evals.
+
+### Can LangGraph be self-hosted?
+
+Yes. The library is MIT licensed and runs anywhere Python or Node runs. You can store state in your own Postgres using the official checkpointer. LangSmith Deployment is an optional managed option.
+
+### Do I need LangChain to use LangGraph?
+
+No. LangGraph is built by the LangChain team but can be used without LangChain. You can call any model SDK directly from your nodes.
+
+### LangGraph or CrewAI?
+
+Choose LangGraph when you need precise control over steps, state and approvals. Choose CrewAI when you want to prototype role-based collaboration quickly and can accept less control over the exact path.
+
+### How does LangGraph handle human approval?
+
+It uses interrupts. The graph pauses at a defined point, saves its state through the checkpointer, and resumes when a person approves, edits or rejects the pending step.
+
+Planning an agent workflow? [Get in touch](/contact) with your use case.

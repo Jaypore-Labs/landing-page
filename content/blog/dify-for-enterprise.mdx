@@ -1,0 +1,156 @@
+---
+title: "Dify for enterprise: use cases, architecture, and license limits"
+description: "Dify for enterprise: where the LLM app platform fits, use cases by industry, a self-hosted reference architecture, and what its modified Apache 2.0 license means."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "Dify", "LLM Apps", "Enterprise AI"]
+---
+
+Dify is a platform for building applications on top of large language models: chat assistants, retrieval-augmented question answering, agents and multi-step AI workflows, all from a visual workspace, with an API behind every app. It is for teams that want to put several internal AI applications into production without hand-building the same retrieval, prompt management and logging plumbing each time. The short verdict: Dify is one of the most complete self-hostable options for internal LLM applications, but it is a large system to operate, and its license has two conditions that matter if you plan to offer it to customers.
+
+This article is part of our series on [open-source AI repos worth evaluating for enterprise use](/blog/top-open-source-ai-github-repos-enterprise).
+
+## What is Dify?
+
+Dify is developed by LangGenius, Inc. The backend is Python, the frontend is a Next.js web app, and the whole thing ships as a set of Docker containers. The [Dify GitHub repository](https://github.com/langgenius/dify) has 160k+ stars as of November 2026.
+
+Core capabilities, as described in the project README:
+
+- **Workflow canvas.** Build and test multi-step AI workflows visually, with branching, tool calls and model calls as nodes.
+- **Model support.** Hundreds of proprietary and open-source models from many inference providers, plus any OpenAI-compatible endpoint, including self-hosted models.
+- **RAG pipeline.** Document ingestion through to retrieval, with text extraction from PDFs, presentations and other common formats, and a choice of vector stores.
+- **Agents.** Agents that use tools from the Dify Marketplace, MCP servers or your own APIs, and can run as a chat app or as a step in a workflow. Newer versions add sandboxed execution for open-ended tasks.
+- **Prompt IDE and LLMOps.** Compare prompts and models, review logs and annotations, and plug in tracing tools such as Langfuse, Opik and Arize Phoenix.
+- **Backend-as-a-service.** Every app gets an API, so your own systems can call it.
+
+Dify comes in three forms: Dify Cloud (hosted), the self-hosted Community Edition, and Dify Enterprise, which the maintainers position for organizations that need SSO, RBAC and support SLAs.
+
+## Enterprise use cases for Dify
+
+1. **Internal knowledge assistants.** Index policies, runbooks and product documentation, then expose a chat app with citations to employees.
+2. **Document extraction workflows.** Upload a contract, invoice or form, extract structured fields with a model, validate them, and return JSON to the calling system through the API.
+3. **Support agent copilots.** Retrieve relevant articles and past tickets and draft a reply for a human agent to edit and send.
+4. **AI microservices behind your apps.** Use Dify as the backend for a summarization, classification or drafting endpoint that your existing applications call.
+5. **Tool-using agents for internal operations.** An agent that can look up an order, check inventory and open a ticket via tools or MCP servers. Our [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial) explains the protocol side.
+6. **Prompt and model evaluation.** Compare models on the same task before committing, including smaller self-hosted models, which are often [underrated](/blog/small-models-are-underrated) for narrow tasks.
+
+## Dify use cases by industry
+
+### Healthcare
+
+Clinical policy question answering: index payer policies and internal clinical guidelines, and give utilization review nurses a cited answer to "does this procedure need prior authorization for this plan?" Keep the deployment self-hosted, keep PHI out of the index where you can, and require citations in every answer. See our [healthcare page](/industries/healthcare) and our post on [HIPAA and AI](/blog/hipaa-and-ai).
+
+### Financial services
+
+Analyst research assistant: retrieve from internal research notes, filings and credit memos, and draft a summary with links back to sources. Another: tag inbound complaints by product and regulatory category before routing. More on our [financial services work](/industries/financial-services).
+
+### Insurance
+
+Claims document workflow: an adjuster uploads a claim packet, a Dify workflow extracts the loss date, policy number, damages and parties, compares them against the policy record via an API tool, and flags inconsistencies for review. The adjuster makes the decision. See [insurance](/industries/insurance).
+
+### Legal
+
+Contract review assistant: extract key clauses such as termination, liability caps and governing law from uploaded agreements, compare them against a clause playbook, and produce a redline checklist for a lawyer. Retrieval quality is the deciding factor here, so measure it. See [legal](/industries/legal) and our guide to [evals for retrieval](/blog/evals-for-retrieval).
+
+### Manufacturing
+
+Maintenance knowledge assistant: index equipment manuals, maintenance logs and SOPs so technicians can ask "what is the reset procedure for this fault code on line 3?" and get the page reference. See [manufacturing](/industries/manufacturing).
+
+### Education and research
+
+Research support: index a lab's papers, protocols and grant documents for a cited internal assistant, or build an admissions FAQ assistant on public policy documents. See [education and research](/industries/education-research).
+
+## Reference architecture for production Dify
+
+```text
+  Users / internal apps
+          |
+  +-------v--------+     SSO at proxy or Dify Enterprise
+  |  nginx / LB    |     TLS, WAF, private network only
+  +---+--------+---+
+      |        |
+ +----v---+ +--v------------+
+ |  web   | |  api (Python) |----► model gateway ----► LLM providers
+ |Next.js | +--+-------+----+       (keys, quotas,      or self-hosted
+ +--------+    |       |             logging)           models
+               |       |
+     +---------v-+   +-v-----------+   +----------------+
+     | Postgres  |   | Redis       |   | Vector store   |
+     | (HA)      |   | + workers   |   | pgvector, Qdrant,
+     +-----------+   | (Celery)    |   | Weaviate, etc. |
+                     +------+------+   +----------------+
+                            |
+             +--------------v--------------+
+             | sandbox + plugin daemon     |
+             | egress via SSRF proxy       |
+             +-----------------------------+
+             object storage (S3 / Blob) for uploaded files
+```
+
+- **Auth and SSO.** SSO and fine-grained RBAC are positioned as Dify Enterprise features. On the Community Edition, keep the console on a private network and put an identity-aware proxy in front of it.
+- **Secrets.** Model provider keys are stored by Dify. Prefer routing model calls through an internal gateway so keys, quotas and logging live in one place you control.
+- **Network boundaries.** Dify runs user-defined code in a sandbox and makes outbound HTTP calls through an SSRF proxy. Keep that proxy and restrict its allowlist. Agents with tool access need the tightest egress rules in the system.
+- **Data residency.** Self-hosting keeps documents, embeddings and logs in your region. Check where your model provider processes prompts; that is usually the real residency question.
+- **Scaling.** API servers and Celery workers scale horizontally. Document indexing is the usual bottleneck, so size workers for ingestion bursts. Use a managed Postgres and a vector store you already know how to operate; our [vector database architecture guide](/blog/vector-db-architecture) covers the choice.
+- **Observability.** Turn on tracing to Langfuse, Phoenix or Opik, and send container logs and metrics to your existing stack. Track retrieval hit rates and latency per app, not just uptime.
+- **Backups.** Back up Postgres, the vector store and object storage together. Reindexing a large corpus is slow and costly.
+
+## Security, compliance and licensing
+
+**License reality.** Dify is published under the "Dify Open Source License", which is Apache 2.0 with additional conditions. Commercial use is explicitly allowed, including as a backend for other applications or as an internal development platform. A commercial license is required if you run a multi-tenant service, where one tenant equals one Dify workspace, unless LangGenius authorizes it in writing. You also may not remove or modify the logo or copyright information in the Dify console or apps when using Dify's frontend; this does not apply if you only use the backend. Contributors agree that LangGenius can change the license terms and use contributed code commercially. Because of these conditions, it is not an OSI-approved license. This is a plain-language summary, not legal advice; read the [license](https://github.com/langgenius/dify/blob/main/LICENSE) with counsel.
+
+For most enterprises building internal apps in a single workspace, the conditions are manageable. If you want separate workspaces per business unit, or you plan to offer Dify-powered apps to your own customers, clarify the multi-tenant clause before you design around it.
+
+**Compliance.** HIPAA, SOC 2 and GDPR obligations sit with your deployment. You need encryption at rest, access control and access reviews, audit logs, retention and deletion for uploaded documents and conversation logs, and data processing agreements with every model provider in the path. For EU deployments, map your use cases against the [EU AI Act](/blog/eu-ai-act-engineering-impact) early.
+
+**What you must add yourself:** identity integration on the Community Edition, a model gateway, egress control for agents and tools, PII redaction before indexing, retention jobs, and a review process before an app goes live to a wider audience.
+
+## Dify vs Flowise vs LangGraph vs Copilot Studio
+
+| | Dify | Flowise | LangGraph | Microsoft Copilot Studio |
+|---|---|---|---|---|
+| Model | Visual platform + API | Visual builder for LLM flows | Code library for agent graphs | Low-code SaaS in Microsoft 365 |
+| License | Apache 2.0 with conditions | Apache 2.0 (enterprise features separate) | MIT | Proprietary |
+| Self-hosting | Yes | Yes | Yes (it is a library) | No |
+| Built-in RAG and logs | Yes | Partial | You build it | Yes, Microsoft-hosted |
+| Best for | Many internal LLM apps on one platform | Lighter visual prototypes | Custom agents with full control | Microsoft-centric organizations |
+| Operational weight | High | Medium | Depends on what you build | Low |
+
+The trade-off is control against speed. Dify gives you a lot out of the box at the cost of running a many-container system. LangGraph gives you full control but you write the retrieval, UI and logging yourself.
+
+## When not to use Dify
+
+- **When you need one AI feature, not a platform.** Running Dify for a single summarization endpoint is a lot of infrastructure. A small service calling a model directly is simpler.
+- **When you will sell it as multi-tenant SaaS.** The license requires a commercial agreement for that. Budget for it or build custom.
+- **When retrieval quality is the product.** Dify's RAG pipeline is a solid default. If you need custom chunking, hybrid ranking or domain-specific rerankers tuned against evals, you will outgrow the defaults. Our [RAG vs fine-tuning](/blog/rag-vs-fine-tuning) post covers the decision.
+- **When workflows must be version-controlled and tested like code.** Visual apps are harder to diff, review and test in CI than code.
+- **When your team cannot operate it.** Postgres, Redis, a vector store, workers, a sandbox and a plugin daemon is a real operational footprint.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates Dify into enterprise systems, connecting it to ERP, CRM, EHR and document platforms through tools and APIs. We set up the self-hosted architecture, identity, model gateway, egress controls and evaluation, so that apps hold up after the demo. When Dify is the wrong fit, we build the AI-enabled software custom instead. To discuss your situation, [talk to a senior architect](/contact) or review our [enterprise solutions](/solutions).
+
+Have a Dify use case in mind? [Get in touch](/contact) and tell us about it.
+
+## FAQ
+
+### Is Dify production ready?
+
+Yes, for internal LLM applications, if you treat it as a multi-service system. Run managed Postgres, a vector store you can operate, horizontally scaled workers, tracing and backups. The weak points in practice are document ingestion at scale and the lack of code-level testing for visual workflows.
+
+### Is Dify open source?
+
+The source is public and licensed under Apache 2.0 with extra conditions: no multi-tenant service without a commercial license, and no removal of Dify branding in its frontend. Because of those conditions, it is not OSI-approved open source.
+
+### Can I self-host Dify for free?
+
+The Community Edition is free to self-host, including for commercial internal use. SSO, fine-grained RBAC and support SLAs are offered through Dify Enterprise. Operating a multi-tenant service requires a commercial license.
+
+### Dify vs LangChain: which should I use?
+
+Use Dify when you want a ready platform with UI, RAG, logs and APIs for many internal apps. Use LangChain or LangGraph when AI behavior is core to your product and you need full control, code review and testing.
+
+### Is Dify HIPAA compliant?
+
+No platform is compliant on its own. A self-hosted Dify deployment can be part of a HIPAA-compliant system if you control access, encryption, audit logging and retention, and if each model provider that receives PHI has signed a business associate agreement.

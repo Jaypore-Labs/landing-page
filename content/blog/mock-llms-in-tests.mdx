@@ -1,6 +1,6 @@
 ---
-title: "Mock LLMs in tests: when to fake, when to call"
-description: "Mocks are fast; real calls are accurate. The right mix depends on what's being tested."
+title: "How to mock LLM calls in tests: when to fake, when to call"
+description: "How to mock LLM calls in unit, integration, and end-to-end tests: record-replay fixtures, keeping mocks honest, and when a real model call is worth it."
 date: "2026-03-12"
 author: "Yash Shah"
 category: "Engineering"
@@ -26,6 +26,34 @@ Use real calls for:
 - Drift detection.
 - Production-like testing before release.
 - Periodic verification that mocks still represent reality.
+
+## How to mock an LLM call
+
+Put the model call behind one small interface in your code, then swap the implementation in tests. Three levels cover most suites:
+
+- **Unit tests: a hand-written fake.** Return a fixed response, or raise a fixed error, to test parsing, retries, and fallbacks.
+- **Integration tests: record and replay.** Call the real model once, save the response to a fixture file, and replay it on every run. Re-record when the prompt or model changes.
+- **End-to-end tests: real calls, on a schedule.** Run against the live model nightly and before release, and check behaviour rather than exact strings.
+
+A minimal record-replay wrapper in Python:
+
+```python
+import hashlib, json, os, pathlib
+
+FIXTURES = pathlib.Path("tests/fixtures/llm")
+
+def cached_completion(client, prompt: str, model: str) -> str:
+    key = hashlib.sha256(f"{model}:{prompt}".encode()).hexdigest()[:16]
+    path = FIXTURES / f"{key}.json"
+    if path.exists() and os.getenv("LLM_RECORD") != "1":
+        return json.loads(path.read_text())["text"]
+    text = client.complete(prompt=prompt, model=model)  # your real call
+    FIXTURES.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"model": model, "prompt": prompt, "text": text}))
+    return text
+```
+
+Run with `LLM_RECORD=1` to refresh fixtures. Keying on model and prompt means a prompt change produces a cache miss instead of a stale pass, which is the drift problem from the opening story. [Determinism harnesses](/blog/determinism-harnesses) goes further on this pattern.
 
 ## Real-call cadence
 
@@ -85,7 +113,8 @@ Mocks and real calls each have their place. Mocks for speed, real calls for accu
 - [Determinism harnesses](/blog/determinism-harnesses) — record-replay pattern.
 - [Integration tests for AI features](/blog/integration-tests-for-ai) — companion topic.
 - [The new test pyramid](/blog/new-test-pyramid) — surrounding context.
+- [QA: flaky test triage at scale](/blog/qa-flaky-test-triage) — when the failures aren't the model's fault.
 
 ---
 
-*We build AI-enabled software and help businesses put AI to work. If you're tightening test mocks, we'd love to hear about it. [Get in touch.](/contact)*
+**Need help?** If your AI test suite is slow, flaky, or missing real regressions and you want a second opinion on the mix of mocks and live calls, [talk to a senior architect](/contact).

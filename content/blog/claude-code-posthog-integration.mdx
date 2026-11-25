@@ -1,15 +1,15 @@
 ---
-title: "Claude Code + PostHog: analytics-aware development"
-description: "Wire Claude Code to PostHog. Cohort queries, A/B test analysis, event-tracking drafts — without leaving the assistant."
+title: "PostHog MCP for Claude Code: setup, queries, and skills"
+description: "Connect the PostHog MCP server to Claude Code with one command, the wizard, or the plugin, sign in, then run cohort, funnel, and experiment queries in the CLI."
 date: "2026-05-14"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Claude Code", "PostHog", "MCP", "Tutorial", "Analytics"]
 ---
 
-This is part 9 of the AI-tools-for-engineers series. The orientation lives in [part 1](/blog/ai-tools-for-engineers-getting-started). This article wires up PostHog — the analytics layer most product engineers we work with use today, and one of the most underrated MCP integrations for engineering productivity.
+This is part 9 of the AI-tools-for-engineers series. The orientation lives in [part 1](/blog/ai-tools-for-engineers-getting-started). This article wires up PostHog, the analytics layer most product engineers we work with use today, and one of the most underrated MCP integrations for day-to-day engineering.
 
-By the end, you'll be running cohort queries, comparing A/B test variants, and generating event-tracking code from the assistant. The integration changes how product engineers think about analytics — from "I'll ask the data team" to "let me check."
+By the end, you'll be running cohort queries, comparing A/B test variants, and generating event-tracking code from the assistant. The practical change is that "I'll ask the data team" becomes "let me check."
 
 ## What we're building
 
@@ -25,61 +25,72 @@ What we're not building:
 - A way to bypass your team's data-modelling discipline. The integration is for ad-hoc analysis, not for replacing dashboards.
 - A way to overwrite event definitions or destroy data. The MCP server we use is read-focused.
 
+## Quick setup
+
+PostHog documents three ways to connect its MCP server to Claude Code. Pick one.
+
+```bash
+# Option A: manual, one command (user scope, available in every project)
+claude mcp add --transport http posthog https://mcp.posthog.com/mcp -s user
+
+# Option B: the PostHog wizard
+npx @posthog/wizard mcp add
+
+# Option C: the PostHog plugin for Claude Code
+claude plugin install posthog
+```
+
+Then start Claude Code, run `/mcp`, select `posthog`, and log in through the browser. Confirm with `claude mcp list`.
+
 ## Prerequisites
 
-- A PostHog project (cloud or self-hosted). PostHog's free tier is generous; this tutorial fits inside it.
-- Claude Code installed and authenticated.
-- A PostHog personal API key.
+- A PostHog Cloud project and an account that can see it.
+- Claude Code installed and logged in. New to it? Start with [how to install Claude Code](/blog/how-to-install-claude-code).
+- A browser on the same machine for the login step.
 
-## Step 1: get a personal API key
+## Step 1: add the PostHog MCP server
 
-In PostHog: My settings → Personal API Keys → Create key.
+The official server URL is `https://mcp.posthog.com/mcp`. There's one URL for everyone. Per [PostHog's MCP docs](https://posthog.com/docs/model-context-protocol), the login step routes you to the right data region (US or EU) based on the account you sign in with, so you don't pick a regional host.
 
-Scope:
-
-- `query:read` — run analytics queries.
-- `event_definition:read` — list and inspect event definitions.
-- `feature_flag:read` — read feature flag and experiment data.
-
-Skip the write scopes. We don't want the assistant creating cohorts or modifying event definitions; that's still a human job.
+The manual command from [PostHog's Claude Code guide](https://posthog.com/docs/model-context-protocol/claude-code):
 
 ```bash
-export POSTHOG_API_KEY="phx_..."
-export POSTHOG_HOST="https://app.posthog.com"   # or your self-hosted URL
-export POSTHOG_PROJECT_ID="12345"
+claude mcp add --transport http posthog https://mcp.posthog.com/mcp -s user
 ```
 
-## Step 2: install the PostHog MCP server
-
-PostHog has an official MCP server in 2026; it ships under the `@posthog` namespace.
-
-```bash
-npm install -g @posthog/mcp-server
-```
-
-You can also use it via `npx -y @posthog/mcp-server` per-invocation, which is what we'll do in the Claude Code config.
-
-## Step 3: configure Claude Code
-
-Edit `~/.claude.json`:
+`-s user` (short for `--scope user`) makes PostHog available in all your projects. Drop it to keep the server local to the current project, or use `--scope project` to write it to a shared `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "posthog": {
-      "command": "npx",
-      "args": ["-y", "@posthog/mcp-server"],
-      "env": {
-        "POSTHOG_API_KEY": "${env:POSTHOG_API_KEY}",
-        "POSTHOG_HOST": "${env:POSTHOG_HOST}",
-        "POSTHOG_PROJECT_ID": "${env:POSTHOG_PROJECT_ID}"
-      }
+      "type": "http",
+      "url": "https://mcp.posthog.com/mcp"
     }
   }
 }
 ```
 
-Restart Claude Code. The PostHog server registers. Test:
+An earlier version of this article told you to create a personal API key and run an npm package with environment variables. You don't need to for this setup. You log in to PostHog the first time the server is used, and the server acts with your PostHog permissions.
+
+## Step 2: log in and verify
+
+Start Claude Code and run `/mcp`. Select `posthog` and follow the browser prompts. Then check from your shell:
+
+```bash
+claude mcp list
+claude mcp get posthog
+```
+
+PostHog describes the server as covering analytics queries, feature flag and experiment management, SQL, CDP destinations, and support ticket triage. The full list is in their MCP tools reference.
+
+### PostHog MCP and Claude Code skills
+
+If you install with `claude plugin install posthog`, you get the plugin route that PostHog documents. Plugins can bundle skills alongside the MCP connection. Run `/plugin` to see what your installed version includes, and `/mcp` to confirm the server is connected. If you only want the raw MCP tools, Option A is the smallest footprint.
+
+## Step 3: first queries
+
+Start with something you can check against the PostHog UI:
 
 ```
 > List the event definitions in my PostHog project.
@@ -103,7 +114,7 @@ The pattern that earns the integration's keep: cohort questions you'd otherwise 
 You:    How many users signed up in the last 30 days, and what
         percentage have completed onboarding?
 
-Claude: [calls posthog.run_query with appropriate HogQL]
+Claude: [runs a HogQL query through the PostHog MCP server]
         - 1,432 signups in last 30 days.
         - 67% completed onboarding (defined as "first_meaningful_action" event fired within 7 days).
         - The 33% incomplete cohort has a few patterns:
@@ -113,7 +124,7 @@ Claude: [calls posthog.run_query with appropriate HogQL]
 
 You:    Are users from the "new-pricing-page" experiment converting at a different rate?
 
-Claude: [calls posthog.run_experiment_query]
+Claude: [reads the experiment results through the PostHog MCP server]
         Looking at signups in the last 14 days who saw the experiment:
         - Variant A (control): 12.4% signup-to-paid conversion (n=812)
         - Variant B (new pricing): 15.8% signup-to-paid conversion (n=794)
@@ -154,7 +165,7 @@ The assistant matched the team's naming convention (verb_past_tense + noun), inf
 
 ## Step 6: funnel and retention queries
 
-Two more high-leverage patterns:
+Two more patterns that pay off quickly:
 
 **Funnel drop-off in plain language.**
 
@@ -192,6 +203,15 @@ Claude: [runs the retention query, summarises]
 
 That kind of question — once you have the integration — takes 30 seconds. Without it, it's a 30-minute analyst request.
 
+## PostHog MCP vs Supabase MCP for product analytics
+
+Teams on Supabase often ask whether they need both. Short answer: they answer different questions.
+
+- **PostHog MCP** reads behavioral data: events, funnels, retention, feature flags, and experiment results. Use it for "what did users do?" questions, and for anything involving flags or A/B tests.
+- **Supabase MCP** reads and manages your Postgres database and project: tables, rows, migrations, logs. Use it for "what is the state of the data?" questions, such as how many accounts are on a plan right now.
+
+For product analytics, PostHog is the right default, because events and experiments live there. Reach for Supabase when the metric depends on application state that never became an event. If you connect both, tell the assistant which source defines each metric (in `CLAUDE.md`), or it may compute "active users" two different ways and give you two different answers. Supabase setup is covered in [Supabase MCP for Claude Code](/blog/claude-code-supabase-integration).
+
 ## Patterns and pitfalls
 
 **Verify a few numbers manually at first.** When you're new to the integration, click through the assistant's claims to the underlying PostHog query a few times. Confirm the numbers match. Build trust gradually.
@@ -201,6 +221,27 @@ That kind of question — once you have the integration — takes 30 seconds. Wi
 **Don't skip data quality checks.** If event tracking is broken, the assistant's answer is confidently wrong. Periodically ask "are any events that should be firing not firing?" — that's the simplest data-quality check.
 
 **Mind the cost of expensive queries.** Some PostHog queries scan a lot of data. The assistant doesn't always know which are cheap and which are expensive. If you see queries timing out, scope them to a smaller window.
+
+## Troubleshooting
+
+- **`posthog` shows as needing authentication.** Run `/mcp`, select it, and log in again.
+- **Queries return another project's data, or none.** Your account may have several projects. Name the project in your prompt, and check which project you selected during login.
+- **You still have an old stdio entry.** If you followed an older guide, `claude mcp list` may show a `posthog` server that runs an npm command. Remove it with `claude mcp remove posthog` and add the hosted server.
+- **Self-hosted PostHog.** The hosted server at mcp.posthog.com is for PostHog Cloud. Check [PostHog's MCP docs](https://posthog.com/docs/model-context-protocol) for current self-hosted options rather than guessing.
+
+## FAQ
+
+### How do I add the PostHog MCP server to Claude Code?
+
+Run `claude mcp add --transport http posthog https://mcp.posthog.com/mcp -s user`, start Claude Code, run `/mcp`, and log in. Or use `npx @posthog/wizard mcp add`.
+
+### Do I need a PostHog personal API key?
+
+Not for the hosted setup in this guide. You log in on first use.
+
+### Is there a separate PostHog MCP server for the EU region?
+
+No. PostHog uses one URL and routes you to US or EU based on the account you log in with.
 
 ## When this integration shines
 
@@ -219,10 +260,10 @@ Before then: get the PostHog integration running, run a few real queries through
 
 ## Related reading
 
-- [Effective MCP patterns](/blog/effective-mcp-patterns)
-- [Claude Code + Supabase integration](/blog/claude-code-supabase-integration)
-- [Claude Code + Sentry integration](/blog/claude-code-sentry-integration)
+- [Sentry MCP for Claude Code: setup and incident debugging](/blog/claude-code-sentry-integration)
+- [Supabase MCP for Claude Code](/blog/claude-code-supabase-integration)
+- [A/B testing AI agents: platforms, metrics, and a test plan](/blog/ab-testing-ai-agents)
 
 ---
 
-*We build AI-enabled software and help businesses put AI to work. If you're integrating PostHog with Claude Code, we'd love to hear about it. [Get in touch.](/contact)*
+**Need help?** If you're connecting Claude Code to your analytics stack and want a second opinion on metric definitions and access, [talk to a senior architect](/contact).

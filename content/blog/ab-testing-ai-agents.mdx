@@ -1,0 +1,167 @@
+---
+title: "A/B testing AI agents: platforms, metrics, and a test plan"
+description: "Which experimentation platforms can A/B test LLMs and agents on live traffic, the metrics that measure agent effectiveness, and a template to document results."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["AI Agents", "A/B Testing", "Experimentation", "LLM Evaluation", "Engineering"]
+---
+
+Offline evals tell you whether a new prompt or model is better on your test set. They don't tell you whether users are better off. For that you need an A/B test on live traffic, and agents make that harder than a button-color test: outputs vary run to run, costs differ between arms, and the effect often shows up in some user segments and not others.
+
+This guide covers the practical side: which platforms can split live traffic between two LLMs or agent versions, which metrics to track, and how to write up the result so the next team can trust it. For cohort design and statistical power, read the companion piece, [agent A/B tests: comparing without confusing your users](/blog/agent-ab-tests).
+
+## Quick answer
+
+- **Platforms that can A/B test LLMs on live traffic** include LaunchDarkly, Statsig, PostHog, GrowthBook, and Eppo (now part of Datadog). All of them can assign users to variants and measure outcomes; they differ in how much LLM-specific tooling they include.
+- **Track three layers of metrics:** task outcomes (did the agent do the job), quality signals (evals, escalations, user feedback), and cost and latency per arm.
+- **Write the plan before you start**: hypothesis, variants, primary metric, guardrails, sample size, duration, and the decision rule. Then record the result in the same document.
+
+## What you're actually testing
+
+An "agent version" is a bundle. Before you split traffic, write down exactly what differs between arms:
+
+- The model (and its version).
+- The system prompt and tool descriptions.
+- Parameters such as temperature.
+- The tools available and their order.
+- Retrieval settings, if the agent uses retrieval.
+
+Change one thing at a time where you can. If you change the model and the prompt together and the test wins, you won't know which change did it. [Agent versioning](/blog/agent-versioning) covers how to name and pin these bundles so the test is reproducible.
+
+## Platforms that can A/B test LLMs and agents
+
+All five platforms below can assign users to variants and measure results. What follows is limited to capabilities each vendor describes in its own documentation or blog; check the current docs before you commit, because this category changes quickly.
+
+### LaunchDarkly
+
+LaunchDarkly's [AI Configs](https://launchdarkly.com/docs/home/ai-configs) (the current docs also use the name AgentControl) hold one or more variations, each defining model settings plus messages or agent instructions. Targeting rules decide which variation each user gets. You can run experiments that compare variations on cost, latency, satisfaction, or other metrics. Its AI SDK tracks generation count, token usage, latency, errors, and evaluation scores, and you can attach judges to variations for automated quality scoring.
+
+**Good fit:** teams already using LaunchDarkly for flags who want model and prompt changes managed the same way.
+
+### Statsig
+
+Statsig's [Agent Experimentation](https://docs.statsig.com/ai-evals/overview) stores the model, prompt messages, and parameters for an LLM task as versioned configs that your app fetches at runtime. It supports offline evals over a dataset and online evals that grade a sample of production traffic. To measure product impact, you create an experiment across config versions, and Statsig splits traffic evenly across the groups. Some Statsig pages have described parts of this product as beta with limited availability, so confirm access with Statsig first.
+
+**Good fit:** teams that want offline evals, online grading, and live experiments in one place.
+
+### PostHog
+
+PostHog's [prompt experiments](https://posthog.com/docs/experiments/llm-prompt-experiments) combine prompt management, experiments, and LLM analytics. Each saved prompt is an immutable version, and an experiment can compare up to 10 versions. PostHog creates a feature flag with one variant per version. Built-in metric templates cover mean LLM cost per user, mean latency per user, and eval pass rate (when LLM evaluations are configured), all from the `$ai_generation` events its SDK wrappers emit.
+
+**Good fit:** product teams already using PostHog analytics who want prompt tests next to their funnels. Our [PostHog MCP guide](/blog/claude-code-posthog-integration) shows how to query those results from Claude Code.
+
+### GrowthBook
+
+GrowthBook describes itself as a warehouse-native platform for experimentation, flags, and analytics. In its [guide to A/B testing AI](https://www.growthbook.io/blog/how-to-a-b-test-ai-a-practical-guide), a flag's value can carry a full AI setup (model, prompt, temperature) rather than a simple on/off, and each new prompt or model swap gets its own experiment while the flag in code stays the same. It recommends starting with low enrollment and using guardrail metrics with sequential testing to catch problems during the test.
+
+**Good fit:** teams whose metrics already live in a data warehouse, and teams that want an open-source option.
+
+### Eppo (Datadog)
+
+Eppo is an experimentation and feature-management platform that connects directly to your existing data warehouse and uses its statistical engine to measure the impact of changes on business metrics. Datadog [acquired Eppo](https://www.datadoghq.com/blog/datadog-acquires-eppo/) and says it continues as "Eppo by Datadog" while its features are brought into Datadog's product analytics and experimentation products.
+
+**How to evaluate Eppo for agent A/B tests:** its strength is warehouse-native analysis of business metrics. Eppo's acquisition post doesn't describe prompt management or LLM evals, so ask Datadog how LLM traces and eval scores reach the experiment, and whether you'd pair it with a separate prompt-management or LLM-observability tool.
+
+### Picking one
+
+Three questions settle most choices:
+
+1. **Where do your outcome metrics live?** If they're in a warehouse, look first at warehouse-native tools. If they're product events, an analytics-first tool is simpler.
+2. **Do you need prompt management built in?** LaunchDarkly, Statsig, and PostHog include versioned model and prompt configs. With other tools you store those yourself and pass a variant key.
+3. **Do you need automated quality scoring on live traffic?** Check for judges or online evals, or plan to run your own.
+
+## Metrics for agent effectiveness
+
+Pick one primary metric before the test starts. Track the rest as secondary metrics and guardrails.
+
+**Task outcomes (pick your primary from here):**
+
+- Task success rate: did the user get what they came for, by your definition.
+- Resolution without escalation, for support and ops agents.
+- Downstream conversion: the business action the agent is meant to drive.
+- Time to completion for the user, not for the model.
+
+**Quality signals:**
+
+- Online eval or judge pass rate on a sampled share of traffic. Calibrate the judge first; see [LLM-as-judge](/blog/llm-as-judge).
+- Human escalation and handoff rate.
+- Explicit feedback (thumbs, CSAT) and implicit feedback (retries, rephrasing, abandonment).
+- Tool-call error rate and retries per task.
+
+**Cost and speed (usually guardrails):**
+
+- Cost per successful task, not cost per call. A cheaper model that fails more often can cost more per success.
+- Tokens per task.
+- Latency at p50 and p95.
+
+**Safety guardrails:**
+
+- Policy or refusal violations caught by your checks.
+- Hallucination flags from your verification layer.
+
+Any guardrail breach stops the test, regardless of the primary metric.
+
+## A test plan you can copy
+
+Write this before launch, and keep it where the team can find it.
+
+```
+Experiment:      support-agent-prompt-v7
+Owner:           name
+Hypothesis:      Rewriting tool descriptions reduces wrong-tool calls,
+                 which raises resolution without escalation.
+Variants:        A = prompt v6 (control), B = prompt v7. Same model, same params.
+Assignment:      user-level, stable across sessions
+Traffic:         10% of eligible users, 50/50 split
+Primary metric:  resolution without escalation
+Secondary:       CSAT, tool-call error rate, time to resolution
+Guardrails:      p95 latency +20%, cost per resolved ticket +15%,
+                 any increase in policy violations
+Segments:        new users (first 7 days), returning users, enterprise accounts
+Sample size:     from power calculation, per arm
+Duration:        minimum 2 full weeks, to cover weekly cycles
+Decision rule:   ship B if primary improves with the agreed confidence and
+                 no guardrail is breached in any segment
+```
+
+## How to document the results
+
+The write-up is what makes the next test faster. Record:
+
+1. **The plan, unchanged.** Paste it at the top. If anything changed mid-test, note what and why.
+2. **The exact versions.** Model IDs, prompt version IDs, flag keys, and dates.
+3. **Results per metric and per segment**, with confidence intervals, not just point estimates.
+4. **Cost per arm**, actual, against the budget.
+5. **Qualitative review.** Ten to twenty sampled transcripts from each arm, read by a person, with notes on how failures differed.
+6. **The decision**, who made it, and the follow-ups: eval cases to add, segments to retest.
+
+Add the failure examples from step 5 to your offline eval set. That's how a live test improves your offline evals, so the next change can be screened before it ever reaches users.
+
+## FAQ
+
+### Which experimentation platforms can A/B test two LLMs on live traffic?
+
+LaunchDarkly, Statsig, PostHog, GrowthBook, and Eppo can all split live traffic between variants that use different models or prompts. LaunchDarkly, Statsig, and PostHog also include model and prompt config management.
+
+### How do I evaluate Eppo for A/B testing AI features?
+
+Eppo is strongest at warehouse-native analysis of business metrics. Check how LLM-specific data such as eval scores and token costs reaches it, and whether you'll need a separate tool for prompt versions.
+
+### What metrics measure AI agent effectiveness?
+
+Task success or resolution as the primary metric, eval pass rate and escalation rate for quality, and cost per successful task and p95 latency as guardrails.
+
+### How should I document an agent A/B test?
+
+Write the plan before launch, then record exact versions, per-segment results with confidence intervals, cost per arm, a transcript review, and the decision.
+
+## Related reading
+
+- [Agent A/B tests: comparing without confusing your users](/blog/agent-ab-tests)
+- [AI feature flags](/blog/ai-feature-flags)
+- [Sampling production traffic for evals](/blog/sampling-production-traffic)
+
+---
+
+**Need help?** If you're planning an A/B test for an AI agent and want help picking the platform, metrics, and decision rule before you spend the traffic, [talk to a senior architect](/contact).

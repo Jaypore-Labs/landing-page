@@ -1,0 +1,161 @@
+---
+title: "vLLM for enterprise: production LLM serving, use cases, limits"
+description: "vLLM is the open-source engine teams use to serve LLMs at scale on their own GPUs. Use cases, reference architecture, security gaps and how it compares."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "vLLM", "LLM Serving", "Enterprise AI"]
+---
+
+vLLM is an open-source inference and serving engine for large language models. You point it at a model, and it serves an OpenAI-compatible API that makes efficient use of GPU memory and handles many concurrent requests. It is for platform and infrastructure teams that need to run open-weight models in production on their own hardware or cloud accounts.
+
+The short verdict: vLLM is the default choice for self-hosted, high-throughput LLM serving. It is fast, widely supported and well maintained. It is also infrastructure, not a product. You still need to build the gateway, security, scaling and operations around it.
+
+## What is vLLM?
+
+[vLLM](https://github.com/vllm-project/vllm) was originally developed in the Sky Computing Lab at UC Berkeley and is now maintained by a community of academic institutions and companies with over 2,000 contributors. It is released under the Apache 2.0 license and had 97k+ GitHub stars as of November 2026. It is one of the projects in our list of [open-source AI repos worth knowing for enterprise teams](/blog/top-open-source-ai-github-repos-enterprise).
+
+The core idea is PagedAttention, described in the team's 2023 SOSP paper. It manages the attention key-value cache in pages, much like an operating system manages memory, so less GPU memory is wasted and more requests fit on each card. Key capabilities from the project README:
+
+- **Throughput features.** Continuous batching, chunked prefill, prefix caching, CUDA and HIP graphs, and speculative decoding.
+- **Quantisation.** FP8, INT8, INT4, GPTQ, AWQ, GGUF and other formats.
+- **Distributed inference.** Tensor, pipeline, data, expert and context parallelism, plus disaggregated prefill and decode.
+- **APIs.** An OpenAI-compatible server, plus Anthropic Messages API and gRPC support.
+- **Structured output and tools.** Constrained generation via xgrammar or guidance, and tool-calling and reasoning parsers.
+- **Multi-LoRA.** Serve many fine-tuned adapters on one base model.
+- **Model coverage.** 200+ model architectures on Hugging Face, including mixture-of-experts, multimodal, embedding and reranking models.
+- **Hardware.** NVIDIA, AMD and Intel GPUs, x86, ARM and PowerPC CPUs, and plugins for TPUs, Intel Gaudi, Huawei Ascend and others.
+
+## Enterprise use cases
+
+vLLM earns its place when volume, concurrency or cost per token matter:
+
+1. **Internal LLM platform.** One shared, governed endpoint that many teams call instead of each team running its own model.
+2. **Customer-facing features on open models.** Chat, search answers or drafting features where data cannot go to an external provider.
+3. **High-volume batch processing.** Classifying, extracting or summarising millions of documents overnight using the offline batch API.
+4. **RAG backends.** Serving both the generation model and the embedding or reranking model for retrieval systems.
+5. **Fine-tuned model fleets.** Many LoRA adapters for different business units on one base model and one set of GPUs.
+6. **Structured extraction.** Schema-constrained output for pipelines that feed downstream systems and cannot tolerate malformed JSON.
+7. **Agent workloads.** Tool-calling models with long contexts, where prefix caching cuts the cost of repeated system prompts.
+
+The economics are the point. Our [token economics](/blog/token-economics) piece explains how to compare self-hosted cost per token with API pricing honestly.
+
+## Use cases by industry
+
+### Healthcare
+
+A health system can run a summarisation model for clinical notes and a separate embedding model for chart search on GPUs inside its own environment. vLLM handles the concurrency of a clinician-facing tool; the compliance controls still sit with you. See [healthcare](/industries/healthcare) and our notes on [HIPAA and AI](/blog/hipaa-and-ai).
+
+### Financial services
+
+A bank's platform team can host an approved open model behind its gateway and expose it to research, operations and engineering teams with per-team quotas. Structured output supports extraction from filings and statements into downstream systems. See [financial services](/industries/financial-services).
+
+### Insurance
+
+Carriers can batch-process claim files, policy documents and adjuster notes overnight, extracting fields against a fixed schema. LoRA adapters let underwriting and claims use tuned variants of one base model. See [insurance](/industries/insurance).
+
+### Logistics
+
+Shipping documents, customs forms and carrier emails arrive in volume and in bursts. A vLLM cluster behind a queue can classify and extract from them at a cost that scales with GPU hours rather than per-call fees. See [logistics](/industries/logistics).
+
+### Retail
+
+Retailers can generate and refresh product descriptions and attributes across large catalogues in batch, and serve a lower-latency model for on-site search answers. See [retail](/industries/retail).
+
+### Legal
+
+Firms and legal departments can host models for contract review and clause extraction where confidentiality rules out external APIs, with retrieval over their own precedent library. See [legal](/industries/legal).
+
+## Reference architecture for production
+
+```text
+ Apps / agents / internal users
+              |
+              v
+   SSO (OIDC / SAML) + API gateway
+   - per-team keys, quotas, audit log
+   - routing by model and task
+              |
+     private network only (no public route)
+              |
+   +----------+-----------+-----------------+
+   |                      |                 |
+ vLLM pool: chat     vLLM pool: embed   vLLM pool: batch
+ (GPU nodes,         (smaller GPUs)     (spot / off-peak)
+  autoscaled)
+   |                      |                 |
+   +---- model registry / weights in object storage
+   +---- Prometheus metrics, logs, traces
+```
+
+- **Auth and SSO.** vLLM's `--api-key` option checks a single shared key on some path prefixes only. Its own docs warn that other endpoints, including `/invocations`, are not covered. Put a gateway with SSO and per-client credentials in front.
+- **Secrets.** Store Hugging Face tokens, gateway keys and registry credentials in a vault and inject them at runtime.
+- **Network boundaries.** The security docs state that multi-node communication is insecure by default and must run on an isolated network. Keep worker traffic inside a private segment.
+- **GPU sizing.** Weights, KV cache and context length all compete for VRAM. Larger models need tensor parallelism across several GPUs. Quantisation trades some quality for capacity. Benchmark your own prompts and output lengths before buying hardware.
+- **Data residency.** Weights and inference stay in your region and account. Mirror weights internally so production nodes do not reach out to public hubs.
+- **Scaling.** Scale horizontally with replicas behind the gateway. On Kubernetes, the project's [production-stack](https://github.com/vllm-project/production-stack) is a reference for cluster-wide deployment. Model load time is real, so keep warm capacity.
+- **Observability.** vLLM exposes Prometheus metrics. Track time to first token, tokens per second, queue depth and KV cache use, and log usage per caller at the gateway. Our [AI latency budgets](/blog/ai-latency-budgets) piece covers setting targets.
+
+## Security, compliance and licensing
+
+vLLM is Apache 2.0 licensed, which allows commercial use and includes a patent grant. Model licenses are separate. Check each model's terms before deployment.
+
+The project publishes a security guide that is worth reading in full. Its headline points: inter-node communication is insecure by default, the components are not built for untrusted networks, and API key authentication does not protect every endpoint. The guide also documents limits on media downloads and decoding to reduce resource-exhaustion risk for multimodal models. Keep those limits on for any deployment that accepts outside input.
+
+For HIPAA, SOC 2 and GDPR, vLLM is a component inside your controlled environment. You must add:
+
+- Strong authentication, authorisation and audit logging at the gateway.
+- TLS in transit and encryption at rest for logs, caches and any stored prompts.
+- Network isolation for workers and blocked access to cloud metadata endpoints.
+- Image scanning, version pinning and a tested upgrade path, since releases are frequent.
+- Retention and redaction rules for prompt and response logs.
+
+## vLLM vs alternatives
+
+| | vLLM | SGLang | TensorRT-LLM | Hugging Face TGI |
+|---|---|---|---|---|
+| Best for | General-purpose production serving | Serving with heavy prefix reuse and structured programs | Peak performance on NVIDIA hardware | Existing TGI deployments |
+| License | Apache 2.0 | Apache 2.0 | Apache 2.0 | Apache 2.0 |
+| Hardware | NVIDIA, AMD, Intel, CPUs, TPU and others via plugins | GPU-focused, several vendors | NVIDIA only | GPU-focused |
+| API | OpenAI-compatible, Anthropic, gRPC | OpenAI-compatible | OpenAI-compatible via trtllm-serve, or Triton | OpenAI-compatible |
+| Status | Very active | Very active | Active, NVIDIA-led | Maintenance mode, repo archived |
+
+TGI's README states it is now in maintenance mode, so we do not recommend it for new deployments. SGLang is a strong peer and worth benchmarking against vLLM on your own workload. TensorRT-LLM can deliver more from NVIDIA hardware but costs more engineering effort and locks you to one vendor.
+
+**Ollama vs vLLM.** Ollama is the easier tool for laptops and small private deployments. vLLM is what you graduate to when concurrency, multi-GPU serving or cost per token become the constraint. Both speak the OpenAI API, so moving is mostly a base URL change plus operational work. See [Ollama for enterprise](/blog/ollama-for-enterprise).
+
+## When not to use it
+
+- **Low volume.** If a few people use the model a few times an hour, a hosted API or Ollama is cheaper and simpler.
+- **No GPU operations capability.** Running GPU clusters needs people who can do it. Without them, a managed endpoint is safer.
+- **Laptops and edge devices.** vLLM is GPU-server first. Use Ollama or llama.cpp at the edge.
+- **When frontier models win on quality.** Self-hosting the wrong model is a false economy. Route tasks to the right model; see [multi-model routing](/blog/multi-model-routing).
+- **Exposed directly to the internet.** Never without a gateway.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates vLLM into enterprise systems: GPU sizing from your real workloads, gateways with SSO and quotas, Kubernetes deployment, observability and upgrade runbooks. Where self-hosting does not pay off, we design a hybrid of hosted and private models, or build custom around your constraints. If you are planning an internal LLM platform, [talk to a senior architect](/contact) or see our [solutions](/solutions).
+
+## FAQ
+
+### Is vLLM production ready?
+
+Yes. It is widely used for production serving and is very actively maintained. Production readiness also depends on what you build around it: gateway, isolation, monitoring and a tested upgrade path.
+
+### Can vLLM run on-prem or air-gapped?
+
+Yes. It runs on your own GPUs with weights loaded from local storage. For air-gapped sites, mirror the container images and model weights internally.
+
+### Does vLLM have authentication?
+
+It has an optional single API key, but the docs warn it covers only some endpoints and should not be relied on alone. Use a gateway or reverse proxy with real identity and per-client credentials.
+
+### vLLM vs SGLang: which is faster?
+
+It depends on the model, hardware and traffic pattern. Both are fast and actively developed. Benchmark both with your own prompts, output lengths and concurrency before deciding.
+
+### When should we move from Ollama to vLLM?
+
+When you see queueing under load, need many concurrent users, need multi-GPU serving for larger models, or want lower GPU cost per token. Many teams keep Ollama for development and use vLLM in production.
+
+Planning to serve open models at scale? [Get in touch](/contact) with your use case.

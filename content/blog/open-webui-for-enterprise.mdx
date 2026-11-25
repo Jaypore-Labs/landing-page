@@ -1,0 +1,148 @@
+---
+title: "Open WebUI for enterprise: use cases, security, and licensing"
+description: "Open WebUI for enterprise: when a self-hosted AI chat portal makes sense, use cases by industry, a production architecture, and its branding-clause license."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "Open WebUI", "Self-Hosted AI", "Enterprise AI"]
+---
+
+Open WebUI is a self-hosted web interface for AI models. It looks and feels like a familiar chat assistant, but it runs on your infrastructure and connects to local models through Ollama or to any OpenAI-compatible API, cloud or on-premises. It is for organizations that want to give employees a sanctioned AI assistant without sending every prompt to a consumer product, and for platform teams that want one front door to several models. The short verdict: Open WebUI is a fast way to stand up an internal AI portal with SSO and access control, but it is a user interface, not an application platform, and its license restricts rebranding for deployments above 50 users.
+
+This article is part of our series on [open-source AI repos worth evaluating for enterprise use](/blog/top-open-source-ai-github-repos-enterprise).
+
+## What is Open WebUI?
+
+Open WebUI is maintained by Open WebUI Inc. and was created by Timothy Jaeryang Baek. The frontend is built with Svelte and the backend is Python. It installs with pip or as a Docker image, with variants for CUDA acceleration and a bundled Ollama. The [Open WebUI GitHub repository](https://github.com/open-webui/open-webui) has 159k+ stars as of November 2026.
+
+Key capabilities, based on the project documentation and its configuration options:
+
+- **Model access.** Connect Ollama for local models and any OpenAI-compatible endpoint for cloud or self-hosted models, and let users switch between them.
+- **Identity and access.** OAuth and OIDC sign-in (including Microsoft), LDAP, SCIM provisioning, user groups and role-based permissions over models, knowledge and tools.
+- **Knowledge and RAG.** Upload documents into knowledge bases and chat over them. The vector store is configurable: Chroma by default, with pgvector, Qdrant, Milvus, OpenSearch, Elasticsearch, Pinecone, Weaviate and others supported.
+- **Extensibility.** Tools, Functions and Pipelines let you add Python logic, call internal APIs or filter requests and responses.
+- **Web search and code execution.** Optional web search and a code interpreter, both of which you can turn off.
+- **Operations.** Postgres via a database URL, Redis for multi-instance deployments, S3-compatible file storage and OpenTelemetry export.
+- **Offline operation.** It is designed to run without internet access when paired with local models.
+
+## Enterprise use cases for Open WebUI
+
+1. **A sanctioned internal AI assistant.** Replace shadow use of consumer chat tools with an approved portal behind SSO, with logs you own and models you choose.
+2. **One front door to many models.** Expose a curated list of models, some cloud and some self-hosted, and control which groups can use which. Put a model gateway behind it for keys and cost tracking.
+3. **Air-gapped or sovereign AI.** Run Open WebUI with local models on GPUs in your own data center for teams that cannot use external APIs at all. Smaller open models handle many internal tasks well; see why [small models are underrated](/blog/small-models-are-underrated).
+4. **Team knowledge bases.** Give a department a knowledge base of its own documents with group-scoped access.
+5. **Internal tool access.** Wire Tools to internal APIs so users can ask the assistant to look up an order or a ticket. Keep these read-only until you trust the controls. Our [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial) covers the integration side.
+6. **Model evaluation by real users.** Let pilot groups compare models side by side on their actual work before you commit to a provider.
+
+## Open WebUI use cases by industry
+
+### Healthcare
+
+A clinician and staff assistant on self-hosted models: drafting patient education material, summarizing policy documents, and answering questions over internal clinical protocols in a group-scoped knowledge base. Whether PHI may be entered is a policy decision you must make and enforce, not a default. See our [healthcare page](/industries/healthcare) and our post on [HIPAA and AI](/blog/hipaa-and-ai).
+
+### Financial services
+
+An internal assistant for analysts and operations staff, running on models approved by model risk management, with conversation logs retained under your records policy. Typical work: summarizing research, drafting client communications for review, and querying internal procedures. See [financial services](/industries/financial-services).
+
+### Insurance
+
+Underwriting and claims teams use a shared knowledge base of underwriting guidelines and claims manuals: "what documentation is required for a water damage claim over the threshold in this state?" with the answer citing the manual section. See [insurance](/industries/insurance).
+
+### Legal
+
+A firm-wide assistant on self-hosted or contractually restricted models for drafting, summarizing and clause research, with matter-specific knowledge bases restricted to the matter team through groups. Confidentiality is the reason to self-host here. See [legal](/industries/legal).
+
+### Education and research
+
+A campus or lab AI portal: give students and researchers access to several models under one sign-in, with usage controlled by group and local models for sensitive research data. Watch the 50-user branding threshold discussed below. See [education and research](/industries/education-research).
+
+## Reference architecture for production Open WebUI
+
+```text
+   Employees (browser)
+          |
+  +-------v---------+
+  | Identity-aware  |  SSO via OIDC / LDAP, SCIM from IdP
+  | proxy / LB      |  TLS, private network
+  +-------+---------+
+          |
+  +-------v-------------------+      +------------------+
+  | Open WebUI (N replicas)   |◄────►| Redis            |
+  | UI + Python backend       |      | sessions, sockets|
+  +---+---------+---------+---+      +------------------+
+      |         |         |
+ +----v----+ +--v------+ +v-------------------+
+ |Postgres | | Vector  | | S3-compatible      |
+ |(HA)     | | store   | | file storage       |
+ +---------+ +---------+ +--------------------+
+      |
+      +------► Model gateway ──► cloud LLM APIs
+                     └─────────► self-hosted models (Ollama, vLLM)
+```
+
+- **Auth and SSO.** Use OIDC with your identity provider, map IdP groups to Open WebUI groups, and provision users with SCIM. Disable local sign-up.
+- **Secrets.** Keep provider keys in a gateway or vault, not in individual admin settings. Restrict who can add connections or API keys.
+- **Network boundaries.** Keep the portal on the corporate network. Decide whether web search, code interpreter and user-installed Tools and Functions are allowed; Functions run Python on your server, so treat them like code deployments.
+- **Data residency.** Chats, uploaded files and embeddings are stored in your database, file storage and vector store. Prompts still go to whichever model endpoint the user picks, so control that list.
+- **Scaling.** Run multiple replicas with Postgres and Redis instead of the default SQLite. Move embeddings and document extraction to dedicated services once usage grows; the slim image is built for that.
+- **Observability.** Export traces with OpenTelemetry and track usage by group and model through the gateway. Our [agent observability](/blog/agent-observability) post covers what to capture.
+- **Backups.** Back up Postgres, file storage and the vector store, and set a retention policy for chat history.
+
+## Security, compliance and licensing
+
+**License reality.** Open WebUI is under the Open WebUI License. It is based on BSD-3-Clause terms with an added clause: you may not alter, remove, obscure or replace any "Open WebUI" branding in any deployment or distribution. There are three exceptions: deployments with 50 or fewer end users in any rolling 30-day period, specific written permission from the copyright holder, or an enterprise license that permits it. Code created before a specific commit stays under its earlier BSD-3-Clause license, as listed in the LICENSE_HISTORY file. Because of the branding clause, this is not an OSI-approved license.
+
+In practice: running Open WebUI internally with its branding intact is allowed at any size. White-labeling it as "Acme AI" for 2,000 employees, or for customers, requires an enterprise license or permission. This is a plain-language summary, not legal advice. Read the [license](https://github.com/open-webui/open-webui/blob/main/LICENSE) with counsel.
+
+**Compliance.** Open WebUI stores conversations, which may contain personal data, health information or client confidences. HIPAA, SOC 2 and GDPR controls fall on your deployment: encryption, access control, audit logging, retention and deletion, data subject requests, and agreements with every model provider in the list. Under the [EU AI Act](/blog/eu-ai-act-engineering-impact), a general-purpose internal assistant is usually lower risk, but specific uses built on it may not be.
+
+**What you must add yourself:** a model gateway with quotas, an acceptable-use policy enforced through group permissions, DLP or PII filtering through Pipelines or the gateway, retention jobs, and review of any Tool or Function before it goes live.
+
+## Open WebUI vs LibreChat vs AnythingLLM vs ChatGPT Enterprise
+
+| | Open WebUI | LibreChat | AnythingLLM | ChatGPT Enterprise |
+|---|---|---|---|---|
+| Model | Self-hosted AI portal | Self-hosted AI portal | Self-hosted or desktop RAG workspace | Vendor SaaS |
+| License | BSD-3-based with branding clause | MIT | MIT | Proprietary |
+| Local models | Yes, Ollama built in | Yes, via compatible endpoints | Yes | No |
+| SSO and groups | OIDC, LDAP, SCIM, groups | OAuth/OIDC, LDAP | Multi-user mode with roles | Yes, vendor-managed |
+| White-labeling | Restricted above 50 users | Allowed | Allowed | No |
+| Best for | Feature-rich internal portal, local models | Teams wanting a permissive license | Document-centric workspaces | Fast rollout, single vendor |
+
+If you want a permissive license so you can rebrand freely, LibreChat or AnythingLLM avoid the branding question. If you want minimal operations and accept a single vendor, a SaaS enterprise plan is simpler. Open WebUI wins on breadth of features and local-model support.
+
+## When not to use Open WebUI
+
+- **When you need a product UI, not a chat portal.** Customer-facing AI features belong in your own application, designed around the task. Open WebUI is a general chat interface.
+- **When you must white-label at scale without a license.** Above 50 users, the branding clause applies.
+- **When you need structured workflows.** Multi-step processes with approvals and system writes are better built in a workflow tool or custom service. Consider n8n or Dify, or custom code.
+- **When retrieval quality is critical.** Built-in knowledge bases are fine for convenience. For regulated answers you need tuned retrieval and [evals for retrieval](/blog/evals-for-retrieval).
+- **When nobody owns model governance.** A portal with many models and open Tools, and no owner, is a shadow AI problem with a nicer interface.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates Open WebUI as an enterprise AI portal: SSO and SCIM, group-based model access, a model gateway, self-hosted model serving, and Tools connected to ERP, CRM and EHR systems with appropriate controls. When a chat portal is the wrong interface, we build task-specific AI-enabled software instead. To plan a rollout, [talk to a senior architect](/contact) or review our [enterprise solutions](/solutions).
+
+Have an Open WebUI use case in mind? [Get in touch](/contact) and tell us about it.
+
+## FAQ
+
+### Is Open WebUI production ready?
+
+Yes, for internal use, if you deploy it properly. Use Postgres and Redis instead of SQLite, run multiple replicas, connect SSO, disable local sign-up and control which models, Tools and Functions are available. Most problems come from running the single-container default at company scale.
+
+### Is Open WebUI free for commercial use?
+
+Yes, you can use it commercially. The license adds one key condition: you may not remove or change the Open WebUI branding unless you have 50 or fewer end users in a rolling 30-day period, written permission, or an enterprise license.
+
+### Is Open WebUI open source?
+
+The source is public and the license is based on BSD-3-Clause, but the branding-preservation clause means it is not an OSI-approved open source license. Older code remains under its original BSD-3-Clause terms.
+
+### Can Open WebUI run fully offline?
+
+Yes. It is designed to run without internet access when connected to local models through Ollama or another self-hosted, OpenAI-compatible server. You also need to disable features that reach outside, such as web search and model downloads.
+
+### Open WebUI vs LibreChat: which is better for enterprise?
+
+Both are capable self-hosted portals with SSO. Open WebUI has broader built-in features and strong local-model support; LibreChat has a permissive MIT license that allows white-labeling. Choose based on whether rebranding or features matter more to you.

@@ -39,6 +39,25 @@
 - [Insights](https://jayporelabs.com/blog)
 - [Contact](https://jayporelabs.com/contact): hello@jayporelabs.com — a senior architect responds within one business day
 
+## Guides: open-source AI for enterprise
+- [Top 10 open-source AI GitHub repos for enterprise](https://jayporelabs.com/blog/top-open-source-ai-github-repos-enterprise): licensing, use cases by industry, evaluation checklist
+- [n8n for enterprise](https://jayporelabs.com/blog/n8n-for-enterprise)
+- [Ollama for enterprise](https://jayporelabs.com/blog/ollama-for-enterprise)
+- [Dify for enterprise](https://jayporelabs.com/blog/dify-for-enterprise)
+- [Open WebUI for enterprise](https://jayporelabs.com/blog/open-webui-for-enterprise)
+- [Browser Use for enterprise](https://jayporelabs.com/blog/browser-use-for-enterprise)
+- [Supabase for enterprise](https://jayporelabs.com/blog/supabase-for-enterprise)
+- [vLLM for enterprise](https://jayporelabs.com/blog/vllm-for-enterprise)
+- [RAGFlow for enterprise](https://jayporelabs.com/blog/ragflow-for-enterprise)
+- [MCP servers for enterprise](https://jayporelabs.com/blog/mcp-servers-for-enterprise)
+- [LangGraph for enterprise](https://jayporelabs.com/blog/langgraph-for-enterprise)
+
+## Guides: Claude Code and Codex integrations
+- [Sentry MCP for Claude Code](https://jayporelabs.com/blog/claude-code-sentry-integration)
+- [PostHog MCP for Claude Code](https://jayporelabs.com/blog/claude-code-posthog-integration)
+- [Supabase MCP for Claude Code](https://jayporelabs.com/blog/claude-code-supabase-integration)
+- [Slack MCP for Claude Code](https://jayporelabs.com/blog/claude-code-slack-integration)
+
 ## Machine-readable
 - Sitemap: https://jayporelabs.com/sitemap.xml
 - Feed: https://jayporelabs.com/feed.xml

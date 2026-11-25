@@ -1,34 +1,137 @@
 ---
-title: "Claude Code + Supabase: a working integration via MCP"
-description: "End-to-end walkthrough. Project setup, MCP server install, scoped keys, read-only patterns, and a writeable workflow with row-level security."
+title: "Supabase MCP for Claude Code: setup, read-only, and RLS"
+description: "Add the Supabase MCP server to Claude Code with one command, sign in with OAuth, scope it to one project in read-only mode, then verify and troubleshoot."
 date: "2026-05-12"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Claude Code", "Supabase", "MCP", "Tutorial", "Integration"]
 ---
 
-This is part 7 of the AI-tools-for-engineers series. Parts 5 and 6 covered MCP fundamentals and patterns. This article walks through a real, production-grade integration with Supabase.
+This is part 7 of the AI-tools-for-engineers series. Parts 5 and 6 covered MCP fundamentals and patterns. This article is the full setup guide for connecting Claude Code to Supabase through Supabase's official MCP server: the exact commands, the config file, how to lock it down, how to check it works, and what to do when it doesn't.
 
-By the end you'll have Claude Code (the same patterns work for Codex) querying and — carefully — writing to a Supabase project, with row-level security in place and the action paths gated by human confirmation.
+By the end you'll have Claude Code (the same server works with Codex) querying a Supabase project in read-only mode, with a clear path to allowing writes on a development project when you're ready.
 
-## What we're building
+## Quick setup
 
-A small, useful integration:
+The short version, verified against [Supabase's MCP docs](https://supabase.com/docs/guides/getting-started/mcp) and [Claude Code's MCP docs](https://code.claude.com/docs/en/mcp):
 
-- Claude Code can read from your Supabase database via an MCP server.
-- Reads are gated by row-level security, so the assistant sees only what your auth context allows.
-- Writes are possible but require explicit confirmation and a service-role key that's separate from the read key.
-- All actions are audited.
+```bash
+# 1. Add the hosted Supabase MCP server, shared with the team via .mcp.json
+claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp"
 
-This lets you do things like "show me users who signed up last week and haven't activated" without leaving the assistant. It also lets you do "run this migration on the dev database" with a real safety check.
+# 2. Start Claude Code and sign in to Supabase in the browser
+claude
+/mcp
+
+# 3. Check the connection
+claude mcp list
+```
+
+The safer version, which we recommend for anything other than a throwaway project, pins the server to one project and makes it read-only:
+
+```bash
+claude mcp add --scope project --transport http supabase \
+  "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true"
+```
+
+Replace `YOUR_PROJECT_REF` with the reference ID from your project's URL in the Supabase dashboard. Quote the URL, because the `&` will otherwise be read by your shell.
+
+## What you'll have at the end
+
+- Claude Code connected to the official Supabase MCP server over HTTP.
+- OAuth sign-in, so there's no access token sitting in a config file.
+- The server scoped to one project and restricted to read-only SQL.
+- A `.mcp.json` the rest of the team can use.
+- A tested path for migrations that keeps a human on the final command.
 
 ## Prerequisites
 
-- A Supabase project. If you don't have one, sign up at supabase.com (the free tier is enough for this tutorial).
-- Claude Code installed and authenticated.
-- The Supabase CLI installed locally (`brew install supabase/tap/supabase`).
+- A Supabase project. Use a development or staging project for the first weeks, not production.
+- Claude Code installed and logged in. If you haven't done that, start with [how to install Claude Code](/blog/how-to-install-claude-code).
+- A browser on the same machine for the OAuth step.
+- Optional: the Supabase CLI, for local development and for running migrations yourself.
 
-This article uses a fictional `tasks` table to keep examples concrete:
+## Step 1: add the Supabase MCP server to Claude Code
+
+Supabase hosts its MCP server at `https://mcp.supabase.com/mcp`. Claude Code connects to remote servers with the HTTP transport:
+
+```bash
+claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp"
+```
+
+What each part does:
+
+- `--transport http` tells Claude Code this is a remote server, not a local process.
+- `--scope project` writes the entry to `.mcp.json` in your repo root so teammates get it through version control. Use `--scope local` (the default) to keep it to yourself in this project, or `--scope user` to make it available in all your projects.
+- `supabase` is the name you'll see in `/mcp` and `claude mcp list`.
+
+The resulting `.mcp.json` looks like this:
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true"
+    }
+  }
+}
+```
+
+You can also write that file by hand instead of running the command. Claude Code asks each person to approve project-scoped servers from `.mcp.json` the first time they load.
+
+## Step 2: scope it with URL parameters
+
+The Supabase server takes its security settings from query parameters on the URL. These are the three that matter:
+
+| Parameter | What it does |
+| --- | --- |
+| `project_ref=...` | Limits the server to a single project. Without it, the server can reach every project your account can. |
+| `read_only=true` | Runs all SQL as a read-only Postgres user. |
+| `features=database,docs` | Enables only the listed tool groups. |
+
+Parameters combine with `&`. Supabase's own example is `?project_ref=abc123&read_only=true`.
+
+Our default for a new team is all three:
+
+```
+https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true&features=database,docs
+```
+
+Supabase groups its tools into areas such as database, debugging, development, Edge Functions, account management, docs, branching, and storage (storage is off by default). Check the docs for the exact identifiers before you widen the `features` list.
+
+## Step 3: authenticate
+
+Start Claude Code in the repo and run `/mcp`. Select `supabase` and follow the browser prompts to sign in and pick the organization. Supabase uses OAuth with dynamic client registration, so you don't need a personal access token for this.
+
+To sign in from your shell instead, run `claude mcp login supabase`. To sign out, use "Clear authentication" in `/mcp` or run `claude mcp logout supabase`.
+
+## Step 4: verify the connection
+
+From your shell:
+
+```bash
+claude mcp list           # supabase should be listed as connected
+claude mcp get supabase   # shows the URL, scope, and status
+```
+
+Inside Claude Code, ask a question only your database can answer:
+
+```
+> What tables are in the public schema of this project?
+```
+
+Then test the read-only setting on purpose:
+
+```
+> Create a table called mcp_write_test with a single id column.
+```
+
+With `read_only=true`, that should fail. If it succeeds, your URL is missing the parameter. Fix it before going further, and drop the test table.
+
+## Step 5: useful read patterns
+
+This article uses a simple `tasks` table to keep examples concrete:
 
 ```sql
 CREATE TABLE tasks (
@@ -40,11 +143,26 @@ CREATE TABLE tasks (
 );
 ```
 
-If you'd like to follow along exactly, run that in your project's SQL editor.
+Questions that work well:
 
-## Step 1: row-level security
+```
+> How many tasks were created in the last 7 days?
+> Are there users with more than 50 tasks?
+> What's the average age of tasks in pending status?
+> Which tables in public don't have row-level security enabled?
+```
 
-Before connecting any AI tool, lock down access at the database level. Supabase's row-level security (RLS) is the foundation.
+Three habits make these better:
+
+**Aggregate before showing detail.** Ask "how many?" before "list all." Reading a thousand rows into context to count them wastes tokens and time.
+
+**Anchor on schema.** Start a session with "what tables are in this project?" The assistant writes better SQL once it has seen the schema.
+
+**Check the SQL.** Claude Code shows each tool call before it runs. Read the query. It's the fastest way to catch a wrong join.
+
+## Step 6: row-level security still matters
+
+Row-level security protects your application's users from each other. It's the right default for every Supabase table, AI or not:
 
 ```sql
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
@@ -60,173 +178,105 @@ CREATE POLICY "users insert own tasks"
   WITH CHECK (user_id = auth.uid());
 ```
 
-Why this matters: even if your AI integration accidentally over-permissions itself, RLS at the database is the floor. The assistant can't see other users' tasks because the database itself enforces it.
+Be clear about what it doesn't do. The MCP server acts on your project through your Supabase account, not as one of your app's signed-in users, so don't count on your RLS policies to limit what the assistant can read. The controls that limit the MCP server are the ones in Step 2: one project, read-only SQL, a narrow feature list, and a non-production project.
 
-This is the pattern we recommend for every Supabase project, AI or not. RLS first; everything else after.
+## Step 7: writes and migrations
 
-## Step 2: scoped keys
+When you need writes, do them on a development project or a branch, never by flipping production to read-write.
 
-Supabase issues several keys. For AI integration, you'll want two:
+1. Point a separate server entry (or a separate repo checkout) at the dev project without `read_only=true`.
+2. Ask the assistant to draft the migration as a file in `supabase/migrations/`.
+3. Review it for the usual problems: missing `IF NOT EXISTS`, no rollback plan, long locks on big tables.
+4. Apply it yourself with the Supabase CLI or your normal deploy pipeline.
 
-- **Anon key.** Public-safe, RLS-respecting. The right key for read tools.
-- **Service-role key.** Bypasses RLS. The right key for *carefully scoped* write tools — and only when the integration genuinely needs them.
+The assistant drafts; a person runs the command that changes the data. Claude Code also asks before every tool call, so read each one before you approve it.
 
-In your Supabase dashboard: Settings → API. You'll see both keys. Treat the service-role key like a production secret.
+## CI and headless setups
 
-For local development, store both in your shell environment:
-
-```bash
-export SUPABASE_URL="https://your-project.supabase.co"
-export SUPABASE_ANON_KEY="eyJhbGciOiJI..."
-export SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJI..."  # only when you need writes
-```
-
-Never check these into git. Use the team's secret manager for shared environments.
-
-## Step 3: install the MCP server
-
-Supabase ships an official MCP server. Install:
-
-```bash
-npm install -g @supabase/mcp-server
-```
-
-You can also run it via `npx -y @supabase/mcp-server` per-invocation, which is what we'll use in the Claude Code config below.
-
-## Step 4: configure Claude Code (read-only first)
-
-Edit `~/.claude.json`:
+OAuth needs a browser. For CI, Supabase documents passing a personal access token as a header instead. In `.mcp.json` that looks like:
 
 ```json
 {
   "mcpServers": {
-    "supabase-read": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server", "--read-only"],
-      "env": {
-        "SUPABASE_URL": "${env:SUPABASE_URL}",
-        "SUPABASE_KEY": "${env:SUPABASE_ANON_KEY}"
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=${SUPABASE_PROJECT_REF}&read_only=true",
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}"
       }
     }
   }
 }
 ```
 
-The `--read-only` flag and the anon key together mean: the assistant can read RLS-respecting data and nothing else.
+Claude Code expands the variables from the environment. Set `SUPABASE_ACCESS_TOKEN` and `SUPABASE_PROJECT_REF` as CI secrets, never in the file. Grant the token only what the enabled tools need.
 
-Restart Claude Code. The new server registers. Test:
+## Local development
 
-```
-> List the tables in my Supabase project.
-```
+If you run Supabase locally with the CLI, the local stack serves an MCP endpoint at `http://localhost:54321/mcp`:
 
-The assistant calls the server's `list_tables` tool, gets back the schema. You can ask things like:
-
-```
-> How many tasks were created in the last 7 days?
-> Are there users with more than 50 tasks?
-> What's the average task age in pending status?
+```bash
+claude mcp add --transport http supabase-local http://localhost:54321/mcp
 ```
 
-Each query runs against your real database, RLS-respecting. You're not in the SQL editor; you're in a conversation.
+It's a good place to let the assistant experiment, because nothing there is real data.
 
-## Step 5: a working read pattern
+## Troubleshooting
 
-A few patterns we've found useful for the read side:
+- **`supabase` shows as failed or needing authentication.** Run `/mcp`, select it, and authenticate again. If the browser step loops, run `claude mcp logout supabase` and then `claude mcp login supabase`.
+- **The command fails or the URL gets cut off.** You probably didn't quote the URL, so the shell split it at `&`. Wrap it in double quotes.
+- **The server can see the wrong project, or every project.** Add `project_ref` to the URL and restart the session.
+- **Writes succeed when they shouldn't.** `read_only=true` is missing or misspelled. Check with `claude mcp get supabase`.
+- **Tools you expected are missing.** Your `features` list is excluding them. Add the group, or remove the parameter to see the full set.
+- **The project-scoped server never loads.** You may have declined it at the approval prompt. Run `claude mcp reset-project-choices` and start Claude Code again.
+- **You still have an old local config.** Earlier guides, including a previous version of this one, used an npm package with keys in environment variables. Remove that entry with `claude mcp remove` and use the hosted server.
 
-**Aggregate before showing detail.** Ask for counts, distributions, summaries first. If the assistant wants to read 1,000 rows to count them, that's a context bloat and a cost hit. Ask "how many?" instead of "list all."
+## Security notes
 
-**Anchor on schema.** Start a session with "what tables are in this project?" The assistant caches the schema for the session and makes better tool calls afterward.
+Supabase's docs are direct about the main risk: prompt injection. Data in your tables could contain text that tries to steer the assistant. Their guidance, which we follow:
 
-**Use natural language for what's natural.** "Users who signed up last week and haven't activated" is a tractable cohort question. The assistant translates it to SQL, runs it, gives you the answer. You don't have to remember the join.
+- Use read-only mode for anything unattended.
+- Scope the server to a single project.
+- Enable only the feature groups you need.
+- Connect a production project only when the task needs production evidence.
+- Review tool calls and their output before acting on them.
 
-## Step 6: adding writes (carefully)
+## FAQ
 
-Once read works for a week without surprises, add a write path. Critically: as a *separate* server with a *separate* key.
+### How do I add the Supabase MCP server to Claude Code?
 
-```json
-{
-  "mcpServers": {
-    "supabase-read": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server", "--read-only"],
-      "env": {
-        "SUPABASE_URL": "${env:SUPABASE_URL}",
-        "SUPABASE_KEY": "${env:SUPABASE_ANON_KEY}"
-      }
-    },
-    "supabase-write": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server", "--require-confirmation"],
-      "env": {
-        "SUPABASE_URL": "${env:SUPABASE_URL}",
-        "SUPABASE_KEY": "${env:SUPABASE_SERVICE_ROLE_KEY}"
-      }
-    }
-  }
-}
-```
+Run `claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp"`, start Claude Code, run `/mcp`, and sign in to Supabase. Add `?project_ref=...&read_only=true` to the URL to scope it.
 
-Two servers. Two scoped keys. The read server is the default for queries. The write server is reached for explicitly when the assistant needs to mutate.
+### How do I connect Supabase to Claude Code without a personal access token?
 
-The `--require-confirmation` flag (when supported) means write tools surface a "ready to execute" message that the user has to approve before the call runs. The assistant doesn't auto-write.
+Use the hosted server with OAuth, as above. Supabase only needs a personal access token for manual setups such as CI.
 
-A typical write interaction:
+### How do I make the Supabase MCP server read-only?
 
-```
-You:    Mark all tasks created before 2025-06-01 as archived.
+Add `read_only=true` to the server URL. Supabase then runs all queries as a read-only Postgres user.
 
-Claude: That would update approximately 1,432 rows in the `tasks` table.
-        SQL:
-            UPDATE tasks
-               SET status = 'archived'
-             WHERE status = 'pending' AND created_at < '2025-06-01';
+### Can I install the Supabase MCP server for every project on my machine?
 
-        Approve to execute?
+Yes. Use `--scope user` instead of `--scope project`. You'll usually want to leave out `project_ref` in that case, which means the server can reach every project your account can, so keep `read_only=true`.
 
-You:    approve
+### Does the Supabase MCP server respect row-level security?
 
-Claude: Updated 1,432 rows. Confirmation token: tkn_a9f3...
-```
+Don't rely on it. The server acts through your Supabase account, not as an app user. Use the URL parameters to limit it.
 
-The confirmation step is structural. The assistant can't sneak a write past you because the write tool literally won't run without the token.
+### Does the same setup work with Codex?
 
-## Step 7: migrations, the safe way
-
-A common use case: write a migration via the assistant. Same patterns apply, with one extra layer.
-
-We use a "draft → review → run" loop:
-
-1. Ask the assistant to draft a migration. It writes the SQL to a file in `supabase/migrations/`.
-2. Review the file. Check it for the things assistants get wrong: missing `IF NOT EXISTS`, missing reverse migration, locks held too long on big tables.
-3. Run the migration via `supabase db push` (not via the assistant). The CLI provides better feedback and the discipline of a human-typed command before production data changes.
-
-The assistant drafts; the human ships. The pattern keeps the assistant productive without giving it the keys to production data.
-
-## Common patterns and pitfalls
-
-A few things we see repeatedly when teams adopt this integration:
-
-**Don't use the service-role key for everyday queries.** It bypasses RLS and your assistant can accidentally see things you didn't expect to surface. The anon key is the safer default for read.
-
-**Don't connect the production database first.** Use a development or staging copy for the first weeks. The assistant will get smarter about your schema; do the learning on data that doesn't matter.
-
-**Track query patterns.** The audit log from your MCP server tells you which queries the assistant actually runs. After a few weeks, you'll see the team's patterns and can build short-cut tools (e.g., a `find_active_users` tool) that wrap the most-common queries with cleaner names.
-
-**Be careful with destructive actions.** `DELETE` and `DROP` deserve their own approval flow. Some teams require a separate, more-rigorous confirmation for these — a pattern we'd recommend.
+Yes, the server is a standard remote MCP server. The config syntax differs per client; Supabase's docs list them.
 
 ## What's next
 
-Part 8 covers Sentry — connecting Claude Code to your error-tracking system so incident debugging becomes a conversation. Part 9 covers PostHog. Part 10 puts the whole stack together.
-
-Before then: get the Supabase integration working on a non-production database. Run a few real queries through it. Notice where it speeds you up and where it doesn't. Pattern your team's daily workflow around the queries that earn their keep.
+Part 8 covers Sentry: connecting Claude Code to your error tracker so incident debugging happens in one place. Part 9 covers PostHog. Part 10 puts the whole stack together.
 
 ## Related reading
 
+- [Sentry MCP for Claude Code: setup and incident debugging](/blog/claude-code-sentry-integration)
+- [PostHog MCP for Claude Code](/blog/claude-code-posthog-integration)
 - [Effective MCP patterns](/blog/effective-mcp-patterns)
-- [Claude Code + Sentry integration](/blog/claude-code-sentry-integration)
-- [Claude Code + PostHog integration](/blog/claude-code-posthog-integration)
 
 ---
 
-*We build AI-enabled software and help businesses put AI to work. If you're integrating Supabase with Claude Code, we'd love to hear about it. [Get in touch.](/contact)*
+**Need help?** If you're connecting Claude Code to a Supabase project with real customer data and want a second pair of eyes on scopes and access, [talk to a senior architect](/contact).

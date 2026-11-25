@@ -1,0 +1,208 @@
+---
+title: "How to install Claude Code (macOS, Windows, Linux)"
+description: "Current Claude Code install commands for macOS, Windows, and Linux, plus Homebrew, WinGet, and npm, then login, first run, updates, and common install fixes."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Claude Code", "AI Tools", "Tutorial", "Developer Tools", "CLI"]
+---
+
+Claude Code installs in one command on every major platform. The details that trip people up are which shell you're in on Windows, whether the install directory is on your PATH, and which account type you sign in with. This guide covers all of it, with commands checked against Anthropic's [Claude Code setup docs](https://code.claude.com/docs/en/setup).
+
+## Quick answer
+
+Run the native installer for your system:
+
+```bash
+# macOS, Linux, WSL
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+```powershell
+# Windows PowerShell
+irm https://claude.ai/install.ps1 | iex
+```
+
+```batch
+:: Windows CMD
+curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+Then open a new terminal and check it:
+
+```bash
+claude --version
+```
+
+Start it in your project with `claude`, and sign in through the browser.
+
+## Before you install
+
+Anthropic lists these requirements:
+
+- **Operating system:** macOS 13.0 or later, Windows 10 1809 or later (or Windows Server 2019 or later), Ubuntu 20.04+, Debian 10+, or Alpine Linux 3.19+.
+- **Hardware:** 4 GB of RAM or more, x64 or ARM64.
+- **Network:** an internet connection.
+- **Shell:** Bash, Zsh, PowerShell, or CMD.
+- **Account:** a Pro, Max, Ultra, Team, Enterprise, or Console account. The free claude.ai plan doesn't include Claude Code. You can also use it through Amazon Bedrock, Google Cloud's Agent Platform, or Microsoft Foundry.
+
+Git is optional, but you'll want it for any real project work.
+
+## Install on macOS
+
+The native installer is the recommended route:
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+It shows no progress while it downloads, so give it a minute. Native installs update themselves in the background.
+
+If you prefer Homebrew:
+
+```bash
+brew install --cask claude-code
+```
+
+The `claude-code` cask tracks the stable channel, which typically runs about a week behind and skips releases with major regressions. `claude-code@latest` tracks every release. Homebrew installs don't auto-update by default, so run `brew upgrade claude-code` from time to time.
+
+## Install on Windows
+
+You can run Claude Code natively on Windows or inside WSL.
+
+**Native Windows.** First work out which shell you're in. A prompt that starts with `PS C:\` is PowerShell; `C:\` without `PS` is CMD.
+
+PowerShell:
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+CMD:
+
+```batch
+curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+You don't need to run as Administrator. Installing [Git for Windows](https://git-scm.com/downloads/win) is recommended: with it, Claude Code uses Git Bash for its shell tool. Without it, Claude Code falls back to PowerShell.
+
+Or use WinGet:
+
+```powershell
+winget install Anthropic.ClaudeCode
+```
+
+WinGet installs don't auto-update; run `winget upgrade Anthropic.ClaudeCode` periodically.
+
+**WSL.** Open your WSL distribution and run the Linux command inside it. You install and launch `claude` in the WSL terminal, not from PowerShell. WSL 2 also supports Claude Code's sandboxing, which native Windows does not.
+
+## Install on Linux
+
+The same native installer works on Linux:
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+On Alpine and other musl-based distributions, install `bash` and `curl` first, because Alpine doesn't ship them:
+
+```bash
+apk add bash curl
+```
+
+Anthropic also publishes signed apt, dnf, and apk repositories for Debian, Ubuntu, Fedora, RHEL, and Alpine. The repository setup is several commands with key verification, so follow the [Linux package manager section](https://code.claude.com/docs/en/setup) of the docs directly rather than copying it from a blog post. Package-manager installs update through your normal system upgrades.
+
+## Install with npm
+
+If your team standardizes on npm, Claude Code is also published as a package. It needs Node.js 22 or later:
+
+```bash
+npm install -g @anthropic-ai/claude-code@latest
+```
+
+Don't use `sudo npm install -g`. Anthropic's docs warn it causes permission problems, and Claude Code can't update itself if the install needed `sudo`. To upgrade, run the same install command again rather than `npm update -g`.
+
+## Verify the install
+
+```bash
+claude --version
+```
+
+A working install prints a version number followed by `(Claude Code)`. For a fuller check:
+
+```bash
+claude doctor
+```
+
+`claude doctor` prints install health, settings-file validation errors, and warnings with suggested fixes, without starting a session.
+
+## Sign in and first run
+
+Open a terminal in a real project and start Claude Code:
+
+```bash
+cd your-project
+claude
+```
+
+The first run prompts you to log in through the browser. Pick the account type your team uses. If you have `ANTHROPIC_API_KEY` set and approve it when asked, Claude Code uses the key and skips the browser login.
+
+Once you're in, give it a small task that needs it to read the codebase, such as "Explain how authentication works in this repo and list the files involved." That's a better first test than a toy prompt, because it shows whether Claude Code can find its way around your actual code.
+
+For the rest of the setup (a `CLAUDE.md` file, permissions, and your first multi-file change), continue with [getting started with Claude Code](/blog/getting-started-with-claude-code).
+
+## Updating Claude Code
+
+- **Native installs** update automatically in the background. To update now, run `claude update`.
+- **Homebrew:** `brew upgrade claude-code`.
+- **WinGet:** `winget upgrade Anthropic.ClaudeCode`.
+- **npm:** `npm install -g @anthropic-ai/claude-code@latest`.
+
+If you want fewer surprises, switch to the stable release channel with `/config`, then **Auto-update channel**.
+
+## Troubleshooting
+
+- **`claude: command not found` after installing.** Open a new terminal first. If it still fails, the install directory isn't on your PATH. On macOS and Linux the native installer puts the launcher at `~/.local/bin/claude`, so add `~/.local/bin` to your PATH in your shell startup file.
+- **`The token '&&' is not a valid statement separator`.** You ran the CMD command in PowerShell. Use the PowerShell command.
+- **`'irm' is not recognized as an internal or external command`.** You ran the PowerShell command in CMD. Use the CMD command.
+- **`syntax error near unexpected token '<'` or a `403`.** The download returned something other than the install script, often an HTML page from a proxy or firewall. See Anthropic's [install troubleshooting guide](https://code.claude.com/docs/en/troubleshoot-install) for fixes and alternative install methods.
+- **`not found` errors on Alpine.** Install `bash` and `curl` first.
+- **Permission errors with npm.** Don't retry with `sudo`. Use the native installer, or fix your npm global directory as the troubleshooting guide describes.
+- **`claude` still runs after you uninstalled it.** You probably have a second install from another method. Check each one (native, Homebrew, WinGet, npm) and remove the extras.
+- **Login says your plan doesn't include Claude Code.** The free claude.ai plan doesn't. Use a paid plan, a Console account, or a cloud provider.
+
+## FAQ
+
+### What is the Claude Code install command?
+
+On macOS, Linux, and WSL: `curl -fsSL https://claude.ai/install.sh | bash`. On Windows PowerShell: `irm https://claude.ai/install.ps1 | iex`.
+
+### Can I install Claude Code with Homebrew?
+
+Yes: `brew install --cask claude-code` for the stable channel, or `claude-code@latest` for every release.
+
+### Can I install Claude Code with npm?
+
+Yes: `npm install -g @anthropic-ai/claude-code@latest`, with Node.js 22 or later. Don't use `sudo`.
+
+### Does Claude Code work on Windows without WSL?
+
+Yes. It runs natively on Windows 10 1809 or later. Git for Windows is recommended so it can use Git Bash.
+
+### Is Claude Code free?
+
+No. It needs a Pro, Max, Ultra, Team, Enterprise, or Console account, or access through a supported cloud provider.
+
+### How do I update Claude Code?
+
+Native installs update automatically. Run `claude update` to update right away.
+
+## Related reading
+
+- [Getting started with Claude Code: install to first real task](/blog/getting-started-with-claude-code)
+- [Sentry MCP for Claude Code: setup and incident debugging](/blog/claude-code-sentry-integration)
+- [Claude Code vs. Codex: which to reach for](/blog/claude-code-vs-codex)
+
+---
+
+**Need help?** If you're rolling Claude Code out across an engineering team and want help with managed settings, permissions, and onboarding, [talk to a senior architect](/contact).

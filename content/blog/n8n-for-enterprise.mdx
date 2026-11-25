@@ -1,0 +1,162 @@
+---
+title: "n8n for enterprise: use cases, architecture, and where it breaks"
+description: "n8n for enterprise: real use cases by industry, a production reference architecture, what the fair-code license allows, and when Temporal or Zapier fits better."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "n8n", "Workflow Automation", "Enterprise AI"]
+---
+
+n8n is a workflow automation platform you can run on your own infrastructure. You build workflows on a visual canvas, drop into JavaScript or Python when the canvas runs out, and connect to a long list of SaaS and internal systems. It is aimed at operations and engineering teams who are tired of paying per-task SaaS fees for glue work, or who cannot send regulated data to a third-party automation cloud. The short verdict: n8n is a strong choice for internal integration and AI-assisted back-office workflows, as long as you treat it as production software with its own architecture, and you read the license before you build a product on it.
+
+This article is part of our series on [open-source AI repos worth evaluating for enterprise use](/blog/top-open-source-ai-github-repos-enterprise).
+
+## What is n8n?
+
+n8n (pronounced "n-eight-n", short for "nodemation") is a TypeScript application built on Node.js. A workflow is a graph of nodes. Each node is either a trigger (webhook, schedule, queue message, app event) or an action (call an API, map data, branch, wait for approval, call a model). The [n8n GitHub repository](https://github.com/n8n-io/n8n) has 210k+ stars as of November 2026.
+
+Key capabilities, per the project's own documentation:
+
+- **Visual builder plus code.** Code nodes accept JavaScript and Python, and you can use npm packages in self-hosted setups.
+- **Integrations.** The README lists 1,500+ integrations and 9,000+ community workflow templates. Coverage quality varies by node, so test the ones you depend on.
+- **AI nodes.** Native nodes for building agents and LLM chains, with model providers such as OpenAI, Anthropic, Google and open-source models, plus tool use and human approval steps.
+- **Self-host or cloud.** Run it in Docker on your own hardware, or use n8n's hosted cloud.
+- **Enterprise features.** SSO (SAML, OIDC, LDAP), projects and role-based access, Git-based source control and environments, external secrets providers, log streaming and multi-main high availability are in the enterprise-licensed part of the codebase.
+
+The maintainer is n8n GmbH, a Berlin-based company. That matters: the project has a commercial owner with a roadmap, which is good for longevity and also explains the license.
+
+## Enterprise use cases for n8n
+
+These are the patterns where n8n earns its keep.
+
+1. **System-to-system sync.** Keep CRM, ERP, billing and support tools consistent without writing and hosting a dozen small services. Webhook in, map fields, upsert out.
+2. **Document intake and routing.** Pull attachments from an inbox or SFTP drop, extract fields with OCR or a model, validate against a reference system, and route to the right queue.
+3. **Human-in-the-loop approvals.** Pause a workflow, send an approval request to Slack, Teams or email, and resume on response. Useful for refunds, access requests and vendor onboarding.
+4. **AI-assisted triage.** Classify inbound tickets, emails or claims with a model, then hand the decision to deterministic logic. The model suggests; the workflow enforces rules.
+5. **Internal API orchestration.** Expose a webhook that fans out to several internal services and returns a combined response.
+6. **Scheduled reporting and reconciliation.** Nightly jobs that pull data from two systems, compare, and open tickets for mismatches.
+7. **Event-driven alerting.** Watch a database, queue or monitoring tool, enrich the event, and notify the owning team with context.
+
+If your use case involves AI agents calling tools, our [multi-agent orchestration guide](/blog/multi-agent-orchestration) covers the design questions n8n will not answer for you.
+
+## n8n use cases by industry
+
+### Healthcare
+
+Prior-authorization intake is a good fit: fax or portal upload, OCR, extract patient and procedure fields, check against payer rules, and push a structured record into the EHR work queue for a human to review. Keep protected health information on self-hosted infrastructure and log every step. See our [healthcare page](/industries/healthcare) and our notes on [HIPAA and AI](/blog/hipaa-and-ai).
+
+### Financial services
+
+KYC document collection works well: a customer uploads documents, n8n calls an identity verification provider, writes results to the case management system, and escalates mismatches to an analyst. n8n orchestrates; the decision logic and audit trail live in your core systems. More on our [financial services work](/industries/financial-services).
+
+### Insurance
+
+First notice of loss intake: email or web form, extract policy number and loss details, look up the policy in the admin system, assign a claims handler by line of business and region, and send the claimant an acknowledgement. A model can draft the loss summary; the routing rules stay deterministic. See [insurance](/industries/insurance).
+
+### Manufacturing
+
+Supplier and quality workflows: when a non-conformance report is raised in the quality system, n8n opens a supplier corrective action request, notifies procurement, and tracks the due date. See [manufacturing](/industries/manufacturing).
+
+### Logistics
+
+Exception handling for shipments: a carrier webhook reports a delay, n8n enriches it with the order from the ERP, checks the customer's SLA tier, and notifies the account team or reroutes. See [logistics](/industries/logistics).
+
+### Retail
+
+Catalog and order operations: sync product data from a PIM to several storefronts and marketplaces, flag pricing mismatches, and route high-value returns to manual review. See [retail](/industries/retail).
+
+## Reference architecture for production n8n
+
+```text
+                 +-------------------+
+ SSO (SAML/OIDC) |   Reverse proxy   |  TLS, WAF, IP allowlist
+ ---------------►|  / load balancer  |
+                 +---------+---------+
+                           |
+            +--------------+---------------+
+            |                              |
+   +--------v--------+           +---------v--------+
+   |  n8n main(s)    |           | n8n webhook procs |
+   |  editor + API   |           |  public triggers  |
+   +--------+--------+           +---------+--------+
+            |      enqueue jobs            |
+            +--------------+---------------+
+                           v
+                    +-------------+
+                    |    Redis    |  queue
+                    +------+------+
+                           v
+                 +-------------------+
+                 |  n8n workers (N)  |  autoscaled
+                 +----+---------+----+
+                      |         |
+              +-------v--+   +--v----------------+
+              | Postgres |   | Secrets manager    |
+              | (HA)     |   | Vault / cloud KMS  |
+              +----------+   +-------------------+
+```
+
+- **Auth and SSO.** Put the editor behind your identity provider. SAML, OIDC and LDAP require the enterprise license; on the community edition, restrict the editor to a private network or VPN.
+- **Secrets.** Do not let credentials live only in n8n's database. Use the external secrets integration (enterprise) or inject from your vault, and set your own encryption key rather than relying on a generated default.
+- **Network boundaries.** Separate public webhook endpoints from the editor. The editor should never be internet-facing. Restrict worker egress to the systems they actually call.
+- **Data residency.** Self-hosting lets you keep execution data in-region. Remember that execution logs store payloads, so prune them on a schedule and redact fields you do not need.
+- **Scaling.** Run in queue mode with Redis and multiple workers. Use Postgres, not the default SQLite, for anything beyond a laptop.
+- **Observability.** Ship logs and metrics to your existing stack. Track failed executions per workflow as a first-class metric; silent failure is the most common n8n incident.
+- **Backups and change control.** Back up Postgres, and keep workflows in Git with promotion between environments. Treat a workflow change like a code change.
+
+## Security, compliance and licensing
+
+**The license is the first thing to check.** n8n is "fair-code", not OSI open source. Most of the code is under the Sustainable Use License, which lets you use and modify n8n for your own internal business purposes, or for non-commercial and personal use. You may only distribute it free of charge for non-commercial purposes. Files with ".ee" in the name or directory are under a separate n8n Enterprise License and need a paid license to use. In practice: running n8n internally to automate your own operations is fine; reselling it, embedding it in a product you charge for, or offering it to customers as a hosted service is where you need to talk to n8n about a commercial agreement. This is a plain-language summary, not legal advice. Have your counsel read the [license text](https://github.com/n8n-io/n8n/blob/master/LICENSE.md).
+
+**Compliance.** n8n is a tool, not a compliance program. If you self-host, HIPAA, SOC 2 and GDPR obligations fall on your deployment: encryption at rest and in transit, access reviews, audit logs, retention policies, and a data processing record for every system a workflow touches. For HIPAA, also check that every downstream API and model provider a workflow calls is covered by a business associate agreement.
+
+**What you must add yourself:** network isolation, secret rotation, execution-data retention, workflow review and approval before production, monitoring of failed runs, and a clear owner for each workflow. Code nodes run arbitrary code; decide who may write them.
+
+## n8n vs Zapier vs Make vs Temporal
+
+| | n8n | Zapier | Make | Temporal |
+|---|---|---|---|---|
+| Model | Visual + code, self-host or cloud | Visual, SaaS only | Visual, SaaS only | Code-first workflow engine |
+| License | Fair-code (Sustainable Use + EE) | Proprietary | Proprietary | MIT (open source) |
+| Self-hosting | Yes | No | No | Yes, or Temporal Cloud |
+| Best for | Internal integrations, AI-assisted ops | Fast, simple SaaS automations | Complex visual scenarios in SaaS | Long-running, mission-critical business processes |
+| Pricing basis | Executions (cloud) or license (EE) | Tasks | Operations / credits | Infra cost or cloud actions |
+| Developer control | Medium to high | Low | Low to medium | Very high |
+
+The honest framing: Zapier and Make win on speed for non-technical teams when data can leave your network. Temporal wins when a workflow is core business logic that must survive failures for days and be tested like code. n8n sits between them: more control than Zapier, less ceremony than Temporal.
+
+## When not to use n8n
+
+- **When the workflow is your product.** If customers pay for the automation, the license and the coupling both work against you. Build it as a service.
+- **When you need durable, long-running transactions.** Multi-day sagas with compensation logic and strict exactly-once semantics belong in a workflow engine like Temporal, written and tested as code.
+- **When nobody will own it.** Visual workflows sprawl. Without naming, review and Git-based promotion, you end up with hundreds of undocumented flows that only one person understands.
+- **When throughput is extreme.** n8n scales horizontally, but a high-volume streaming pipeline is better served by a message broker and purpose-built consumers.
+- **When the AI step is the hard part.** n8n will call a model. It will not evaluate retrieval quality or catch regressions for you. See our posts on [agent observability](/blog/agent-observability) and [evals for retrieval](/blog/evals-for-retrieval).
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates n8n into enterprise systems: ERP, CRM, EHR, claims and policy platforms. We set up the production architecture, SSO, secrets, monitoring and change control, and we write the custom nodes and services that the canvas cannot handle. When n8n is the wrong fit, we say so and build the integration as custom software instead. If you are weighing options, [talk to a senior architect](/contact) or see how we approach [enterprise solutions](/solutions).
+
+Have an n8n use case in mind? [Get in touch](/contact) and tell us about it.
+
+## FAQ
+
+### Is n8n production ready?
+
+Yes, for internal automation, provided you run it like production software. That means Postgres instead of SQLite, queue mode with workers, backups, monitoring of failed executions and workflows kept in Git. Most n8n production problems come from skipping those steps, not from the core engine.
+
+### Is n8n open source?
+
+Not in the OSI sense. n8n is fair-code: the source is public and self-hostable, but the Sustainable Use License limits use to internal business, non-commercial or personal purposes, and enterprise features need a paid license. Commercial redistribution or hosting it for customers requires an agreement with n8n.
+
+### Can I self-host n8n for free in my company?
+
+Using the community edition for your own internal business purposes is allowed under the Sustainable Use License. Features such as SSO, external secrets, source control environments and log streaming require an enterprise license. Confirm your specific case with counsel.
+
+### Is n8n HIPAA compliant?
+
+No software is HIPAA compliant on its own. A self-hosted n8n deployment can be part of a HIPAA-compliant system if you control access, encryption, audit logging and retention, and if every service a workflow sends PHI to is covered by a business associate agreement.
+
+### Should I use n8n or Temporal?
+
+Use n8n for integration and operational workflows that benefit from a visual builder and many prebuilt connectors. Use Temporal when the workflow is core business logic that must be durable over long periods, versioned and tested as code.
