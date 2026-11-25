@@ -1,6 +1,8 @@
 "use server";
 
+import { after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { notifyInquiry } from "./notify";
 
 export type InquiryInput = {
   name: string;
@@ -51,6 +53,7 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
       "[inquiry]",
       JSON.stringify({ at: new Date().toISOString(), ...record })
     );
+    after(() => notifyInquiry(record));
     return {
       ok: true,
       storage: "log",
@@ -62,7 +65,11 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
     const supabase = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { error } = await supabase.from("inquiries").insert(record);
+    const { data, error } = await supabase
+      .from("inquiries")
+      .insert(record)
+      .select("id")
+      .single();
     if (error) {
       console.error("[inquiry:db-error]", error);
       return {
@@ -71,6 +78,8 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
           "We could not save your message. Please email us directly at hello@jayporelabs.com.",
       };
     }
+    // Saved first; email afterwards so a mail failure never loses an inquiry.
+    after(() => notifyInquiry(record, data?.id));
     return {
       ok: true,
       storage: "supabase",
