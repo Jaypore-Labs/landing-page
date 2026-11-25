@@ -1,0 +1,163 @@
+---
+title: "Ollama for enterprise: private LLMs, use cases and limits"
+description: "Ollama runs open models on your own hardware with one command. Where it fits in enterprise work, how to secure it, and when to move to vLLM for production."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "Ollama", "Private LLM", "Enterprise AI"]
+---
+
+Ollama is an open-source tool that downloads and runs open-weight language models on a laptop, workstation or server, and exposes them through a local REST API. It is for engineering teams that want private inference without sending prompts to a third party, and for developers who want a model running in minutes rather than days.
+
+The short verdict: Ollama is the best way we know to get open models into the hands of developers and small internal teams. It is a sound choice for private, low-concurrency workloads. It is not a high-throughput serving platform, and it ships with no authentication, so anything beyond a single machine needs a layer you build around it.
+
+## What is Ollama?
+
+[Ollama](https://github.com/ollama/ollama) is maintained by the Ollama team and released under the MIT license. It had 188k+ GitHub stars as of November 2026, which puts it among the most watched AI projects on GitHub. We cover it alongside other projects in our list of [open-source AI repos worth knowing for enterprise teams](/blog/top-open-source-ai-github-repos-enterprise).
+
+Under the hood, Ollama uses [llama.cpp](https://github.com/ggml-org/llama.cpp) as its inference backend and wraps it in a model manager, a server and a CLI. Key capabilities from the project documentation:
+
+- **One-command model runs.** `ollama run` pulls a model from the Ollama library and starts a chat. Models include Gemma, Qwen, DeepSeek, gpt-oss and many others.
+- **REST API.** The server listens on port 11434 with endpoints for chat, generation, embeddings and model management.
+- **Compatibility layers.** OpenAI-compatible and Anthropic-compatible endpoints, so many existing client libraries work with a base URL change.
+- **Official SDKs.** Python and JavaScript libraries, plus a long list of community integrations including LangChain, LlamaIndex, Spring AI and Semantic Kernel.
+- **Modelfiles.** A plain-text format for packaging a base model with a system prompt, parameters and templates, and for importing GGUF weights.
+- **Broad hardware support.** NVIDIA, AMD Radeon, Apple Metal and Vulkan GPUs, with CPU fallback.
+- **Packaging.** Native installers for macOS, Windows and Linux, and an official Docker image.
+
+Ollama now also offers optional cloud-hosted models. For enterprises that want local-only operation, the FAQ documents a setting (`OLLAMA_NO_CLOUD=1` or `disable_ollama_cloud` in the server config) that turns cloud features off. Set it on every managed install.
+
+## Enterprise use cases
+
+Ollama is strongest where privacy matters more than throughput. Good candidates:
+
+1. **Private developer tooling.** A local model behind code assistants such as Continue or Cline, so source code never leaves the laptop.
+2. **Prototyping and evaluation.** Trying several open models against your own prompts before committing to a production serving stack.
+3. **Internal assistants for small teams.** A chat front end such as Open WebUI on top of one Ollama server for a department of a few dozen people.
+4. **Offline and edge workloads.** Field laptops, factory floor PCs or ships that have no reliable connection.
+5. **Local embeddings for RAG.** Generating embeddings on your own hardware for a document index, so content stays inside the network.
+6. **CI and test fixtures.** A small model in a container gives integration tests a deterministic-enough local endpoint without paying for API calls.
+7. **Batch jobs with relaxed deadlines.** Overnight classification or summarisation where a few requests at a time is enough.
+
+Small models do more of this work than most teams expect. We make that case in [small models are underrated](/blog/small-models-are-underrated).
+
+## Use cases by industry
+
+### Healthcare
+
+A clinical documentation team can summarise de-identified notes or draft discharge instructions on a workstation inside the hospital network, with no data leaving the building. Ollama alone does not make a workflow HIPAA compliant, so treat it as one component of a controlled environment. See our [healthcare work](/industries/healthcare) and our notes on [HIPAA and AI](/blog/hipaa-and-ai).
+
+### Financial services
+
+Analysts can run a local model to extract fields from internal research or summarise call transcripts that cannot go to an external API under current policy. It is also a practical sandbox for model risk teams who need to test open models before approval. More on our [financial services work](/industries/financial-services).
+
+### Insurance
+
+Claims teams can classify incoming correspondence and draft first-pass summaries of adjuster notes on internal hardware. Volumes in a single regional office often suit one GPU server. See [insurance](/industries/insurance).
+
+### Manufacturing
+
+A maintenance technician on a plant floor PC can query equipment manuals and past work orders through a local model that keeps working when the network does not. Small quantised models run well on modest hardware. See [manufacturing](/industries/manufacturing).
+
+### Legal
+
+Firms can review and summarise privileged documents on machines they control, which simplifies conversations about confidentiality with clients. Pair it with a retrieval layer for clause lookup and citation. See [legal](/industries/legal).
+
+### Education and research
+
+Research groups can run open models on lab workstations for literature triage and data labelling, and reproduce results by pinning a model version in a Modelfile. See [education and research](/industries/education-research).
+
+## Reference architecture for production
+
+For a shared internal deployment, put Ollama behind a gateway and never expose it directly.
+
+```text
+ Users / apps
+      |
+      v
+ SSO (OIDC / SAML)  -->  API gateway / reverse proxy
+                          - auth, rate limits, audit log
+                          - TLS termination
+                               |
+                    private subnet / VPC only
+                               |
+             +-----------------+-----------------+
+             |                                   |
+       Ollama node A                       Ollama node B
+       (GPU, pinned models)                (GPU, pinned models)
+             |                                   |
+       local model store                    local model store
+       (pre-pulled, mirrored)               (pre-pulled, mirrored)
+```
+
+- **Auth and SSO.** The local API does not require authentication. Put an authenticating reverse proxy or API gateway in front and tie it to your identity provider.
+- **Secrets.** There are no secrets in Ollama itself for local use. Keep gateway credentials and any client API keys in a vault, not in config files.
+- **Network boundaries.** Ollama binds to 127.0.0.1 by default. If you change `OLLAMA_HOST` to listen on other interfaces, restrict it to a private subnet and allow traffic only from the gateway. Review `OLLAMA_ORIGINS` for browser access.
+- **Model supply chain.** Pre-pull approved models into an internal mirror or image. Production nodes should not pull from the internet. Route any outbound pulls through `HTTPS_PROXY`.
+- **GPU sizing.** The model, quantisation and context length must fit in VRAM. Concurrent model loads need all models to fit at once. Start with one model per node and measure.
+- **Data residency.** In local-only mode, prompts and outputs stay on your hardware. Disable cloud features to keep it that way.
+- **Scaling.** Ollama queues requests and returns a 503 when the queue is full. `OLLAMA_NUM_PARALLEL`, `OLLAMA_MAX_LOADED_MODELS` and `OLLAMA_MAX_QUEUE` tune behaviour. Beyond that, scale by adding nodes behind a load balancer.
+- **Observability.** Log at the gateway: user, model, token counts, latency and status. Ollama's own logs are for debugging, not audit. Set latency targets early; our [AI latency budgets](/blog/ai-latency-budgets) piece explains how.
+
+## Security, compliance and licensing
+
+Ollama is MIT licensed, which allows commercial use, modification and redistribution with attribution. The models you run carry their own licenses. Gemma, Llama, Qwen and others each have different terms, and some restrict certain uses. Review the model license, not just the runtime license.
+
+The key fact for security reviews: the local API at port 11434 has no built-in authentication. Anyone who can reach the port can run models, pull new ones and delete existing ones. That is fine on a developer laptop bound to localhost. It is not fine on a shared network.
+
+For HIPAA, SOC 2 and GDPR, Ollama is a component, not a compliant service. What you must add yourself:
+
+- Authentication, authorisation and per-user audit logging at the gateway.
+- Encryption in transit (TLS at the proxy) and at rest for any stored prompts or outputs.
+- An approved model list and a controlled update process for both Ollama and models.
+- Retention rules for logs that contain prompt content.
+- Host hardening, patching and vulnerability scanning like any other server.
+
+## Ollama vs alternatives
+
+| | Ollama | vLLM | llama.cpp | LM Studio |
+|---|---|---|---|---|
+| Best for | Local dev, small private deployments | High-throughput production serving | Embedded and custom builds | Desktop use by individuals |
+| License | MIT | Apache 2.0 | MIT | Proprietary app (free to use) |
+| Setup effort | Very low | Moderate | Moderate to high | Very low |
+| Concurrency | Limited, tunable | High, continuous batching | Server mode, manual tuning | Local server, single-user focus |
+| Hardware | NVIDIA, AMD, Apple, Vulkan, CPU | GPU-first, many accelerators | Very broad, incl. CPU | Desktop GPUs and Apple |
+| Built-in auth | None on local API | Optional API key, partial | Optional API key | Not applicable |
+
+**When to graduate from Ollama to vLLM.** Move when you have many concurrent users, when queueing shows up in your latency numbers, when you need multi-GPU or multi-node serving for larger models, or when GPU cost per token starts to matter. A common pattern is Ollama for development and vLLM for production, with the same OpenAI-compatible client code on both. Our [vLLM for enterprise](/blog/vllm-for-enterprise) guide covers the production side.
+
+## When not to use it
+
+- **High-concurrency production APIs.** Ollama is not built for hundreds of simultaneous requests per GPU. Use a serving engine designed for batching.
+- **Multi-GPU serving of very large models.** Distributed inference is not its focus.
+- **Exposed network services without a gateway.** No authentication means no direct exposure. Ever.
+- **When a hosted frontier model is simply better.** For hard reasoning tasks, a small local model may cost you more in quality than it saves. Route by task; see [multi-model routing](/blog/multi-model-routing).
+- **When you need vendor support contracts.** Check what support options exist before betting a regulated workload on it.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates Ollama into enterprise systems: gateways with SSO and audit, approved model catalogues, offline-ready images and the evaluation work to pick the right model. When Ollama is the wrong fit, we design the vLLM or hybrid serving stack, or build a custom system around your constraints. If you are planning private LLMs inside your network, [talk to a senior architect](/contact) or see our [solutions](/solutions).
+
+## FAQ
+
+### Is Ollama production ready?
+
+For small internal deployments with modest concurrency, yes, provided you add authentication, TLS and logging at a gateway. For high-volume, customer-facing APIs, a serving engine such as vLLM is a better fit.
+
+### Can Ollama be self-hosted on-prem or air-gapped?
+
+Yes. It runs entirely on your own hardware, and the FAQ documents a local-only mode that disables cloud features. For air-gapped sites, pre-load approved models into the image or model directory, since nodes cannot pull from the library.
+
+### Does Ollama have authentication?
+
+The local API does not require authentication. API keys apply only to Ollama's hosted cloud. For any shared deployment, put an authenticating reverse proxy or API gateway in front of it.
+
+### Ollama vs vLLM: which should I use?
+
+Use Ollama for development, prototyping and small private workloads where ease of setup matters most. Use vLLM when you need high throughput, many concurrent users or multi-GPU serving. Many teams use both.
+
+### Is Ollama free for commercial use?
+
+The runtime is MIT licensed and free for commercial use. Each model has its own license, so check the terms of every model you deploy.
+
+Planning a private LLM deployment? [Get in touch](/contact) with your use case.

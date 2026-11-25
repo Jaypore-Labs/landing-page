@@ -1,0 +1,194 @@
+---
+title: "Codex CLI authentication: ChatGPT login vs API key"
+description: "How Codex CLI auth works: codex login with ChatGPT, API key login, device code for headless machines, CI with CODEX_API_KEY, where credentials live, and fixes."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Codex", "OpenAI", "Authentication", "CLI", "Developer Tools"]
+---
+
+Codex CLI has more ways to sign in than most people expect, and the choice affects billing, which features you get, and how safely the credentials sit on disk. This guide covers every documented option, with commands checked against OpenAI's [Codex authentication docs](https://developers.openai.com/codex/auth) and the [openai/codex README](https://github.com/openai/codex).
+
+## Quick answer
+
+- **On your own laptop:** run `codex login` and sign in with ChatGPT in the browser. Usage comes from your ChatGPT plan.
+- **With an API key:** run `printenv OPENAI_API_KEY | codex login --with-api-key`. Usage is billed at standard API pricing.
+- **On a remote or headless machine:** run `codex login --device-auth` and finish the sign-in on another device.
+- **In CI:** pass an API key as `CODEX_API_KEY` to the single step that runs `codex exec`, or use the `openai/codex-action` GitHub Action.
+- **Check what you're using:** `codex login status`. **Sign out:** `codex logout`.
+
+## ChatGPT login vs API key: what actually differs
+
+Both get you a working CLI. The differences are about money, features, and data policy.
+
+| | ChatGPT sign-in | API key |
+| --- | --- | --- |
+| Billing | Included usage on your ChatGPT plan | Standard API pricing |
+| Data policy | Your ChatGPT workspace's permissions, RBAC, retention, and residency settings | Your API organization's retention and data-sharing settings |
+| Features | Everything, including Codex cloud | Some features that rely on ChatGPT workspace access or cloud services may be limited or unavailable |
+| Best for | Day-to-day interactive use | Automation, CI, scripted jobs |
+
+OpenAI's docs say API keys are still the recommended default for automation. For an engineer working interactively, ChatGPT sign-in is usually simpler and cheaper.
+
+## Step 1: install Codex
+
+If you haven't installed it yet, the README lists these options:
+
+```bash
+# macOS / Linux
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
+
+# npm
+npm install -g @openai/codex
+
+# Homebrew
+brew install --cask codex
+```
+
+On Windows, the README gives a PowerShell one-liner:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"
+```
+
+Our [getting started with Codex](/blog/getting-started-with-codex) guide walks through the first real task after install.
+
+## Step 2: sign in with ChatGPT
+
+```bash
+codex login
+```
+
+A browser window opens. Sign in with your ChatGPT account, approve access, and return to the terminal. Running plain `codex` and choosing **Sign in with ChatGPT** does the same thing.
+
+Confirm it worked:
+
+```bash
+codex login status
+```
+
+That prints the active authentication method.
+
+## Step 3 (alternative): sign in with an API key
+
+Create a key in your OpenAI API organization, put it in an environment variable, and pipe it into the login command:
+
+```bash
+printenv OPENAI_API_KEY | codex login --with-api-key
+```
+
+Piping keeps the key out of your shell history, which is the point of this form. Don't paste the key as a command-line argument.
+
+Run `codex login status` again to confirm you're now on API-key auth.
+
+## Headless and remote machines
+
+The browser flow needs a browser on the same machine. On an SSH box, a dev container, or a cloud VM, use one of these, in this order of preference.
+
+**Device code.** OpenAI's docs recommend this first:
+
+```bash
+codex login --device-auth
+```
+
+Codex shows a code and a URL. Open the URL on any device, enter the code, and sign in.
+
+**SSH port forwarding.** If device code doesn't work in your environment, forward the login callback port from your laptop to the remote machine, then run `codex login` on the remote side:
+
+```bash
+ssh -L 1455:localhost:1455 user@remote
+```
+
+**Copy the credentials file.** As a last resort, sign in on a machine with a browser and copy `~/.codex/auth.json` to the same path on the remote machine. Treat that file like a password: it is one.
+
+## CI and automation
+
+For CI, use an API key, not a ChatGPT login.
+
+`codex exec` runs Codex non-interactively. It reuses saved CLI authentication by default, but in CI you usually supply the key directly to the one command that needs it:
+
+```bash
+CODEX_API_KEY="$CODEX_API_KEY" codex exec --json "triage open bug reports"
+```
+
+Per OpenAI's non-interactive docs, `CODEX_API_KEY` is read by `codex exec`, `codex review`, the TypeScript SDK, and `codex exec-server --remote`. Two rules from the same page:
+
+- **Don't set `OPENAI_API_KEY` or `CODEX_API_KEY` as a job-level environment variable.** Scope it to the step that runs Codex, so other steps and scripts in the job can't read it.
+- **On GitHub, use `openai/codex-action`** instead of installing Codex and passing the key to a shell step. The action is designed to reduce key exposure.
+
+Also note that `codex exec` runs in a read-only sandbox by default. Add `--sandbox workspace-write` only for jobs that genuinely need to edit files. The old `--full-auto` flag is no longer supported.
+
+## Where Codex stores credentials
+
+Codex keeps its state in `CODEX_HOME`, which defaults to `~/.codex`. Where the credentials go depends on the `cli_auth_credentials_store` setting in `~/.codex/config.toml`:
+
+| Value | Behavior |
+| --- | --- |
+| `file` | Stores credentials in `auth.json` under `CODEX_HOME` |
+| `keyring` | Uses your operating system's credential store, and fails if it's unavailable |
+| `ephemeral` | Keeps credentials in memory for the current process only |
+| `auto` | Uses the OS credential store when available, otherwise falls back to `auth.json` |
+
+For a shared or long-lived machine, `keyring` is the safer choice, because there's no plaintext file to copy. For a throwaway container, `ephemeral` means nothing is left behind.
+
+```toml
+# ~/.codex/config.toml
+cli_auth_credentials_store = "keyring"
+```
+
+## Enforcing a login method for a team
+
+Admins can pin how Codex is allowed to authenticate. In `config.toml`:
+
+```toml
+forced_login_method = "chatgpt"   # or "api"
+forced_chatgpt_workspace_id = "00000000-0000-0000-0000-000000000000"
+```
+
+The first line restricts the login method. The second restricts ChatGPT sign-in to one workspace, so nobody accidentally runs company code through a personal account. If the active credentials don't match, Codex logs the user out and exits. Distribute this through your managed config, not by asking people to edit the file.
+
+## Troubleshooting
+
+- **The browser never opens, or the callback fails.** You're likely on a remote machine. Use `codex login --device-auth`, or forward port 1455 over SSH.
+- **You're billed at API rates when you expected plan usage.** You're signed in with an API key. Check with `codex login status`, then run `codex logout` and `codex login` to switch to ChatGPT.
+- **Codex cloud features are missing.** Codex cloud requires ChatGPT sign-in. API-key auth won't show them.
+- **Codex logs you out immediately and exits.** Your credentials don't match a `forced_login_method` or `forced_chatgpt_workspace_id` setting. Sign in with the method and workspace your admin requires.
+- **`keyring` storage fails.** The OS credential store isn't available (common in minimal Linux containers). Use `auto`, or `ephemeral` for short-lived environments.
+- **TLS or certificate errors behind a corporate proxy.** Point `CODEX_CA_CERTIFICATE` at your PEM bundle. If it's unset, Codex falls back to `SSL_CERT_FILE`.
+- **CI works locally but not in the pipeline.** Check that `CODEX_API_KEY` is set on the step that runs `codex exec`, not only in your local shell.
+
+## FAQ
+
+### How do I log in to Codex CLI?
+
+Run `codex login` and finish the browser sign-in with your ChatGPT account. Check with `codex login status`.
+
+### How do I use Codex with an API key?
+
+Run `printenv OPENAI_API_KEY | codex login --with-api-key`. For one-off non-interactive runs, set `CODEX_API_KEY` on the `codex exec` command instead.
+
+### Where is the Codex auth file?
+
+In `~/.codex/auth.json` (or under `CODEX_HOME` if you set it), when `cli_auth_credentials_store` is `file`, or `auto` with no OS credential store available.
+
+### How do I authenticate Codex on a server without a browser?
+
+Use `codex login --device-auth`. If that isn't possible, forward port 1455 over SSH or copy `auth.json` from a machine where you signed in.
+
+### How do I log out of Codex?
+
+Run `codex logout`. It clears stored credentials.
+
+### Should my team use ChatGPT login or API keys?
+
+ChatGPT login for engineers working interactively, API keys for automation and CI. Pin the choice with `forced_login_method` if you need it enforced.
+
+## Related reading
+
+- [Getting started with Codex CLI](/blog/getting-started-with-codex)
+- [Codex hooks: UserPromptSubmit and the hook lifecycle](/blog/codex-hooks-userpromptsubmit)
+- [Claude Code vs. Codex: which to reach for](/blog/claude-code-vs-codex)
+
+---
+
+**Need help?** If you're rolling Codex out across a team and want a second pair of eyes on auth policy, CI secrets, and sandbox settings, [talk to a senior architect](/contact).

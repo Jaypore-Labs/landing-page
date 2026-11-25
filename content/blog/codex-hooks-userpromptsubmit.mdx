@@ -1,0 +1,218 @@
+---
+title: "Codex UserPromptSubmit hook: setup, examples, and events"
+description: "How Codex hooks work: where hooks.json lives, the UserPromptSubmit input fields, how to block a prompt or add context, trusting hooks with /hooks, and fixes."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Codex", "OpenAI", "Hooks", "Automation", "Developer Tools"]
+---
+
+Codex supports hooks: scripts that run at fixed points in the agent loop, such as before a tool call or when you submit a prompt. `UserPromptSubmit` is the one most teams reach for first, because it lets you check or enrich a prompt before the model ever sees it. Everything below is checked against OpenAI's [Codex hooks documentation](https://developers.openai.com/codex/hooks).
+
+## Quick answer
+
+- Hooks are **on by default** in Codex. You configure them in a `hooks.json` file (or inline under `[hooks]` in `config.toml`).
+- `UserPromptSubmit` runs when you submit a prompt. Your command receives JSON on stdin, including the `prompt` text.
+- To **block** the prompt, print `{"decision": "block", "reason": "..."}` or exit with code `2` and write the reason to stderr.
+- To **add context**, print plain text to stdout, or return `additionalContext` inside `hookSpecificOutput`. Codex adds it as extra developer context.
+- New or changed hooks don't run until you **trust** them with `/hooks`.
+
+## Where hooks live
+
+Codex looks for `hooks.json` in these places:
+
+| Scope | Location |
+| --- | --- |
+| System (macOS, Linux) | `/etc/codex/hooks.json` |
+| System (Windows) | `%ProgramData%\OpenAI\Codex\hooks.json` |
+| User | `$CODEX_HOME/hooks.json` (by default `~/.codex/hooks.json`) |
+| Trusted project | `.codex/hooks.json` in the repo |
+
+Project hooks are the useful default for teams: commit `.codex/hooks.json` and the scripts it calls, and everyone working in the repo gets the same checks after they trust them.
+
+To turn hooks off entirely, set this in `config.toml`:
+
+```toml
+[features]
+hooks = false
+```
+
+## The hook events
+
+Codex documents these events:
+
+- **Per turn:** `PreToolUse`, `PermissionRequest`, `PostToolUse`, `PreCompact`, `PostCompact`, `UserPromptSubmit`, `SubagentStop`, `Stop`
+- **Per model request:** `PreModelRequest`, `PostModelRequest`
+- **Interrupts:** `Interrupt`
+- **Session and subagent lifecycle:** `SessionStart`, `SubagentStart`, `SessionEnd`
+
+If you've written Claude Code hooks, many of these names will look familiar. The semantics are close, but check the Codex docs for each event rather than assuming they match exactly.
+
+## Step 1: write the hooks.json entry
+
+The file has a `hooks` object keyed by event name. Each event holds an array of matcher groups, and each group holds an array of handlers:
+
+```json
+{
+  "description": "Prompt checks for this repo",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/check_prompt.py\"",
+            "statusMessage": "Checking prompt",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Notes on the fields:
+
+- `type` is `command` here. Codex supports `command` and `mcp_tool` handlers. `prompt` and `agent` handlers are parsed but skipped.
+- `statusMessage` is what Codex shows while the hook runs.
+- `timeout` is in seconds. Most hooks default to 600, which is far too long for a prompt check; set something short.
+- There's no `matcher` on this group. `UserPromptSubmit` doesn't support matchers, and Codex ignores one if you add it.
+
+## Step 2: read the input
+
+Every command hook gets one JSON object on stdin. The shared fields are `session_id`, `transcript_path`, `cwd`, `hook_event_name`, and `model`. `UserPromptSubmit` adds `turn_id`, `prompt`, and `permission_mode`.
+
+## Step 3: decide what to return
+
+A `UserPromptSubmit` hook can do one of three things:
+
+**Let it through.** Exit `0` with no output. Codex continues.
+
+**Block it.** Print this JSON to stdout:
+
+```json
+{"decision": "block", "reason": "Prompt contains what looks like an API key."}
+```
+
+Or exit with code `2` and write the reason to stderr.
+
+**Add context.** Print plain text to stdout, or return structured output:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": "Ask for a clearer reproduction before editing files."
+  }
+}
+```
+
+Either way, the text is added as extra developer context for that turn.
+
+## Example: block secrets, add repo rules
+
+This script blocks prompts that look like they contain a credential, and reminds the model of the repo's test command when the prompt mentions a bug:
+
+```python
+#!/usr/bin/env python3
+# .codex/hooks/check_prompt.py
+import json, re, sys
+
+event = json.load(sys.stdin)
+prompt = event.get("prompt", "")
+
+SECRET_PATTERNS = [
+    r"sk-[A-Za-z0-9_-]{20,}",          # OpenAI-style keys
+    r"AKIA[0-9A-Z]{16}",               # AWS access key IDs
+    r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
+]
+
+for pattern in SECRET_PATTERNS:
+    if re.search(pattern, prompt):
+        print(json.dumps({
+            "decision": "block",
+            "reason": "This prompt looks like it contains a secret. Remove it and use an environment variable instead.",
+        }))
+        sys.exit(0)
+
+if re.search(r"\b(bug|regression|broken|fails?)\b", prompt, re.I):
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": "Before proposing a fix, reproduce the failure with `make test` and show the failing output.",
+        }
+    }))
+
+sys.exit(0)
+```
+
+Keep hooks like this fast and boring. They run on every prompt, so a slow or flaky hook makes the whole tool feel broken.
+
+## Step 4: trust the hook
+
+Codex doesn't run new or changed non-managed hooks until someone reviews them. In the CLI, run:
+
+```
+/hooks
+```
+
+From there you can inspect hook sources, review new or changed hooks, trust them, or disable individual ones. In the desktop app, use **Review hooks** in the composer or **Settings > Hooks**. Codex records trust against each hook's current hash, so editing the script or the config means trusting it again.
+
+Managed hooks (from system config, MDM, or `requirements.toml`) are trusted by policy and can't be disabled from the user hook browser. That's the route for org-wide checks you don't want people switching off.
+
+For automation that already vets hook sources, the docs mention a `--dangerously-bypass-hook-trust` flag. Don't use it on a developer machine.
+
+## Step 5: test it
+
+1. Start Codex in the repo and run `/hooks`. Confirm your hook is listed and trusted.
+2. Submit a harmless prompt. It should go through, and you should briefly see your `statusMessage`.
+3. Submit a prompt containing a fake key such as `sk-` followed by 24 random letters. It should be blocked with your reason.
+4. Submit "the login test fails". The model's reply should reflect the added context.
+
+## Troubleshooting
+
+- **The hook never runs.** It isn't trusted yet, or it changed since you trusted it. Run `/hooks` and review it. Also check hooks aren't disabled with `[features] hooks = false`.
+- **The project hook is ignored.** Project hooks load from `.codex/hooks.json` in a trusted project. Check the path and that the project is trusted.
+- **Your matcher does nothing.** Expected. `UserPromptSubmit`, `Stop`, and `Interrupt` ignore matchers. Do the filtering inside your script.
+- **Prompts hang for a long time.** Your script is slow or waiting on the network, and the default timeout is long. Set `timeout` to a few seconds.
+- **Context isn't added.** Make sure you print either plain text or valid JSON with `hookEventName` set to `UserPromptSubmit`. Invalid JSON is a common cause.
+- **The block doesn't fire with exit code 2.** Write the reason to stderr, not stdout, when you use the exit-code route.
+
+## Limits worth knowing
+
+- Tool hooks are a useful guardrail, not a complete enforcement boundary. OpenAI's docs say this directly. Don't treat a hook as your only control for something that matters.
+- Hosted tools such as web search don't trigger `PreToolUse` or `PostToolUse`.
+- Up to eight background hooks run concurrently per session.
+
+## FAQ
+
+### Does Codex support hooks?
+
+Yes. Hooks are enabled by default and configured in `hooks.json` or under `[hooks]` in `config.toml`.
+
+### What is the Codex UserPromptSubmit hook?
+
+A hook event that runs when you submit a prompt, before the model handles it. It receives the prompt text and can let it through, block it, or add developer context.
+
+### How do I block a prompt in Codex?
+
+Return `{"decision": "block", "reason": "..."}` from a `UserPromptSubmit` hook, or exit with code `2` and write the reason to stderr.
+
+### Can a UserPromptSubmit hook use a matcher?
+
+No. Codex ignores matchers on `UserPromptSubmit`. Filter inside the script.
+
+### Why isn't my Codex hook running?
+
+Most often it hasn't been trusted, or it changed after you trusted it. Run `/hooks` to review it.
+
+## Related reading
+
+- [Codex CLI authentication: ChatGPT login vs API key](/blog/codex-cli-authentication)
+- [Getting started with Codex CLI](/blog/getting-started-with-codex)
+- [Claude Code vs. Codex: which to reach for](/blog/claude-code-vs-codex)
+
+---
+
+**Need help?** If you're standardizing Codex hooks across a team and want them reviewed for safety and speed before they hit every prompt, [talk to a senior architect](/contact).

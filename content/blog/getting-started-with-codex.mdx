@@ -1,6 +1,6 @@
 ---
-title: "Getting started with Codex: install to first real task"
-description: "OpenAI's coding-CLI side of the stack. Install, authenticate, configure, ship a real change. About thirty focused minutes."
+title: "Getting started with Codex CLI: install, login, first task"
+description: "Install the Codex CLI, sign in with ChatGPT or an API key, add AGENTS.md project context, and ship your first real change. About thirty minutes."
 date: "2026-05-06"
 author: "Yash Shah"
 category: "Engineering"
@@ -29,17 +29,25 @@ Codex ships as a CLI plus extensions for major editors. The CLI is the foundatio
 
 ```bash
 # macOS / Linux
-curl -fsSL https://openai.com/cli/install.sh | sh
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
 
 # Or via npm
-npm install -g @openai/codex-cli
+npm install -g @openai/codex
+
+# Or via Homebrew
+brew install --cask codex
+```
+
+On Windows, the [openai/codex README](https://github.com/openai/codex) gives a PowerShell installer:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"
 ```
 
 Verify:
 
 ```bash
 codex --version
-# codex-cli 1.x.y
 ```
 
 If your shell can't find `codex`, the installer's last line tells you which path to add. Add it to your shell's startup file.
@@ -50,21 +58,20 @@ If your shell can't find `codex`, the installer's last line tells you which path
 codex login
 ```
 
-A browser opens. You authenticate with your OpenAI account. The CLI receives a token. The token lives in `~/.config/codex/credentials`.
+A browser opens and you sign in with your ChatGPT account. By default Codex stores credentials under `~/.codex` (either in `auth.json` or your OS credential store, depending on the `cli_auth_credentials_store` setting).
 
-If your team uses an API key instead of an OpenAI Plus subscription, you can authenticate with the key:
+If your team uses an API key instead of a ChatGPT plan, pipe the key into the login command:
 
 ```bash
-export OPENAI_API_KEY=sk-...
-codex auth status
-# Authenticated via OPENAI_API_KEY
+printenv OPENAI_API_KEY | codex login --with-api-key
+codex login status
 ```
 
-The two paths bill differently. The Plus path bills against the subscription. The API-key path bills against your API account. For team use, API keys are usually the right answer because they support per-user quotas and audit trails through OpenAI's dashboards.
+The two paths bill differently. ChatGPT sign-in uses your plan's included usage. API-key sign-in uses standard API pricing against your API organization, and some features that depend on ChatGPT workspace access (Codex cloud, for example) need ChatGPT sign-in. For automation and CI, OpenAI still recommends API keys. We cover every option, including headless machines, in [Codex CLI authentication: ChatGPT login vs API key](/blog/codex-cli-authentication).
 
 ## Configure
 
-The Codex config lives at `~/.config/codex/config.toml`. A starter:
+The Codex config lives at `~/.codex/config.toml` (or under `CODEX_HOME` if you set it). The block below is illustrative; check the [Codex configuration docs](https://developers.openai.com/codex) for the current key names before copying it:
 
 ```toml
 [default]
@@ -86,9 +93,9 @@ Notes:
 - **mode**. `interactive` for the conversational CLI. `headless` for scripting and CI.
 - **mcp**. Codex supports MCP via this section. Same protocol as Claude Code.
 
-## Project context: `CODEX.md`
+## Project context: `AGENTS.md`
 
-Like `CLAUDE.md` for Claude Code, Codex reads a project-level Markdown file as context. The exact filename Codex looks for is `CODEX.md` at the repo root, with `AGENTS.md` as a fallback that some teams use across both tools.
+Like `CLAUDE.md` for Claude Code, Codex reads a project-level Markdown file as context. Codex reads `AGENTS.md` (and `AGENTS.override.md` first, if one exists). If your team prefers another filename, list it under `project_doc_fallback_filenames` in `config.toml`.
 
 A working example, slightly trimmed:
 
@@ -113,13 +120,13 @@ Python service. FastAPI + Postgres + Stripe.
 - Add new top-level packages without architecture review.
 ```
 
-If you wrote a `CLAUDE.md` for the project already, you can typically symlink:
+If you wrote a `CLAUDE.md` for the project already, you can symlink it:
 
 ```bash
-ln -s CLAUDE.md CODEX.md
+ln -s CLAUDE.md AGENTS.md
 ```
 
-Some teams maintain `AGENTS.md` and link both files to it, which avoids duplication when the two assistants need the same context.
+Some teams keep `AGENTS.md` as the source of truth and point `CLAUDE.md` at it instead, which avoids duplication when the two assistants need the same context.
 
 ## Your first session
 
@@ -138,7 +145,7 @@ The CLI prompt appears. The pattern is similar to Claude Code: tell it what you 
 > in app/api/v2/customers.py.
 ```
 
-Codex reads `CODEX.md`, opens the relevant files, proposes a plan, and asks for confirmation before edits. Sound familiar? Same shape as Claude Code. Different defaults in some places.
+Codex reads `AGENTS.md`, opens the relevant files, proposes a plan, and asks for confirmation before edits. Sound familiar? Same shape as Claude Code. Different defaults in some places.
 
 A typical exchange:
 
@@ -191,9 +198,9 @@ Honest observations from running both daily:
 
 ```bash
 codex --version                       # binary works
-codex auth status                     # authenticated
-cat ~/.config/codex/config.toml       # config exists
-ls CODEX.md                           # project context (or AGENTS.md / symlink)
+codex login status                    # authenticated
+cat ~/.codex/config.toml              # config exists
+ls AGENTS.md                          # project context
 ```
 
 Then ship a small real task end-to-end. If you can do that — plan, edits, tests pass — the setup is good. If any step fails, fix before moving on.
@@ -212,4 +219,4 @@ Before then, spend a focused day on the same project with both tools. Note where
 
 ---
 
-*We build AI-enabled software and help businesses put AI to work. If you're picking between Claude Code and Codex, we'd love to hear about it. [Get in touch.](/contact)*
+**Need help?** If you're rolling Codex out across a team and want a second opinion on auth, permissions, and project context, [talk to a senior architect](/contact).

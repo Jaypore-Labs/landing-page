@@ -1,0 +1,158 @@
+---
+title: "MCP servers for enterprise: reference servers and safe setup"
+description: "The official MCP reference servers repo explained: which servers matter for enterprise, how to run them safely, and when to build your own MCP server instead."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "MCP", "AI Agents", "Enterprise AI"]
+---
+
+The Model Context Protocol (MCP) is an open standard for connecting AI applications to tools and data. The official `modelcontextprotocol/servers` repository holds a small set of reference servers that show how the protocol works. It is for engineering teams deciding how their assistants and agents should reach internal systems.
+
+The short verdict: read these servers, learn from them, and use a few of them in controlled settings. Do not treat them as production integrations. The maintainers say so plainly, and for enterprise systems you will almost always build or buy hardened servers of your own.
+
+## What is the MCP servers repo?
+
+The [MCP servers repository](https://github.com/modelcontextprotocol/servers) is maintained by the MCP steering group and had 90k+ GitHub stars as of November 2026. Its licensing is in transition: new contributions are Apache-2.0, while older contributions whose authors have not agreed to relicense remain MIT. Documentation is CC-BY-4.0.
+
+The README carries a clear warning: these servers are "reference implementations" meant as "educational examples," "not as production-ready solutions." If you need a catalogue of servers, the README points to the MCP Registry instead.
+
+If MCP itself is new to you, start with our [MCP fundamentals tutorial](/blog/mcp-fundamentals-tutorial). The current reference servers are:
+
+- **Everything.** A test server that exercises prompts, resources and tools. Useful for testing clients.
+- **Fetch.** Fetches web content and converts it for model use. It obeys robots.txt for model-initiated requests and, by default, refuses private, loopback and cloud metadata addresses.
+- **Filesystem.** File operations limited to allowed directories passed on the command line, with a read-only mode.
+- **Git.** Read, search and change Git repositories.
+- **Memory.** A knowledge-graph based persistent memory.
+- **Sequential Thinking.** A structured, step-by-step reasoning tool.
+- **Time.** Time and timezone conversion.
+
+Several earlier servers, including GitHub, GitLab, Slack, PostgreSQL, Google Drive and Puppeteer, are archived in a separate repo. Some now have official vendor-maintained replacements. Do not deploy archived servers.
+
+Servers are built on official SDKs in TypeScript, Python, Go, Java, Kotlin, C#, Rust, Swift, Ruby and PHP.
+
+## Which servers matter for enterprise?
+
+Honestly, few of them as-is. The value is in the patterns:
+
+- **Filesystem** shows how to bound access: explicit allowed directories and a read-only switch. That is the model for any server that touches data.
+- **Fetch** shows how to defend against server-side request forgery, with private address blocking, redirect checks and response size limits. Copy these ideas into any server that makes outbound calls.
+- **Git** is useful for developer tooling on local repositories.
+- **Everything** is useful in CI to test your MCP client.
+
+Memory, Sequential Thinking and Time are handy for experiments but rarely the bottleneck in enterprise work.
+
+## Enterprise use cases for MCP
+
+1. **Internal knowledge access.** Let assistants search policies, runbooks and wikis through a server that enforces the user's permissions.
+2. **Developer tooling.** Give coding assistants controlled access to repos, CI logs and tickets.
+3. **Read-only data access.** Expose curated, read-only views of reporting data instead of raw database credentials.
+4. **Action tools with approval.** Create tickets, draft emails or update records, with confirmation before anything is written.
+5. **Standardised integration layer.** Build one server per system of record so every AI client in the company uses the same governed interface.
+6. **Agent testing.** Use stub servers to test agent behaviour against predictable tools.
+
+## Use cases by industry
+
+### Healthcare
+
+A hospital can expose a read-only MCP server over its clinical knowledge base and formulary, so clinicians' assistants answer from approved sources. Patient data should only flow through servers built for it, with audit logging. See [healthcare](/industries/healthcare).
+
+### Financial services
+
+Banks can wrap internal risk and reporting APIs in MCP servers that enforce entitlements per user. An analyst's assistant can then pull exposure figures without anyone handing it database access. See [financial services](/industries/financial-services).
+
+### Insurance
+
+An MCP server over the policy administration system lets claims assistants look up coverage and history. Writes, such as reserve changes, stay behind approval. See [insurance](/industries/insurance).
+
+### Manufacturing
+
+Plant engineers can query maintenance histories and equipment manuals through a server that reads from the CMMS and document store. See [manufacturing](/industries/manufacturing).
+
+### Legal
+
+Firms can expose document management search through MCP, respecting matter-level access walls so an assistant never surfaces documents from a matter the user cannot see. See [legal](/industries/legal).
+
+### Logistics
+
+Operations teams can give assistants tools for shipment lookup and exception lists from the TMS, with rerouting actions gated behind confirmation. See [logistics](/industries/logistics).
+
+## Reference architecture for production
+
+```text
+ [ AI clients: chat, IDE, agents ]
+              |  (OAuth, user identity)
+ [ MCP gateway: authn, authz, rate limits, audit ]
+       |               |                |
+ [ Knowledge MCP ] [ Ticketing MCP ] [ Reporting MCP (read-only) ]
+       |               |                |
+ [ Search index ]  [ Ticket API ]   [ Curated SQL views ]
+              |
+ [ Logs, traces, metrics ] --> [ SIEM ]
+```
+
+- **Auth and SSO.** Use remote servers over HTTP with OAuth tied to your identity provider. See [MCP authentication](/blog/mcp-authentication) and [MCP authorization](/blog/mcp-authorization).
+- **Secrets.** Servers hold backend credentials; clients never do. Store them in a vault and rotate them.
+- **Network boundaries.** Host servers inside your network behind a gateway. Block outbound traffic except to the systems each server needs. Our [MCP server hosting](/blog/mcp-server-hosting) guide covers options.
+- **Human in the loop.** Mark write tools clearly and require client-side confirmation for them.
+- **Data residency.** Servers run where you put them, but the model provider sees tool results. Know what leaves your region.
+- **Scaling.** Run stateless servers behind a load balancer and scale per system.
+- **Observability.** Log every tool call with user, arguments and result size. Alert on unusual volume.
+
+## Security, compliance and licensing
+
+The licensing is permissive (Apache-2.0 and MIT), so forking and adapting the reference code is straightforward. Keep license notices.
+
+The larger risk is prompt injection. Any tool result, whether a web page, a ticket or a document, can carry instructions aimed at the model. Combine a server that reads untrusted content with one that can take actions, and you have a path for data to leak. Our post on [MCP prompt injection](/blog/mcp-prompt-injection) covers defences.
+
+For HIPAA, SOC 2 and GDPR, MCP is a protocol and carries no certification. Compliance depends on how you build, host, log and control access to your servers, and on your model provider's terms.
+
+What you must add yourself: per-user authorisation, input validation, rate limits, audit logs, versioning and tests. Run servers launched with `npx` or `uvx` only from pinned, reviewed versions, because those commands fetch packages at run time.
+
+## Building your own MCP server
+
+For most enterprise systems, you will build your own. Start small: one system, read-only tools, clear names and tight schemas. Our tutorial on building a [first MCP server in Node](/blog/first-mcp-server-node) walks through it. Then add OAuth, logging and write tools with confirmation. Borrow the guardrails from the Filesystem and Fetch reference servers.
+
+## MCP reference servers vs alternatives
+
+| Option | What you get | Best for | Main trade-off |
+|---|---|---|---|
+| Reference servers | Small, readable examples on official SDKs | Learning, testing, local experiments | Not intended for production |
+| Vendor-maintained servers | Official servers from SaaS vendors | Connecting to that vendor's product | Quality and security vary; review each |
+| Custom MCP server | Your own server on an official SDK | Internal systems, regulated data | You build and run it |
+| Direct API tool calls | Tools defined in your agent code | A single app with few tools | No reuse across clients |
+
+## When not to use it
+
+- **In production as-is.** The maintainers say the reference servers are not production-ready.
+- **For write access to systems of record** without authorisation and approval layers.
+- **When one app needs two tools.** Plain function calling may be simpler.
+- **When you have not reviewed the code.** Every server runs with the permissions you give it.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates MCP servers into enterprise systems: gateways with SSO, per-user authorisation, audit logging and safe hosting inside your network. Where an off-the-shelf server does not fit, we build a custom one for your system of record. To plan an MCP rollout, [talk to a senior architect](/contact) or browse our [solutions](/solutions). For more context, see our [guide to open-source AI repos for enterprise](/blog/top-open-source-ai-github-repos-enterprise).
+
+## FAQ
+
+### Are the official MCP servers production ready?
+
+No. The repository README describes them as reference implementations and educational examples, not production-ready solutions. Use them to learn and test, and build or buy hardened servers for production.
+
+### Where is the GitHub or Postgres MCP server?
+
+Both were moved to an archived repository. Check the MCP Registry or the vendor's own repository for a maintained replacement, and review it before use.
+
+### Can MCP servers be self-hosted?
+
+Yes. MCP servers are ordinary processes or web services you run on your own infrastructure. For shared enterprise use, host them as remote HTTP servers behind a gateway with OAuth.
+
+### Is the Filesystem MCP server safe?
+
+It limits access to directories you pass on the command line and offers a read-only mode. That is a good start, but you should still run it with least privilege and avoid pointing it at sensitive directories.
+
+### Should we build our own MCP server?
+
+For internal systems and regulated data, usually yes. A custom server lets you enforce your own permissions, logging and data rules.
+
+Want to connect your assistants to internal systems? [Get in touch](/contact) with your use case.

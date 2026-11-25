@@ -1,0 +1,148 @@
+---
+title: "Top 10 open-source AI GitHub repos for enterprise (2026)"
+description: "The 10 open-source AI repositories enterprise teams evaluate most, what each is good for, licensing traps, and use cases by industry. Updated November 2026."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "Enterprise AI", "AI Agents", "Private LLM"]
+---
+
+Every few weeks a new open-source AI project crosses 50,000 GitHub stars and lands in a steering-committee deck. Stars tell you a project is popular. They don't tell you whether it will survive a security review, scale past a pilot, or come with a license your legal team can sign off on.
+
+This guide covers the ten repositories we see most often in enterprise evaluations. For each one: what it does, where it fits, what to watch for, and a link to a full deep-dive with use cases by industry and a reference architecture.
+
+Star counts are from GitHub as of November 2026, rounded down.
+
+## The list at a glance
+
+| # | Repository | What it is | Stars | License | Best for |
+|---|---|---|---|---|---|
+| 1 | n8n | Workflow automation with AI steps | 210k+ | Sustainable Use (fair-code) | Back-office automation, integrations |
+| 2 | Ollama | Run open models locally | 185k+ | MIT | Private prototyping, small on-prem workloads |
+| 3 | Dify | Visual builder for RAG and agent apps | 160k+ | Modified Apache 2.0 | Internal AI apps with a UI |
+| 4 | Open WebUI | Chat interface for any model | 155k+ | Custom (branding clause) | Private internal ChatGPT |
+| 5 | browser-use | AI agents that operate a browser | 120k+ | MIT | Web tasks with no API |
+| 6 | Supabase | Postgres platform with auth and vectors | 115k+ | Apache 2.0 | App backends with AI features |
+| 7 | vLLM | High-throughput LLM serving | 95k+ | Apache 2.0 | Production self-hosted inference |
+| 8 | RAGFlow | RAG engine with deep document parsing | 90k+ | Apache 2.0 | Search over messy documents |
+| 9 | MCP reference servers | Connectors between AI and your systems | 90k+ | Mixed per server | Giving assistants safe tool access |
+| 10 | LangGraph | Framework for stateful agents | 45k+ | MIT | Agents that need control and audit |
+
+LangGraph has fewer stars than projects that didn't make the list. It's here because it's what we actually see in production agent systems, which is the point of this guide.
+
+## 1. n8n: workflow automation with AI inside
+
+n8n connects SaaS tools, databases and APIs in visual workflows, and lets you drop LLM steps into the middle. It's the fastest way to automate a back-office process that touches five systems.
+
+Watch the license. n8n is "fair-code", not OSI open source. Internal use is fine; embedding it in a product you sell needs a commercial agreement.
+
+[Read: n8n for enterprise](/blog/n8n-for-enterprise)
+
+## 2. Ollama: private models on your own hardware
+
+Ollama makes running an open model as easy as one command. It's the right starting point for teams that can't send data to a hosted API, and for developers who want a local model while they build.
+
+It's not a production serving layer for heavy traffic, and it ships without authentication. Put it behind a gateway or graduate to vLLM.
+
+[Read: Ollama for enterprise](/blog/ollama-for-enterprise)
+
+## 3. Dify: build RAG and agent apps visually
+
+Dify gives product and operations teams a UI to assemble retrieval, prompts, tools and agents into an app, with logs and model switching included. Good for internal tools that need to exist next month, not next quarter.
+
+The license adds conditions on top of Apache 2.0, including limits on multi-tenant use. Read it before you build a customer-facing product on it.
+
+[Read: Dify for enterprise](/blog/dify-for-enterprise)
+
+## 4. Open WebUI: a private ChatGPT for your staff
+
+Open WebUI is the chat front end most companies put in front of Ollama, vLLM or a hosted API. It handles users, roles, document upload and model selection.
+
+Its license requires keeping Open WebUI branding in many deployments. If you need a white-labelled interface, plan for that early.
+
+[Read: Open WebUI for enterprise](/blog/open-webui-for-enterprise)
+
+## 5. browser-use: agents for systems without an API
+
+browser-use lets an AI agent drive a real browser: log in, click, fill forms, extract data. That matters for the carrier portal, payer website or supplier extranet that will never get an API.
+
+Treat every web page as untrusted input. Prompt injection from page content is the main risk, followed by credential handling.
+
+[Read: browser-use for enterprise](/blog/browser-use-for-enterprise)
+
+## 6. Supabase: the backend under your AI features
+
+Supabase bundles Postgres, auth, storage, row-level security and pgvector. For many enterprise apps it's the simplest way to get a backend where AI features and normal application data live under the same access rules.
+
+[Read: Supabase for enterprise](/blog/supabase-for-enterprise)
+
+## 7. vLLM: serving open models at production scale
+
+When self-hosted inference moves past a pilot, vLLM is the default choice. It batches requests and manages GPU memory so the same hardware serves far more users.
+
+[Read: vLLM for enterprise](/blog/vllm-for-enterprise)
+
+## 8. RAGFlow: retrieval over messy documents
+
+Most RAG projects fail at parsing, not at the model. RAGFlow focuses on the hard part: tables, scanned PDFs, multi-column layouts, and showing which passage an answer came from.
+
+[Read: RAGFlow for enterprise](/blog/ragflow-for-enterprise)
+
+## 9. MCP reference servers: connecting AI to your systems
+
+The Model Context Protocol is the standard way to give an assistant access to files, databases, tickets and internal APIs. The official servers repo is where most teams start, and where most security mistakes start too.
+
+[Read: MCP servers for enterprise](/blog/mcp-servers-for-enterprise) · [MCP fundamentals](/blog/mcp-fundamentals-tutorial)
+
+## 10. LangGraph: agents you can actually control
+
+LangGraph models an agent as an explicit graph of steps with saved state, so you can add human approval, retries and audit trails. That's what turns an agent demo into something a regulated business can run.
+
+[Read: LangGraph for enterprise](/blog/langgraph-for-enterprise)
+
+## Which repos fit which industry?
+
+| Industry | Start with | Why |
+|---|---|---|
+| [Healthcare](/industries/healthcare) | Ollama or vLLM, RAGFlow, LangGraph | Data stays inside your boundary; cited answers; human sign-off |
+| [Financial services](/industries/financial-services) | vLLM, LangGraph, Supabase | Auditability, access control, private inference |
+| [Insurance](/industries/insurance) | RAGFlow, n8n, browser-use | Claims documents, intake automation, legacy portals |
+| [Legal](/industries/legal) | RAGFlow, Open WebUI, Ollama | Document-heavy search with privilege kept in-house |
+| [Manufacturing](/industries/manufacturing) | n8n, MCP servers, Dify | Connecting MES/ERP data to assistants for operators |
+| [Logistics](/industries/logistics) | browser-use, n8n, LangGraph | Carrier portals, exception handling, multi-step workflows |
+| [Retail](/industries/retail) | Dify, Supabase, n8n | Catalog enrichment, support assistants, ops automation |
+| [Education & research](/industries/education-research) | Open WebUI, Ollama, RAGFlow | Private assistants over research and course material |
+
+## How to evaluate an open-source AI repo for enterprise use
+
+Stars are the weakest signal. Before a repository goes into a production plan, check these:
+
+1. **License.** Several popular projects are "source available", not open source. Know whether you can embed, resell or white-label it.
+2. **Authentication and access control.** Many projects assume a trusted network. Plan for SSO, roles and audit logs yourself if they're missing.
+3. **Data path.** Trace where prompts, documents and outputs are stored and sent, including telemetry.
+4. **Release health.** Look at release cadence, open security issues and how breaking changes are handled.
+5. **Exit cost.** If the project stalls or changes license, how much of your system has to be rewritten?
+6. **Evaluation.** Decide how you'll measure quality before launch. See [building your first eval set](/blog/building-your-first-eval-set).
+
+For regulated work, also read [HIPAA and AI](/blog/hipaa-and-ai) and [what the EU AI Act means for engineering teams](/blog/eu-ai-act-engineering-impact).
+
+## FAQ
+
+### What is the most popular open-source AI repository on GitHub?
+Among the projects in this list, n8n and Ollama have the most stars as of November 2026. Popularity doesn't equal enterprise readiness; licensing and security matter more.
+
+### Are these repositories free for commercial use?
+Ollama, vLLM, RAGFlow, Supabase, browser-use and LangGraph use permissive licenses (MIT or Apache 2.0). n8n, Dify and Open WebUI add conditions, so check them before embedding or reselling.
+
+### Can we run these on-premises?
+Yes. All ten can be self-hosted. The work is in adding authentication, monitoring, backups and access controls that match your security standards.
+
+### Should we build on open source or buy a vendor platform?
+Open source wins when you need data control, customization or cost predictability at scale. A vendor wins when speed and support matter more than control. Many enterprises end up with a mix.
+
+### Which repo should we start with for a first AI project?
+Start from the business process, not the repository. If it's document search, look at RAGFlow. If it's automation across systems, n8n. If it's a private assistant, Open WebUI with Ollama or vLLM.
+
+## Need help choosing?
+
+We help enterprise teams pick, harden and integrate these tools into the systems they already run, and we'll tell you when a custom build is the better path. If you're evaluating any of these repositories, [talk to a senior architect](/contact) or see [our solutions](/solutions).

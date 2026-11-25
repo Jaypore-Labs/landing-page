@@ -1,0 +1,146 @@
+---
+title: "Browser Use for enterprise: use cases, risks and architecture"
+description: "Browser Use lets an LLM drive a real browser. Where it fits in enterprise work, how to run it safely, and how it compares with Playwright, Stagehand and UiPath."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "Browser Use", "AI Agents", "Enterprise AI"]
+---
+
+Browser Use is an open-source Python library that lets a language model operate a real web browser. You give it a task in plain language, and the model clicks, types and reads pages until the task is done. It is for teams that need to work with web applications that have no API, or whose API does not cover the job.
+
+The short verdict: Browser Use is a good fit for internal back-office work on portals you cannot integrate with any other way, provided you wrap it in the controls that a browser with a model at the wheel needs. It is not a replacement for an API integration, and it is not a sandbox.
+
+## What is Browser Use?
+
+[Browser Use](https://github.com/browser-use/browser-use) is maintained by the Browser Use company and released under the MIT license. It had 120k+ GitHub stars as of November 2026, which makes it one of the most watched agent projects in the open-source ecosystem. We include it in our wider list of [open-source AI repos worth knowing for enterprise teams](/blog/top-open-source-ai-github-repos-enterprise).
+
+The design is simple. As of version 1.0, the model writes Python in a persistent REPL, and that Python drives Chrome through the Chrome DevTools Protocol. The README sums it up as "the model, a REPL and CDP." Key capabilities from the project documentation:
+
+- **Any model.** Built-in clients for OpenAI, Anthropic and Google models, plus any Pydantic AI model string. You can point it at a local model server.
+- **Local or cloud browsers.** It can launch a fresh local Chromium with a temporary profile, attach to an existing Chrome, or use a hosted Browser Use Cloud browser.
+- **Typed results.** You can pass a schema and get structured output back, which matters when the result feeds another system.
+- **Domain restrictions.** Allow and block lists for domains, and an option to block raw IP addresses.
+- **Scoped secrets.** Credentials can be bound to a domain and are masked in logs and output.
+- **Custom tools.** Plain Python functions can be registered as actions.
+- **A judge step.** After each run, a second model call grades the run against the task and flags suspected prompt injection or bot blocks.
+
+Two practical notes from the README. First, pin the exact version, because releases move quickly and can break APIs. Second, the library sends anonymous telemetry by default; you can turn it off with an environment variable, and most enterprises should.
+
+## Enterprise use cases
+
+Browser agents earn their place where the alternative is a person copying data between screens. Good candidates:
+
+1. **Portal data collection.** Pulling statements, remittances or order status from supplier, payer or carrier portals that offer no API.
+2. **Legacy web app bridging.** Reading from or entering data into an old internal web application while a proper integration is planned.
+3. **Form submission at volume.** Filing the same structured information into government, regulator or partner portals.
+4. **Research and monitoring.** Checking public pages for price, policy or availability changes and returning structured results.
+5. **QA exploration.** Running exploratory checks against staging environments in plain language, alongside scripted tests.
+6. **Assisted operations.** A human starts a task, the agent does the repetitive navigation, and the human approves the final submit.
+
+The common thread is that the target is a web UI you do not control. If you control the system, build an API instead.
+
+## Use cases by industry
+
+### Healthcare
+
+Revenue cycle teams spend hours checking claim status and eligibility on payer portals. A browser agent can log in, look up a batch of claims and return structured status for review. Keep PHI handling inside your own environment, and see our notes on [HIPAA and AI](/blog/hipaa-and-ai). More on our work in [healthcare](/industries/healthcare).
+
+### Financial services
+
+Operations teams pull statements and confirmations from counterparty and custodian portals. An agent can download documents, extract key fields and drop them into a reconciliation queue. Every action should be logged for audit. See [financial services](/industries/financial-services).
+
+### Insurance
+
+Claims and underwriting staff gather data from many third-party sites: repair estimates, registries, partner portals. A browser agent can assemble that evidence into one file for an adjuster, who makes the decision. See [insurance](/industries/insurance).
+
+### Logistics
+
+Carriers and freight forwarders often expose tracking and booking only through web portals. An agent can check shipment status across several carriers and update your TMS with the results. See [logistics](/industries/logistics).
+
+### Retail
+
+Merchandising teams track competitor pricing and marketplace listings. An agent can visit a defined list of public pages and return structured price and stock data, within each site's terms. See [retail](/industries/retail).
+
+### Legal
+
+Paralegals search court dockets and public registries that have no API. An agent can run the searches, download filings and summarise what changed since the last check, with a lawyer reviewing the output. See [legal](/industries/legal).
+
+## Reference architecture for production
+
+```text
+ [ Workflow / queue ] --> [ Agent worker (pinned browser-use) ]
+                                 |            |
+                         [ LLM gateway ]   [ Browser pool in isolated containers ]
+                                 |            |
+                         [ Secrets vault ] [ Egress proxy + domain allowlist ]
+                                 |
+                  [ Approval UI ] --> [ Audit log + traces ] --> [ SIEM ]
+```
+
+- **Auth and SSO.** Trigger runs from your workflow system under a named service identity. Tie each run to the employee who requested it.
+- **Secrets.** Pull credentials from a vault at run time and use domain-scoped secrets. Never put passwords in the task text.
+- **Network boundaries.** Run each browser in its own container. Force all traffic through an egress proxy with a domain allowlist, and block internal IP ranges so a page cannot steer the agent into your network.
+- **Human in the loop.** Require approval before any irreversible step: submit, pay, delete, send. Our post on [safety guardrails](/blog/safety-guardrails) covers patterns.
+- **Data residency.** Decide where the browser runs, where the model runs and where screenshots are stored. A self-hosted model and local browser keep data in your region.
+- **Scaling.** Treat runs as jobs on a queue with concurrency limits per target site. Portals rate-limit and block aggressive traffic.
+- **Observability.** Record each step, URL, screenshot and model call. Our guide to [agent observability](/blog/agent-observability) covers what to capture.
+
+## Security, compliance and licensing
+
+The library is MIT licensed, which is permissive and simple for commercial use. The risks are operational, not legal.
+
+**Prompt injection from web pages.** Every page the agent reads is untrusted input. A page can contain text that tells the model to go somewhere else or reveal data. Domain allowlists, no access to internal networks and approval gates are your main defences. The README is clear that domain restrictions are "a guard for an aligned model, not a sandbox."
+
+**Credential handling.** The README notes that model-written Python can read secret values, and that screenshots or a live view can expose them. Local browser modes open an unauthenticated debugging port on localhost, so other users on a shared machine could attach. Run browsers in isolated containers and use least-privilege accounts created for the agent.
+
+**Site terms of service.** Many portals restrict automated access. Check the terms of each target site, and prefer a formal integration or data agreement where one exists.
+
+**HIPAA, SOC 2, GDPR.** The open-source library carries no certification of its own. Your compliance posture depends on where you run it and which model provider you use. The README says Browser Use offers SOC 2, HIPAA with a BAA, GDPR and EU data residency for its enterprise cloud; check the vendor's current compliance page before relying on that. If you self-host, you own those controls.
+
+## Browser Use vs alternatives
+
+| Option | How it works | Best for | Main trade-off |
+|---|---|---|---|
+| Browser Use | LLM writes code that drives Chrome via CDP | Varied tasks on sites that change, plain-language tasks | Less predictable; per-run model cost |
+| Playwright scripts | Engineer writes deterministic selectors and steps | Stable, high-volume flows | Breaks when the UI changes; needs engineers |
+| Stagehand | Scripted browser code with AI-assisted steps, TypeScript-first | Teams wanting scripted flows with AI fallbacks | Smaller ecosystem; TypeScript-first |
+| UiPath and similar RPA | Visual workflow designer, desktop and web | Governed automation programs, desktop apps | License cost; brittle on dynamic web UIs |
+
+A common pattern is to use both: let an agent explore a flow once, then harden the stable path into a Playwright script and keep the agent as a fallback. We cover the agent side in more depth in [browsing agents](/blog/browsing-agents).
+
+## When not to use it
+
+- **When an API exists.** An API call is faster, cheaper and auditable. Use it.
+- **For high-volume, fixed flows.** A deterministic script will beat an agent on cost and reliability.
+- **For irreversible actions without review.** Do not let an agent make payments or legal filings on its own.
+- **When the site forbids automation.** Terms of service are a hard stop.
+- **When you need a hard sandbox.** The library is not one. You must provide isolation.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates Browser Use into enterprise systems: isolated browser pools, egress controls, vault-backed credentials, approval steps and audit trails that your security team can sign off. Where a browser agent is the wrong tool, we build the API integration or deterministic automation instead. If you are weighing a browser agent for a back-office process, [talk to a senior architect](/contact) or see our [solutions](/solutions).
+
+## FAQ
+
+### Is Browser Use production ready?
+
+The library is mature enough for production use in controlled settings, but its maintainers say releases move fast and can break APIs. Pin the exact version, test upgrades, and wrap it in your own isolation, logging and approval controls.
+
+### Can Browser Use be self-hosted?
+
+Yes. The Python library runs on your own infrastructure with a local Chromium and any model you choose, including a self-hosted one. The hosted cloud is optional.
+
+### How does Browser Use handle logins?
+
+It can use a dedicated browser profile, attach to an existing Chrome session, or type credentials passed as domain-scoped secrets. For enterprise use, create dedicated agent accounts and fetch credentials from a vault at run time.
+
+### Is Browser Use safe against prompt injection?
+
+No tool is fully safe against it. Browser Use includes domain restrictions and a judge step that can flag suspected injection, but you still need network isolation, least-privilege accounts and human approval for sensitive actions.
+
+### Browser Use or UiPath?
+
+Use RPA where you need governed, repeatable automation across desktop and web, and you already have the platform. Use Browser Use where tasks vary, sites change often, or plain-language task definitions save engineering time.
+
+Have a portal or process in mind? [Get in touch](/contact) with your use case.

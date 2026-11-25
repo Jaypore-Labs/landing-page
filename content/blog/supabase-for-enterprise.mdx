@@ -1,0 +1,146 @@
+---
+title: "Supabase for enterprise: Postgres, RLS, pgvector and hosting"
+description: "Is Supabase ready for enterprise apps? How its Postgres, auth, RLS and pgvector fit, self-hosted vs cloud, and how it compares with Firebase, Neon and RDS."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "Supabase", "Postgres", "Enterprise AI"]
+---
+
+Supabase is an open-source platform built around a dedicated Postgres database, with authentication, auto-generated APIs, storage, realtime and edge functions added on top. It is for teams that want the speed of a backend platform without giving up a standard relational database.
+
+The short verdict: Supabase is a sensible foundation for many enterprise applications and AI features, because underneath it is Postgres. You can take your data and your SQL with you. The questions to settle early are hosting model, how you use row level security, and which parts of the platform you actually need.
+
+## What is Supabase?
+
+[Supabase](https://github.com/supabase/supabase) is developed by Supabase Inc and released under the Apache-2.0 license. It had 115k+ GitHub stars as of November 2026. The README describes it as "the Postgres development platform" and says it aims to give a Firebase-like developer experience using open-source tools.
+
+It is a combination of open-source components:
+
+- **Postgres** as the database.
+- **PostgREST**, which turns the database into a REST API.
+- **pg_graphql**, a Postgres extension that exposes a GraphQL API.
+- **Auth** (originally GoTrue), a JWT-based authentication service.
+- **Realtime**, an Elixir server that streams database changes over websockets.
+- **Storage**, a RESTful API for files stored in S3, with permissions held in Postgres.
+- **Edge Functions** and database functions for server-side logic.
+- **postgres-meta** and a dashboard for managing the database.
+- **An AI and vector toolkit**, built on the pgvector extension.
+
+It is offered as a hosted platform, and the project documents self-hosting and local development. For how it fits next to other projects, see our [guide to open-source AI repos for enterprise](/blog/top-open-source-ai-github-repos-enterprise).
+
+## Enterprise use cases
+
+1. **Internal tools and portals.** Admin consoles, partner portals and operational dashboards where the generated APIs save weeks.
+2. **Customer-facing apps with per-tenant data.** Row level security (RLS) policies in Postgres keep each tenant's rows separate at the database layer.
+3. **Retrieval for AI features.** Store embeddings next to the source records with pgvector, and filter by the same permissions. See our [vector database architecture](/blog/vector-db-architecture) post.
+4. **Realtime operations views.** Live queues and status boards that update as rows change.
+5. **Document and file workflows.** Storage with access rules tied to database permissions.
+6. **Fast prototypes that can grow.** Start on the platform, keep standard Postgres, and move to another host later if needed.
+
+## Use cases by industry
+
+### Healthcare
+
+A patient intake or care coordination app can keep records in Postgres with RLS limiting each clinician to their own patients. Any PHI requires a hosting setup and agreements that meet HIPAA; see [HIPAA and AI](/blog/hipaa-and-ai). See [healthcare](/industries/healthcare).
+
+### Financial services
+
+Advisor portals and internal case tools can use Postgres for transactional data and pgvector for searching research notes, with policies that match entitlements. Many firms will choose self-hosting or a dedicated deployment for data control. See [financial services](/industries/financial-services).
+
+### Insurance
+
+A claims workspace can store claim records, uploaded photos in Storage, and embeddings of adjuster notes for similar-claim search. Realtime keeps the adjuster queue current. See [insurance](/industries/insurance).
+
+### Logistics
+
+Dispatch and exception dashboards benefit from realtime updates as shipment rows change. Drivers' mobile apps can use the client libraries and auth directly. See [logistics](/industries/logistics).
+
+### Retail
+
+Product catalogues with semantic search can keep product data and embeddings in one database, so search results always match live stock and price. See [retail](/industries/retail).
+
+### Education and research
+
+Research platforms can store datasets, participant records and files with RLS enforcing study-level access, and use pgvector to search literature or notes. See [education and research](/industries/education-research).
+
+## Reference architecture for production
+
+```text
+ [ Web / mobile apps ] --(JWT)--> [ API gateway / WAF ]
+                                       |
+             [ Supabase: Auth | PostgREST | Realtime | Storage | Functions ]
+                                       |
+                    [ Postgres + RLS + pgvector ] --> [ Read replica / warehouse ]
+                                       |
+ [ Backend services (service role, private network) ]   [ Backups, PITR, audit logs ]
+```
+
+- **Auth and SSO.** Use Supabase Auth for end users, and connect enterprise SSO through SAML where your plan or deployment supports it. Map identity claims into RLS policies.
+- **Secrets.** The service role key bypasses RLS. Keep it only on backend services, in a vault, never in a browser or mobile app.
+- **Network boundaries.** Put internal tools behind your gateway. Restrict direct database connections to known networks.
+- **Human in the loop.** For AI features that write data, write to a staging table and have a person or rule approve the change.
+- **Data residency.** Choose the hosting region up front, or self-host in your own cloud account.
+- **Scaling.** Use connection pooling, read replicas for heavy reads, and move analytics to a warehouse. Index vector columns once data grows.
+- **Observability.** Track slow queries, RLS policy performance and auth errors. Export logs to your existing stack.
+
+## Security, compliance and licensing
+
+Supabase is Apache-2.0 licensed, which allows commercial use and self-hosting. The components it bundles carry their own open licenses.
+
+Row level security is the core control, and also the most common mistake. Tables exposed through the API without RLS enabled, or with loose policies, can leak data. Enable RLS on every exposed table, test policies with real user roles, and review them in code review.
+
+For HIPAA, SOC 2 and GDPR, do not assume coverage. What the hosted platform covers can depend on your plan and agreements. Check the vendor's current compliance page and agreements before storing regulated data. If you self-host, the certifications do not transfer; your own controls, hosting and processes are what auditors review.
+
+What you must add yourself: RLS policy tests, backup and restore drills, key rotation, audit logging for sensitive tables, and a review process for database migrations.
+
+## Self-hosted vs cloud
+
+Supabase Cloud handles upgrades, backups and operations for you. Self-hosting gives full control over network, region and data, but you run several services, not just Postgres, and you take on patching and uptime. A practical rule: start on the hosted platform unless policy forbids it, and self-host when data control requirements are firm and you have a platform team to run it.
+
+If your team uses AI coding tools, see our post on [Claude Code and Supabase integration](/blog/claude-code-supabase-integration).
+
+## Supabase vs alternatives
+
+| Option | Database | Best for | Main trade-off |
+|---|---|---|---|
+| Supabase | Postgres with auth, APIs, storage, realtime | Full app backend on standard Postgres | More moving parts to secure and self-host |
+| Firebase | Document store (Firestore) plus Google services | Mobile apps in the Google ecosystem | Proprietary; harder relational queries and migration |
+| Neon | Serverless Postgres with branching | Postgres with dev branching and scale-to-zero | Database only; you add auth and APIs |
+| Amazon RDS | Managed Postgres, MySQL and others | Teams standardised on AWS controls | Database only; more build work for app features |
+
+## When not to use it
+
+- **When you only need a database.** RDS, Cloud SQL or Neon may be simpler.
+- **When you cannot invest in RLS discipline.** Exposing tables to clients requires careful policies.
+- **For very heavy analytics.** Use a warehouse alongside it.
+- **When strict policy requires self-hosting and you lack a platform team.** Running the full stack is real work.
+- **When your stack is built around another database.** Do not migrate just for the platform features.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates Supabase into enterprise systems: schema and RLS design, SSO, pgvector retrieval, migration from legacy databases, and self-hosted deployments in your cloud. Where Supabase is not the right fit, we build on plain Postgres or your existing platform. To review an architecture, [talk to a senior architect](/contact) or see our [solutions](/solutions).
+
+## FAQ
+
+### Is Supabase production ready for enterprise?
+
+Yes, for many workloads, because the core is Postgres and the platform is widely used. Readiness depends on your RLS design, hosting model, backups and compliance needs, which you must verify for your own case.
+
+### Can Supabase be self-hosted?
+
+Yes. The project is Apache-2.0 licensed and documents self-hosting. You become responsible for running, patching and backing up all the services, not just the database.
+
+### Is Supabase HIPAA compliant?
+
+Do not assume it. Check Supabase's current compliance page and agreements for the plan you would use. If you self-host, compliance depends on your own environment and controls.
+
+### Can Supabase be used as a vector database?
+
+Yes. It supports the pgvector extension, so embeddings can live next to your source data and be filtered with the same SQL and policies. For very large vector workloads, benchmark before committing.
+
+### Supabase or Firebase?
+
+Choose Supabase if you want relational data, SQL and an open-source stack you can move. Choose Firebase if you are building mobile-first on Google Cloud and prefer a document model.
+
+Building an app or AI feature on Postgres? [Get in touch](/contact) with your use case.

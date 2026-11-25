@@ -1,94 +1,200 @@
 ---
-title: "Claude Code + Slack: standups, escalations, and the back-channel"
-description: "Slack is where work is discussed. Wire Claude Code in and the discussion gets searchable, summarizable, and actionable."
+title: "Slack MCP for Claude Code: setup, scopes, and workflows"
+description: "Add Slack's official MCP server to Claude Code with the plugin or claude mcp add, finish OAuth with /mcp, get admin approval, then search, summarize, and draft."
 date: "2026-02-11"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Claude Code", "Slack", "MCP", "Productivity", "Integrations"]
 ---
 
-A common pattern in teams that ship fast: Slack is the system of record for work-in-progress conversations. Tickets and PRs are the formal artifacts; Slack is where the actual problem-solving happens.
+In teams that ship fast, Slack is where work-in-progress actually gets discussed. Tickets and PRs are the formal record; Slack is where the problem-solving happens. That makes it one of the most useful things to connect to a coding agent: search, summaries, and drafts in a single prompt, without leaving the terminal.
 
-That makes Slack a goldmine for an agent. The integration changes what you can do in a single command — search, summarize, escalate, draft.
+This guide covers the official Slack MCP server: the exact setup commands for Claude Code, what your workspace admin has to approve, how to check it works, and the trust rules we apply before anyone lets an agent near a shared workspace.
 
-## What you can do after setup
+## Quick setup
 
-- "Find Slack discussions from the last 72 hours about the payment service. Summarize what people are worried about."
-- "I'm being asked to triage this incident. Who in the channel has touched this code recently?"
-- "Draft a status update for #engineering based on my activity since Monday."
-- "Search the back-channel for any mention of customer 'Acme' in the last month."
+Slack documents two routes for Claude Code in its [guide to connecting harnesses](https://docs.slack.dev/ai/slack-mcp-server/connect-to-harnesses). Pick one.
 
-## Setup
+**Option A: the Slack plugin (Slack's recommended route).** Run these inside a Claude Code session:
 
-Use Slack's official MCP server or the community version. We default to the community one for the flexibility.
-
-```bash
-npm install -g @slack-mcp/server
+```
+/plugin marketplace add slackapi/slack-skills-plugin
+/plugin install slack@slack
+/mcp
 ```
 
-Generate a Slack app token (xoxb-, with channels:history, chat:write scopes), and:
+The plugin configures the Slack MCP server for you. `/mcp` completes the OAuth sign-in.
+
+**Option B: one CLI command.** From your shell:
+
+```bash
+claude mcp add --transport http --scope local slack https://mcp.slack.com/mcp
+```
+
+Then start Claude Code and run `/mcp` to sign in to Slack.
+
+Both routes need one thing first: your workspace admin has to have approved the MCP integration. If they haven't, sign-in will fail no matter which route you pick.
+
+## What the official Slack MCP server is
+
+Slack hosts the server at `https://mcp.slack.com/mcp`. Per [Slack's MCP server overview](https://docs.slack.dev/ai/slack-mcp-server/), it speaks JSON-RPC over Streamable HTTP, authenticates with OAuth, and acts with a user token, meaning it sees what you can see in Slack and nothing more. It does not support SSE connections or dynamic client registration.
+
+The tools fall into a few groups:
+
+- **Search:** messages and files, users, channels, and custom emoji.
+- **Messaging:** read channels and threads, send, schedule, and draft messages, create conversations, add and read reactions.
+- **Canvases:** create, update, and read (exported as Markdown).
+- **Users:** fetch user info and list channel members.
+- **Files and Lists:** upload files, create and update lists.
+
+Rate limits are per tool and match the equivalent Web API methods. Search and send have their own documented limits.
+
+If you set up a Slack integration last year, you may have used a community server with a bot token (`xoxb-...`) in environment variables. The official server replaces that pattern. Anthropic's old reference Slack server was archived, and a bot token in a config file is exactly the kind of long-lived secret you want to stop managing.
+
+## Prerequisites
+
+- A Slack workspace where an admin has approved the MCP integration.
+- Claude Code installed and logged in. If you need that first, see [how to install Claude Code](/blog/how-to-install-claude-code).
+- A browser on the same machine for OAuth.
+
+## Step 1: get admin approval
+
+Slack treats MCP clients like apps. Workspace admins approve and manage MCP client integrations, and only directory-published apps or internal apps may use MCP. Unlisted apps are not allowed. If your workspace has an IP allowlist on the app, MCP requests are subject to it.
+
+Ask your admin two questions before you start: is the Claude Code integration approved, and are there any restrictions on MCP access? It saves an afternoon of debugging OAuth errors that are really policy errors.
+
+## Step 2: add the server
+
+### Option A: the plugin
+
+Inside Claude Code:
+
+```
+/plugin marketplace add slackapi/slack-skills-plugin
+/plugin install slack@slack
+```
+
+The plugin sets up an HTTP server entry pointing at `https://mcp.slack.com/mcp` with Slack's OAuth client settings already filled in. To keep it updated, go to `/plugin`, then Marketplaces, then `slack`, and enable auto-update.
+
+### Option B: claude mcp add
+
+```bash
+claude mcp add --transport http --scope local slack https://mcp.slack.com/mcp
+```
+
+`--scope local` keeps the server to you, in the current project, stored in `~/.claude.json`. Use `--scope user` if you want Slack in every project. We don't recommend `--scope project` for Slack: it's a personal-data connection, so each person should opt in.
+
+### Option C: manual config
+
+Slack also documents a manual entry for `.mcp.json` (project) or `~/.claude.json` (user). It needs your Slack app's client ID and a fixed OAuth callback port:
 
 ```json
 {
   "mcpServers": {
     "slack": {
-      "command": "slack-mcp",
-      "env": {
-        "SLACK_BOT_TOKEN": "xoxb-...",
-        "SLACK_TEAM_ID": "T..."
+      "type": "http",
+      "url": "https://mcp.slack.com/mcp",
+      "oauth": {
+        "clientId": "YOUR_SLACK_APP_CLIENT_ID",
+        "callbackPort": 3118
       }
     }
   }
 }
 ```
 
-## Prompts that earn rent
+Restart Claude Code after editing the file. This route is for teams running their own internal Slack app as the MCP client; most people should use Option A or B.
 
-**Context recovery.** "I just joined the #incidents channel mid-thread. Summarize what happened and what's been tried." The agent reads the channel and condenses.
+## Step 3: authenticate
 
-**Decision archaeology.** "Search Slack for discussions in #architecture from the last 6 months about Kafka vs. Kinesis. What was the decision and why?" Surfaces the rationale; helps newcomers.
+Run `/mcp` in Claude Code, select `slack`, and complete the browser flow. Slack shows the permissions being requested. Read them. They map to user-token scopes such as `search:read.public`, `channels:history`, and `chat:write`.
 
-**Who-to-ask.** "I have a question about the inventory service's caching layer. Who's been most active in those threads this quarter?" Smarter than digging through git blame for a Slack handle.
+## Step 4: verify
 
-**Draft-and-confirm.** "Draft a Slack message to #product summarizing this PR. Mention @design-lead. Don't send — show me first."
+From your shell:
+
+```bash
+claude mcp list        # slack should show as connected
+claude mcp get slack
+```
+
+Then try a read-only prompt you can check by hand:
+
+```
+> Search Slack for messages in #engineering from the last 24 hours
+  that mention "deploy". Summarize them in five bullets with links.
+```
+
+If the summary links to real messages, you're set up. Don't test by sending a message.
+
+## Prompts that earn their place
+
+**Context recovery.** "I just joined the #incidents thread mid-way. Summarize what happened and what's been tried." The agent reads the thread and condenses it.
+
+**Decision archaeology.** "Search #architecture over the last six months for discussion of Kafka vs. Kinesis. What was decided, and why?" Useful for anyone new to the team.
+
+**Who to ask.** "Who has been most active in threads about the inventory service's caching layer this quarter?" Faster than reading git blame and guessing at Slack handles.
+
+**Draft, then confirm.** "Draft a message to #product summarizing this PR. Don't send it. Show me first." The server supports drafts and scheduled messages, so the agent can prepare the post while you keep the send button.
+
+**Async standups.** Each engineer's agent drafts a status from their commits, PRs, tracker activity, and Slack messages, then shows it to them before posting to the #standup thread. The manager reads the thread and asks follow-ups there.
 
 ## What to keep manual
 
-- **Sending the message.** The agent drafts; you send. Slack messages are social signals. The cost of an awkward one is real.
-- **DMs.** Don't let the agent read or send DMs without explicit per-call consent. Privacy and trust.
-- **Channel creation, archival.** Workspace state is sensitive.
-- **Reaction emojis.** Honestly, just keep this manual. The agent will always pick the wrong one.
+- **Sending.** The agent drafts; you send. A Slack message is a social signal, and an awkward one has a real cost.
+- **DMs.** The server can read DMs if your token's scopes allow it. Don't ask it to unless you'd be comfortable with the other person seeing the prompt.
+- **Channel creation and archiving.** Workspace structure belongs to people.
+- **Reactions.** Keep these manual. The agent will pick the wrong one.
 
 ## Privacy and retention
 
 Three rules we apply with every team:
 
-- **Scope the bot's channel access.** Bot in `#engineering`, not in `#exec` or `#hr`.
-- **Don't store Slack content in your own DBs without explicit policy.** The MCP server should query Slack live, not mirror.
-- **Audit log every search.** Who asked the agent about what. Reviewable.
+- **Approve only the scopes you need.** If nobody needs canvases or lists, don't grant them.
+- **Don't mirror Slack into your own database.** Query live through the server. Copies create retention and access problems you then have to govern.
+- **Use the audit trail.** Slack's audit logs record MCP activity. Make sure whoever owns Slack governance knows where to find it.
 
-The integration is powerful. That's exactly why it should be careful.
+## Troubleshooting
 
-## The async-status pattern
+- **OAuth fails or says the app isn't allowed.** Your admin hasn't approved the integration, or has restricted MCP access. This is the most common cause.
+- **`slack` shows as needing authentication.** Run `/mcp`, select it, and sign in again.
+- **The plugin installed but no Slack tools appear.** Restart Claude Code, then run `/mcp` and check the server's status. Make sure you didn't also add a second `slack` server by hand; `claude mcp list` will show both.
+- **Manual config won't connect.** Check the `clientId` and `callbackPort` values, and confirm your Slack app is internal or directory-published. Unlisted apps can't use MCP.
+- **Search misses a channel.** The server uses your user token. If you aren't in a private channel, the agent can't see it either.
+- **You still have the old community server.** Remove it with `claude mcp remove` and revoke the old bot token in Slack.
 
-The biggest single win we've seen with Slack integration is async standups. Instead of a meeting:
+## FAQ
 
-- Each engineer's local agent drafts a status from their commits, PRs, Linear activity, and Slack messages.
-- The draft posts to a thread in #standup before 10 AM.
-- Manager scans, asks follow-ups in-thread.
+### How do I add the Slack MCP server to Claude Code?
 
-Real cost: 5 minutes per engineer per day, vs. 15 minutes of synchronous meeting. Compound that across a 30-person team.
+Either run `/plugin marketplace add slackapi/slack-skills-plugin` and `/plugin install slack@slack` inside Claude Code, or run `claude mcp add --transport http --scope local slack https://mcp.slack.com/mcp` from your shell. Finish with `/mcp` to sign in.
 
-## Close
+### What is the official Claude Slack MCP server URL?
 
-Slack as a knowledge graph is most companies' biggest unexploited asset. The integration pays for itself in the first month. Setup is shallow; trust boundaries matter; the wins are weekly.
+`https://mcp.slack.com/mcp`, hosted by Slack.
+
+### Do I need a Slack bot token?
+
+No. The official server uses OAuth with a user token. Bot tokens are optional and only for in-Slack experiences.
+
+### Why does Slack MCP sign-in fail in my workspace?
+
+Usually because the workspace admin hasn't approved the MCP integration. Ask them to check the approval and any MCP restrictions.
+
+### Can the Slack MCP server send messages?
+
+Yes, it includes send, schedule, and draft tools. We recommend drafting with the agent and sending yourself.
+
+### Is the Slack MCP server the same as Claude in Slack?
+
+No. The MCP server lets Claude Code (and other MCP clients) read and act in Slack from outside it. Claude in Slack is a separate app that runs inside your workspace.
 
 ## Related reading
 
-- [Claude Code + Linear](/blog/claude-code-linear-integration) — pairs with this for the full work loop.
-- [The AI productivity playbook](/blog/ai-productivity-playbook) — broader workflow.
-- [Effective MCP patterns](/blog/effective-mcp-patterns) — the patterns this relies on.
+- [Claude Code + Linear](/blog/claude-code-linear-integration), which pairs with this for the full work loop.
+- [Sentry MCP for Claude Code](/blog/claude-code-sentry-integration), for incident threads that need error context.
+- [Effective MCP patterns](/blog/effective-mcp-patterns), the patterns this relies on.
 
 ---
 
-*We help teams wire AI into Slack carefully. [Get in touch](/contact) to skip the trust pitfalls.*
+**Need help?** If you're connecting Claude Code to a shared Slack workspace and want a second pair of eyes on scopes, approvals, and retention, [talk to a senior architect](/contact).

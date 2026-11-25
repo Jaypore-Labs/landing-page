@@ -1,13 +1,13 @@
 ---
-title: "Claude Code + Sentry: incident debugging as conversation"
-description: "Wire Claude Code to your error tracker. Triage live incidents, draft post-mortems, surface error patterns — without leaving the assistant."
+title: "Sentry MCP for Claude Code: setup and incident debugging"
+description: "Add the official Sentry MCP server to Claude Code with one command, sign in with OAuth, then triage errors, pair it with PagerDuty, and draft post-mortems."
 date: "2026-05-13"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Claude Code", "Sentry", "MCP", "Tutorial", "Incident Response"]
 ---
 
-This is part 8 of the AI-tools-for-engineers series. Part 7 covered Supabase; this article does the same for Sentry. The integration here is one of the highest-value MCP wirings we've seen on real teams — it changes the shape of incident response in measurable ways.
+This is part 8 of the AI-tools-for-engineers series. Part 7 covered Supabase; this article does the same for Sentry. The integration here is one of the highest-value MCP wirings we've seen on real teams, because it shortens the slowest part of incident response: getting from an alert to the line of code that caused it.
 
 By the end of this article you'll have Claude Code (or Codex; same patterns) reading from your Sentry project, surfacing error context, and drafting post-mortems from real incident data.
 
@@ -25,78 +25,101 @@ What we're explicitly not building:
 - An auto-remediation pipeline. The assistant reads errors and proposes fixes; humans ship.
 - A way to leak customer PII out of Sentry. Sentry's built-in PII scrubbing stays on; the assistant respects what Sentry has redacted.
 
+## Quick setup
+
+If you only want the commands, here they are. Each step is explained below.
+
+```bash
+# 1. Add the official hosted Sentry MCP server (remote, HTTP transport)
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+
+# 2. Start Claude Code, then authenticate in the browser
+claude
+/mcp
+
+# 3. Confirm it's connected
+claude mcp list
+claude mcp get sentry
+```
+
+Then ask Claude Code something real: "List the unresolved issues in my payments project from the last 24 hours."
+
 ## Prerequisites
 
-- A Sentry project. The free tier has plenty of throughput for this tutorial.
-- Claude Code installed and authenticated.
-- A Sentry auth token with the right scopes (more on this below).
+- A Sentry account with access to the organization and projects you want to query.
+- Claude Code installed and logged in. If you haven't done that yet, start with [how to install Claude Code](/blog/how-to-install-claude-code).
+- A browser on the same machine for the OAuth sign-in.
 
-## Step 1: create a scoped auth token
+## Official Sentry MCP server setup
 
-In Sentry: User Settings → Auth Tokens → Create New Token.
+Sentry runs an official, hosted MCP server. The documentation lives at [mcp.sentry.dev](https://mcp.sentry.dev) (the old `docs.sentry.io/product/sentry-mcp` address redirects there). Older guides, including an earlier version of this one, told you to install an npm package and paste an auth token into `~/.claude.json`. You no longer need to. The hosted server uses OAuth, so there is no token to create, store, or rotate.
 
-Scope it carefully:
+### Step 1: add the server
 
-- `event:read` — read events (always needed).
-- `project:read` — read project metadata.
-- `org:read` — read org metadata.
-- Skip `event:write` and `project:write` unless you have a specific reason. The MCP server we're using is read-focused.
-
-Copy the token. Store it in your shell:
+The base server address is `https://mcp.sentry.dev/mcp`. Add it with the HTTP transport:
 
 ```bash
-export SENTRY_AUTH_TOKEN="sntrys_..."
-export SENTRY_ORG="your-org"
-export SENTRY_PROJECT="your-project"
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
 ```
 
-If your team uses Sentry's self-hosted version, also note the base URL:
+If you want the server pinned to one organization and project, Sentry's docs also accept the slugs in the path:
 
 ```bash
-export SENTRY_BASE_URL="https://sentry.your-company.com"
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp/{organizationSlug}/{projectSlug}
 ```
 
-Most teams on Sentry SaaS can leave the base URL unset; the default works.
+Replace both placeholders with your own slugs. Pinning keeps the assistant from wandering into other projects and saves a round-trip on every query.
 
-## Step 2: install the Sentry MCP server
+### Step 2: choose a scope
 
-Sentry maintains an official MCP server. There are also community servers; the official one is what we'd recommend for most teams.
+`claude mcp add` defaults to `local` scope: the server is available in the current project only, and the config is stored in `~/.claude.json`. Two other scopes are useful here:
 
-```bash
-npm install -g @sentry/mcp-server
-```
+- `--scope user` makes Sentry available in every project on your machine.
+- `--scope project` writes the entry to `.mcp.json` in the repo root so the whole team gets the same server through version control.
 
-You can also use it via `npx -y @sentry/mcp-server`, which is what we'll do in the Claude Code config.
-
-## Step 3: configure Claude Code
-
-Edit `~/.claude.json`:
+A project-scoped `.mcp.json` for Sentry looks like this:
 
 ```json
 {
   "mcpServers": {
     "sentry": {
-      "command": "npx",
-      "args": ["-y", "@sentry/mcp-server"],
-      "env": {
-        "SENTRY_AUTH_TOKEN": "${env:SENTRY_AUTH_TOKEN}",
-        "SENTRY_ORG": "${env:SENTRY_ORG}",
-        "SENTRY_PROJECT": "${env:SENTRY_PROJECT}"
-      }
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp"
     }
   }
 }
 ```
 
-Restart Claude Code. The Sentry server registers. Test:
+Because the server uses OAuth, there's nothing secret in that file. Each engineer signs in with their own Sentry account and sees only what their Sentry permissions allow. Claude Code asks each person to approve project-scoped servers the first time they load.
 
+### Step 3: authenticate
+
+Start Claude Code and run `/mcp`. Pick `sentry`, follow the browser prompts, and approve access. You can also run `claude mcp login sentry` from your shell. To sign out later, use "Clear authentication" in the `/mcp` menu or `claude mcp logout sentry`.
+
+### Step 4: verify
+
+```bash
+claude mcp list        # sentry should show as connected
+claude mcp get sentry  # shows the URL, scope, and status
 ```
-> List the top 5 errors in the last 24 hours.
+
+Inside a session, ask a question that can only be answered from Sentry: "What are the five most frequent unresolved issues this week?" If the answer cites real issue IDs, you're done.
+
+### Alternative: the Sentry CLI as a local server
+
+If you prefer a local stdio server, Sentry documents a CLI route: install the Sentry CLI, run `sentry auth login`, then register it with Claude Code:
+
+```bash
+claude mcp add sentry -- sentry mcp
 ```
 
-The assistant calls the Sentry server's `list_events` (or equivalent) tool and reports the top errors with counts.
+That setup reuses the CLI login, so the MCP config needs no token. For self-hosted Sentry, Sentry's docs say to set `SENTRY_HOST` in the MCP server's environment, and they still list the legacy `@sentry/mcp-server` npm package for setups that need it. Check [mcp.sentry.dev](https://mcp.sentry.dev) for the current flags before you rely on either.
 
-## Step 4: a real incident workflow
+### What the server can do
+
+Per Sentry's docs, the server covers searching errors, analyzing performance, triaging issues, reading documentation, and managing projects. Your Sentry role still applies. If you can't resolve an issue in the Sentry UI, the assistant can't either.
+
+## A real incident workflow
 
 Where this integration earns its keep is during an incident. Here's a real flow we use.
 
@@ -106,7 +129,7 @@ A page comes in. Customer-facing API showing elevated 500s. Open Claude Code in 
 You:    Show me the most recent 500 errors on the payments-api project,
         last 30 minutes.
 
-Claude: [calls sentry.list_events with project=payments-api, level=error, time=30m]
+Claude: [calls the Sentry issue search tool for payments-api, last 30 minutes]
         12 events. Top three groups:
           1. KeyError: 'currency' in services/billing.py:142 — 7 occurrences
           2. TimeoutError calling Stripe.charges.create — 4 occurrences
@@ -114,7 +137,7 @@ Claude: [calls sentry.list_events with project=payments-api, level=error, time=3
 
 You:    Tell me about the KeyError. What's the request context?
 
-Claude: [calls sentry.get_event with the most recent event id]
+Claude: [fetches the most recent event for that issue]
         Event 1234567:
           - User: customer cust_A1B2C3D4E5F6
           - Endpoint: POST /v2/charges
@@ -140,11 +163,11 @@ You:    Draft a fix and a test.
 Claude: [proposes a small patch + test]
 ```
 
-That entire interaction took maybe 4 minutes. Without the integration, the same flow involves jumping between Sentry, GitHub, your editor, your terminal, and your incident channel — probably 15-20 minutes for the same conclusion.
+Without the integration, the same flow means jumping between Sentry, GitHub, your editor, your terminal, and your incident channel. With it, the diagnosis happens in one place, and the time you save is the context switching.
 
 The fix and test still go through the team's normal review. The assistant accelerates the diagnosis, not the deploy.
 
-## Step 5: post-mortem drafts
+## Post-mortem drafts
 
 Once the incident is resolved, the assistant can draft the post-mortem from the same data.
 
@@ -162,7 +185,7 @@ The team's actual post-mortem reviewer (the EM, usually) reads the draft, fills 
 
 We covered the post-mortem-discipline pattern more deeply in [SRE: postmortem first drafts](/blog/sre-postmortem-drafts). The Sentry MCP integration is what makes the draft step trivial.
 
-## Step 6: error-pattern queries
+## Error-pattern queries
 
 Beyond incidents, the integration is useful for steady-state pattern queries.
 
@@ -178,15 +201,81 @@ You:    Show me the top 5 errors that affect users on the enterprise plan.
 
 These are the questions you'd struggle to answer without writing a Sentry-API script. The assistant runs them in a sentence.
 
+## Claude Code with PagerDuty and Sentry for incident debugging
+
+Sentry tells you what broke. PagerDuty tells you who was paged, when, what the incident timeline looks like, and which service owns it. Connect both and Claude Code can walk an incident from the page to the stack trace without you copying IDs between tabs.
+
+PagerDuty now runs a hosted MCP server. Per [PagerDuty's MCP server docs](https://docs.pagerduty.com/ai-automation/advance/pagerduty-mcp-server), the US endpoint is `https://mcp.pagerduty.com/mcp` and EU accounts use `https://mcp.eu.pagerduty.com/mcp`. Their self-hosted server is deprecated.
+
+Once a PagerDuty admin has installed the Claude app for your account, add the server with the HTTP transport and pick a tool group in the URL:
+
+```bash
+claude mcp add --transport http pagerduty "https://mcp.pagerduty.com/mcp?tool_groups=read-only-tools"
+```
+
+PagerDuty's docs show `tool_groups=full-tools,ai-agents` in their example. The default `full-tools` group includes write tools such as `manage_incidents`. For debugging, start with `read-only-tools`, which disables create, update, and delete actions. Then run `/mcp` to authorize. If your org uses its own OAuth client instead, PagerDuty documents a `claude mcp add-json` variant with a client ID and secret.
+
+With both servers connected, a typical flow looks like this:
+
+```
+You:    I just got paged. Pull the open high-urgency PagerDuty incident
+        for payments-api, then find the matching Sentry issues that
+        started in the same window.
+
+Claude: [reads the PagerDuty incident: triggered 09:42, service payments-api,
+         escalation policy, alert details]
+        [searches Sentry for payments-api issues first seen after 09:30]
+        One Sentry issue lines up: KeyError 'currency' in services/billing.py,
+        first seen 09:40, 7 events. It started 2 minutes after release 8842.
+
+You:    Draft a status note for the incident channel and a timeline
+        I can paste into the post-mortem.
+```
+
+Rules we hold to when both are connected:
+
+- **Read-only by default.** Acknowledging, reassigning, or resolving incidents stays a human action until your team has decided otherwise in writing.
+- **One source of truth for the timeline.** Use PagerDuty timestamps for the incident timeline and Sentry timestamps for error onset. Don't let the assistant blend them.
+- **The on-call engineer owns the conclusion.** The assistant correlates. The person holding the pager decides.
+
 ## Patterns and pitfalls
 
-**Don't expose write access.** The integration is read-only by default; keep it that way. There's almost never a reason for the assistant to need to write to Sentry.
+**Keep write actions deliberate.** Your Sentry role decides what the server can change. Claude Code asks before each tool call; read the call before you approve anything that resolves, assigns, or edits issues.
 
 **Be careful with PII in error messages.** Sentry has PII scrubbing; verify it's enabled. The MCP server returns whatever Sentry shows; if Sentry shows PII, so will the assistant. Audit a sample of MCP outputs to confirm.
 
 **Don't skip the human read.** When the assistant proposes a fix during an incident, the team's normal PR review still happens. Speed comes from the diagnosis being faster, not from skipping review.
 
-**Mind the rate limits.** Sentry's API has rate limits. The MCP server respects them but heavy use during a busy incident can hit them. If you see "rate limited" errors, slow your queries.
+**Mind the rate limits.** Sentry's API has rate limits, and heavy use during a busy incident can hit them. If you see rate-limit errors, narrow your queries to one project and a shorter time window.
+
+## Troubleshooting
+
+- **The server shows as "needs authentication" or "failed".** Run `/mcp`, select `sentry`, and authenticate again. If the browser step never completes, run `claude mcp logout sentry`, then `claude mcp login sentry`.
+- **Tools load but return nothing.** Your Sentry account may not have access to that org or project. Check in the Sentry UI with the same account. If you pinned the URL to an org and project, confirm the slugs.
+- **An old token-based config is still there.** If you followed an older guide, you may have a stdio `sentry` entry in `~/.claude.json`. Run `claude mcp list`, then `claude mcp remove sentry` and add the hosted server again.
+- **Self-hosted Sentry.** The hosted server talks to sentry.io. For self-hosted, use the CLI or legacy package route and set `SENTRY_HOST`, as described above.
+
+## FAQ
+
+### How do I add Sentry MCP to Claude Code?
+
+Run `claude mcp add --transport http sentry https://mcp.sentry.dev/mcp`, start Claude Code, run `/mcp`, and sign in to Sentry in the browser. Confirm with `claude mcp list`.
+
+### Where are the official Sentry MCP server docs for Claude Code?
+
+At [mcp.sentry.dev](https://mcp.sentry.dev). Claude Code's own [MCP documentation](https://code.claude.com/docs/en/mcp) also uses Sentry as its OAuth example.
+
+### Do I need a Sentry auth token?
+
+Not for the hosted server. It uses OAuth. The CLI route reuses `sentry auth login`, so it doesn't need a token in your MCP config either.
+
+### Can I share the Sentry MCP config with my team?
+
+Yes. Add it with `--scope project` to write it to `.mcp.json` and commit that file. Each person authenticates with their own Sentry account.
+
+### Does this work with Codex?
+
+Yes. The Sentry MCP server is a standard remote MCP server, so any client that supports remote MCP with OAuth can use it. The setup command differs per client.
 
 ## When this integration shines
 
@@ -209,10 +298,11 @@ After PostHog, part 10 ties everything together into a daily workflow. By the en
 
 ## Related reading
 
-- [Effective MCP patterns](/blog/effective-mcp-patterns)
-- [Claude Code + Supabase integration](/blog/claude-code-supabase-integration)
+- [Claude Code + PostHog: PostHog MCP setup](/blog/claude-code-posthog-integration)
+- [AI incident response](/blog/ai-incident-response)
 - [SRE: postmortem first drafts that don't blame](/blog/sre-postmortem-drafts)
+- [Effective MCP patterns](/blog/effective-mcp-patterns)
 
 ---
 
-*We build AI-enabled software and help businesses put AI to work. If you're integrating Sentry with Claude Code, we'd love to hear about it. [Get in touch.](/contact)*
+**Need help?** If you're wiring Claude Code into your incident workflow and want a second pair of eyes on scopes, permissions, and on-call rules, [talk to a senior architect](/contact).

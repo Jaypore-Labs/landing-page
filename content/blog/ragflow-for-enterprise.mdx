@@ -1,0 +1,154 @@
+---
+title: "RAGFlow for enterprise: document-heavy RAG, use cases, limits"
+description: "RAGFlow is an open-source RAG engine built around deep document parsing. Where it fits, how to deploy it on-prem, its security gaps and how it compares."
+date: "2026-11-25"
+author: "Yash Shah"
+category: "Engineering"
+tags: ["Open Source", "GitHub", "RAGFlow", "RAG", "Enterprise AI"]
+---
+
+RAGFlow is an open-source retrieval-augmented generation (RAG) engine. It ingests documents, parses them with layout and table awareness, chunks them with document-type templates, indexes them, and answers questions with citations back to the source. It is for teams whose knowledge lives in messy PDFs, scans, spreadsheets and slide decks rather than clean text.
+
+The short verdict: RAGFlow is one of the strongest open-source options when document parsing quality is the bottleneck, which in enterprise RAG it usually is. It gives you a working system with a UI and APIs out of the box. It does not give you single sign-on in the open-source build, and it is a multi-service platform that needs real operations.
+
+## What is RAGFlow?
+
+[RAGFlow](https://github.com/infiniflow/ragflow) is maintained by InfiniFlow and released under the Apache 2.0 license. It had 94k+ GitHub stars as of November 2026, and version 1.0.0 was released on 6 November 2026. It is one of the projects in our list of [open-source AI repos worth knowing for enterprise teams](/blog/top-open-source-ai-github-repos-enterprise).
+
+The project's own line is "quality in, quality out". Key capabilities from the README and docs:
+
+- **Deep document understanding.** The DeepDoc parser performs OCR, table structure recognition and layout analysis. Alternatives include a fast parser for plain-text PDFs, Docling, Tencent's TCADP parser, PaddleOCR, or a vision-language model you configure.
+- **Template-based chunking.** Built-in methods for General, Q&A, Manual, Table, Paper, Book, Laws, Presentation, Picture, Email and single-chunk documents.
+- **Visible chunks.** You can inspect how a document was chunked and correct it by hand.
+- **Grounded citations.** Answers link back to the source passages.
+- **Hybrid retrieval.** Multiple recall paths with fused re-ranking, and configurable LLM, embedding and reranker models.
+- **Agentic retrieval.** Multi-step retrieval for complex questions, with selectable thinking depth.
+- **Knowledge compilation.** Generate wikis, graphs, trees, timelines and other structured artifacts from documents and datasets.
+- **Data source sync.** Connectors for Confluence, SharePoint, Google Drive, OneDrive, S3, Azure Blob, MySQL, PostgreSQL, BigQuery, Jira, GitHub, Gmail, Outlook, Slack, Teams and others.
+- **Model flexibility.** Hosted APIs or local models, including models served by Ollama or any OpenAI-compatible endpoint.
+
+## Enterprise use cases
+
+RAGFlow is strongest where documents are long, structured and hard to parse:
+
+1. **Policy and procedure assistants.** Staff ask questions of handbooks, SOPs and policy manuals and get cited answers.
+2. **Contract and clause search.** Find obligations, terms and exceptions across thousands of agreements.
+3. **Technical documentation Q&A.** Engineers and field staff query product manuals, specs and service bulletins.
+4. **Spreadsheet and table lookup.** Row-level retrieval over rate cards, price lists and product catalogues.
+5. **Research and regulatory libraries.** Search across papers, filings and regulatory guidance with section-aware chunking.
+6. **Support knowledge bases.** Answer support agents' questions from ticket history, emails and internal wikis synced from source systems.
+7. **Scanned archives.** Make legacy scanned documents searchable with OCR before retrieval.
+
+If you are still weighing retrieval against fine-tuning, start with our [RAG vs fine-tuning decision tree](/blog/rag-vs-fine-tuning). For a plain-language model of how retrieval works, see [RAG is a public library](/blog/rag-is-a-public-library).
+
+## Use cases by industry
+
+### Healthcare
+
+Clinical operations teams can index care pathways, formularies and payer policy documents, then give staff cited answers on coverage rules or protocol steps. Keep patient records out of scope unless the full environment meets your HIPAA controls. See [healthcare](/industries/healthcare).
+
+### Financial services
+
+Compliance and operations teams can query internal policies, product terms and regulatory circulars, with each answer citing the exact clause. The Table method suits fee schedules and rate sheets. See [financial services](/industries/financial-services).
+
+### Insurance
+
+Underwriters and claims handlers can search policy wordings, endorsements and claims manuals across product lines. Section-aware chunking helps keep exclusions attached to the cover they modify. See [insurance](/industries/insurance).
+
+### Manufacturing
+
+Maintenance and quality teams can query equipment manuals, work instructions and quality procedures, many of them scanned PDFs with tables and diagrams. The Manual method chunks by section, which suits this material. See [manufacturing](/industries/manufacturing).
+
+### Legal
+
+Legal teams can index contracts, precedents and statutes using the Laws template, then retrieve clauses with citations for review. A lawyer still checks the answer; the citation makes that fast. See [legal](/industries/legal).
+
+### Education and research
+
+Research offices and libraries can index papers and reports with the Paper method, which chunks by abstract and section, and run literature questions across a collection. See [education and research](/industries/education-research).
+
+## Reference architecture for production
+
+```text
+ Users / internal apps
+         |
+         v
+ SSO-aware reverse proxy (OIDC / SAML)  -->  RAGFlow web + API
+                                               |
+                         private network only  |
+     +-------------+-------------+-------------+-------------+
+     |             |             |             |             |
+  MySQL       Doc engine     MinIO /       NATS +        Model endpoints
+  (metadata)  (Infinity or   object store  kvrocks       (vLLM / Ollama /
+               Elasticsearch) (files)      (queue/cache)  hosted API)
+     |
+  Data source connectors --> SharePoint, Confluence, S3, databases
+```
+
+- **Auth and SSO.** The open-source build has no OAuth or OIDC login; it uses its own accounts. Put an SSO-aware proxy in front for network access control, and manage RAGFlow users and team sharing deliberately.
+- **Secrets.** Database, MinIO, model API keys and connector credentials live in `docker/.env` and service config by default. Move them into a vault and change every default password.
+- **Network boundaries.** Only the web and API entry point should be reachable from users. Keep MySQL, the document engine, MinIO and the queue on a private network.
+- **Sizing.** The README's recommended starting point is 4 CPU cores, 16 GB RAM and 50 GB disk, and notes that real needs depend on data volume, parsing and concurrency. In the open-source 1.0 release, DeepDoc parsing runs on CPU, so plan CPU capacity for ingestion. GPU sizing applies to the model servers, not RAGFlow itself.
+- **Data residency.** Documents, chunks and indexes stay in your stores. If you use hosted models, chunks are sent to that provider at query time. Use self-hosted models to keep everything in-region.
+- **Scaling.** Separate ingestion load from query load, schedule bulk parsing off-peak, and scale the document engine and model endpoints independently.
+- **Observability.** Track parse failures, ingestion lag, retrieval hit rates and answer latency. Build a retrieval eval set early; see [evals for retrieval](/blog/evals-for-retrieval).
+
+## Security, compliance and licensing
+
+RAGFlow is Apache 2.0 licensed, which allows commercial use, modification and self-hosting, and includes a patent grant. Model and parser licenses are separate, so check those too.
+
+For HIPAA, SOC 2 and GDPR, RAGFlow is a component you operate. What you must add yourself:
+
+- SSO and central identity, since the open-source build does not include OAuth or OIDC login.
+- Document-level permissions that mirror the source systems. Syncing a SharePoint library does not automatically mean each user only sees what they could see in SharePoint. Design and test this explicitly.
+- TLS everywhere, encryption at rest for MySQL, the document engine and object storage, and backups.
+- Audit logging of queries and answers, with retention and redaction rules.
+- A deletion process that removes a document from files, chunks and indexes when a GDPR or contract request requires it.
+
+## RAGFlow vs alternatives
+
+| | RAGFlow | Dify | LlamaIndex |
+|---|---|---|---|
+| What it is | RAG engine with UI, APIs and deep parsing | LLM app and workflow platform with RAG built in | Python and TypeScript framework for building RAG |
+| Strength | Parsing complex documents, tables and scans | Building many AI apps and workflows quickly | Full control in code |
+| Document parsing | DeepDoc, templates, pluggable parsers | Standard extraction, extensible | Bring your own, or LlamaParse |
+| License | Apache 2.0 | Apache 2.0 based, with extra conditions | MIT |
+| Effort to run | Multi-service platform | Multi-service platform | You build and run the app |
+
+Choose RAGFlow when document quality is the problem. Choose Dify when you need a broad app-building platform; see [Dify for enterprise](/blog/dify-for-enterprise). Choose LlamaIndex when your team wants to own the retrieval code end to end. For the storage layer under any of these, see our [vector database architecture](/blog/vector-db-architecture) notes.
+
+## When not to use it
+
+- **Clean, small text corpora.** A few hundred clean pages do not need a multi-service parsing platform. A simple pipeline is enough.
+- **Strict SSO requirements with no integration budget.** The open-source build has no OIDC login.
+- **Fine-grained, source-mirrored permissions out of the box.** You will need to design this yourself.
+- **macOS Docker hosts.** The README notes macOS is not currently supported for its Docker images. Use Linux servers.
+- **When you need retrieval embedded deep in your own product.** A framework may fit better than a separate platform.
+
+## How we help
+
+Jaypore Labs designs, hardens and integrates RAGFlow into enterprise systems: parser and chunking choices for your documents, SSO and permission design, private model serving, retrieval evals and operations runbooks. Where RAGFlow is the wrong fit, we build a custom retrieval pipeline around your data and access rules. If you have a document-heavy knowledge problem, [talk to a senior architect](/contact) or see our [solutions](/solutions).
+
+## FAQ
+
+### Is RAGFlow production ready?
+
+Version 1.0.0 shipped in November 2026, and the README describes Docker deployment as suitable for production. You still need to add SSO, secrets management, backups, monitoring and permission design.
+
+### Can RAGFlow be self-hosted on-prem?
+
+Yes. It deploys with Docker Compose on Linux servers and can use local models through Ollama, vLLM or any OpenAI-compatible endpoint. With self-hosted models, documents and queries stay inside your network.
+
+### Does RAGFlow support SSO?
+
+Not in the open-source build, which has no OAuth or OIDC login. Plan an SSO-aware proxy for access control and a deliberate approach to user and team management.
+
+### RAGFlow vs Dify: which should we choose?
+
+RAGFlow focuses on parsing and retrieving from complex documents. Dify is a broader platform for building LLM apps and workflows. If answer quality is failing because documents parse badly, start with RAGFlow.
+
+### Does RAGFlow need a GPU?
+
+Not for parsing in the open-source 1.0 release, which runs DeepDoc on CPU. Your LLM, embedding and reranker models need GPUs if you self-host them, or you can use hosted APIs.
+
+Have a document-heavy use case? [Get in touch](/contact) with your use case.
