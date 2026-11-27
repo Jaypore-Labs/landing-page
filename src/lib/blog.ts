@@ -9,6 +9,8 @@ export interface BlogPost {
   title: string;
   description: string;
   date: string;
+  /** Last substantive revision (YYYY-MM-DD). Set only after real content changes. */
+  updated?: string;
   author: string;
   category: string;
   tags: string[];
@@ -22,6 +24,8 @@ export interface BlogPostMeta {
   title: string;
   description: string;
   date: string;
+  /** Last substantive revision (YYYY-MM-DD). Set only after real content changes. */
+  updated?: string;
   author: string;
   category: string;
   tags: string[];
@@ -55,6 +59,7 @@ export function getAllPosts(): BlogPostMeta[] {
         title: data.title || slug,
         description: data.description || "",
         date: data.date || new Date().toISOString(),
+        updated: data.updated,
         author: data.author || "Jaypore Labs",
         category: data.category || "General",
         tags: data.tags || [],
@@ -77,6 +82,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       title: data.title || slug,
       description: data.description || "",
       date: data.date || new Date().toISOString(),
+      updated: data.updated,
       author: data.author || "Jaypore Labs",
       category: data.category || "General",
       tags: data.tags || [],

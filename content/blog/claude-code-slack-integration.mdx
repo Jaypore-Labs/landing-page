@@ -2,6 +2,7 @@
 title: "Slack MCP for Claude Code: setup, scopes, and workflows"
 description: "Add Slack's official MCP server to Claude Code with the plugin or claude mcp add, finish OAuth with /mcp, get admin approval, then search, summarize, and draft."
 date: "2026-02-11"
+updated: "2026-11-27"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Claude Code", "Slack", "MCP", "Productivity", "Integrations"]
@@ -188,6 +189,10 @@ Yes, it includes send, schedule, and draft tools. We recommend drafting with the
 ### Is the Slack MCP server the same as Claude in Slack?
 
 No. The MCP server lets Claude Code (and other MCP clients) read and act in Slack from outside it. Claude in Slack is a separate app that runs inside your workspace.
+
+### How do I trigger Claude Code from Slack?
+
+There are two routes. With the Claude app installed in your workspace, mention @Claude in a thread and ask for a coding task; it can hand the task to a Claude Code session on the web, depending on your plan and admin settings. The other way round, this MCP server lets a Claude Code session you start read the thread and post results back to Slack. Check Anthropic's current docs for availability on your plan.
 
 ## Related reading
 

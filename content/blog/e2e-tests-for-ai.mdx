@@ -1,7 +1,8 @@
 ---
-title: "End-to-end tests for AI workflows: scope and survival"
-description: "E2E tests for AI are expensive and brittle. Use them sparingly; design them for survival."
+title: "AI end-to-end testing: scope, flaky tests, and survival"
+description: "How to run end-to-end tests for AI workflows without a flaky suite: thin slices, outcome-based assertions, and fast triage when a test fails."
 date: "2026-04-23"
+updated: "2026-11-27"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Testing", "AI Engineering", "Engineering", "Testing for AI", "E2E"]
@@ -73,6 +74,24 @@ E2E maintenance:
 **Skipping investigation** of e2e failures.
 
 **E2E tests** that test the same thing as integration tests.
+
+## FAQ
+
+### What is AI end-to-end testing?
+
+It means running the whole user flow, model calls included, the way a real user would, and checking the outcome instead of the exact wording. Because model output varies, assertions check structure, required facts and the actions taken, not exact text.
+
+### How do you reduce flaky test triage in AI end-to-end tests?
+
+Keep the suite thin: a few critical user flows, not one test per feature. Pin model versions and set temperature to 0 where you can. Assert on structure and outcomes rather than exact wording. Record each failure's prompt, response and trace so triage takes minutes instead of reruns. Quarantine a flaky test straight away instead of letting the team learn to ignore red builds.
+
+### Should AI end-to-end tests call the real model?
+
+A few should, so you catch drift and provider changes. Most layers below them should use recorded or mocked responses. See [mocking LLMs in tests](/blog/mock-llms-in-tests).
+
+### How many end-to-end tests does an AI feature need?
+
+Usually a handful per critical user flow. If the suite takes long enough that people stop waiting for it, it's too big.
 
 ## Close
 

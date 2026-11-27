@@ -61,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const priority = Math.round((0.4 + recencyRatio * 0.4) * 100) / 100;
     return {
       url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: postDate,
+      lastModified: post.updated ? new Date(post.updated) : postDate,
       changeFrequency: "monthly",
       priority,
     };

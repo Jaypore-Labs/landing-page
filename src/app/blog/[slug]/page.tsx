@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: post.description,
       type: "article",
       publishedTime: post.date,
+      ...(post.updated ? { modifiedTime: post.updated } : {}),
       authors: [post.author],
       tags: post.tags,
       url: canonical,
@@ -137,6 +138,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           description: post.description,
           author: post.author,
           date: post.date,
+          updated: post.updated,
           slug,
           tags: post.tags,
         }}
@@ -167,6 +169,9 @@ export default async function BlogPostPage({ params }: PageProps) {
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-mute">
               <span className="text-ink font-medium">{post.author}</span>
               <span>{formatDate(post.date, "long")}</span>
+              {post.updated && post.updated !== post.date && (
+                <span>Updated {formatDate(post.updated, "long")}</span>
+              )}
               <span>{post.readingTime}</span>
             </div>
           </div>
