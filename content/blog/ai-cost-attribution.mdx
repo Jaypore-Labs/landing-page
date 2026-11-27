@@ -1,7 +1,8 @@
 ---
 title: "AI cost attribution: a chargeback model for LLM spend"
-description: "When your finance team asks who's spending $80,000 on Claude, 'product' isn't an answer. Build chargeback before the bill makes the question urgent."
+description: "How to build an AI chargeback model for LLM spend: the fields to log on every call, the reports finance needs, and token, action or tier-based billing."
 date: "2026-02-12"
+updated: "2026-11-27"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Cost Optimization", "Finance", "LLM", "Engineering Management", "Observability"]
@@ -100,6 +101,24 @@ We've seen four failure modes:
 - **The model upgrade.** Quietly switching a feature to a more expensive model. With attribution, you see the per-call cost jump immediately.
 
 All four are catastrophic without attribution and trivial with it.
+
+## FAQ
+
+### How do you build an AI chargeback model?
+
+First, tag every LLM call with the user, tenant, feature and environment, and log tokens and cost per call. Second, send those logs somewhere you can query with SQL. Third, pick a billing unit: tokens, actions (for example, per drafted email) or plan tiers with an included budget. Finally, reconcile your logged cost against the provider invoice every month before you bill anyone.
+
+### What is the difference between showback and chargeback for AI spend?
+
+Showback reports each team's or customer's AI cost without billing it. Chargeback actually bills the cost back to them. Most companies start with showback to check the numbers, then move to chargeback once teams trust them.
+
+### Which fields should every LLM call log for cost attribution?
+
+At minimum: the user or tenant, the feature, the environment, the model, input and output tokens, the computed cost, and a request ID that ties back to the user action.
+
+### How do you allocate shared AI costs like embeddings or evals?
+
+Spread them across features in proportion to usage, or keep them as a platform line item that you report on its own. Pick one rule, write it down, and apply it the same way every month.
 
 ## Close
 

@@ -1,7 +1,8 @@
 ---
 title: "Semantic caching: why your top 1% of queries cost 60% of your bill"
-description: "Most LLM bills follow a power law. The same questions get asked a thousand times. Cache them by meaning, not by string."
+description: "How to cache LLM and semantic search results by meaning: picking a threshold, handling staleness, and what never to cache. One team cut a $9,000 bill to $3,300."
 date: "2026-02-17"
+updated: "2026-11-27"
 author: "Yash Shah"
 category: "Engineering"
 tags: ["Caching", "LLM", "Cost Optimization", "Production AI", "Engineering"]
@@ -103,6 +104,24 @@ For the team above, after rolling out exact + semantic caching:
 | **Combined** | **63% of all queries hit cache** | **$9,000 → $3,300** |
 
 64% cost reduction. P50 latency improved from 800ms to 110ms on cache hits.
+
+## FAQ
+
+### How do you cache semantic search results?
+
+Embed each incoming query, look it up in a vector index of queries you've already answered, and return the stored answer when similarity clears your threshold. On a miss, call the model and store the new query, embedding and answer. Put an exact-match cache in front of it, since exact hits are cheaper and carry no false-positive risk.
+
+### What similarity threshold should a semantic cache use?
+
+There's no universal number. Start around 0.94 to 0.95, sample the hits, and adjust until false positives are rare enough for your use case. Recheck it every couple of weeks and after any change to the embedding model.
+
+### When should you not use a semantic cache?
+
+Skip it for answers that depend on the user, on live data, or on the time of day. A cached answer that was right for one customer can leak into another customer's session, and a cached price or stock level goes stale fast.
+
+### How much can semantic caching save?
+
+It depends on how repetitive your traffic is. In the audit above, exact plus semantic caching cut the bill from $9,000 to $3,300 a month. Run a similarity histogram on your own logs before you build anything.
 
 ## Close
 

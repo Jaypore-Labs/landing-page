@@ -5,6 +5,8 @@ type InquiryRecord = {
   budget: string | null;
   message: string;
   source: string;
+  heard_from: string | null;
+  ai_prompt: string | null;
 };
 
 const DEFAULT_TO = "yashshh123@gmail.com";
@@ -44,6 +46,8 @@ export async function notifyInquiry(record: InquiryRecord, id?: string) {
     ["Company", record.company || "Not given"],
     ["Budget", record.budget || "Not given"],
     ["Source", record.source],
+    ["Found us via", record.heard_from || "Not given"],
+    ...(record.ai_prompt ? ([["AI prompt", record.ai_prompt]] as [string, string][]) : []),
   ];
 
   const text = [

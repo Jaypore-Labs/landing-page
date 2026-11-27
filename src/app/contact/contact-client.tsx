@@ -7,7 +7,21 @@ import { Eyebrow, SectionHeader, Wrap } from "@/components/ui/primitives";
 import { siteConfig, faq } from "@/data/site";
 import { submitInquiry } from "./actions";
 
-const emptyForm = { name: "", email: "", company: "", budget: "", message: "" };
+const emptyForm = { name: "", email: "", company: "", budget: "", message: "", heardFrom: "", aiPrompt: "" };
+
+// Self-reported attribution. When the answer is an AI assistant we also ask
+// for the prompt, which shows exactly which AI searches recommend us.
+const heardFromOptions = [
+  { value: "google", label: "Google search", ai: false },
+  { value: "chatgpt", label: "ChatGPT", ai: true },
+  { value: "claude", label: "Claude", ai: true },
+  { value: "perplexity", label: "Perplexity", ai: true },
+  { value: "gemini", label: "Gemini or Google AI Overview", ai: true },
+  { value: "other-ai", label: "Another AI assistant", ai: true },
+  { value: "linkedin", label: "LinkedIn", ai: false },
+  { value: "referral", label: "Referral or colleague", ai: false },
+  { value: "other", label: "Other", ai: false },
+];
 
 const fieldClass =
   "mt-2 block w-full border border-line-strong bg-paper-light px-4 py-3 text-[16px] text-ink placeholder:text-ink-mute/70 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink";
@@ -36,8 +50,9 @@ export function ContactForm({ industry }: { industry?: string } = {}) {
     setSubmitting(true);
     setError(null);
     try {
+      const payload = { ...formData, aiPrompt: askPrompt ? formData.aiPrompt : "" };
       const res = await submitInquiry(
-        industry ? { ...formData, source: `industry-page:${industry}` } : formData
+        industry ? { ...payload, source: `industry-page:${industry}` } : payload
       );
       if (res.ok) {
         setSubmitted(true);
@@ -50,6 +65,8 @@ export function ContactForm({ industry }: { industry?: string } = {}) {
       setSubmitting(false);
     }
   };
+
+  const askPrompt = heardFromOptions.some((o) => o.ai && o.value === formData.heardFrom);
 
   if (submitted) {
     return (
@@ -109,6 +126,29 @@ export function ContactForm({ industry }: { industry?: string } = {}) {
           placeholder="Briefly describe the initiative, the systems involved, and your timeline."
         />
       </div>
+      <div className="sm:col-span-2">
+        <Label htmlFor="heardFrom">How did you find us?</Label>
+        <select id="heardFrom" value={formData.heardFrom} onChange={set("heardFrom")} className={fieldClass}>
+          <option value="">Select one</option>
+          {heardFromOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
+      {askPrompt && (
+        <div className="sm:col-span-2">
+          <Label htmlFor="aiPrompt">What did you ask it?</Label>
+          <textarea
+            id="aiPrompt"
+            rows={2}
+            maxLength={2000}
+            value={formData.aiPrompt}
+            onChange={set("aiPrompt")}
+            className={`${fieldClass} resize-y`}
+            placeholder="For example: best software consultancy for healthcare platform modernization"
+          />
+        </div>
+      )}
       <div className="sm:col-span-2 flex flex-wrap items-center gap-6">
         <button
           type="submit"

@@ -11,6 +11,8 @@ export type InquiryInput = {
   budget?: string;
   message: string;
   source?: string;
+  heardFrom?: string;
+  aiPrompt?: string;
 };
 
 export type InquiryResult =
@@ -44,6 +46,8 @@ export async function submitInquiry(input: InquiryInput): Promise<InquiryResult>
     budget: input.budget?.trim() || null,
     message,
     source: input.source?.trim() || "jayporelabs.com",
+    heard_from: input.heardFrom?.trim().slice(0, 64) || null,
+    ai_prompt: input.aiPrompt?.trim().slice(0, 2000) || null,
   };
 
   if (!url || !key) {

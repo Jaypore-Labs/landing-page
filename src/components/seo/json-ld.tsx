@@ -204,6 +204,7 @@ type ArticleInput = {
   description: string;
   author: string;
   date: string;
+  updated?: string;
   slug: string;
   tags: string[];
 };
@@ -217,7 +218,7 @@ export function ArticleJsonLd({ article }: { article: ArticleInput }) {
     headline: article.title,
     description: article.description,
     datePublished: article.date,
-    dateModified: article.date,
+    dateModified: article.updated || article.date,
     keywords: article.tags.join(", "),
     author: {
       "@type": "Person",
